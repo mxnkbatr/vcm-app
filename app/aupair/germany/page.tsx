@@ -277,37 +277,7 @@ export default function GermanyPageBright() {
       </section>
 
       {/* ─── 4. DUTIES ─── */}
-      <section className="py-24 px-6 bg-white relative">
-         <div className="max-w-6xl mx-auto">
-            <h2 className="text-4xl font-black text-center mb-16 text-slate-900">
-               Au Pair <span className="text-[#E3002D]">Ажил Үүрэг</span>
-            </h2>
-            
-            <div className="grid md:grid-cols-2 gap-12">
-               {DATA.duties.map((duty, i) => (
-                  <motion.div 
-                    key={i} whileHover={{ scale: 1.02 }}
-                    className="bg-white p-10 rounded-[3rem] shadow-[0_15px_60px_-15px_rgba(0,0,0,0.08)] border border-slate-50 hover:border-[#E3002D] transition-all group"
-                  >
-                     <div className="flex items-center gap-6 mb-8">
-                        <div className={`w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-inner ${duty.color}`}>
-                           <duty.icon />
-                        </div>
-                        <h3 className="text-2xl font-black text-slate-900">{duty.title}</h3>
-                     </div>
-                     <ul className="space-y-4">
-                        {duty.items.map((item, idx) => (
-                           <li key={idx} className="flex items-center gap-4 text-slate-600 font-bold bg-slate-50 p-4 rounded-2xl group-hover:bg-white transition-colors">
-                              <div className="w-2 h-2 rounded-full bg-[#00C1B6]" /> {item}
-                           </li>
-                        ))}
-                     </ul>
-                  </motion.div>
-               ))}
-            </div>
-         </div>
-      </section>
-
+    
       {/* ─── 5. CONTRACT & HOUSING ─── */}
       <section className="py-24 bg-white relative">
          <div className="max-w-7xl mx-auto px-6">

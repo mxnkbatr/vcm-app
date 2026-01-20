@@ -56,10 +56,6 @@ const DATA = {
     { title: "120 Цаг", subtitle: "Хэлний курс (Үнэгүй)", icon: FaGraduationCap, color: "text-red-600 bg-red-50 border-red-100" },
     { title: "4 Долоо хоног", subtitle: "Цалинтай амралт", icon: FaPlaneDeparture, color: "text-emerald-600 bg-emerald-50 border-emerald-100" },
   ],
-  duties: [
-    { icon: FaBaby, title: "Хүүхэд Харах", items: ["Тоглох, саатуулах", "Өглөө сэрээх, хувцаслах", "Сургууль, цэцэрлэгт хүргэх", "Даалгаварт туслах"], color: "bg-red-50 text-red-600 border-red-200" },
-    { icon: FaBroom, title: "Гэрийн Ажил", items: ["Аяга таваг угаагч", "Тоос соруулах", "Хүүхдийн хувцас угаах", "Жижиг худалдан авалт"], color: "bg-emerald-50 text-emerald-600 border-emerald-200" },
-  ],
   contract: [
     { icon: FaClock, title: "Ажлын Цаг", desc: "Долоо хоногт 30 цаг." },
     { icon: FaMoneyBillWave, title: "Халаасны Мөнгө", desc: "Сар бүр 990 CHF." },
@@ -245,37 +241,7 @@ export default function SwitzerlandPageBright() {
       </section>
 
       {/* ─── 3. DUTIES ─── */}
-      <section className="py-24 px-6 bg-white relative">
-         <div className="max-w-6xl mx-auto relative z-10">
-            <h2 className="text-4xl font-black text-center mb-16 text-slate-900">
-               Au Pair <span className="text-emerald-500">Ажил Үүрэг</span>
-            </h2>
-            
-            <div className="grid md:grid-cols-2 gap-12">
-               {DATA.duties.map((duty, i) => (
-                  <motion.div 
-                    key={i} whileHover={{ scale: 1.02 }}
-                    className={`bg-white p-10 rounded-[3rem] shadow-lg border-2 ${duty.color.split(' ')[2]} group`}
-                  >
-                     <div className="flex items-center gap-6 mb-8">
-                        <div className={`w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-sm ${duty.color.split(' ').slice(0,2).join(' ')}`}>
-                           <duty.icon />
-                        </div>
-                        <h3 className="text-2xl font-black text-slate-900">{duty.title}</h3>
-                     </div>
-                     <ul className="space-y-4">
-                        {duty.items.map((item, idx) => (
-                           <li key={idx} className="flex items-center gap-4 text-slate-600 font-bold bg-slate-50 p-4 rounded-2xl group-hover:bg-slate-100 transition-colors">
-                              <div className={`w-3 h-3 rounded-full ${i === 0 ? "bg-red-500" : "bg-emerald-500"}`} /> {item}
-                           </li>
-                        ))}
-                     </ul>
-                  </motion.div>
-               ))}
-            </div>
-         </div>
-      </section>
-
+     
       {/* ─── 4. CONTRACT & CONDITIONS (Bright Background) ─── */}
       <section className="py-24 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white relative overflow-hidden">
          {/* Background Elements */}

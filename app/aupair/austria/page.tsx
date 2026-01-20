@@ -236,42 +236,7 @@ export default function AustriaPageBright() {
       </section>
 
       {/* ─── 3. DUTIES (Friendly Clouds) ─── */}
-      <section className="py-24 px-6 bg-slate-50 relative overflow-hidden">
-         {/* Doodles */}
-         <svg className="absolute top-10 left-10 w-32 h-32 text-slate-200 opacity-50 rotate-12" viewBox="0 0 200 200" fill="currentColor">
-            <path d="M45,-76.3C58.3,-69.3,69.2,-57.4,76.5,-44.5C83.8,-31.6,87.5,-17.7,85.6,-4.3C83.7,9.1,76.3,22,67.7,33.8C59.1,45.6,49.3,56.3,37.6,63.9C26,71.5,12.4,75.9,-0.6,76.9C-13.6,77.9,-27.8,75.5,-40.5,68.9C-53.2,62.3,-64.4,51.5,-73.4,39C-82.4,26.5,-89.2,12.3,-87.3,-1.1C-85.4,-14.5,-74.8,-27.1,-63.9,-38.1C-53,-49.1,-41.8,-58.5,-29.7,-66.2C-17.6,-73.9,-4.6,-79.9,9.3,-79.3" transform="translate(100 100)" />
-         </svg>
-
-         <div className="max-w-6xl mx-auto relative z-10">
-            <h2 className="text-4xl font-black text-center mb-16 text-slate-900">
-               Au Pair <span className="text-[#E3002D]">Ажил Үүрэг</span>
-            </h2>
-            
-            <div className="grid md:grid-cols-2 gap-12">
-               {DATA.duties.map((duty, i) => (
-                  <motion.div 
-                    key={i} 
-                    whileHover={{ y: -10 }}
-                    className="bg-white p-10 rounded-[3rem] shadow-[0_15px_50px_-10px_rgba(0,0,0,0.08)] border border-white hover:border-[#E3002D] transition-all relative overflow-hidden group"
-                  >
-                     <div className="flex items-center gap-6 mb-8 relative z-10">
-                        <div className={`w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-inner ${duty.color}`}>
-                           <duty.icon />
-                        </div>
-                        <h3 className="text-2xl font-black text-slate-900">{duty.title}</h3>
-                     </div>
-                     <ul className="space-y-4 relative z-10">
-                        {duty.items.map((item, idx) => (
-                           <li key={idx} className="flex items-center gap-4 text-slate-600 font-bold bg-slate-50 p-4 rounded-2xl group-hover:bg-[#FFF9F9] transition-colors">
-                              <div className="w-2 h-2 rounded-full bg-[#E3002D]" /> {item}
-                           </li>
-                        ))}
-                     </ul>
-                  </motion.div>
-               ))}
-            </div>
-         </div>
-      </section>
+      
 
       {/* ─── 4. CONNECTING (Contract Info) ─── */}
       <section className="py-24 bg-white relative">

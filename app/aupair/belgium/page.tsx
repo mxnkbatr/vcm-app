@@ -278,63 +278,7 @@ export default function BelgiumConnectedPage() {
          </div>
       </section>
 
-      {/* ─── 4. DUTIES & BENEFITS: THE CONNECTING PATH ─── */}
-      <section className="py-24 px-6 relative bg-slate-50 overflow-hidden">
-         {/* Decorative dashed line connecting sections */}
-         <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-1 border-l-4 border-dashed border-slate-200 hidden lg:block" />
-
-         <div className="max-w-6xl mx-auto relative z-10">
-            
-            {/* Benefits Row */}
-            <div className="mb-24 relative">
-               <div className="text-center mb-12">
-                  <span className="bg-white px-6 py-2 rounded-full border-2 border-slate-100 text-slate-500 font-bold uppercase text-xs tracking-widest shadow-sm">Why Belgium?</span>
-               </div>
-               <div className="grid md:grid-cols-3 gap-8">
-                  {DATA.benefits.map((b, i) => (
-                     <motion.div 
-                        key={i}
-                        whileHover={{ y: -10 }}
-                        className="bg-white p-8 rounded-[2rem] shadow-lg border-b-4 border-slate-100 hover:border-yellow-400 transition-all group"
-                     >
-                        <div className={`text-4xl mb-4 ${b.color} group-hover:scale-110 transition-transform`}>
-                           <b.icon />
-                        </div>
-                        <h3 className="text-xl font-black text-slate-800 mb-2">{b.title}</h3>
-                        <p className="text-slate-500 font-medium text-sm">{b.sub}</p>
-                     </motion.div>
-                  ))}
-               </div>
-            </div>
-
-            {/* Duties Interaction */}
-            <div className="grid md:grid-cols-2 gap-12 lg:gap-24">
-               {DATA.duties.map((duty, i) => (
-                  <motion.div 
-                     key={i}
-                     initial={{ x: i === 0 ? -50 : 50, opacity: 0 }}
-                     whileInView={{ x: 0, opacity: 1 }}
-                     viewport={{ margin: "-100px" }}
-                     whileHover={{ scale: 1.02 }}
-                     className={`relative bg-gradient-to-br ${duty.color} p-1 rounded-[3rem] shadow-2xl`}
-                  >
-                     <div className="bg-white p-8 md:p-10 rounded-[2.8rem] h-full relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-8 opacity-10 text-9xl text-slate-300">
-                           <duty.icon />
-                        </div>
-                        <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${duty.color} flex items-center justify-center text-white text-3xl mb-6 shadow-md`}>
-                           <duty.icon />
-                        </div>
-                        <h3 className="text-3xl font-black text-slate-800 mb-3">{duty.title}</h3>
-                        <p className="text-slate-600 font-medium text-lg leading-relaxed">{duty.desc}</p>
-                     </div>
-                  </motion.div>
-               ))}
-            </div>
-
-         </div>
-      </section>
-
+     
       {/* ─── 5. SCHEDULE: THE TICKET ─── */}
       <section className="py-24 px-6 bg-white">
          <div className="max-w-4xl mx-auto">
