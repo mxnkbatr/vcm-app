@@ -1,125 +1,54 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import Image from "next/image";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { 
-  ArrowRight, 
-  Mail, 
-  Lock, 
-  User, 
-  Loader2,
-  IdCard,
-  Building,
-  GraduationCap,
-  Sparkles,
-  CheckCircle2,
-  ChevronDown,
-  Search,
-  X
-} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSignUp } from "@clerk/nextjs";
-import { useTheme } from "next-themes";
-import { useLanguage } from "../context/LanguageContext";
+import { 
+  ChevronLeft, 
+  User, 
+  Mail, 
+  Lock, 
+  ArrowRight, 
+  Loader2, 
+  CheckCircle2, 
+  Sparkles,
+  Plane,
+  MapPin,
+  Globe
+} from "lucide-react";
+import { FaPassport } from "react-icons/fa";
 
-// --- UNIVERSITY LIST DATA ---
-const UNIVERSITIES = [
-  { id: "NUM", en: "National University of Mongolia", mn: "Монгол Улсын Их Сургууль (МУИС)" },
-  { id: "MUST", en: "Mongolian University of Science and Technology", mn: "Шинжлэх Ухаан, Технологийн Их Сургууль (ШУТИС)" },
-  { id: "UFE", en: "University of Finance and Economics", mn: "Санхүү, Эдийн Засгийн Их Сургууль (СЭЗИС)" },
-  { id: "MNUMS", en: "Mongolian National University of Medical Sciences", mn: "Анагаахын Шинжлэх Ухааны Үндэсний Их Сургууль (АШУҮИС)" },
-  { id: "MSUE", en: "Mongolian State University of Education", mn: "Боловсролын Их Сургууль (МУБИС)" },
-  { id: "MSUA", en: "Mongolian State University of Agriculture", mn: "Хөдөө Аж Ахуйн Их Сургууль (ХААИС)" },
-  { id: "MSUAC", en: "Mongolian State University of Arts and Culture", mn: "Соёл, Урлагийн Их Сургууль (СУИС)" },
-  { id: "MNDU", en: "National Defense University", mn: "Үндэсний Батлан Хамгаалахын Их Сургууль" },
-  { id: "LEUM", en: "Law Enforcement University of Mongolia", mn: "Хууль Сахиулахын Их Сургууль" },
-  { id: "UBU", en: "Ulaanbaatar University", mn: "Улаанбаатарын Их Сургууль (УБИС)" },
-  { id: "IDER", en: "Ider University", mn: "Идэр Их Сургууль" },
-  { id: "OTU", en: "Otgontenger University", mn: "Отгонтэнгэр Их Сургууль" },
-  { id: "HUREE", en: "Huree University", mn: "Хүрээ Дээд Сургууль" },
-  { id: "MJHU", en: "Mongolia-Japan Humanitarian University", mn: "Монгол-Японы Хүмүүнлэгийн Их Сургууль" },
-  { id: "ACH", en: "Ach Medical University", mn: "Ач Анагаах Ухааны Их Сургууль" },
-  { id: "IZIU", en: "Ikh Zasag International University", mn: "Их Засаг Олон Улсын Их Сургууль" },
-  { id: "ORKHON", en: "Orkhon University", mn: "Орхон Их Сургууль" },
-  { id: "MIU", en: "Mongolia International University", mn: "Монгол Олон Улсын Их Сургууль" },
-  { id: "MANDAKH", en: "Mandakh University", mn: "Мандах Их Сургууль" },
-  { id: "CHINGGIS", en: "Chinggis Khaan University", mn: "Чингис Хаан Их Сургууль" },
-  { id: "GAZARCHIN", en: "Gazarchin Institute", mn: "Газарчин Дээд Сургууль" },
-];
-
-const CONTENT = {
-  header: { en: "Student Registration", mn: "Оюутны Бүртгэл" },
-  sub: { en: "Choose your university and use your Student ID to join.", mn: "Сургуулиа сонгож, оюутны кодоо ашиглан нэгдээрэй." },
-  inputs: {
-    university: { en: "Search University...", mn: "Сургуулиа хайх..." },
-    studentId: { en: "Student ID (e.g., S.SS24000)", mn: "Оюутны код (Жш: S.SS24000)" },
-    fullname: { en: "Full Name", mn: "Бүтэн Нэр" },
-    email: { en: "School Email", mn: "Сургуулийн Имэйл" },
-    pass: { en: "Password", mn: "Нууц үг" },
-  },
-  btn: { en: "Create Account", mn: "Бүртгүүлэх" },
-  verify: { en: "Verify Email", mn: "Имэйл баталгаажуулах" },
-  login: { text: { en: "Already a member?", mn: "Бүртгэлтэй юу?" }, link: { en: "Access Portal", mn: "Нэвтрэх" } }
-};
-
-export default function SignUpPage() {
-  const { language: lang } = useLanguage();
-  const { theme } = useTheme();
-  const { isLoaded, signUp, setActive } = useSignUp();
+export default function AuPairRegisterPage() {
   const router = useRouter();
-
-  const [mounted, setMounted] = useState(false);
-  const [university, setUniversity] = useState("");
-  const [uniSearch, setUniSearch] = useState("");
-  const [isUniOpen, setIsUniOpen] = useState(false);
+  const { isLoaded, signUp, setActive } = useSignUp();
   
-  const [studentId, setStudentId] = useState("");
+  // --- FORM STATE ---
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  
+  // --- UI STATE ---
   const [pendingVerification, setPendingVerification] = useState(false);
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setMounted(true);
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsUniOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  if (!mounted) return null;
-  const isDark = theme === "dark" || !theme;
-
-  const filteredUnis = UNIVERSITIES.filter(u => 
-    u.en.toLowerCase().includes(uniSearch.toLowerCase()) || 
-    u.mn.toLowerCase().includes(uniSearch.toLowerCase())
-  );
-
-  const selectedUni = UNIVERSITIES.find(u => u.id === university);
-
+  // --- HANDLERS ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isLoaded || isLoading) return;
-    if (!university) { setError("Please select your university."); return; }
+    
     setIsLoading(true);
     setError("");
 
     try {
       await signUp.create({
-        username: studentId.toUpperCase(),
         emailAddress: email,
         password,
-        unsafeMetadata: { fullName, studentId: studentId.toUpperCase(), role: "member", university }
+        firstName: fullName.split(" ")[0],
+        lastName: fullName.split(" ")[1] || "",
       });
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
       setPendingVerification(true);
@@ -144,170 +73,256 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className={`min-h-screen w-full flex overflow-hidden font-sans transition-colors duration-700
-      ${isDark ? "bg-[#001829] text-white" : "bg-slate-50 text-slate-900"}`}>
+    <div className="min-h-screen w-full flex font-sans selection:bg-red-500 selection:text-white overflow-hidden bg-[#FDFBF7]">
       
-      <div className="w-full lg:w-[55%] flex flex-col justify-center px-6 md:px-12 lg:px-24 py-12 relative z-10 overflow-y-auto">
-        <div className="absolute inset-0 opacity-[0.03] bg-[url('/noise.png')] mix-blend-overlay pointer-events-none" />
+      {/* ─── LEFT: FORM SECTION (50%) ─── */}
+      <div className="w-full lg:w-1/2 p-6 lg:p-16 flex flex-col justify-center relative z-20">
         
-        {/* LOGO */}
-     
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md w-full mx-auto relative z-10">
-          <h1 className={`text-4xl md:text-5xl font-black tracking-tighter mb-4 transition-colors ${isDark ? "text-white" : "text-[#001829]"}`}>
-            {CONTENT.header[lang]}
-          </h1>
-          <p className={`text-lg mb-10 font-medium opacity-60 transition-colors ${isDark ? "text-white" : "text-slate-600"}`}>
-            {CONTENT.sub[lang]}
-          </p>
+        {/* Subtle Background Pattern */}
+        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:24px_24px] opacity-50 -z-10" />
+
+        <motion.div 
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="max-w-md mx-auto w-full"
+        >
+          {/* Back Nav */}
+          <div className="mb-8">
+            <Link 
+              href="/" 
+              className="inline-flex items-center gap-2 text-[10px] font-black text-slate-400 hover:text-red-600 uppercase tracking-[0.2em] transition-colors group"
+            >
+              <ChevronLeft size={12} className="group-hover:-translate-x-1 transition-transform" /> 
+              Нүүр хуудас
+            </Link>
+          </div>
+
+          {/* Header */}
+          <div className="mb-10 relative">
+            <motion.div 
+              initial={{ scale: 0 }} animate={{ scale: 1 }} 
+              className="absolute -top-10 -left-10 w-24 h-24 bg-red-100 rounded-full blur-3xl opacity-50" 
+            />
+            <h1 className="text-5xl md:text-6xl font-black text-slate-900 mb-3 tracking-tight leading-[0.95] relative z-10">
+              Future <br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-rose-500">
+                Au Pair.
+              </span>
+            </h1>
+            <p className="text-slate-500 font-bold text-sm leading-relaxed max-w-sm relative z-10">
+              Дэлхийгээр аялж, хэл сурч, шинэ соёлтой танилцах эхний алхам.
+            </p>
+          </div>
 
           {!pendingVerification ? (
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               
-              {/* --- SEARCHABLE UNIVERSITY DROPDOWN --- */}
-              <div className="relative" ref={dropdownRef}>
-                 <div 
-                   onClick={() => setIsUniOpen(!isUniOpen)}
-                   className={`relative w-full border rounded-2xl py-4 pl-12 pr-10 text-xs font-bold transition-all cursor-pointer flex items-center
-                    ${isDark 
-                        ? "bg-white/5 border-white/10 text-white" 
-                        : "bg-white border-slate-200 text-slate-900 shadow-sm"}`}
-                 >
-                    <Building className={`absolute left-4 w-4 h-4 ${isDark ? "text-white/20" : "text-slate-400"}`} />
-                    <span className={university ? "" : "opacity-40"}>
-                        {university ? selectedUni?.[lang] : CONTENT.inputs.university[lang]}
-                    </span>
-                    <ChevronDown size={16} className={`absolute right-4 transition-transform duration-300 ${isUniOpen ? "rotate-180" : ""}`} />
+              {/* FULL NAME */}
+              <div className="relative group">
+                 <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-red-500 transition-colors">
+                    <User size={20} />
                  </div>
-
-                 <AnimatePresence>
-                    {isUniOpen && (
-                        <motion.div 
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 10 }}
-                          className={`absolute top-full left-0 right-0 mt-2 z-50 rounded-2xl border shadow-2xl overflow-hidden backdrop-blur-xl
-                            ${isDark ? "bg-[#002b49] border-white/10" : "bg-white border-slate-200"}`}
-                        >
-                            <div className={`p-2 border-b ${isDark ? "border-white/5" : "border-slate-100"}`}>
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-                                    <input 
-                                        autoFocus
-                                        placeholder={lang === 'mn' ? "Хайх..." : "Search..."}
-                                        value={uniSearch}
-                                        onChange={(e) => setUniSearch(e.target.value)}
-                                        className={`w-full py-2 pl-9 pr-4 text-xs font-bold rounded-xl focus:outline-none
-                                            ${isDark ? "bg-white/5 text-white" : "bg-slate-50 text-slate-900"}`}
-                                    />
-                                </div>
-                            </div>
-                            <div className="max-h-[240px] overflow-y-auto custom-scrollbar">
-                                {filteredUnis.length > 0 ? filteredUnis.map((uni) => (
-                                    <div 
-                                        key={uni.id}
-                                        onClick={() => {
-                                            setUniversity(uni.id);
-                                            setIsUniOpen(false);
-                                            setUniSearch("");
-                                        }}
-                                        className={`px-4 py-3 text-xs font-bold cursor-pointer transition-colors
-                                            ${university === uni.id ? "bg-[#00aeef] text-white" : isDark ? "hover:bg-white/5" : "hover:bg-slate-50"}`}
-                                    >
-                                        {uni[lang]}
-                                    </div>
-                                )) : (
-                                    <div className="px-4 py-8 text-center text-xs opacity-40">No results found</div>
-                                )}
-                            </div>
-                        </motion.div>
-                    )}
-                 </AnimatePresence>
+                 <input 
+                    type="text" 
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Бүтэн Нэр (Full Name)"
+                    className="w-full bg-white border-2 border-slate-100 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 rounded-[1.5rem] py-5 pl-14 pr-6 text-sm font-bold text-slate-900 placeholder:text-slate-300 transition-all shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] outline-none"
+                    required
+                 />
               </div>
 
-              {/* STANDARD INPUTS */}
-              {[
-                { id: 'sid', val: studentId, set: setStudentId, icon: IdCard, label: CONTENT.inputs.studentId[lang], type: 'text', upper: true },
-                { id: 'name', val: fullName, set: setFullName, icon: User, label: CONTENT.inputs.fullname[lang], type: 'text' },
-                { id: 'email', val: email, set: setEmail, icon: Mail, label: CONTENT.inputs.email[lang], type: 'email' },
-                { id: 'pass', val: password, set: setPassword, icon: Lock, label: CONTENT.inputs.pass[lang], type: 'password' },
-              ].map((input) => (
-                <div key={input.id} className="relative group">
-                  <input.icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors
-                    ${isDark ? "text-white/20 group-focus-within:text-[#00aeef]" : "text-slate-400 group-focus-within:text-[#00aeef]"}`} />
-                  <input 
-                    type={input.type} 
-                    value={input.val}
-                    onChange={(e) => input.set(input.upper ? e.target.value.toUpperCase() : e.target.value)}
-                    placeholder={input.label}
-                    className={`w-full border rounded-2xl py-4 pl-12 pr-4 text-xs font-bold transition-all focus:outline-none focus:ring-2 focus:ring-[#00aeef]/50
-                      ${isDark 
-                        ? "bg-white/5 border-white/10 text-white placeholder:text-white/20" 
-                        : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 shadow-sm"}`}
+              {/* EMAIL */}
+              <div className="relative group">
+                 <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-red-500 transition-colors">
+                    <Mail size={20} />
+                 </div>
+                 <input 
+                    type="email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="И-мэйл хаяг"
+                    className="w-full bg-white border-2 border-slate-100 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 rounded-[1.5rem] py-5 pl-14 pr-6 text-sm font-bold text-slate-900 placeholder:text-slate-300 transition-all shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] outline-none"
                     required
-                  />
-                </div>
-              ))}
+                 />
+              </div>
 
-              {error && <p className="text-rose-500 text-[10px] font-bold text-center bg-rose-500/10 p-3 rounded-xl border border-rose-500/20 uppercase tracking-widest">{error}</p>}
+              {/* PASSWORD */}
+              <div className="relative group">
+                 <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-red-500 transition-colors">
+                    <Lock size={20} />
+                 </div>
+                 <input 
+                    type="password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Нууц үг"
+                    className="w-full bg-white border-2 border-slate-100 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 rounded-[1.5rem] py-5 pl-14 pr-6 text-sm font-bold text-slate-900 placeholder:text-slate-300 transition-all shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] outline-none"
+                    required
+                 />
+              </div>
 
-              <button type="submit" disabled={isLoading} className="w-full bg-[#00aeef] hover:bg-[#009bd5] text-white font-black uppercase tracking-[0.2em] text-[10px] py-5 rounded-2xl shadow-xl transition-all active:scale-[0.98] flex items-center justify-center gap-3">
-                {isLoading ? <Loader2 className="animate-spin" size={18} /> : <>{CONTENT.btn[lang]} <ArrowRight size={16} /></>}
+              {/* ERROR MSG */}
+              {error && (
+                <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="text-red-500 text-[11px] font-black uppercase tracking-wider bg-red-50 p-4 rounded-2xl border border-red-100 text-center">
+                   {error}
+                </motion.p>
+              )}
+
+              {/* SUBMIT BUTTON */}
+              <button 
+                type="submit" 
+                disabled={isLoading} 
+                className="w-full bg-slate-900 hover:bg-red-600 text-white font-black text-xs uppercase tracking-[0.25em] py-6 rounded-[1.5rem] shadow-xl hover:shadow-2xl hover:shadow-red-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-3 mt-4 group"
+              >
+                {isLoading ? <Loader2 className="animate-spin" size={18} /> : (
+                   <>Бүртгүүлэх <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" /></>
+                )}
               </button>
+
             </form>
           ) : (
-            <form onSubmit={handleVerify} className="space-y-6">
-               <div className="text-center">
-                  <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 border-2 transition-colors ${isDark ? "bg-[#00aeef]/10 border-[#00aeef]/30" : "bg-sky-50 border-sky-100"}`}>
-                     <Mail size={36} className="text-[#00aeef]" />
-                  </div>
-                  <h3 className={`text-2xl font-black ${isDark ? "text-white" : "text-[#001829]"}`}>Verify Email</h3>
-                  <p className="text-sm mt-3 font-medium opacity-60">Sent code to <span className="font-black text-[#00aeef]">{email}</span></p>
+            
+            /* VERIFICATION FORM */
+            <motion.form 
+               initial={{ opacity: 0, scale: 0.95 }}
+               animate={{ opacity: 1, scale: 1 }}
+               onSubmit={handleVerify} 
+               className="bg-white/80 backdrop-blur border-2 border-slate-100 p-8 rounded-[2.5rem] text-center shadow-xl"
+            >
+               <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 shadow-sm">
+                  <Mail />
                </div>
-               <input type="text" value={code} onChange={(e) => setCode(e.target.value)} placeholder="000000" className={`w-full border rounded-2xl py-5 text-center text-sm font-black tracking-[0.5em] focus:outline-none ${isDark ? "bg-white/5 border-white/10 text-white" : "bg-white border-slate-200"}`} />
-               <button type="submit" className="w-full bg-[#00aeef] text-white font-black uppercase tracking-[0.2em] text-[10px] py-5 rounded-2xl shadow-xl">{isLoading ? "Validating..." : CONTENT.verify[lang]}</button>
-            </form>
+               <h3 className="text-2xl font-black text-slate-900 mb-2">Check Email</h3>
+               <p className="text-slate-500 text-sm font-bold mb-8">
+                  We sent a code to <span className="text-slate-900">{email}</span>
+               </p>
+               
+               <input 
+                  type="text" 
+                  value={code} 
+                  onChange={(e) => setCode(e.target.value)} 
+                  placeholder="000000" 
+                  className="w-full bg-slate-50 border-2 border-slate-200 focus:border-red-500 focus:bg-white rounded-2xl py-4 text-center text-2xl font-black tracking-[0.5em] text-slate-900 mb-6 outline-none transition-colors" 
+               />
+               
+               <button type="submit" className="w-full bg-red-600 text-white font-black text-xs uppercase tracking-[0.2em] py-4 rounded-xl shadow-lg hover:shadow-red-500/30 hover:scale-[1.02] transition-all">
+                  {isLoading ? "Checking..." : "Verify Code"}
+               </button>
+            </motion.form>
           )}
 
-          <div className="mt-10 text-center p-5 rounded-2xl border transition-all ${isDark ? 'bg-white/5 border-white/5' : 'bg-white border-slate-100 shadow-sm'}">
-             <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">Already a member?</span>
-             <Link href="/sign-in" className="text-[#00aeef] text-[10px] font-black uppercase tracking-widest hover:underline ml-2">Sign In</Link>
+          {/* Login Link */}
+          <div className="mt-8 text-center">
+             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                Бүртгэлтэй юу? 
+                <Link href="/sign-in" className="text-red-500 ml-2 hover:text-slate-900 transition-colors underline decoration-2 underline-offset-4">Нэвтрэх</Link>
+             </p>
           </div>
+
         </motion.div>
       </div>
 
-      {/* --- RIGHT SIDE: ID CARD VISUAL --- */}
-      <div className={`hidden lg:block w-[45%] relative overflow-hidden border-l transition-colors duration-700 ${isDark ? "bg-[#00101a] border-white/5" : "bg-sky-50 border-slate-200"}`}>
-         <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay z-10" />
-         <motion.div animate={{ scale: [1, 1.2, 1], opacity: isDark ? [0.2, 0.4, 0.2] : [0.4, 0.6, 0.4] }} transition={{ duration: 10, repeat: Infinity }} className={`absolute top-0 right-0 w-[800px] h-[800px] rounded-full blur-[200px] ${isDark ? "bg-[#00aeef]" : "bg-sky-200"}`} />
+      {/* ─── RIGHT: VISUAL SECTION (50%) ─── */}
+      <div className="hidden lg:flex w-1/2 relative items-center justify-center bg-[#F2F5F8] border-l border-white/50 overflow-hidden">
+         
+         {/* Animated Gradients */}
+         <div className="absolute inset-0 w-full h-full">
+            <motion.div 
+               animate={{ scale: [1, 1.1, 1], x: [0, 20, 0] }}
+               transition={{ duration: 10, repeat: Infinity }}
+               className="absolute top-[-10%] right-[-10%] w-[700px] h-[700px] bg-red-200 rounded-full blur-[150px] opacity-40" 
+            />
+            <motion.div 
+               animate={{ scale: [1, 1.2, 1], x: [0, -20, 0] }}
+               transition={{ duration: 15, repeat: Infinity }}
+               className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-emerald-200 rounded-full blur-[150px] opacity-40" 
+            />
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]" />
+         </div>
 
-         <div className="absolute inset-0 flex items-center justify-center z-20">
-            <motion.div initial={{ rotateY: 45 }} animate={{ rotateY: -12 }} transition={{ duration: 1.5, type: "spring" }} className={`relative w-[400px] h-[600px] border rounded-[3rem] backdrop-blur-3xl shadow-2xl overflow-hidden flex flex-col p-10 ${isDark ? "bg-white/5 border-white/10" : "bg-white/60 border-white"}`}>
-               <div className="absolute -top-32 -left-32 w-64 h-64 bg-[#00aeef] rounded-full blur-[80px] opacity-40" />
-               <div className="flex justify-between items-start mb-16 relative z-10">
-                  <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-xl p-0.5 bg-white`}>
-                     <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#00aeef] to-[#005691]" />
-                  </div>
-                  <div className="text-right">
-                     <h3 className="font-black text-xl tracking-tighter line-clamp-1">{university || "University"}</h3>
-                     <p className="text-[#00aeef] text-[10px] font-black uppercase tracking-[0.2em]">Membership Card</p>
+         {/* 3D Floating "Traveler" Card */}
+         <motion.div 
+            initial={{ rotateY: 90, opacity: 0 }}
+            animate={{ rotateY: -5, opacity: 1 }}
+            transition={{ duration: 1.2, type: "spring", bounce: 0.3 }}
+            whileHover={{ rotateY: 0, scale: 1.02 }}
+            className="relative z-10 w-[420px] h-[620px] bg-white/40 backdrop-blur-2xl border border-white/60 rounded-[3rem] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] p-10 flex flex-col overflow-hidden"
+         >
+            {/* Gloss Shine */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/50 via-transparent to-transparent opacity-80 pointer-events-none" />
+
+            {/* Top Badge */}
+            <div className="flex justify-between items-start mb-12 relative z-10">
+               <div className="bg-white p-3 rounded-2xl shadow-sm">
+                  <FaPassport className="text-red-500 text-2xl" />
+               </div>
+               <div className="text-right">
+                  <p className="text-[10px] font-black text-red-500 uppercase tracking-[0.2em] mb-1">Status</p>
+                  <div className="inline-flex items-center gap-2 bg-emerald-100/50 px-3 py-1 rounded-full border border-emerald-100">
+                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                     <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Ready</span>
                   </div>
                </div>
-               <div className="relative z-10 flex-1 flex flex-col justify-center text-center space-y-6">
-                  <div className={`w-32 h-32 mx-auto rounded-[2.5rem] border flex items-center justify-center shadow-2xl relative bg-white/5 border-white/10`}>
-                     <GraduationCap size={56} className="text-sky-400" />
-                     <div className="absolute -bottom-3 -right-3 bg-[#00aeef] rounded-full p-2 border-4 border-white shadow-lg"><CheckCircle2 size={16} className="text-white" /></div>
+            </div>
+
+            {/* Center Visual */}
+            <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center space-y-8">
+               
+               {/* Animated Icon Circle */}
+               <div className="w-40 h-40 bg-gradient-to-tr from-white to-slate-50 rounded-full shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] flex items-center justify-center relative border-4 border-white">
+                  <Plane size={48} className="text-slate-400 rotate-[-45deg]" />
+                  
+                  {/* Floating particles around circle */}
+                  <motion.div 
+                     animate={{ rotate: 360 }} 
+                     transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                     className="absolute inset-0"
+                  >
+                     <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-red-500 rounded-full shadow-lg" />
+                  </motion.div>
+                  <motion.div 
+                     animate={{ rotate: -360 }} 
+                     transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                     className="absolute inset-[-20px] rounded-full border border-dashed border-slate-300"
+                  />
+               </div>
+
+               <div>
+                  <h2 className="text-4xl font-black text-slate-900 leading-[0.9]">
+                     Global <br/> <span className="text-red-500">Citizen.</span>
+                  </h2>
+                  <p className="text-slate-500 font-bold text-sm mt-4 leading-relaxed max-w-[200px] mx-auto">
+                     Your verified profile allows you to connect with families across Europe.
+                  </p>
+               </div>
+            </div>
+
+            {/* Bottom Details */}
+            <div className="mt-auto relative z-10 pt-8 border-t border-white/20">
+               <div className="flex justify-between items-center">
+                  <div>
+                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Destination</p>
+                     <div className="flex items-center gap-1.5">
+                        <MapPin size={12} className="text-emerald-500" />
+                        <span className="text-xs font-black text-slate-800">Europe</span>
+                     </div>
                   </div>
                   <div>
-                     <h2 className="text-3xl font-black tracking-tight leading-tight line-clamp-2">{fullName || "Full Name"}</h2>
-                     <p className="text-[#00aeef] font-black tracking-[0.3em] text-xs mt-2">{studentId || "S.ID2025"}</p>
+                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Program</p>
+                     <div className="flex items-center gap-1.5">
+                        <Sparkles size={12} className="text-orange-500" />
+                        <span className="text-xs font-black text-slate-800">Au Pair</span>
+                     </div>
                   </div>
-                  <div className={`w-full h-px mx-auto ${isDark ? 'bg-white/10' : 'bg-slate-200'}`} />
-                  <div className="text-left"><p className="text-[#00aeef] text-[9px] font-black uppercase tracking-[0.2em] mb-1">University</p><p className="text-[10px] font-bold line-clamp-1">{selectedUni?.[lang] || "Select University"}</p></div>
                </div>
-               <div className="mt-auto flex justify-center opacity-20"><div className="h-10 w-full bg-gradient-to-r from-transparent via-current to-transparent" /></div>
-            </motion.div>
-         </div>
+            </div>
+
+         </motion.div>
+
       </div>
+
     </div>
   );
 }
