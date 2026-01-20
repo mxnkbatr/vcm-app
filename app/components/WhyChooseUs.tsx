@@ -25,8 +25,15 @@ const PALETTE = {
   WHITE: "#FFFFFF",
 };
 
-const WhyChooseUs: React.FC<{ dictionary: any }> = ({ dictionary }) => {
+// FIX: Make dictionary optional in the type definition
+interface WhyChooseUsProps {
+  dictionary?: any; 
+}
+
+const WhyChooseUs: React.FC<WhyChooseUsProps> = ({ dictionary }) => {
+  // Safe fallback if dictionary is undefined
   const t = dictionary || {};
+  
   const containerRef = useRef(null);
   
   // Parallax Background
