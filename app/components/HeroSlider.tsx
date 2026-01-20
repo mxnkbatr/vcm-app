@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import {
   FaMapMarkerAlt,
@@ -10,6 +11,7 @@ import {
   FaGlobeEurope,
   FaUserCheck,
 } from "react-icons/fa";
+import CloudinaryPlayer from "./CloudinaryPlayer";
 // Assuming you have a language context, otherwise use the fallback below
 // import { useLanguage } from "../context/LanguageContext";
 
@@ -99,15 +101,25 @@ const Hero = () => {
       {/* ─── 1. Background (Video/Image) ─── */}
       <div className="absolute inset-0 z-0">
         {/* Placeholder for Video - Replace src with your actual video file */}
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full h-full object-cover opacity-50 scale-105" // Slight scale to avoid borders
-        >
-          <source src="https://res.cloudinary.com/dxoxdiuwr/video/upload/f_auto,q_auto/v1768920602/A_cinematic_highquality_202601201908_j5s2n_kkoosh.mp4" type="video/mp4" />
-        </video>
+        {/* Desktop Video Background */}
+        <div className="hidden md:block absolute inset-0 w-full h-full">
+          <CloudinaryPlayer
+            publicId="A_cinematic_highquality_202601201908_j5s2n_kkoosh"
+            cloudName="dxoxdiuwr"
+            className="w-full h-full object-cover opacity-50 scale-105 pointer-events-none"
+          />
+        </div>
+
+        {/* Mobile Static Image Background */}
+        <div className="block md:hidden absolute inset-0 w-full h-full">
+          <Image
+            src="https://res.cloudinary.com/dxoxdiuwr/video/upload/f_auto,q_auto,so_0/v1/A_cinematic_highquality_202601201908_j5s2n_kkoosh.jpg"
+            alt="Hero Background"
+            fill
+            className="object-cover opacity-50 scale-105"
+            priority
+          />
+        </div>
 
         {/* Gradient Overlay for Text Readability */}
         <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/60 to-transparent" />
