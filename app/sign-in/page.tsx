@@ -162,7 +162,7 @@ export default function SignInPage() {
           <div className="mt-8 text-center">
              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
                 Шинэ гишүүн үү? 
-                <Link href="/signup" className="text-emerald-600 ml-2 hover:text-slate-900 transition-colors underline decoration-2 underline-offset-4">Бүртгүүлэх</Link>
+                <Link href="/sign-up" className="text-emerald-600 ml-2 hover:text-slate-900 transition-colors underline decoration-2 underline-offset-4">Бүртгүүлэх</Link>
              </p>
           </div>
 
