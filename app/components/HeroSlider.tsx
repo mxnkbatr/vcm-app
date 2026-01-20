@@ -106,7 +106,7 @@ const Hero = () => {
           playsInline
           className="w-full h-full object-cover opacity-50 scale-105" // Slight scale to avoid borders
         >
-          <source src="video.mp4" type="video/mp4" />
+          <source src="https://res.cloudinary.com/dxoxdiuwr/video/upload/v1768920602/A_cinematic_highquality_202601201908_j5s2n_kkoosh.mp4" type="video/mp4" />
         </video>
         
         {/* Gradient Overlay for Text Readability */}

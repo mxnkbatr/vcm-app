@@ -24,79 +24,24 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     await connectToDB();
-    const formData = await request.formData();
-    
-    const titleEn = formData.get("titleEn") as string;
-    const titleMn = formData.get("titleMn") as string;
-    const summaryEn = formData.get("summaryEn") as string;
-    const summaryMn = formData.get("summaryMn") as string;
-    const contentEn = formData.get("contentEn") as string;
-    const contentMn = formData.get("contentMn") as string;
-    const author = formData.get("author") as string;
-    const tags = (formData.get("tags") as string).split(',').map(t => t.trim());
-    const featured = formData.get("featured") === 'true';
-    const imageFile = formData.get("image") as File;
+    let data: any;
+    const contentType = request.headers.get("content-type") || "";
 
-    let imageUrl = "";
-    if (imageFile) {
-        const arrayBuffer = await imageFile.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        const uploadResult = await new Promise<any>((resolve, reject) => {
-            const uploadStream = cloudinary.uploader.upload_stream(
-                { folder: 'unicef_news' },
-                (error, result) => {
-                    if (error) reject(error);
-                    else resolve(result);
-                }
-            );
-            uploadStream.end(buffer);
-        });
-        imageUrl = uploadResult.secure_url;
-    }
-
-    const newArticle = await News.create({
-        title: { en: titleEn, mn: titleMn },
-        summary: { en: summaryEn, mn: summaryMn },
-        content: { en: contentEn, mn: contentMn },
-        author,
-        tags,
-        featured,
-        image: imageUrl
-    });
-
-    return NextResponse.json(newArticle, { status: 201 });
-  } catch (error) {
-    console.error("Failed to create news", error);
-    return NextResponse.json({ error: "Failed to create news" }, { status: 500 });
-  }
-}
-
-export async function PUT(request: Request) {
-    try {
-        await connectToDB();
+    if (contentType.includes("application/json")) {
+        data = await request.json();
+    } else {
         const formData = await request.formData();
-        const id = formData.get("id") as string;
-        
-        if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
-
-        const titleEn = formData.get("titleEn") as string;
-        const titleMn = formData.get("titleMn") as string;
-        const summaryEn = formData.get("summaryEn") as string;
-        const summaryMn = formData.get("summaryMn") as string;
-        const contentEn = formData.get("contentEn") as string;
-        const contentMn = formData.get("contentMn") as string;
-        const tags = (formData.get("tags") as string).split(',').map(t => t.trim());
-        const featured = formData.get("featured") === 'true';
-        const imageFile = formData.get("image") as File;
-
-        const updateData: any = {
-            title: { en: titleEn, mn: titleMn },
-            summary: { en: summaryEn, mn: summaryMn },
-            content: { en: contentEn, mn: contentMn },
-            tags,
-            featured
+        data = {
+            title: { en: formData.get("titleEn"), mn: formData.get("titleMn") },
+            summary: { en: formData.get("summaryEn"), mn: formData.get("summaryMn") },
+            content: { en: formData.get("contentEn"), mn: formData.get("contentMn") },
+            author: formData.get("author") || "Admin",
+            tags: (formData.get("tags") as string || "").split(',').map(t => t.trim()),
+            featured: formData.get("featured") === 'true',
+            status: formData.get("status") || 'published',
+            image: ""
         };
-
+        const imageFile = formData.get("image") as File | null;
         if (imageFile) {
             const arrayBuffer = await imageFile.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
@@ -110,12 +55,65 @@ export async function PUT(request: Request) {
                 );
                 uploadStream.end(buffer);
             });
-            updateData.image = uploadResult.secure_url;
+            data.image = uploadResult.secure_url;
+        }
+    }
+
+    const newArticle = await News.create(data);
+    return NextResponse.json(newArticle, { status: 201 });
+  } catch (error) {
+    console.error("Failed to create news", error);
+    return NextResponse.json({ error: "Failed to create news" }, { status: 500 });
+  }
+}
+
+export async function PUT(request: Request) {
+    try {
+        await connectToDB();
+        let data: any;
+        let id: string;
+        const contentType = request.headers.get("content-type") || "";
+
+        if (contentType.includes("application/json")) {
+            data = await request.json();
+            id = data.id || data._id;
+            if (data.image === "") delete data.image;
+            delete data.id;
+            delete data._id;
+        } else {
+            const formData = await request.formData();
+            id = formData.get("id") as string;
+            data = {
+                title: { en: formData.get("titleEn"), mn: formData.get("titleMn") },
+                summary: { en: formData.get("summaryEn"), mn: formData.get("summaryMn") },
+                content: { en: formData.get("contentEn"), mn: formData.get("contentMn") },
+                author: formData.get("author"),
+                tags: (formData.get("tags") as string || "").split(',').map(t => t.trim()),
+                featured: formData.get("featured") === 'true',
+                status: formData.get("status")
+            };
+            const imageFile = formData.get("image") as File | null;
+            if (imageFile && imageFile instanceof File) {
+                const arrayBuffer = await imageFile.arrayBuffer();
+                const buffer = Buffer.from(arrayBuffer);
+                const uploadResult = await new Promise<any>((resolve, reject) => {
+                    const uploadStream = cloudinary.uploader.upload_stream(
+                        { folder: 'unicef_news' },
+                        (error, result) => {
+                            if (error) reject(error);
+                            else resolve(result);
+                        }
+                    );
+                    uploadStream.end(buffer);
+                });
+                data.image = uploadResult.secure_url;
+            }
         }
 
-        const updatedArticle = await News.findByIdAndUpdate(id, updateData, { new: true });
-        return NextResponse.json(updatedArticle, { status: 200 });
+        if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
 
+        const updatedArticle = await News.findByIdAndUpdate(id, data, { new: true });
+        return NextResponse.json(updatedArticle, { status: 200 });
     } catch (error) {
         console.error("Failed to update news", error);
         return NextResponse.json({ error: "Failed to update news" }, { status: 500 });

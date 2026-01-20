@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
-import { MOCK_OPPORTUNITIES } from "@/lib/data/mockOpportunities";
+import { connectToDB } from "@/lib/db";
+import Opportunity from "@/lib/models/Opportunity";
 
 export async function GET() {
-  return NextResponse.json(MOCK_OPPORTUNITIES, { status: 200 });
+  try {
+    await connectToDB();
+    const opportunities = await Opportunity.find({}).sort({ createdAt: -1 });
+    return NextResponse.json(opportunities, { status: 200 });
+  } catch (error) {
+    console.error("Failed to fetch opportunities", error);
+    return NextResponse.json({ error: "Failed to fetch opportunities" }, { status: 500 });
+  }
 }

@@ -24,97 +24,29 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     await connectToDB();
-    const formData = await request.formData();
-    
-    const titleEn = formData.get("titleEn") as string;
-    const titleMn = formData.get("titleMn") as string;
-    const providerEn = formData.get("providerEn") as string;
-    const providerMn = formData.get("providerMn") as string;
-    const locationEn = formData.get("locEn") as string;
-    const locationMn = formData.get("locMn") as string;
-    const descEn = formData.get("descEn") as string;
-    const descMn = formData.get("descMn") as string;
-    const type = formData.get("type") as string;
-    const deadline = formData.get("deadline") as string;
-    const link = formData.get("link") as string;
-    const tags = (formData.get("tags") as string).split(',').map(t => t.trim());
-    const reqEn = (formData.get("reqEn") as string).split('\n').filter(r => r.trim());
-    const reqMn = (formData.get("reqMn") as string).split('\n').filter(r => r.trim());
-    const imageFile = formData.get("image") as File;
+    let data: any;
+    const contentType = request.headers.get("content-type") || "";
 
-    let imageUrl = "";
-    if (imageFile) {
-        const arrayBuffer = await imageFile.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        const uploadResult = await new Promise<any>((resolve, reject) => {
-            const uploadStream = cloudinary.uploader.upload_stream(
-                { folder: 'unicef_opportunities' },
-                (error, result) => {
-                    if (error) reject(error);
-                    else resolve(result);
-                }
-            );
-            uploadStream.end(buffer);
-        });
-        imageUrl = uploadResult.secure_url;
-    }
-
-    const newOpp = await Opportunity.create({
-        type,
-        title: { en: titleEn, mn: titleMn },
-        provider: { en: providerEn, mn: providerMn },
-        location: { en: locationEn, mn: locationMn },
-        description: { en: descEn, mn: descMn },
-        deadline,
-        link,
-        tags,
-        requirements: { en: reqEn, mn: reqMn },
-        image: imageUrl
-    });
-
-    return NextResponse.json(newOpp, { status: 201 });
-  } catch (error) {
-    console.error("Failed to create opportunity", error);
-    return NextResponse.json({ error: "Failed to create opportunity" }, { status: 500 });
-  }
-}
-
-export async function PUT(request: Request) {
-    try {
-        await connectToDB();
+    if (contentType.includes("application/json")) {
+        data = await request.json();
+    } else {
         const formData = await request.formData();
-        const id = formData.get("id") as string;
-        
-        if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
-
-        const titleEn = formData.get("titleEn") as string;
-        const titleMn = formData.get("titleMn") as string;
-        const providerEn = formData.get("providerEn") as string;
-        const providerMn = formData.get("providerMn") as string;
-        const locationEn = formData.get("locEn") as string;
-        const locationMn = formData.get("locMn") as string;
-        const descEn = formData.get("descEn") as string;
-        const descMn = formData.get("descMn") as string;
-        const type = formData.get("type") as string;
-        const deadline = formData.get("deadline") as string;
-        const link = formData.get("link") as string;
-        const tags = (formData.get("tags") as string).split(',').map(t => t.trim());
-        const reqEn = (formData.get("reqEn") as string).split('\n').filter(r => r.trim());
-        const reqMn = (formData.get("reqMn") as string).split('\n').filter(r => r.trim());
-        const imageFile = formData.get("image") as File;
-
-        const updateData: any = {
-            type,
-            title: { en: titleEn, mn: titleMn },
-            provider: { en: providerEn, mn: providerMn },
-            location: { en: locationEn, mn: locationMn },
-            description: { en: descEn, mn: descMn },
-            deadline,
-            link,
-            tags,
-            requirements: { en: reqEn, mn: reqMn },
+        data = {
+            type: formData.get("type") || 'volunteer',
+            title: { en: formData.get("titleEn"), mn: formData.get("titleMn") },
+            provider: { en: formData.get("providerEn"), mn: formData.get("providerMn") },
+            location: { en: formData.get("locEn"), mn: formData.get("locMn") },
+            description: { en: formData.get("descEn"), mn: formData.get("descMn") },
+            deadline: formData.get("deadline"),
+            link: formData.get("link") || "#",
+            tags: (formData.get("tags") as string || "").split(',').map(t => t.trim()),
+            requirements: {
+                en: (formData.get("reqEn") as string || "").split('\n').filter(r => r.trim()),
+                mn: (formData.get("reqMn") as string || "").split('\n').filter(r => r.trim())
+            },
+            image: ""
         };
-
+        const imageFile = formData.get("image") as File | null;
         if (imageFile) {
             const arrayBuffer = await imageFile.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
@@ -128,12 +60,67 @@ export async function PUT(request: Request) {
                 );
                 uploadStream.end(buffer);
             });
-            updateData.image = uploadResult.secure_url;
+            data.image = uploadResult.secure_url;
+        }
+    }
+
+    const newOpp = await Opportunity.create(data);
+    return NextResponse.json(newOpp, { status: 201 });
+  } catch (error) {
+    console.error("Failed to create opportunity", error);
+    return NextResponse.json({ error: "Failed to create opportunity" }, { status: 500 });
+  }
+}
+
+export async function PUT(request: Request) {
+    try {
+        await connectToDB();
+        let data: any;
+        let id: string;
+        const contentType = request.headers.get("content-type") || "";
+
+        if (contentType.includes("application/json")) {
+            data = await request.json();
+            id = data.id || data._id;
+        } else {
+            const formData = await request.formData();
+            id = formData.get("id") as string;
+            data = {
+                type: formData.get("type"),
+                title: { en: formData.get("titleEn"), mn: formData.get("titleMn") },
+                provider: { en: formData.get("providerEn"), mn: formData.get("providerMn") },
+                location: { en: formData.get("locEn"), mn: formData.get("locMn") },
+                description: { en: formData.get("descEn"), mn: formData.get("descMn") },
+                deadline: formData.get("deadline"),
+                link: formData.get("link"),
+                tags: (formData.get("tags") as string || "").split(',').map(t => t.trim()),
+                requirements: {
+                    en: (formData.get("reqEn") as string || "").split('\n').filter(r => r.trim()),
+                    mn: (formData.get("reqMn") as string || "").split('\n').filter(r => r.trim())
+                },
+            };
+            const imageFile = formData.get("image") as File | null;
+            if (imageFile && imageFile instanceof File) {
+                const arrayBuffer = await imageFile.arrayBuffer();
+                const buffer = Buffer.from(arrayBuffer);
+                const uploadResult = await new Promise<any>((resolve, reject) => {
+                    const uploadStream = cloudinary.uploader.upload_stream(
+                        { folder: 'unicef_opportunities' },
+                        (error, result) => {
+                            if (error) reject(error);
+                            else resolve(result);
+                        }
+                    );
+                    uploadStream.end(buffer);
+                });
+                data.image = uploadResult.secure_url;
+            }
         }
 
-        const updatedOpp = await Opportunity.findByIdAndUpdate(id, updateData, { new: true });
-        return NextResponse.json(updatedOpp, { status: 200 });
+        if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
 
+        const updatedOpp = await Opportunity.findByIdAndUpdate(id, data, { new: true });
+        return NextResponse.json(updatedOpp, { status: 200 });
     } catch (error) {
         console.error("Failed to update opportunity", error);
         return NextResponse.json({ error: "Failed to update opportunity" }, { status: 500 });

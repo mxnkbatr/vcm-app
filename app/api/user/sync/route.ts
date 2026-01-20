@@ -40,7 +40,7 @@ export async function POST(req: Request) {
         studentId: studentId ? studentId.toUpperCase() : "NO-ID",
         fullName: fullName || "New User",
         university: university || "MNUMS",
-        role: "member", // Default role
+        role: "guest", // Default role
       },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );

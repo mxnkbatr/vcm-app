@@ -1,88 +1,105 @@
+// app/api/admin/users/route.ts
 import { NextResponse } from "next/server";
-import { currentUser } from "@clerk/nextjs/server";
+import { currentUser, clerkClient } from "@clerk/nextjs/server";
 import { connectToDB } from "@/lib/db";
 import User from "@/lib/models/User";
 
-// --- FIXED HELPER ---
-// Checks Clerk Public Metadata AND MongoDB for robust auth
+// --- AUTH CHECK ---
 async function isAdmin() {
-  const clerkUser = await currentUser();
-  
-  if (!clerkUser) return false;
-
-  // 1. Check metadata directly (Fastest)
-  if (clerkUser.publicMetadata?.role === 'admin') {
-    return true;
-  }
-
-  // 2. Fallback: Check MongoDB (Source of Truth)
-  // Useful if you manually edited the DB but Clerk metadata isn't synced yet
-  await connectToDB();
-  const dbUser = await User.findOne({ clerkId: clerkUser.id });
-  return dbUser?.role === 'admin';
+  const user = await currentUser();
+  if (!user) return false;
+  // Check Clerk metadata or DB role
+  return user.publicMetadata?.role === 'admin';
 }
 
+// 1. GET: Fetch all users for the table
 export async function GET() {
-  // 1. Check Admin Auth
-  if (!await isAdmin()) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
-  // 2. Connect to DB (Required since we removed it from isAdmin)
+  if (!await isAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  
   await connectToDB();
-
-  try {
-    const users = await User.find({}).sort({ createdAt: -1 });
-    return NextResponse.json(users);
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
-  }
+  
+  // Sort by newest first
+  const users = await User.find({}).sort({ createdAt: -1 });
+  
+  // Map Mongo _id to string if needed, otherwise send as is
+  return NextResponse.json(users);
 }
 
+// 2. PUT: The critical part that SAVES changes
 export async function PUT(req: Request) {
-  if (!await isAdmin()) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-  
-  await connectToDB();
+  if (!await isAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
   try {
+    await connectToDB();
     const body = await req.json();
-    const { userId, action, badgeName } = body;
-
-    if (action === 'assign_badge') {
-      const updatedUser = await User.findByIdAndUpdate(
-        userId, 
-        { $addToSet: { badges: badgeName } }, // $addToSet prevents duplicates
-        { new: true }
-      );
-      return NextResponse.json(updatedUser);
-    }
     
+    // Destructure the payload sent from AdminDashboard.tsx
+    const { userId, action, data } = body; 
+
+    // --- CASE A: UPDATE USER DETAILS (Role, Country, Step) ---
+    if (action === 'update_user') {
+      if (!userId) return NextResponse.json({ error: "Missing User ID" }, { status: 400 });
+
+      // 1. Update MongoDB (The Permanent Save)
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        {
+          role: data.role,
+          country: data.country,
+          step: data.step,
+        },
+        { new: true } // Return the updated document
+      );
+
+      // 2. Sync Clerk Metadata (So permissions work immediately)
+      if (updatedUser && updatedUser.clerkId) {
+        const client = await clerkClient();
+        await client.users.updateUserMetadata(updatedUser.clerkId, {
+          publicMetadata: {
+            role: data.role, // "student", "admin", "guest"
+          },
+        });
+      }
+
+      return NextResponse.json({ success: true, user: updatedUser });
+    }
+
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+
   } catch (error) {
-    return NextResponse.json({ error: "Update failed" }, { status: 500 });
+    console.error("Database Update Failed:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
 
+// 3. DELETE: Remove user
 export async function DELETE(req: Request) {
-  if (!await isAdmin()) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-  
-  await connectToDB();
-  
+  if (!await isAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+
   try {
+    await connectToDB();
     const { searchParams } = new URL(req.url);
-    const id = searchParams.get('id');
-    
-    if (!id) {
-      return NextResponse.json({ error: "User ID required" }, { status: 400 });
+    const id = searchParams.get("id");
+
+    if (!id) return NextResponse.json({ error: "ID missing" }, { status: 400 });
+
+    // Find user to get Clerk ID
+    const userToDelete = await User.findById(id);
+    if (!userToDelete) return NextResponse.json({ error: "User not found" }, { status: 404 });
+
+    // Delete from Clerk
+    if (userToDelete.clerkId) {
+      try {
+        const client = await clerkClient();
+        await client.users.deleteUser(userToDelete.clerkId);
+      } catch (err) {
+        console.log("Clerk delete error (ignoring):", err);
+      }
     }
 
-    // Note: This only deletes from MongoDB.
+    // Delete from MongoDB
     await User.findByIdAndDelete(id);
-    
+
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: "Delete failed" }, { status: 500 });

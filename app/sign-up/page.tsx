@@ -66,6 +66,19 @@ export default function AuPairRegisterPage() {
       const result = await signUp.attemptEmailAddressVerification({ code: code.trim() });
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
+        
+        // Sync user to DB
+        try {
+           await fetch('/api/user/sync', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ fullName })
+           });
+        } catch (syncErr) {
+           console.error("DB Sync failed", syncErr);
+           // Continue to dashboard anyway, maybe retry later
+        }
+
         router.push("/dashboard");
       }
     } catch (err: any) { setError(err.errors?.[0]?.longMessage || "Verification failed."); }
@@ -180,6 +193,9 @@ export default function AuPairRegisterPage() {
                    <>Бүртгүүлэх <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" /></>
                 )}
               </button>
+
+              {/* Clerk CAPTCHA Placeholder */}
+              <div id="clerk-captcha" />
 
             </form>
           ) : (

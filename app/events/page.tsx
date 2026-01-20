@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { 
   motion, 
@@ -12,73 +12,80 @@ import {
   FaBullhorn,
   FaUserFriends
 } from "react-icons/fa";
-import { Clock, MapPin, Filter } from "lucide-react";
+import { Clock, MapPin, Filter, Loader2 } from "lucide-react";
+
+// --- TYPES ---
+interface EventItem {
+  _id: string;
+  title: { en: string; mn: string };
+  description: { en: string; mn: string };
+  date: string;
+  timeString: string;
+  location: { en: string; mn: string };
+  image: string;
+  category: string;
+  status: string;
+}
 
 // --- DATA STRUCTURE ---
-const CATEGORIES = ["Бүгд", "Өдөрлөг", "Сургалт", "Клуб"];
+const CATEGORIES = ["Бүгд", "Өдөрлөг", "Сургалт", "Клуб"]; // These need to match what's in DB or be mapped
+// DB categories: ['campaign', 'workshop', 'fundraiser', 'meeting']
+// Mapping: campaign -> Өдөрлөг, workshop -> Сургалт, meeting -> Клуб, fundraiser -> Хандив
 
-const EVENTS = [
-  {
-    id: 1,
-    title: "Au Pair 2025 Нээлттэй Өдөрлөг",
-    category: "Өдөрлөг",
-    date: { month: "JAN", day: "25" },
-    time: "14:00 - 16:00",
-    location: "Blue Sky Tower, 3 давхар",
-    type: "Offline",
-    image: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=800&q=80",
-    spots: "Сүүлийн 10 суудал",
-    isFull: false,
-    tagColor: "bg-red-100 text-red-600"
-  },
-  {
-    id: 2,
-    title: "Герман Хэлний Ярианы Клуб",
-    category: "Клуб",
-    date: { month: "FEB", day: "02" },
-    time: "18:00 - 19:30",
-    location: "Google Meet",
-    type: "Online",
-    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80",
-    spots: "Бүртгэл явагдаж байна",
-    isFull: false,
-    tagColor: "bg-emerald-100 text-emerald-600"
-  },
-  {
-    id: 3,
-    title: "Визний Материал Бүрдүүлэлт",
-    category: "Сургалт",
-    date: { month: "FEB", day: "10" },
-    time: "11:00 - 13:00",
-    location: "Төв Оффис",
-    type: "Offline",
-    image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=800&q=80",
-    spots: "Дүүрсэн",
-    isFull: true,
-    tagColor: "bg-slate-100 text-slate-500"
-  },
-  {
-    id: 4,
-    title: "Европ дахь Амьдрал: Q&A",
-    category: "Өдөрлөг",
-    date: { month: "FEB", day: "15" },
-    time: "20:00 - 21:00",
-    location: "Instagram Live",
-    type: "Online",
-    image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80",
-    spots: "Нээлттэй",
-    isFull: false,
-    tagColor: "bg-red-50 text-red-500"
-  },
-];
+const mapCategory = (dbCat: string) => {
+    switch (dbCat) {
+        case 'campaign': return "Өдөрлөг";
+        case 'workshop': return "Сургалт";
+        case 'meeting': return "Клуб";
+        case 'fundraiser': return "Хандив";
+        default: return "Бусад";
+    }
+};
+
+const getTagColor = (category: string) => {
+    switch (category) {
+        case 'Өдөрлөг': return "bg-red-100 text-red-600";
+        case 'Клуб': return "bg-emerald-100 text-emerald-600";
+        case 'Сургалт': return "bg-slate-100 text-slate-500";
+        default: return "bg-red-50 text-red-500";
+    }
+};
 
 export default function EventsPageRedGreen() {
   const [activeFilter, setActiveFilter] = useState("Бүгд");
   const containerRef = useRef(null);
   
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+        try {
+            const res = await fetch('/api/events');
+            if (res.ok) {
+                const data = await res.json();
+                setEvents(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch events", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    fetchEvents();
+  }, []);
+  
   const filteredEvents = activeFilter === "Бүгд" 
-    ? EVENTS 
-    : EVENTS.filter(e => e.category === activeFilter);
+    ? events 
+    : events.filter(e => mapCategory(e.category) === activeFilter);
+
+  if (loading) {
+      return (
+          <div className="min-h-screen flex items-center justify-center bg-white">
+              <Loader2 className="animate-spin text-red-600" size={48} />
+          </div>
+      );
+  }
 
   return (
     <div ref={containerRef} className="min-h-screen bg-white text-slate-800 font-sans selection:bg-red-500 selection:text-white">
@@ -140,9 +147,17 @@ export default function EventsPageRedGreen() {
                className="grid md:grid-cols-2 lg:grid-cols-2 gap-8"
             >
                <AnimatePresence mode="popLayout">
-                  {filteredEvents.map((event) => (
+                  {filteredEvents.map((event) => {
+                     const dateObj = new Date(event.date);
+                     const month = dateObj.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+                     const day = dateObj.getDate();
+                     const category = mapCategory(event.category);
+                     const isOnline = event.location.mn.toLowerCase().includes('online') || event.location.en.toLowerCase().includes('online');
+                     const isFull = event.status === 'past' || event.status === 'cancelled'; // Simple logic
+                     
+                     return (
                      <motion.div
-                        key={event.id}
+                        key={event._id}
                         layout
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -155,12 +170,12 @@ export default function EventsPageRedGreen() {
                            {/* Date & Image */}
                            <div className="w-full md:w-48 h-48 md:h-auto relative shrink-0">
                               <div className="absolute top-4 left-4 z-20 bg-white/90 backdrop-blur rounded-2xl px-4 py-2 text-center shadow-lg border border-slate-50">
-                                 <span className="block text-xs font-black text-emerald-600 uppercase">{event.date.month}</span>
-                                 <span className="block text-2xl font-black text-slate-900">{event.date.day}</span>
+                                 <span className="block text-xs font-black text-emerald-600 uppercase">{month}</span>
+                                 <span className="block text-2xl font-black text-slate-900">{day}</span>
                               </div>
                               <Image 
                                  src={event.image} 
-                                 alt={event.title}
+                                 alt={event.title.mn}
                                  fill
                                  className="object-cover rounded-[2rem] group-hover:scale-105 transition-transform duration-500"
                               />
@@ -170,10 +185,10 @@ export default function EventsPageRedGreen() {
                            <div className="flex-1 py-4 pr-4 flex flex-col justify-between">
                               <div>
                                  <div className="flex items-center gap-3 mb-3">
-                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${event.tagColor}`}>
-                                       {event.category}
+                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${getTagColor(category)}`}>
+                                       {category}
                                     </span>
-                                    {event.type === "Online" ? (
+                                    {isOnline ? (
                                        <span className="flex items-center gap-1 text-xs font-bold text-slate-400">
                                           <FaVideo /> Online
                                        </span>
@@ -184,37 +199,37 @@ export default function EventsPageRedGreen() {
                                     )}
                                  </div>
                                  <h3 className="text-2xl font-black text-slate-900 mb-2 leading-tight group-hover:text-red-600 transition-colors">
-                                    {event.title}
+                                    {event.title.mn}
                                  </h3>
                                  <div className="space-y-2">
                                     <p className="flex items-center gap-2 text-sm text-slate-500 font-medium">
-                                       <Clock size={16} className="text-emerald-500" /> {event.time}
+                                       <Clock size={16} className="text-emerald-500" /> {event.timeString}
                                     </p>
                                     <p className="flex items-center gap-2 text-sm text-slate-500 font-medium">
-                                       <MapPin size={16} className="text-emerald-500" /> {event.location}
+                                       <MapPin size={16} className="text-emerald-500" /> {event.location.mn}
                                     </p>
                                  </div>
                               </div>
 
                               <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
-                                 <span className={`text-xs font-bold ${event.isFull ? "text-red-500" : "text-emerald-600"}`}>
-                                    {event.spots}
+                                 <span className={`text-xs font-bold ${isFull ? "text-red-500" : "text-emerald-600"}`}>
+                                    {isFull ? "Бүртгэл хаагдсан" : "Бүртгэл нээлттэй"}
                                  </span>
                                  <button 
-                                    disabled={event.isFull}
+                                    disabled={isFull}
                                     className={`px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
-                                       event.isFull 
+                                       isFull 
                                        ? "bg-slate-100 text-slate-400 cursor-not-allowed" 
                                        : "bg-slate-900 text-white hover:bg-red-600 hover:gap-3"
                                     }`}
                                  >
-                                    {event.isFull ? "Дүүрсэн" : "Бүртгүүлэх"} {!event.isFull && <FaArrowRight />}
+                                    {isFull ? "Дүүрсэн" : "Бүртгүүлэх"} {!isFull && <FaArrowRight />}
                                  </button>
                               </div>
                            </div>
                         </div>
                      </motion.div>
-                  ))}
+                  )})}
                </AnimatePresence>
             </motion.div>
          </div>

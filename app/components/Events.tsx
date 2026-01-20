@@ -53,49 +53,6 @@ const BLOG_CATEGORIES = [
   { id: 'news', en: 'Company News', mn: 'Мэдээ' },
 ];
 
-const MOCK_BLOGS = [
-  {
-    _id: "b1",
-    title: { mn: "Гадаад руу явах нь хэцүү биш: AuPair Vlog #1", en: "Going abroad is not hard: AuPair Vlog #1" },
-    category: "vlog",
-    date: "2024-05-15",
-    image: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&q=80&w=800", 
-    author: { mn: "Админ", en: "Admin" },
-    readTime: "10 min watch",
-    type: "blogs"
-  },
-  {
-    _id: "b2",
-    title: { mn: "Манай хөтөлбөрийн оролцогчид ачаагаа хэрхэн бэлдэж байна?", en: "How our participants pack their luggage?" },
-    category: "tips",
-    date: "2024-06-02",
-    image: "https://images.unsplash.com/photo-1553531384-cc64ac80f931?auto=format&fit=crop&q=80&w=800",
-    author: { mn: "Сара", en: "Sarah" },
-    readTime: "5 min read",
-    type: "blogs"
-  },
-  {
-    _id: "b3",
-    title: { mn: "Улаан бурханы Вакциныг хийлгэсэн бичиг яаж авдаг вэ?", en: "How to get Measles Vaccination Certificate?" },
-    category: "tips",
-    date: "2024-04-20",
-    image: "https://images.unsplash.com/photo-1584036561566-baf8f5f1b144?auto=format&fit=crop&q=80&w=800",
-    author: { mn: "Эмч", en: "Dr. Bold" },
-    readTime: "3 min read",
-    type: "blogs"
-  },
-  {
-    _id: "b4",
-    title: { mn: "2024 оны IAPA-ийн шилдэг Au Pair-аар Эквадор улсаас...", en: "2024 IAPA Au Pair of the Year Announced" },
-    category: "news",
-    date: "2024-03-10",
-    image: "https://images.unsplash.com/photo-1531545514256-b1400bc00f31?auto=format&fit=crop&q=80&w=800",
-    author: { mn: "IAPA", en: "IAPA" },
-    readTime: "4 min read",
-    type: "blogs"
-  }
-];
-
 // --- SUB-COMPONENT: BRANDED CARD ---
 const ContentCard = ({ item, lang, isDark, isMobile, type }: any) => {
   const x = useMotionValue(0);
@@ -128,6 +85,7 @@ const ContentCard = ({ item, lang, isDark, isMobile, type }: any) => {
   }, [item.date, lang]);
 
   const isBlog = type === 'blogs';
+  const authorName = typeof item.author === 'string' ? item.author : (item.author?.[lang] || item.author?.en);
 
   return (
     <motion.div
@@ -192,7 +150,7 @@ const ContentCard = ({ item, lang, isDark, isMobile, type }: any) => {
 
               <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-300">
                  {isBlog ? (
-                    <><User size={12} style={{ color: BRAND.RED }} /> {item.author[lang] || item.author.en}</>
+                    <><User size={12} style={{ color: BRAND.RED }} /> {authorName}</>
                  ) : (
                     <><MapPin size={12} style={{ color: BRAND.RED }} /> {item.location?.[lang] || item.location?.en || 'Online'}</>
                  )}
@@ -207,7 +165,7 @@ const ContentCard = ({ item, lang, isDark, isMobile, type }: any) => {
            {/* Time or Read Time */}
            <div className="text-xs font-bold flex items-center gap-2 mb-4 text-slate-400">
               {isBlog ? (
-                <> <BookOpen size={14} style={{ color: BRAND.GREEN }} /> {item.readTime} </>
+                <> <BookOpen size={14} style={{ color: BRAND.GREEN }} /> {item.readTime || "5 min read"} </>
               ) : (
                 <> <Clock size={14} style={{ color: BRAND.GREEN }} /> {item.timeString} </>
               )}
@@ -217,7 +175,7 @@ const ContentCard = ({ item, lang, isDark, isMobile, type }: any) => {
         {/* Read More Button */}
         <div className="h-0 overflow-hidden sm:group-hover:h-auto sm:group-hover:pb-1 transition-all duration-500 opacity-0 sm:group-hover:opacity-100 pointer-events-auto">
            <div className="w-full h-[1px] bg-white/20 mb-4" />
-           <Link href={`/${isBlog ? 'blog' : 'events'}/${item._id}`} className="flex items-center gap-2 font-black uppercase tracking-widest text-[10px] text-white hover:gap-4 transition-all">
+           <Link href={`/${isBlog ? 'news' : 'events'}/${item._id}`} className="flex items-center gap-2 font-black uppercase tracking-widest text-[10px] text-white hover:gap-4 transition-all">
               {lang === 'mn' ? 'Дэлгэрэнгүй' : 'Read More'} 
               <span className="p-1.5 rounded-full text-white shadow-lg" style={{ backgroundColor: BRAND.RED }}>
                 <ArrowUpRight size={10} />
@@ -239,6 +197,7 @@ export default function LatestUpdatesSection() {
   const [filter, setFilter] = useState("all");
   
   const [events, setEvents] = useState<any[]>([]);
+  const [blogs, setBlogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   
@@ -253,28 +212,40 @@ export default function LatestUpdatesSection() {
   // Theme check
   const isDark = mounted && (theme === 'dark');
 
-  // Fetch Events (Client Side for now)
+  // Fetch Events & Blogs
   useEffect(() => {
-    async function fetchEvents() {
+    async function fetchData() {
         try {
-            // Replace with your actual API endpoint
-            // const res = await fetch('/api/events'); 
-            // if (res.ok) {
-            //     const data = await res.json();
-            //     setEvents(data);
-            // }
-            // Simulating empty event fetch for demo
-            setEvents([]); 
+            const [eventsRes, blogsRes] = await Promise.all([
+                fetch('/api/events'),
+                fetch('/api/news')
+            ]);
+            
+            if (eventsRes.ok) {
+                const data = await eventsRes.json();
+                setEvents(data);
+            }
+            if (blogsRes.ok) {
+                const data = await blogsRes.json();
+                // Map blog data to match component expectation
+                const mappedBlogs = data.map((blog: any) => ({
+                    ...blog,
+                    date: blog.publishedDate,
+                    category: blog.tags?.[0] || 'General',
+                    readTime: "3 min read" // Placeholder as we don't have this in DB yet
+                }));
+                setBlogs(mappedBlogs);
+            }
         } catch (error) {
-            console.error("Failed to fetch events", error);
+            console.error("Failed to fetch data", error);
         } finally {
             setLoading(false);
         }
     }
-    fetchEvents();
+    fetchData();
   }, []);
 
-  const displayedItems = activeTab === 'events' ? events : MOCK_BLOGS;
+  const displayedItems = activeTab === 'events' ? events : blogs;
   const categories = activeTab === 'events' ? EVENT_CATEGORIES : BLOG_CATEGORIES;
   const filteredItems = displayedItems.filter(item => filter === 'all' || item.category === filter);
 
@@ -395,7 +366,7 @@ export default function LatestUpdatesSection() {
 
         {/* --- GRID CONTENT --- */}
         <div className="min-h-[400px]">
-            {loading && activeTab === 'events' ? (
+            {loading ? (
                 <div className="h-60 flex items-center justify-center">
                    <Loader2 className="animate-spin text-red-500" size={40} />
                 </div>
@@ -423,7 +394,7 @@ export default function LatestUpdatesSection() {
                     <div className="p-4 bg-slate-100 rounded-full mb-4">
                         <Clock size={32} className="text-slate-400" />
                     </div>
-                    <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">No upcoming events found.</p>
+                    <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">No items found.</p>
                 </div>
             )}
         </div>
@@ -435,7 +406,7 @@ export default function LatestUpdatesSection() {
            viewport={{ once: true }}
            className="mt-24 flex justify-center"
         >
-           <Link href={activeTab === 'events' ? '/events' : '/blog'} className="group relative inline-flex items-center gap-6">
+           <Link href={activeTab === 'events' ? '/events' : '/news'} className="group relative inline-flex items-center gap-6">
               <span className={`text-xs font-black uppercase tracking-[0.25em] transition-colors
                  ${isDark ? "text-slate-400 group-hover:text-white" : "text-slate-500 group-hover:text-slate-900"}`}>
                   {activeTab === 'events' 

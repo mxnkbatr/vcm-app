@@ -1,35 +1,24 @@
-import mongoose, { Schema, model, models } from "mongoose";
+// lib/models/User.ts
+import mongoose from "mongoose";
 
-// Sub-schema for Activity History to keep things organized
-const ActivitySchema = new Schema({
-  type: { type: String, required: true }, // 'Event', 'Donation', 'Workshop'
-  title: { type: String, required: true },
-  date: { type: Date, default: Date.now },
-  points: { type: Number, required: true },
-  status: { type: String, enum: ['completed', 'verified', 'pending'], default: 'completed' }
-});
-
-const UserSchema = new Schema(
+const UserSchema = new mongoose.Schema(
   {
     clerkId: { type: String, required: true, unique: true },
-    email: { type: String, required: true, unique: true },
-    studentId: { type: String, required: true },
-    fullName: { type: String, required: true },
-    university: { type: String, default: "MNUMS" },
-    role: { type: String, default: "member" },
+    email: { type: String, required: true },
+    fullName: { type: String },
+    photo: { type: String },
+    role: { type: String, default: "guest" }, // admin, student, guest
     
-    // --- Dashboard Specific Stats ---
-    points: { type: Number, default: 0 },
-    volunteerHours: { type: Number, default: 0 },
-    eventsAttendedCount: { type: Number, default: 0 },
-    level: { type: String, default: "Volunteer" }, // 'Volunteer', 'Leader', 'Ambassador'
-    badges: [{ type: String }], // Array of strings e.g. ["Early Bird"]
+    // --- NEW FIELDS FOR TRACKING ---
+    country: { type: String, default: "-" }, // e.g. "Germany"
+    step: { type: String, default: "-" },    // e.g. "Visa Process"
     
-    // Recent Activity History
-    activityHistory: [ActivitySchema],
+    badges: { type: [String], default: [] },
+    createdAt: { type: Date, default: Date.now },
   },
   { timestamps: true }
 );
 
-const User = models.User || model("User", UserSchema);
+const User = mongoose.models.User || mongoose.model("User", UserSchema);
+
 export default User;

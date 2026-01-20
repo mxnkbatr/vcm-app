@@ -27,6 +27,7 @@ const BRAND = {
   WHITE: "#FFFFFF",      // Backgrounds, Text on Red
 };
 
+
 const CONTENT = {
   logo: { mn: "MONGOLIAN AUPAIR", en: "MONGOLIAN AUPAIR" },
   login: { mn: "Нэвтрэх", en: "Sign In" },
@@ -218,9 +219,7 @@ export default function Navbar() {
                 <Globe size={15}/>
              </button>
 
-             <button onClick={toggleTheme} className="w-9 h-9 rounded-full border flex items-center justify-center border-current/10 hover:bg-current/10 transition-all active:scale-90">
-                {isDark ? <Sun size={15} /> : <Moon size={15} />}
-             </button>
+            
            
              <div className="h-5 w-[1px] bg-current/10 mx-1" />
 
@@ -284,9 +283,7 @@ export default function Navbar() {
                 <button onClick={toggleLanguage} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isDark ? "text-slate-200" : "text-slate-700"}`}>
                     <span className="text-[8px] font-black">{lang === 'mn' ? 'EN' : 'MN'}</span>
                 </button>
-                <button onClick={toggleTheme} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isDark ? "text-slate-200" : "text-slate-700"}`}>
-                    {isDark ? <Sun size={14} /> : <Moon size={14} />}
-                </button>
+             
             </div>
 
             <SignedIn>

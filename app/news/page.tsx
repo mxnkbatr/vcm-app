@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { 
@@ -12,90 +12,24 @@ import {
 import { 
   FaNewspaper, 
   FaArrowRight, 
-  FaSearch,
-  FaTags
+  FaSearch, 
+  FaTags 
 } from "react-icons/fa";
-import { Calendar, User, ChevronRight } from "lucide-react";
+import { Calendar, User, ChevronRight, Loader2 } from "lucide-react";
 
 // --- TYPES ---
 interface NewsItem {
-  id: number;
-  title: string;
-  category: string;
-  date: string;
+  _id: string;
+  title: { en: string; mn: string };
+  summary: { en: string; mn: string };
+  content: { en: string; mn: string };
+  author: string;
+  publishedDate: string;
   image: string;
-  excerpt: string;
-  tagColor: string;
-  featured?: boolean; // Optional property
+  tags: string[];
+  featured: boolean;
+  views: number;
 }
-
-// --- DATA STRUCTURE ---
-const NEWS_DATA: NewsItem[] = [
-  {
-    id: 1,
-    title: "2024 оны IAPA-ийн шилдэг Au Pair тодорлоо",
-    category: "Global News",
-    date: "2024-03-20",
-    image: "https://images.unsplash.com/photo-1531545514256-b1400bc00f31?auto=format&fit=crop&w=1200&q=80",
-    excerpt: "Эквадор улсаас АНУ-д суугаа оролцогч энэ жилийн шилдгээр шалгарч, олон улсын индэр дээр түүхээ хуваалцлаа.",
-    featured: true,
-    tagColor: "bg-emerald-500"
-  },
-  {
-    id: 2,
-    title: "Гадаад орноор аялж, үнэ төлбөргүй хэл сурцгаая",
-    category: "Зөвлөгөө",
-    date: "2024-02-15",
-    image: "https://images.unsplash.com/photo-1527866959252-deab85ef7d1b?auto=format&fit=crop&w=800&q=80",
-    excerpt: "Хэлний мэдлэгээ сайжруулах хамгийн шилдэг арга бол тухайн орчинд нь амьдрах юм. Au Pair хөтөлбөрийн давуу тал.",
-    tagColor: "bg-red-500"
-  },
-  {
-    id: 3,
-    title: "Гадаад руу явах нь “хэцүү” биш",
-    category: "Мотиваци",
-    date: "2024-01-10",
-    image: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=800&q=80",
-    excerpt: "Зорилготой хүнд бэрхшээл жижиг харагддаг. Манай оролцогчийн бодит түүхээс урам зориг аваарай.",
-    tagColor: "bg-emerald-500"
-  },
-  {
-    id: 4,
-    title: "Ачаагаа хэрхэн бэлдэж байна?",
-    category: "Зөвлөгөө",
-    date: "2023-12-05",
-    image: "https://images.unsplash.com/photo-1505935428862-770b6f24f629?auto=format&fit=crop&w=800&q=80",
-    excerpt: "Оролцогчид чемодандаа юу хийх хэрэгтэй вэ? Туршлагатай Au Pair-уудын зөвлөгөө.",
-    tagColor: "bg-slate-800"
-  },
-  {
-    id: 5,
-    title: "Sport Day 2023",
-    category: "Арга Хэмжээ",
-    date: "2023-09-15",
-    image: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=800&q=80",
-    excerpt: "Манай нийт оролцогчдын дунд зохиогдсон спортын өдөрлөгийн гэрэл зургууд.",
-    tagColor: "bg-red-500"
-  },
-  {
-    id: 6,
-    title: "Улаан бурханы Вакцины бичиг авах",
-    category: "Мэдээлэл",
-    date: "2023-08-20",
-    image: "https://images.unsplash.com/photo-1576091160550-2187d8001889?auto=format&fit=crop&w=800&q=80",
-    excerpt: "Визний материалд шаардлагатай эрүүл мэндийн бичгүүдийг хэрхэн, хаанаас авах заавар.",
-    tagColor: "bg-emerald-500"
-  },
-  {
-    id: 7,
-    title: "Au Pair-ийн нэг өдөр #1",
-    category: "Vlog",
-    date: "2023-07-10",
-    image: "https://images.unsplash.com/photo-1513258496098-8838ee01dc27?auto=format&fit=crop&w=800&q=80",
-    excerpt: "Германд амьдарч буй Оюукагийн нэг өдөр хэрхэн өнгөрдөг вэ? Сонирхолтой влог.",
-    tagColor: "bg-red-500"
-  }
-];
 
 // --- ANIMATION VARIANTS ---
 const containerVar: Variants = {
@@ -108,19 +42,64 @@ const itemVar: Variants = {
   visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100 } }
 };
 
+const getTagColor = (category: string) => {
+    if (!category) return "bg-emerald-500";
+    switch (category.toLowerCase()) {
+        case 'global news': return "bg-emerald-500";
+        case 'зөвлөгөө': return "bg-red-500";
+        case 'мотиваци': return "bg-emerald-500";
+        case 'мэдээлэл': return "bg-slate-800";
+        case 'арга хэмжээ': return "bg-red-500";
+        default: return "bg-emerald-500";
+    }
+};
+
 export default function NewsPage() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: containerRef });
+  // Use scroll progress for the whole window instead of a specific container to fix hydration issue
+  const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
 
+  const [newsData, setNewsData] = useState<NewsItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    const fetchNews = async () => {
+        try {
+            const res = await fetch('/api/news');
+            if (res.ok) {
+                const data = await res.json();
+                setNewsData(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch news", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    fetchNews();
+  }, []);
+
   // Safety: Ensure featuredPost exists, otherwise fallback to the first item
-  const featuredPost = NEWS_DATA.find(post => post.featured) || NEWS_DATA[0];
+  const featuredPost = newsData.find(post => post.featured) || newsData[0];
   
   // Filter out the featured post from the main grid
-  const otherPosts = NEWS_DATA.filter(post => post.id !== featuredPost.id);
+  const otherPosts = newsData.filter(post => post._id !== featuredPost?._id)
+    .filter(post => 
+        (post.title?.mn || "").toLowerCase().includes(search.toLowerCase()) || 
+        (post.summary?.mn || "").toLowerCase().includes(search.toLowerCase())
+    );
+
+  if (loading) {
+      return (
+          <div className="min-h-screen flex items-center justify-center bg-white">
+              <Loader2 className="animate-spin text-red-600" size={48} />
+          </div>
+      );
+  }
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-white text-slate-800 font-sans selection:bg-red-500 selection:text-white">
+    <div className="min-h-screen bg-white text-slate-800 font-sans selection:bg-red-500 selection:text-white">
       
       {/* ─── SCROLL BAR ─── */}
       <motion.div 
@@ -151,38 +130,40 @@ export default function NewsPage() {
             </div>
 
             {/* Featured Post Card */}
-            <motion.div 
-               initial={{ opacity: 0, scale: 0.95 }}
-               animate={{ opacity: 1, scale: 1 }}
-               transition={{ duration: 0.6 }}
-               className="group relative rounded-[3rem] overflow-hidden shadow-2xl h-[500px] md:h-[600px] w-full"
-            >
-               <Image 
-                  src={featuredPost.image} 
-                  alt={featuredPost.title} 
-                  fill 
-                  className="object-cover group-hover:scale-105 transition-transform duration-700" 
-                  priority
-               />
-               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent" />
-               
-               <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full md:w-3/4">
-                  <span className={`inline-block px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest text-white mb-4 ${featuredPost.tagColor}`}>
-                     {featuredPost.category}
-                  </span>
-                  <h2 className="text-3xl md:text-5xl font-black text-white mb-6 leading-tight group-hover:text-emerald-300 transition-colors">
-                     {featuredPost.title}
-                  </h2>
-                  <p className="text-slate-200 text-lg md:text-xl font-medium mb-8 line-clamp-2">
-                     {featuredPost.excerpt}
-                  </p>
-                  <Link href={`/news/${featuredPost.id}`}>
-                     <button className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-white text-slate-900 font-bold hover:bg-emerald-500 hover:text-white transition-all shadow-lg">
-                        Дэлгэрэнгүй унших <FaArrowRight />
-                     </button>
-                  </Link>
-               </div>
-            </motion.div>
+            {featuredPost && (
+                <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6 }}
+                className="group relative rounded-[3rem] overflow-hidden shadow-2xl h-[500px] md:h-[600px] w-full"
+                >
+                <Image 
+                    src={featuredPost.image || "/logo.jpg"} 
+                    alt={featuredPost.title.mn} 
+                    fill 
+                    className="object-cover group-hover:scale-105 transition-transform duration-700" 
+                    priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent" />
+                
+                <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full md:w-3/4">
+                    <span className={`inline-block px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest text-white mb-4 ${getTagColor(featuredPost.tags[0])}`}>
+                        {featuredPost.tags[0] || 'News'}
+                    </span>
+                    <h2 className="text-3xl md:text-5xl font-black text-white mb-6 leading-tight group-hover:text-emerald-300 transition-colors">
+                        {featuredPost.title.mn}
+                    </h2>
+                    <p className="text-slate-200 text-lg md:text-xl font-medium mb-8 line-clamp-2">
+                        {featuredPost.summary.mn}
+                    </p>
+                    <Link href={`/news/${featuredPost._id}`}>
+                        <button className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-white text-slate-900 font-bold hover:bg-emerald-500 hover:text-white transition-all shadow-lg">
+                            Дэлгэрэнгүй унших <FaArrowRight />
+                        </button>
+                    </Link>
+                </div>
+                </motion.div>
+            )}
          </div>
       </section>
 
@@ -200,6 +181,8 @@ export default function NewsPage() {
                   <input 
                      type="text" 
                      placeholder="Мэдээ хайх..." 
+                     value={search}
+                     onChange={(e) => setSearch(e.target.value)}
                      className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-4 pl-12 pr-4 font-bold text-slate-800 focus:outline-none focus:border-red-500 transition-colors"
                   />
                   <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -216,41 +199,41 @@ export default function NewsPage() {
             >
                {otherPosts.map((post) => (
                   <motion.div 
-                     key={post.id}
+                     key={post._id}
                      variants={itemVar}
                      whileHover={{ y: -10 }}
                      className="bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:border-emerald-100 transition-all duration-300 overflow-hidden flex flex-col group"
                   >
                      <div className="relative h-60 overflow-hidden">
                         <Image 
-                           src={post.image} 
-                           alt={post.title} 
+                           src={post.image || "/logo.jpg"} 
+                           alt={post.title.mn} 
                            fill 
                            className="object-cover group-hover:scale-110 transition-transform duration-500" 
                         />
                         <div className="absolute top-4 left-4 bg-white/90 backdrop-blur rounded-lg px-3 py-1 font-bold text-xs text-slate-800 shadow-sm flex items-center gap-2">
-                           <Calendar size={12} className="text-red-500" /> {post.date}
+                           <Calendar size={12} className="text-red-500" /> {new Date(post.publishedDate).toLocaleDateString()}
                         </div>
                      </div>
                      
                      <div className="p-8 flex-1 flex flex-col">
                         <div className="mb-4">
-                           <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full text-white ${post.tagColor}`}>
-                              {post.category}
+                           <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full text-white ${getTagColor(post.tags[0])}`}>
+                              {post.tags[0] || 'General'}
                            </span>
                         </div>
                         <h3 className="text-xl font-black text-slate-900 mb-3 leading-snug group-hover:text-red-600 transition-colors line-clamp-2">
-                           {post.title}
+                           {post.title.mn}
                         </h3>
                         <p className="text-slate-500 text-sm font-medium mb-6 line-clamp-3 flex-1">
-                           {post.excerpt}
+                           {post.summary.mn}
                         </p>
                         
                         <div className="border-t border-slate-100 pt-6 flex items-center justify-between">
                            <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
-                              <User size={14} /> Admin
+                              <User size={14} /> {post.author}
                            </div>
-                           <Link href={`/news/${post.id}`} className="text-emerald-600 font-bold text-sm flex items-center gap-1 hover:gap-2 transition-all">
+                           <Link href={`/news/${post._id}`} className="text-emerald-600 font-bold text-sm flex items-center gap-1 hover:gap-2 transition-all">
                               Унших <ChevronRight size={16} />
                            </Link>
                         </div>

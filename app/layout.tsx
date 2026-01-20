@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "./components/ThemeProvider"; // <--- Import this
 import Navbar from "./components/Navbar";
 import { LanguageProvider } from "./context/LanguageContext";
 import { ClerkProvider } from "@clerk/nextjs";
@@ -25,22 +24,16 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider>
-      <html lang="en" suppressHydrationWarning> {/* Add suppressHydrationWarning */}
+      <html lang="en">
         <body className={inter.className}>
           <LanguageProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="dark"
-              forcedTheme="dark"
-              enableSystem={false}
-              disableTransitionOnChange
-            >
+            
               <Navbar />
             <main className="min-h-screen pb-24 lg:pb-0">
               {children}
             </main>
               <Footer/>
-            </ThemeProvider>
+            
           </LanguageProvider>
         </body>
       </html>

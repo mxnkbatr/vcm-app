@@ -18,7 +18,9 @@ const NewsSchema = new Schema(
     publishedDate: { type: Date, default: Date.now },
     image: { type: String, required: true },
     tags: [{ type: String }],
-    featured: { type: Boolean, default: false }
+    featured: { type: Boolean, default: false },
+    views: { type: Number, default: 0 },
+    status: { type: String, enum: ['published', 'draft'], default: 'published' }
   },
   { timestamps: true }
 );

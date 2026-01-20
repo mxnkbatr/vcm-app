@@ -156,6 +156,9 @@ export default function SignInPage() {
               )}
             </button>
 
+            {/* Clerk CAPTCHA Placeholder */}
+            <div id="clerk-captcha" />
+
           </form>
 
           {/* Sign Up Link */}
