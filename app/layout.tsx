@@ -9,11 +9,11 @@ import Footer from "./components/Footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "UNICEF Club MNUMS",
+  title: "Aupair Mongolia",
   description: "Small Actions, Big Differences",
   icons: {
-    icon: "/logo.jpg",
-    apple: "/logo.jpg",
+    icon: "/image.png",
+    apple: "/image.png",
   }
 };
 
