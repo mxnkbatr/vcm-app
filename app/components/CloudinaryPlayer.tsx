@@ -34,6 +34,8 @@ const CloudinaryPlayer = ({ publicId, className, cloudName }: CloudinaryPlayerPr
                 transformation={{
                     quality: "auto",
                     fetchFormat: "auto",
+                    width: 1400,
+                    crop: "limit",
                 }}
             />
         </div>

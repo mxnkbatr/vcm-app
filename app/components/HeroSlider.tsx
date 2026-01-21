@@ -123,6 +123,8 @@ const Hero = () => {
             fill
             className="object-cover opacity-50 scale-105"
             priority
+            fetchPriority="high"
+            sizes="100vw"
           />
         </div>
 
