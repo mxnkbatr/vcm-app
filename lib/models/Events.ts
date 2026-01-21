@@ -17,16 +17,17 @@ const EventSchema = new Schema(
       mn: { type: String, required: true },
     },
     image: { type: String, required: true },
-    category: { 
-        type: String, 
-        enum: ['campaign', 'workshop', 'fundraiser', 'meeting'],
-        required: true 
+    category: {
+      type: String,
+      enum: ['campaign', 'workshop', 'fundraiser', 'meeting'],
+      required: true
     },
+    link: { type: String }, // Registration link
     university: { type: String, required: true, default: "MNUMS" },
-    status: { 
-        type: String, 
-        enum: ['upcoming', 'past', 'cancelled'], 
-        default: 'upcoming' 
+    status: {
+      type: String,
+      enum: ['upcoming', 'past', 'cancelled'],
+      default: 'upcoming'
     },
     featured: { type: Boolean, default: false },
     attendees: [{ type: Schema.Types.ObjectId, ref: "User" }]

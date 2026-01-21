@@ -102,6 +102,7 @@ export default function Navbar() {
     { name: { mn: "Бидний тухай", en: "About" }, href: "/about" },
     { name: { mn: "Au Pair хөтөлбөр", en: "Au Pair Program" }, href: "/aupair", hasDropdown: true },
     { name: { mn: "Эвент", en: "Events" }, href: "/events" },
+    { name: { mn: "Хичээл", en: "Lessons" }, href: "/lessons" },
     { name: { mn: "Цаг авах", en: "Booking" }, href: "/booking" },
     { name: { mn: "Мэдээ", en: "News" }, href: "/news" },
   ];
@@ -112,6 +113,7 @@ export default function Navbar() {
     // Placeholders for spacing around the central button
     { id: "booking", icon: CalendarClock, href: "/booking", label: { mn: "Цаг авах", en: "Booking" }, isMain: true },
     { id: "events", icon: Ticket, href: "/events", label: { mn: "Эвент", en: "Events" } },
+    { id: "lessons", icon: BookOpen, href: "/lessons", label: { mn: "Хичээл", en: "Lessons" } },
     { id: "news", icon: BookOpen, href: "/news", label: { mn: "Мэдээ", en: "News" } },
   ];
 

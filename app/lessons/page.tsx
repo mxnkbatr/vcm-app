@@ -1,364 +1,216 @@
 "use client";
 
-import React, { useRef } from "react";
-import Link from "next/link";
-import { 
-  motion, 
-  useScroll, 
-  useSpring, 
-  Variants 
-} from "framer-motion";
-import { 
-  FaBookOpen, 
-  FaChild, 
-  FaFirstAid, 
-  FaLanguage, 
-  FaChalkboardTeacher, 
-  FaCertificate,
-  FaBrain,
-  FaHandHoldingHeart,
-  FaComments,
-  FaLaptop,
-  FaUserGraduate
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+   FaBook,
+   FaLanguage,
+   FaGlobe,
+   FaCheckCircle,
+   FaLock,
+   FaPlay,
+   FaUserGraduate
 } from "react-icons/fa";
-import { CheckCircle2, PlayCircle, Star, Sparkles } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { Loader2 } from "lucide-react";
 
-// --- DATA STRUCTURE ---
-const DATA = {
-  hero: {
-    title: "Au Pair Бэлтгэл",
-    highlight: "Сургалт",
-    sub: "Герман, Англи хэлний мэдлэгээ сайжруулж, хүүхэд асрах арга барил, анхны тусламжийн мэдлэг эзэмшин өөртөө итгэлтэйгээр аяллаа эхлүүлээрэй.",
-    cta: "Сургалтанд Бүртгүүлэх"
-  },
-  modules: [
-    {
-      title: "Гадаад Хэл",
-      level: "A1 - B1 Түвшин",
-      desc: "Герман болон Англи хэлний эрчимжүүлсэн сургалт. Ярианы дадлага, сонсгол сайжруулах дасгалууд.",
-      icon: FaLanguage,
-      color: "bg-red-500",
-      light: "bg-red-50",
-      text: "text-red-600",
-      topics: ["Өдөр тутмын яриа", "Гэр бүлтэй харилцах", "Дүрэм & Үгсийн сан"]
-    },
-    {
-      title: "Хүүхэд Асхуй",
-      level: "Олон Улсын Стандарт",
-      desc: "Хүүхдийн сэтгэл зүй, хөгжлийн онцлог, тоглоомын аргаар сургах, хооллолт ба аюулгүй байдал.",
-      icon: FaChild,
-      color: "bg-emerald-500",
-      light: "bg-emerald-50",
-      text: "text-emerald-600",
-      topics: ["Хөгжлийн үе шатууд", "Бүтээлч тоглоом", "Эрүүл хооллолт"]
-    },
-    {
-      title: "Анхны Тусламж",
-      level: "Сертификаттай",
-      desc: "Гэнэтийн ослын үед үзүүлэх анхны тусламж. Хахах, түлэгдэх, гэмтэх үед авах арга хэмжээ.",
-      icon: FaFirstAid,
-      color: "bg-red-500",
-      light: "bg-red-50",
-      text: "text-red-600",
-      topics: ["CPR хийх", "Шарх цэвэрлэх", "Яаралтай тусламж дуудах"]
-    },
-    {
-      title: "Соёлын Бэлтгэл",
-      level: "Зөөлөн Ур Чадвар",
-      desc: "Европ гэр бүлийн соёл, харилцааны ёс зүй, зөрчилдөөнийг шийдвэрлэх арга барил.",
-      icon: FaHandHoldingHeart,
-      color: "bg-emerald-500",
-      light: "bg-emerald-50",
-      text: "text-emerald-600",
-      topics: ["Гэрийн дүрэм", "Дасан зохицох", "Цаг баримтлах"]
-    }
-  ],
-  methodology: [
-    { title: "Online & Offline", text: "Танхим болон цахим хосолсон сургалт.", icon: FaLaptop, color: "bg-red-500" },
-    { title: "Speaking Club", text: "Гадаад багштай ярианы клуб.", icon: FaComments, color: "bg-emerald-500" },
-    { title: "Mentorship", text: "Туршлагатай Au Pair-уудын зөвлөгөө.", icon: FaBrain, color: "bg-red-600" },
-  ]
-};
+// --- TYPES ---
+interface Lesson {
+   _id: string;
+   title: { mn: string; en: string };
+   description: { mn: string; en: string };
+   image?: string;
+   imageUrl?: string; // Handle inconsistent naming if any
+   category: string;
+   difficulty: string; // beginner, intermediate, advanced
+   status: string;
+   attendees: Array<{ _id: string, clerkId: string }>;
+}
 
-// --- VARIANTS ---
-const fadeInUp: Variants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { type: "spring", bounce: 0.4, duration: 0.8 } 
-  }
-};
+export default function LessonsPage() {
+   const { user, isLoaded, isSignedIn } = useUser();
+   const router = useRouter();
 
-const staggerContainer: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.2
-    }
-  }
-};
+   // State
+   const [lessons, setLessons] = useState<Lesson[]>([]);
+   const [loading, setLoading] = useState(true);
+   const [registeringId, setRegisteringId] = useState<string | null>(null);
 
-export default function LessonsPageRedGreen() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: containerRef });
-  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
+   // Fetch Lessons
+   const fetchLessons = async () => {
+      try {
+         const res = await fetch('/api/lessons');
+         if (res.ok) {
+            const data = await res.json();
+            setLessons(data);
+         }
+      } catch (e) {
+         console.error("Failed to fetch lessons", e);
+      } finally {
+         setLoading(false);
+      }
+   };
 
-  return (
-    <div ref={containerRef} className="min-h-[100dvh] bg-white text-slate-800 font-sans selection:bg-red-500 selection:text-white overflow-hidden">
-      
-      {/* ─── PROGRESS BAR ─── */}
-      <motion.div 
-        className="fixed top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-red-500 via-emerald-500 to-red-500 origin-left z-50"
-        style={{ scaleX }}
-      />
+   useEffect(() => {
+      fetchLessons();
+   }, []);
 
-      {/* ─── 1. HERO: ACTION ORIENTED ─── */}
-      <section className="relative pt-32 pb-20 px-6 overflow-hidden">
-         {/* Background Shapes */}
-         <div className="absolute inset-0 w-full h-full pointer-events-none">
-            <motion.div 
-               animate={{ rotate: 360 }}
-               transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
-               className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-red-50 rounded-full blur-[80px] opacity-60" 
-            />
-            <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-emerald-50 rounded-full blur-[80px] opacity-60" />
+   // Handlers
+   const handleRegister = async (lessonId: string) => {
+      if (!isSignedIn) {
+         router.push("/sign-in");
+         return;
+      }
+
+      setRegisteringId(lessonId);
+      try {
+         const res = await fetch('/api/lessons', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lessonId })
+         });
+
+         if (res.ok) {
+            // Refresh list to update attendee status (or we could manually update local state)
+            fetchLessons();
+            // alert("Successfully joined the lesson!"); 
+         } else {
+            alert("Failed to join.");
+         }
+      } catch (e) {
+         console.error(e);
+      } finally {
+         setRegisteringId(null);
+      }
+   };
+
+   // Helpers
+   const isRegistered = (lesson: Lesson) => {
+      if (!user) return false;
+      // Check if our user ID matches any attendee
+      if (!lesson.attendees) return false;
+      return lesson.attendees.some(a => a.clerkId === user.id);
+   };
+
+   const getDifficultyColor = (diff: string) => {
+      switch (diff) {
+         case 'beginner': return "bg-green-100 text-green-700";
+         case 'intermediate': return "bg-blue-100 text-blue-700";
+         case 'advanced': return "bg-purple-100 text-purple-700";
+         default: return "bg-slate-100 text-slate-600";
+      }
+   };
+
+   if (loading) {
+      return (
+         <div className="min-h-screen flex items-center justify-center bg-slate-50">
+            <Loader2 className="animate-spin text-red-600" size={40} />
          </div>
+      );
+   }
 
-         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center relative z-10">
-            <motion.div 
-              initial="hidden" 
-              animate="visible" 
-              variants={staggerContainer} 
-              className="space-y-8"
-            >
-               <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-red-100 text-red-600 shadow-sm">
-                  <FaChalkboardTeacher />
-                  <span className="text-xs font-bold uppercase tracking-widest">Training Center</span>
-               </motion.div>
+   return (
+      <div className="min-h-screen bg-[#F8F9FC] font-sans text-slate-800 pb-20">
 
-               <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl font-black text-slate-900 leading-tight">
-                  <span className="block">{DATA.hero.title}</span>
-                  <span className="block text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-emerald-600">
-                    {DATA.hero.highlight}
-                  </span>
-               </motion.h1>
-               
-               <motion.p variants={fadeInUp} className="text-lg text-slate-600 font-medium leading-relaxed border-l-4 border-emerald-400 pl-6">
-                  {DATA.hero.sub}
-               </motion.p>
-
-               <motion.div variants={fadeInUp} className="flex flex-wrap gap-4">
-                  <Link href="/register">
-                    <button className="px-10 py-4 rounded-xl bg-red-600 text-white font-bold shadow-lg shadow-red-200 hover:bg-emerald-600 hover:shadow-emerald-200 hover:scale-105 transition-all flex items-center gap-3">
-                       <FaBookOpen /> {DATA.hero.cta}
-                    </button>
-                  </Link>
-                  <div className="flex items-center gap-4 text-slate-500 font-bold px-4 hover:text-emerald-600 cursor-pointer transition-colors">
-                     <PlayCircle className="text-emerald-500" /> Танилцуулга үзэх
-                  </div>
-               </motion.div>
-            </motion.div>
-
-            {/* Hero Graphic: Books/Learning */}
-            <div className="relative h-[500px] hidden lg:block">
-               <motion.div 
-                 animate={{ y: [0, -20, 0] }} 
-                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                 className="absolute right-10 top-10 w-[450px] h-[500px] bg-white rounded-[3rem] shadow-2xl p-4 border border-emerald-100"
-               >
-                  <div className="w-full h-full bg-gradient-to-br from-emerald-50 to-white rounded-[2.5rem] relative overflow-hidden flex flex-col items-center justify-center text-center p-8">
-                      {/* Decorative Elements */}
-                      <FaUserGraduate className="text-9xl text-emerald-100 opacity-50 absolute top-10 left-10 transform -rotate-12" />
-                      <FaCertificate className="text-9xl text-red-100 opacity-50 absolute bottom-10 right-10 transform rotate-12" />
-                      
-                      <div className="relative z-10 bg-white/90 backdrop-blur-md p-8 rounded-3xl shadow-lg border border-white">
-                          <h3 className="text-2xl font-black text-slate-800 mb-2">Au Pair Academy</h3>
-                          <p className="text-emerald-600 text-sm font-bold uppercase tracking-wide">Certified Program</p>
-                          <div className="flex justify-center gap-2 mt-4">
-                             {[1,2,3,4,5].map(s => <Star key={s} className="text-yellow-400 fill-yellow-400 w-5 h-5" />)}
-                          </div>
-                      </div>
-                  </div>
-
-                  {/* Floating Badge 1: Red Alert Style */}
-                  <motion.div 
-                    animate={{ x: [0, 10, 0] }}
-                    transition={{ duration: 4, repeat: Infinity }}
-                    className="absolute top-20 -left-12 bg-white p-4 rounded-2xl shadow-xl flex items-center gap-3 border-l-4 border-red-500"
-                  >
-                     <div className="bg-red-100 p-2 rounded-lg text-red-600 font-black">A2</div>
-                     <div>
-                        <p className="font-bold text-slate-800">German</p>
-                        <p className="text-xs text-slate-400">Level Up</p>
-                     </div>
-                  </motion.div>
-
-                  {/* Floating Badge 2: Green Success Style */}
-                  <motion.div 
-                    animate={{ x: [0, -10, 0] }}
-                    transition={{ duration: 5, repeat: Infinity }}
-                    className="absolute bottom-20 -right-8 bg-white p-4 rounded-2xl shadow-xl flex items-center gap-3 border-l-4 border-emerald-500"
-                  >
-                     <div className="bg-emerald-100 p-2 rounded-lg text-emerald-600"><CheckCircle2 /></div>
-                     <div>
-                        <p className="font-bold text-slate-800">Success</p>
-                        <p className="text-xs text-slate-400">Guaranteed</p>
-                     </div>
-                  </motion.div>
-               </motion.div>
-            </div>
-         </div>
-      </section>
-
-      {/* ─── 2. CURRICULUM: THE LEARNING PATH ─── */}
-      <section className="py-24 px-6 relative bg-white">
-         <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-20">
-               <span className="text-emerald-600 font-bold tracking-widest uppercase text-sm mb-2 block">Curriculum</span>
-               <h2 className="text-4xl font-black text-slate-900">Сургалтын <span className="text-red-600 underline decoration-wavy decoration-emerald-300">Хөтөлбөр</span></h2>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-               {DATA.modules.map((mod, i) => (
-                  <motion.div 
-                     key={i}
-                     initial={{ opacity: 0, y: 30 }}
-                     whileInView={{ opacity: 1, y: 0 }}
-                     transition={{ delay: i * 0.1 }}
-                     whileHover={{ y: -10 }}
-                     className="bg-white rounded-[2rem] border border-slate-100 shadow-lg hover:shadow-2xl hover:border-red-200 transition-all duration-300 relative overflow-hidden group"
-                  >
-                     <div className={`h-2 w-full ${mod.color}`} />
-                     <div className="p-8">
-                        <div className={`w-16 h-16 rounded-2xl ${mod.light} ${mod.text} flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform`}>
-                           <mod.icon />
-                        </div>
-                        <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider ${mod.light} ${mod.text}`}>
-                           {mod.level}
-                        </span>
-                        <h3 className="text-2xl font-black text-slate-900 mt-4 mb-2">{mod.title}</h3>
-                        <p className="text-slate-500 text-sm leading-relaxed mb-6">
-                           {mod.desc}
-                        </p>
-                        <ul className="space-y-2">
-                           {mod.topics.map((t, idx) => (
-                              <li key={idx} className="flex items-center gap-2 text-sm font-bold text-slate-700">
-                                 <div className={`w-1.5 h-1.5 rounded-full ${mod.color}`} /> {t}
-                              </li>
-                           ))}
-                        </ul>
-                     </div>
-                  </motion.div>
-               ))}
-            </div>
-         </div>
-      </section>
-
-      {/* ─── 3. INTERACTIVE METHODOLOGY ─── */}
-      <section className="py-24 px-6 bg-slate-50 relative overflow-hidden">
-         {/* Decorative Blobs */}
-         <div className="absolute top-0 right-0 w-96 h-96 bg-red-100 rounded-full blur-[100px] opacity-40" />
-         <div className="absolute bottom-0 left-0 w-80 h-80 bg-emerald-100 rounded-full blur-[100px] opacity-40" />
-         
-         <div className="max-w-6xl mx-auto relative z-10">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-               <motion.div 
-                 initial={{ opacity: 0, x: -50 }}
-                 whileInView={{ opacity: 1, x: 0 }}
-               >
-                  <h2 className="text-4xl font-black text-slate-900 mb-6">Бид хэрхэн <span className="text-emerald-600">сургадаг вэ?</span></h2>
-                  <p className="text-lg text-slate-600 mb-8 leading-relaxed">
-                     Манай сургалтын арга барил нь зөвхөн танхимын сургалтаар хязгаарлагдахгүй. Бид бодит амьдрал дээрх дадлага, харилцан яриа, дүрд тоглох аргуудыг ашигладаг.
-                  </p>
-                  
-                  <div className="space-y-6">
-                     {DATA.methodology.map((m, i) => (
-                        <motion.div 
-                           key={i}
-                           whileHover={{ x: 10 }}
-                           className="flex items-center gap-5 bg-white p-4 rounded-2xl shadow-sm border border-slate-100 group hover:border-emerald-200"
-                        >
-                           <div className={`w-12 h-12 rounded-xl ${m.color} text-white flex items-center justify-center text-xl shadow-md group-hover:scale-110 transition-transform`}>
-                              <m.icon />
-                           </div>
-                           <div>
-                              <h4 className="font-bold text-slate-900">{m.title}</h4>
-                              <p className="text-sm text-slate-500">{m.text}</p>
-                           </div>
-                        </motion.div>
-                     ))}
-                  </div>
-               </motion.div>
-
-               <div className="relative">
-                  <div className="grid grid-cols-2 gap-4">
-                     <div className="space-y-4 translate-y-12">
-                        <div className="bg-white p-6 rounded-3xl shadow-lg text-center border-b-4 border-red-500 hover:-translate-y-2 transition-transform">
-                           <p className="text-4xl font-black text-red-600">120</p>
-                           <p className="text-xs font-bold text-slate-400 uppercase">Цагийн Хичээл</p>
-                        </div>
-                        <div className="bg-emerald-500 p-6 rounded-3xl shadow-lg text-center text-white hover:-translate-y-2 transition-transform">
-                           <FaBookOpen className="text-4xl mx-auto mb-2" />
-                           <p className="font-bold">Шилдэг Материал</p>
-                        </div>
-                     </div>
-                     <div className="space-y-4">
-                        <div className="bg-red-600 p-6 rounded-3xl shadow-lg text-center text-white hover:-translate-y-2 transition-transform">
-                           <FaCertificate className="text-4xl mx-auto mb-2" />
-                           <p className="font-bold">Албан Ёсны Гэрчилгээ</p>
-                        </div>
-                        <div className="bg-white p-6 rounded-3xl shadow-lg text-center border-b-4 border-emerald-500 hover:-translate-y-2 transition-transform">
-                           <p className="text-4xl font-black text-emerald-600">98%</p>
-                           <p className="text-xs font-bold text-slate-400 uppercase">Визийн Амжилт</p>
-                        </div>
-                     </div>
-                  </div>
+         {/* Header / Hero */}
+         <div className="bg-white pt-32 pb-16 px-6 shadow-sm border-b border-slate-200">
+            <div className="max-w-7xl mx-auto text-center">
+               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-600 mb-6 border border-blue-100">
+                  <FaUserGraduate size={14} />
+                  <span className="text-xs font-bold uppercase tracking-widest">Au Pair Academy</span>
                </div>
+               <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6">
+                  Хэлний <span className="text-red-600">Хичээлүүд</span>
+               </h1>
+               <p className="max-w-2xl mx-auto text-slate-500 text-lg font-medium leading-relaxed">
+                  Au Pair хөтөлбөрт шаардлагатай хэлний мэдлэг олгох, соёлын ойлголт өгөх тусгай хичээлүүд.
+               </p>
             </div>
          </div>
-      </section>
 
-      {/* ─── 4. CTA: START YOUR JOURNEY ─── */}
-      <section className="py-24 px-6">
-         <div className="max-w-4xl mx-auto">
-            <motion.div 
-               whileHover={{ scale: 1.01 }}
-               className="bg-slate-900 rounded-[3rem] p-12 text-center relative overflow-hidden text-white shadow-2xl"
-            >
-               <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-500 via-emerald-500 to-red-500" />
-               <div className="absolute -left-10 top-1/2 w-40 h-40 bg-red-600 rounded-full blur-[80px] opacity-30" />
-               <div className="absolute -right-10 bottom-0 w-40 h-40 bg-emerald-600 rounded-full blur-[80px] opacity-30" />
+         {/* Content */}
+         <div className="max-w-7xl mx-auto px-6 py-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+               {lessons.map((lesson) => {
+                  const registered = isRegistered(lesson);
+                  // Fallback for image field name, in case admin saved as imageUrl or image
+                  const displayImage = lesson.image || lesson.imageUrl;
 
-               <div className="relative z-10">
-                  <div className="inline-block bg-white/10 backdrop-blur px-6 py-2 rounded-full mb-8 border border-white/20">
-                     <span className="flex items-center gap-2 font-bold text-sm">
-                        <Sparkles className="text-emerald-400" size={16} /> 2025 Оны Шинэ Элсэлт
-                     </span>
-                  </div>
-                  <h2 className="text-4xl md:text-5xl font-black mb-8 leading-tight">
-                     Мөрөөдлийн Аялалдаа <br /> Бэлдэхэд Бэлэн үү?
-                  </h2>
-                  <p className="text-slate-300 mb-10 max-w-lg mx-auto font-medium">
-                     Таныг мэргэжлийн багш нар, найрсаг орчин, ирээдүйн боломжууд хүлээж байна.
-                  </p>
-                  
-                  <Link href="/register">
-                     <motion.button 
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="px-12 py-5 rounded-xl bg-red-600 text-white font-black text-lg shadow-xl hover:bg-emerald-600 transition-colors"
+                  return (
+                     <motion.div
+                        key={lesson._id}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="bg-white rounded-[2rem] p-4 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col h-full group"
                      >
-                        Одоо Бүртгүүлэх
-                     </motion.button>
-                  </Link>
-               </div>
-            </motion.div>
-         </div>
-      </section>
+                        {/* Image / Visual */}
+                        <div className="h-48 rounded-[1.5rem] bg-slate-100 relative overflow-hidden mb-6">
+                           {displayImage ? (
+                              <Image src={displayImage} alt={lesson.title.mn} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                           ) : (
+                              <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                 <FaBook size={48} />
+                              </div>
+                           )}
 
-    </div>
-  );
+                           {/* Badges */}
+                           <div className="absolute top-4 left-4 flex gap-2">
+                              <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm ${getDifficultyColor(lesson.difficulty)}`}>
+                                 {lesson.difficulty}
+                              </span>
+                           </div>
+
+                           {/* Status Overlay if registered */}
+                           {registered && (
+                              <div className="absolute inset-0 bg-emerald-500/80 backdrop-blur-[2px] flex items-center justify-center text-white font-black uppercase tracking-widest gap-2">
+                                 <FaCheckCircle size={20} /> Registered
+                              </div>
+                           )}
+                        </div>
+
+                        {/* Body */}
+                        <div className="flex-1 px-2 flex flex-col">
+                           <div className="mb-4">
+                              <h3 className="text-xl font-bold text-slate-900 mb-2 line-clamp-1" title={lesson.title.mn}>{lesson.title.mn}</h3>
+                              <p className="text-sm text-slate-500 font-medium line-clamp-2">{lesson.description.mn}</p>
+                           </div>
+
+                           <div className="mt-auto grid grid-cols-2 gap-4 border-t border-slate-100 pt-6">
+                              <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase">
+                                 <FaLanguage size={14} className="text-blue-500" /> {lesson.category || 'Language'}
+                              </div>
+                              <div className="text-right">
+                                 {registered ? (
+                                    <span className="text-emerald-500 font-bold text-xs flex items-center justify-end gap-1">
+                                       <FaCheckCircle /> Joined
+                                    </span>
+                                 ) : (
+                                    <button
+                                       onClick={() => handleRegister(lesson._id)}
+                                       disabled={registeringId === lesson._id}
+                                       className="w-full bg-slate-900 text-white py-2 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                                    >
+                                       {registeringId === lesson._id ? <Loader2 className="animate-spin" size={14} /> : "Join Class"}
+                                    </button>
+                                 )}
+                              </div>
+                           </div>
+                        </div>
+                     </motion.div>
+                  );
+               })}
+            </div>
+
+            {lessons.length === 0 && !loading && (
+               <div className="text-center py-20 text-slate-400">
+                  <FaBook size={48} className="mx-auto mb-4 opacity-20" />
+                  <p className="font-bold">No lessons available at the moment.</p>
+               </div>
+            )}
+         </div>
+      </div>
+   );
 }

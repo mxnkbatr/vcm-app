@@ -11,8 +11,9 @@ import {
 } from "lucide-react";
 import {
    FaPlus, FaTrash, FaEdit, FaCalendarAlt, FaHandsHelping,
-   FaTimes, FaCloudUploadAlt, FaImage, FaSpinner
+   FaTimes, FaCloudUploadAlt, FaImage, FaSpinner, FaBook
 } from "react-icons/fa";
+import LessonsManager from "../components/admin/LessonsManager";
 
 // --- BRAND CONSTANTS ---
 const BRAND = {
@@ -86,6 +87,7 @@ export default function AdminDashboard() {
    const [applications, setApplications] = useState<any[]>([]);
    const [events, setEvents] = useState<any[]>([]);
    const [opportunities, setOpportunities] = useState<any[]>([]);
+   const [lessons, setLessons] = useState<any[]>([]);
 
    const [stats, setStats] = useState({
       activeStudents: 0,
@@ -100,14 +102,15 @@ export default function AdminDashboard() {
    // 1. FETCH ALL DATA
    const refreshData = async () => {
       try {
-         const [usersRes, newsRes, bookingsRes, appsRes, statsRes, eventsRes, oppsRes] = await Promise.all([
+         const [usersRes, newsRes, bookingsRes, appsRes, statsRes, eventsRes, oppsRes, lessonsRes] = await Promise.all([
             fetch('/api/admin/users'),
             fetch('/api/admin/news'),
             fetch('/api/admin/bookings'),
             fetch('/api/admin/applications'),
             fetch('/api/admin/stats'),
             fetch('/api/admin/events'),
-            fetch('/api/admin/opportunities')
+            fetch('/api/admin/opportunities'),
+            fetch('/api/admin/lessons')
          ]);
 
          if (usersRes.ok) {
@@ -140,6 +143,17 @@ export default function AdminDashboard() {
          if (appsRes.ok) setApplications(await appsRes.json());
          if (eventsRes.ok) setEvents(await eventsRes.json());
          if (oppsRes.ok) setOpportunities(await oppsRes.json());
+         if (lessonsRes.ok) setLessons(await lessonsRes.json());
+         // Use the 8th response (index 6 provided 0-based in Promise.all is 7th item? Wait, count carefully)
+         // Promise.all has [users, news, bookings, apps, stats, events, opps, lessons] -> 8 items
+         // The indices match the order.
+         // usersRes is index 0.
+         // ...
+         // oppsRes is index 6.
+         // lessonsRes is index 7.
+         // BUT wait, I destructured only up to oppsRes in the array destructuring. I need to add lessonsRes.
+         // I will fix the fetch call first.
+
 
          if (statsRes.ok) {
             const s = await statsRes.json();
@@ -249,6 +263,7 @@ export default function AdminDashboard() {
                   <SidebarItem icon={Users} label="Members & Roles" active={activeTab === "users"} onClick={() => setActiveTab("users")} />
                   <SidebarItem icon={ClipboardList} label="Applications" active={activeTab === "applications"} onClick={() => setActiveTab("applications")} />
                   <SidebarItem icon={Calendar} label="Events & Jobs" active={activeTab === "events"} onClick={() => setActiveTab("events")} />
+                  <SidebarItem icon={FaBook} label="Au Pair Lessons" active={activeTab === "lessons"} onClick={() => setActiveTab("lessons")} />
                   <SidebarItem icon={FileText} label="Blog & Content" active={activeTab === "blog"} onClick={() => setActiveTab("blog")} />
                </nav>
             </div>
@@ -434,6 +449,14 @@ export default function AdminDashboard() {
                <EventsManager
                   events={events}
                   opportunities={opportunities}
+                  onRefresh={refreshData}
+               />
+            )}
+
+            {/* ─── LESSONS MANAGEMENT ─── */}
+            {activeTab === "lessons" && (
+               <LessonsManager
+                  lessons={lessons}
                   onRefresh={refreshData}
                />
             )}
@@ -635,7 +658,8 @@ function EventsManager({ events, opportunities, onRefresh }: any) {
                location: { en: formData.locationEn, mn: formData.locationMn },
                image: formData.imageUrl,
                category: formData.category,
-               timeString: "All Day"
+               timeString: "All Day",
+               link: formData.link
             };
          } else {
             body = {
@@ -707,7 +731,12 @@ function EventsManager({ events, opportunities, onRefresh }: any) {
                            <Input label="Location (MN)" value={formData.locationMn} onChange={(v: any) => setFormData({ ...formData, locationMn: v })} />
                            <Input label="Location (EN)" value={formData.locationEn} onChange={(v: any) => setFormData({ ...formData, locationEn: v })} />
                            <Input type="date" label={activeTab === "event" ? "Event Date" : "Deadline"} value={formData.date} onChange={(v: any) => setFormData({ ...formData, date: v })} />
-                           {activeTab === "event" && <Input label="Category" value={formData.category} onChange={(v: any) => setFormData({ ...formData, category: v })} />}
+                           {activeTab === "event" && (
+                              <>
+                                 <Input label="Category" value={formData.category} onChange={(v: any) => setFormData({ ...formData, category: v })} />
+                                 <Input label="Registration Link" value={formData.link} onChange={(v: any) => setFormData({ ...formData, link: v })} />
+                              </>
+                           )}
                         </div>
                         <TextArea label="Description (MN)" value={formData.descMn} onChange={(v: any) => setFormData({ ...formData, descMn: v })} />
                         <TextArea label="Description (EN)" value={formData.descEn} onChange={(v: any) => setFormData({ ...formData, descEn: v })} />
