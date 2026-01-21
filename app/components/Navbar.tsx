@@ -75,6 +75,14 @@ export default function Navbar() {
   const { language: lang, setLanguage } = useLanguage();
   const { resolvedTheme, setTheme } = useTheme();
   const { scrollY } = useScroll();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   useEffect(() => setMounted(true), []);
 
@@ -302,7 +310,7 @@ export default function Navbar() {
       {/* ========================================================= */}
       <div className="lg:hidden fixed bottom-6 left-0 right-0 z-[100] px-2 flex justify-center">
         <nav
-          style={{ WebkitBackdropFilter: "blur(16px)" }}
+          style={{ WebkitBackdropFilter: isMobile ? "blur(8px)" : "blur(16px)" }}
           className={`
           transform-gpu grid grid-cols-5 items-end justify-between w-full max-w-[420px] px-1 py-3 pb-3 rounded-[2rem] border shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] backdrop-blur-lg transition-all duration-700
           ${isDark ? "bg-[#0F172A]/95 border-white/10 shadow-black text-slate-400" : "bg-white/95 border-slate-200 shadow-slate-200/50 text-slate-500"}
@@ -321,8 +329,10 @@ export default function Navbar() {
                       style={{ backgroundColor: BRAND.RED }}
                     >
                       <item.icon size={24} strokeWidth={2.5} />
-                      {/* Glow Ring */}
-                      <div className="absolute inset-0 rounded-full animate-ping opacity-20" style={{ backgroundColor: BRAND.RED }} />
+                      {/* Glow Ring - DISABLED ON MOBILE */}
+                      {!isMobile && (
+                        <div className="absolute inset-0 rounded-full animate-ping opacity-20" style={{ backgroundColor: BRAND.RED }} />
+                      )}
                     </motion.div>
 
                     {/* Label for Main Button */}

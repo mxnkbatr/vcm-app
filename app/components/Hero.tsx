@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import Image from "next/image";
@@ -105,6 +105,14 @@ const HeroSection = () => {
   const { language } = useLanguage();
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const active = COUNTRY_DATA[index];
 
@@ -126,27 +134,27 @@ const HeroSection = () => {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.1 }
+      transition: { staggerChildren: isMobile ? 0.05 : 0.1, delayChildren: 0.1 }
     },
     exit: { opacity: 0 }
   };
 
   const textItemVariant: Variants = {
-    hidden: { opacity: 0, x: -20 },
+    hidden: { opacity: 0, x: isMobile ? -10 : -20 },
     visible: {
       opacity: 1,
       x: 0,
-      transition: { duration: 0.5, ease: "easeOut" }
+      transition: { duration: isMobile ? 0.3 : 0.5, ease: "easeOut" }
     },
-    exit: { opacity: 0, x: 20 }
+    exit: { opacity: 0, x: isMobile ? 10 : 20 }
   };
 
   // 2. CARD VARIANTS (3D Effect)
   const cardVariants: Variants = {
     enter: (dir: number) => ({
-      x: dir > 0 ? 200 : -200,
+      x: isMobile ? (dir > 0 ? 50 : -50) : (dir > 0 ? 200 : -200),
       opacity: 0,
-      rotateY: dir > 0 ? 45 : -45,
+      rotateY: isMobile ? 0 : (dir > 0 ? 45 : -45),
       scale: 0.8,
       zIndex: 0
     }),
@@ -157,16 +165,16 @@ const HeroSection = () => {
       scale: 1,
       zIndex: 10,
       transition: {
-        duration: 0.6,
+        duration: isMobile ? 0.4 : 0.6,
         type: "spring",
         stiffness: 150,
         damping: 20
       }
     },
     exit: (dir: number) => ({
-      x: dir < 0 ? 200 : -200,
+      x: isMobile ? (dir < 0 ? 50 : -50) : (dir < 0 ? 200 : -200),
       opacity: 0,
-      rotateY: dir < 0 ? 45 : -45,
+      rotateY: isMobile ? 0 : (dir < 0 ? 45 : -45),
       scale: 0.8,
       zIndex: 0,
       transition: { duration: 0.4 }
@@ -188,20 +196,24 @@ const HeroSection = () => {
         {/* Noise Texture */}
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-soft-light" />
 
-        {/* Animated Blobs */}
-        <motion.div
-          animate={{
-            backgroundColor: active.colors.primary,
-            x: [0, 100, -100, 0],
-            y: [0, -50, 50, 0],
-          }}
-          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -top-[20%] -right-[10%] w-[600px] h-[600px] rounded-full blur-[80px] opacity-20 mix-blend-multiply"
-        />
-        <motion.div
-          animate={{ backgroundColor: active.colors.primary }}
-          className="absolute -bottom-[20%] -left-[10%] w-[500px] h-[500px] rounded-full blur-[80px] opacity-15 mix-blend-multiply"
-        />
+        {/* Animated Blobs - DISABLED ON MOBILE */}
+        {!isMobile && (
+          <>
+            <motion.div
+              animate={{
+                backgroundColor: active.colors.primary,
+                x: [0, 100, -100, 0],
+                y: [0, -50, 50, 0],
+              }}
+              transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -top-[20%] -right-[10%] w-[600px] h-[600px] rounded-full blur-[80px] opacity-20 mix-blend-multiply"
+            />
+            <motion.div
+              animate={{ backgroundColor: active.colors.primary }}
+              className="absolute -bottom-[20%] -left-[10%] w-[500px] h-[500px] rounded-full blur-[80px] opacity-15 mix-blend-multiply"
+            />
+          </>
+        )}
       </div>
 
       <div className="container mx-auto px-6 relative z-10 grid lg:grid-cols-2 gap-16 h-full items-center">
@@ -239,7 +251,7 @@ const HeroSection = () => {
                 {/* Decorative Underline */}
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: 120 }}
+                  animate={{ width: isMobile ? 80 : 120 }}
                   transition={{ delay: 0.4, duration: 0.8 }}
                   className="h-2 mt-4 rounded-full"
                   style={{ backgroundColor: active.colors.primary }}
@@ -258,7 +270,7 @@ const HeroSection = () => {
               <motion.div variants={textItemVariant} className="flex flex-wrap items-center gap-4 pt-2">
                 <Link href={active.link}>
                   <motion.button
-                    whileHover={{ scale: 1.05, paddingRight: "2.5rem" }}
+                    whileHover={!isMobile ? { scale: 1.05, paddingRight: "2.5rem" } : {}}
                     whileTap={{ scale: 0.95 }}
                     className={`group relative px-8 py-4 rounded-full text-white font-bold text-lg shadow-xl shadow-${active.colors.primary}/20 overflow-hidden flex items-center transition-all bg-gradient-to-r ${active.colors.gradient}`}
                   >
@@ -383,15 +395,17 @@ const HeroSection = () => {
 
           </div>
 
-          {/* Decorative Card Stack (Visual Depth) */}
-          <motion.div
-            animate={{
-              rotate: [6, 8, 6],
-              backgroundColor: active.colors.secondary
-            }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-4 lg:right-4 w-[320px] md:w-[380px] h-full rounded-[2.5rem] opacity-60 -z-10 border-2 border-slate-100"
-          />
+          {/* Decorative Card Stack (Visual Depth) - DISABLED ON MOBILE */}
+          {!isMobile && (
+            <motion.div
+              animate={{
+                rotate: [6, 8, 6],
+                backgroundColor: active.colors.secondary
+              }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-4 lg:right-4 w-[320px] md:w-[380px] h-full rounded-[2.5rem] opacity-60 -z-10 border-2 border-slate-100"
+            />
+          )}
         </div>
 
       </div>
