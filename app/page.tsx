@@ -3,11 +3,11 @@ import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import HeroSlider from "./components/HeroSlider";
 
-const Hero = dynamic(() => import("./components/Hero"));
-const EventsSection = dynamic(() => import("./components/Events"));
-const Expectations = dynamic(() => import("./components/Expectations"));
-const UsSection = dynamic(() => import("./components/UseSection"));
-const WhyChooseUs = dynamic(() => import("./components/WhyChooseUs"));
+const Hero = dynamic(() => import("./components/Hero"), { ssr: false });
+const EventsSection = dynamic(() => import("./components/Events"), { ssr: false });
+const Expectations = dynamic(() => import("./components/Expectations"), { ssr: false });
+const UsSection = dynamic(() => import("./components/UseSection"), { ssr: false });
+const WhyChooseUs = dynamic(() => import("./components/WhyChooseUs"), { ssr: false });
 
 // Simple loading skeleton
 const SectionSkeleton = ({ height = "64" }: { height?: string }) => (

@@ -18,8 +18,14 @@ import {
 import { useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion";
 import { Motion as motion } from "./MotionProxy";
 import { useTheme } from "next-themes";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { useLanguage } from "../context/LanguageContext";
+import dynamic from "next/dynamic";
+
+// Dynamically import Clerk components to reduce initial JS bundle
+const AuthActions = dynamic(() => import("./AuthActions"), { 
+  ssr: false,
+  loading: () => <div className="w-[120px] h-9" /> 
+});
 
 // --- COLOR PALETTE CONFIGURATION ---
 const BRAND = {
@@ -249,32 +255,7 @@ export default function Navbar() {
 
             <div className="h-5 w-[1px] bg-current/10 mx-1" />
 
-            <SignedIn>
-              <div className="flex items-center gap-3">
-                <Link
-                  href="/dashboard"
-                  className="text-[9px] font-black uppercase tracking-widest opacity-70 hover:opacity-100 border-b-2 hidden xl:block"
-                  style={{ borderColor: BRAND.RED }}
-                >
-                  {CONTENT.dashboard[lang]}
-                </Link>
-                {/* Reserve space for UserButton to prevent CLS */}
-                <div className="w-8 h-8 flex items-center justify-center">
-                  <UserButton />
-                </div>
-              </div>
-            </SignedIn>
-
-            <SignedOut>
-              <Link href="/sign-in">
-                <button
-                  className="px-5 py-2 min-w-[80px] rounded-full text-white text-[9px] font-black uppercase tracking-widest shadow-xl shadow-red-900/20 transition-all active:scale-95 hover:brightness-110"
-                  style={{ backgroundColor: BRAND.RED }}
-                >
-                  {CONTENT.login[lang]}
-                </button>
-              </Link>
-            </SignedOut>
+            <AuthActions lang={lang} BRAND={BRAND} CONTENT={CONTENT} />
           </div>
         </nav>
       </motion.header>
@@ -302,18 +283,6 @@ export default function Navbar() {
         {/* Right Actions */}
         <div className="flex items-center gap-2 pointer-events-auto min-w-[120px] justify-end">
           <div className="flex items-center gap-2">
-            <SignedOut>
-              <Link href="/sign-in">
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
-                  className="px-4 h-9 rounded-full text-white text-[9px] font-black tracking-widest uppercase shadow-lg shadow-red-900/30 border border-white/20 whitespace-nowrap"
-                  style={{ backgroundColor: BRAND.RED }}
-                >
-                  {CONTENT.login[lang]}
-                </motion.button>
-              </Link>
-            </SignedOut>
-
             <button
               onClick={toggleLanguage}
               aria-label={lang === 'mn' ? "Switch to English" : "Switch to Mongolian"}
@@ -323,11 +292,7 @@ export default function Navbar() {
               <span className="text-[10px] font-black">{lang === 'mn' ? 'EN' : 'MN'}</span>
             </button>
 
-            <SignedIn>
-              <div className="ml-1 scale-105 drop-shadow-lg w-8 h-8 flex items-center justify-center">
-                <UserButton />
-              </div>
-            </SignedIn>
+            <AuthActions lang={lang} BRAND={BRAND} CONTENT={CONTENT} isMobile={true} />
           </div>
         </div>
       </div>

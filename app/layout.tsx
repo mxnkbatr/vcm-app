@@ -5,8 +5,10 @@ import Navbar from "./components/Navbar";
 import { LanguageProvider } from "./context/LanguageContext";
 import { ClerkProvider } from "@clerk/nextjs";
 import SmoothScroll from "./components/SmoothScroll";
-import Footer from "./components/Footer";
+import dynamic from "next/dynamic";
 import MotionProvider from "./components/MotionProvider";
+
+const Footer = dynamic(() => import("./components/Footer"));
 
 const inter = Inter({ 
   subsets: ["latin"],
