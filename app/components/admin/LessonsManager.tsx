@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image"; // Added Image import
 import {
     FaPlus,
     FaTrash,
@@ -223,7 +224,15 @@ export default function LessonsManager({ lessons, onRefresh }: LessonsManagerPro
                                         {/* Image Upload */}
                                         <div onClick={() => fileInputRef.current?.click()} className={`col-span-1 border-2 border-dashed rounded-xl h-40 flex items-center justify-center cursor-pointer hover:bg-slate-50 relative overflow-hidden ${uploadingImage && 'opacity-50'}`}>
                                             {uploadingImage ? <FaSpinner className="animate-spin text-2xl text-blue-500" /> :
-                                                formData.imageUrl ? <img src={formData.imageUrl} className="w-full h-full object-cover" /> :
+                                                formData.imageUrl ? (
+                                                    <Image
+                                                        src={formData.imageUrl}
+                                                        alt="Lesson cover"
+                                                        fill
+                                                        className="object-cover"
+                                                        unoptimized
+                                                    />
+                                                ) :
                                                     <div className="text-center text-slate-400"><FaImage className="text-2xl mx-auto mb-1" /><span className="text-xs">Cover Image</span></div>}
                                             <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
                                         </div>

@@ -3,8 +3,11 @@ import { auth } from "@clerk/nextjs/server";
 import { connectToDB } from "@/lib/db";
 import Lesson from "@/lib/models/Lesson";
 import User from "@/lib/models/User";
+import { CACHE_TIMES, createCacheHeaders } from "@/lib/cache-config";
 
-export const dynamic = "force-dynamic";
+// Revalidate this route every 60 seconds
+export const revalidate = 60;
+
 
 export async function GET(req: Request) {
     try {
@@ -19,7 +22,9 @@ export async function GET(req: Request) {
             if (!lesson) {
                 return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
             }
-            return NextResponse.json(lesson);
+            return NextResponse.json(lesson, {
+                headers: createCacheHeaders(300) // Cache individual lesson for 5 minutes
+            });
         }
 
         // Return visible lessons, sort by newest
@@ -27,7 +32,9 @@ export async function GET(req: Request) {
             .sort({ createdAt: -1 })
             .populate('attendees', '_id clerkId fullName email photo');
 
-        return NextResponse.json(lessons);
+        return NextResponse.json(lessons, {
+            headers: createCacheHeaders(CACHE_TIMES.dynamic) // Cache list for 1 minute
+        });
     } catch (error) {
         console.error("Failed to fetch lessons", error);
         return NextResponse.json({ error: "Failed to fetch lessons" }, { status: 500 });

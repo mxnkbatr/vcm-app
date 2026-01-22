@@ -26,7 +26,13 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
-    optimizePackageImports: ['framer-motion', 'lucide-react', 'react-icons'],
+    optimizePackageImports: [
+      'framer-motion',
+      'lucide-react',
+      'react-icons',
+      '@clerk/nextjs',
+      'react-icons/fa',
+    ],
   },
 };
 

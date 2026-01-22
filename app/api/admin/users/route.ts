@@ -12,15 +12,26 @@ async function isAdmin() {
   return user.publicMetadata?.role === 'admin';
 }
 
-// 1. GET: Fetch all users for the table
-export async function GET() {
+// 1. GET: Fetch all users for the table (or specific user with documents)
+export async function GET(req: Request) {
   if (!await isAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-  
+
   await connectToDB();
-  
+
+  const { searchParams } = new URL(req.url);
+  const userId = searchParams.get("id");
+  const includeDocuments = searchParams.get("includeDocuments") === "true";
+
+  // If fetching specific user with documents
+  if (userId && includeDocuments) {
+    const user = await User.findById(userId);
+    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    return NextResponse.json(user);
+  }
+
   // Sort by newest first
   const users = await User.find({}).sort({ createdAt: -1 });
-  
+
   // Map Mongo _id to string if needed, otherwise send as is
   return NextResponse.json(users);
 }
@@ -32,9 +43,9 @@ export async function PUT(req: Request) {
   try {
     await connectToDB();
     const body = await req.json();
-    
+
     // Destructure the payload sent from AdminDashboard.tsx
-    const { userId, action, data } = body; 
+    const { userId, action, data } = body;
 
     // --- CASE A: UPDATE USER DETAILS (Role, Country, Step) ---
     if (action === 'update_user') {
@@ -60,6 +71,23 @@ export async function PUT(req: Request) {
           },
         });
       }
+
+      return NextResponse.json({ success: true, user: updatedUser });
+    }
+
+    // --- CASE B: APPROVE DOCUMENTS ---
+    if (action === 'approve_documents') {
+      if (!userId) return NextResponse.json({ error: "Missing User ID" }, { status: 400 });
+
+      const adminUser = await currentUser();
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        {
+          documentsReviewedBy: adminUser?.firstName || "Admin",
+          documentsApprovedAt: new Date(),
+        },
+        { new: true }
+      );
 
       return NextResponse.json({ success: true, user: updatedUser });
     }

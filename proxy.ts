@@ -1,29 +1,51 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-// 1. Define the protected route
+// Define admin routes that require admin role
 const isAdminRoute = createRouteMatcher(['/admin(.*)']);
 
-// 2. Make the callback ASYNC
-export default clerkMiddleware(async (auth, req) => {
-  
-  if (isAdminRoute(req)) {
-    // 3. AWAIT the auth() call to resolve the Promise
-    const { sessionClaims } = await auth();
-    
-    // Debug Log (Check your server terminal)
-    console.log("Middleware checking role:", sessionClaims?.metadata);
+// Define public routes that don't require authentication
+const isPublicRoute = createRouteMatcher([
+  '/',
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+  '/join',
+  '/about',
+  '/aupair(.*)',
+  '/events(.*)',
+  '/lessons(.*)',
+  '/news(.*)',
+  '/contact',
+  '/booking',
+  '/api/events(.*)',
+  '/api/lessons(.*)',
+  '/api/news(.*)',
+  '/api/opportunities(.*)',
+]);
 
-    // 4. Safely check the role
+export default clerkMiddleware(async (auth, req) => {
+  // Admin route protection - check for admin role
+  if (isAdminRoute(req)) {
+    const { sessionClaims } = await auth();
+
     const metadata = sessionClaims?.metadata as { role?: string } | undefined;
 
     if (metadata?.role !== 'admin') {
-      // Redirect to home if failed
       return NextResponse.redirect(new URL('/', req.url));
     }
+  }
+
+  // Protect all non-public routes
+  if (!isPublicRoute(req) && !isAdminRoute(req)) {
+    await auth.protect();
   }
 });
 
 export const config = {
-  matcher: ['/((?!.*\\..*|_next).*)', '/', '/(api|trpc)(.*)'],
+  matcher: [
+    // Skip Next.js internals and all static files
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run for API routes
+    '/(api|trpc)(.*)',
+  ],
 };
