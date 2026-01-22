@@ -2,8 +2,8 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import HeroSlider from "./components/HeroSlider";
-import Hero from "./components/Hero";
 
+const Hero = dynamic(() => import("./components/Hero"));
 const EventsSection = dynamic(() => import("./components/Events"));
 const Expectations = dynamic(() => import("./components/Expectations"));
 const UsSection = dynamic(() => import("./components/UseSection"));
@@ -18,7 +18,9 @@ export default function Home() {
   return (
     <>
       <HeroSlider />
-      <Hero />
+      <Suspense fallback={<div className="w-full h-[95vh] bg-slate-50 animate-pulse" />}>
+        <Hero />
+      </Suspense>
       <Suspense fallback={<div className="w-full h-[800px] bg-slate-50 animate-pulse" />}>
         <UsSection />
       </Suspense>

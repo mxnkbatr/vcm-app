@@ -29,9 +29,12 @@ export default function RootLayout({
       <html lang="en" suppressHydrationWarning>
         <head>
           <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
-          <link rel="preconnect" href="https://analytics-api-s.cloudinary.com" />
           <link rel="preconnect" href="https://careful-beetle-54.clerk.accounts.dev" />
-          <link rel="dns-prefetch" href="https://unpkg.com" />
+          <link rel="dns-prefetch" href="https://careful-beetle-54.clerk.accounts.dev" />
+          <link rel="dns-prefetch" href="https://img.clerk.com" />
+          <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         </head>
         <body className={inter.className}>
           <LanguageProvider>
