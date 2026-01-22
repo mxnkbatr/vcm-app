@@ -300,31 +300,35 @@ export default function Navbar() {
         </Link>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-2 pointer-events-auto">
-          <SignedOut>
-            <Link href="/sign-in">
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                className="px-4 h-9 rounded-full text-white text-[9px] font-black tracking-widest uppercase shadow-lg shadow-red-900/30 border border-white/20"
-                style={{ backgroundColor: BRAND.RED }}
-              >
-                {CONTENT.login[lang]}
-              </motion.button>
-            </Link>
-          </SignedOut>
+        <div className="flex items-center gap-2 pointer-events-auto min-w-[120px] justify-end">
+          <div className="flex items-center gap-2">
+            <SignedOut>
+              <Link href="/sign-in">
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  className="px-4 h-9 rounded-full text-white text-[9px] font-black tracking-widest uppercase shadow-lg shadow-red-900/30 border border-white/20 whitespace-nowrap"
+                  style={{ backgroundColor: BRAND.RED }}
+                >
+                  {CONTENT.login[lang]}
+                </motion.button>
+              </Link>
+            </SignedOut>
 
-          <button
-            onClick={toggleLanguage}
-            aria-label={lang === 'mn' ? "Switch to English" : "Switch to Mongolian"}
-            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all border backdrop-blur-sm ${isDark ? "bg-black/80 border-white/10 text-white" : "bg-white/90 border-slate-100 text-slate-700 shadow-sm"
-              }`}
-          >
-            <span className="text-[10px] font-black">{lang === 'mn' ? 'EN' : 'MN'}</span>
-          </button>
+            <button
+              onClick={toggleLanguage}
+              aria-label={lang === 'mn' ? "Switch to English" : "Switch to Mongolian"}
+              className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center transition-all border backdrop-blur-sm ${isDark ? "bg-black/80 border-white/10 text-white" : "bg-white/90 border-slate-100 text-slate-700 shadow-sm"
+                }`}
+            >
+              <span className="text-[10px] font-black">{lang === 'mn' ? 'EN' : 'MN'}</span>
+            </button>
 
-          <SignedIn>
-            <div className="ml-1 scale-105 drop-shadow-lg"><UserButton /></div>
-          </SignedIn>
+            <SignedIn>
+              <div className="ml-1 scale-105 drop-shadow-lg w-8 h-8 flex items-center justify-center">
+                <UserButton />
+              </div>
+            </SignedIn>
+          </div>
         </div>
       </div>
 
