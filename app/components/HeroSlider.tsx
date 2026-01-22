@@ -12,7 +12,10 @@ import {
   FaGlobeEurope,
   FaUserCheck,
 } from "react-icons/fa";
-import CloudinaryPlayer from "./CloudinaryPlayer";
+import dynamic from "next/dynamic";
+
+const CloudinaryPlayer = dynamic(() => import("./CloudinaryPlayer"), { ssr: false });
+
 // Assuming you have a language context, otherwise use the fallback below
 // import { useLanguage } from "../context/LanguageContext";
 

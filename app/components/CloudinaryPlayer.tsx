@@ -9,6 +9,7 @@ interface CloudinaryPlayerProps {
 const CloudinaryPlayer = ({ publicId, className, cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME }: CloudinaryPlayerProps) => {
     // Fallback if no cloudName provided
     const cName = cloudName || "dxoxdiuwr"; 
+
     const baseUrl = `https://res.cloudinary.com/${cName}/video/upload`;
     
     // Construct URLs with optimizations
