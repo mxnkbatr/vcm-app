@@ -26,7 +26,7 @@ const CloudinaryPlayer = ({ publicId, className, cloudName = process.env.NEXT_PU
                 loop
                 muted
                 playsInline
-                preload="none"
+                preload="metadata"
                 poster={posterUrl}
                 style={{ objectFit: 'cover' }}
                 // @ts-ignore

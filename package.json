@@ -45,8 +45,10 @@
     "typescript": "^5"
   },
   "browserslist": [
-    "defaults",
+    "last 2 versions",
+    "> 0.5%",
+    "not dead",
     "not IE 11",
-    "not dead"
+    "maintained node versions"
   ]
 }

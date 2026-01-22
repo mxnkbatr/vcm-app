@@ -33,13 +33,10 @@ export default function RootLayout({
       <html lang="en" suppressHydrationWarning>
         <head>
           <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
-          <link rel="preconnect" href="https://careful-beetle-54.clerk.accounts.dev" crossOrigin="anonymous" />
           <link rel="preconnect" href="https://grainy-gradients.vercel.app" crossOrigin="anonymous" />
-          <link rel="preconnect" href="https://clerk-telemetry.com" crossOrigin="anonymous" />
+          <link rel="preconnect" href="https://careful-beetle-54.clerk.accounts.dev" crossOrigin="anonymous" />
           <link rel="dns-prefetch" href="https://res.cloudinary.com" />
-          <link rel="dns-prefetch" href="https://careful-beetle-54.clerk.accounts.dev" />
           <link rel="dns-prefetch" href="https://grainy-gradients.vercel.app" />
-          <link rel="dns-prefetch" href="https://clerk-telemetry.com" />
         </head>
         <body className={`${inter.variable} font-sans`}>
           <LanguageProvider>

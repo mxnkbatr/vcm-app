@@ -27,7 +27,7 @@ const COUNTRY_DATA = [
     },
     flag: "🇩🇪",
     iso: "DEU",
-    img: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&q=45&w=400", // German Street/Architecture
+    img: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&q=30&w=400", // German Street/Architecture
     title: { mn: "Герман", en: "Germany" },
     subtitle: { mn: "Европын Эдийн Засгийн Төв", en: "Economic Heart of Europe" },
     desc: {
@@ -47,7 +47,7 @@ const COUNTRY_DATA = [
     },
     flag: "🇦🇹",
     iso: "AUT",
-    img: "https://images.unsplash.com/photo-1516550893923-42d28e5677af?auto=format&fit=crop&q=45&w=400", // Vienna/Alps
+    img: "https://images.unsplash.com/photo-1516550893923-42d28e5677af?auto=format&fit=crop&q=30&w=400", // Vienna/Alps
     title: { mn: "Австри", en: "Austria" },
     subtitle: { mn: "Сонгодог Урлагийн Өлгий", en: "Cradle of Classical Art" },
     desc: {
@@ -67,7 +67,7 @@ const COUNTRY_DATA = [
     },
     flag: "🇧🇪",
     iso: "BEL",
-    img: "https://images.unsplash.com/photo-1559410545-0112ea057b99?auto=format&fit=crop&q=45&w=400", // Brussels
+    img: "https://images.unsplash.com/photo-1559410545-0112ea057b99?auto=format&fit=crop&q=30&w=400", // Brussels
     title: { mn: "Бельги", en: "Belgium" },
     subtitle: { mn: "Олон Улсын Төв", en: "International Hub" },
     desc: {
@@ -87,7 +87,7 @@ const COUNTRY_DATA = [
     },
     flag: "🇨🇭",
     iso: "CHE",
-    img: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?auto=format&fit=crop&q=45&w=400", // Swiss Alps
+    img: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?auto=format&fit=crop&q=30&w=400", // Swiss Alps
     title: { mn: "Швейцарь", en: "Switzerland" },
     subtitle: { mn: "Амьдралын Чанар", en: "Highest Quality of Life" },
     desc: {
