@@ -144,7 +144,7 @@ export default function Navbar() {
           onMouseLeave={() => setHoveredNav(null)}
           style={{ WebkitBackdropFilter: "blur(12px)" }}
           className={`
-          z-[100] transform-gpu pointer-events-auto flex items-center justify-between transition-all duration-700 relative
+          z-[100] transform-gpu pointer-events-auto flex items-center justify-between transition-[background-color,border-color,shadow,padding] duration-700 relative
           w-[98%] xl:w-[1250px] py-3 px-6 rounded-full border backdrop-blur-md shadow-2xl
           ${isScrolled
               ? (isDark ? "bg-[#00101a]/95 border-red-900/40 shadow-black" : "bg-white/95 border-emerald-100 shadow-emerald-100/50")
@@ -154,7 +154,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group shrink-0">
             <div className="relative w-10 h-10 overflow-hidden rounded-full border-2 border-white/50 shadow-md bg-white">
-              <Image src="/image.png" alt="AuPair Logo" fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+              <Image src="/image.png" alt="AuPair Logo" fill unoptimized className="object-cover transition-transform duration-500 group-hover:scale-110" />
             </div>
             <span className="font-sans font-black text-lg tracking-tight uppercase" style={{ color: BRAND.RED }}>
               {CONTENT.logo[lang]}
@@ -174,7 +174,7 @@ export default function Navbar() {
                 >
                   <Link
                     href={item.href}
-                    className={`flex items-center gap-1 px-3 py-2 rounded-full text-[10px] font-bold uppercase tracking-wide transition-all duration-300 whitespace-nowrap
+                    className={`flex items-center gap-1 px-3 py-2 rounded-full text-[10px] font-bold uppercase tracking-wide transition-[color,background-color,shadow] duration-300 whitespace-nowrap
                       ${isActive
                         ? (isDark
                           ? "bg-[#00C896]/10 text-[#00C896] shadow-[0_0_15px_rgba(0,200,150,0.5)]"

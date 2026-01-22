@@ -47,12 +47,12 @@ const WhyChooseUs: React.FC<WhyChooseUsProps> = ({ dictionary }) => {
 
       {/* ─── DREAMY ATMOSPHERE (Bright & Airy) ─── */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay" />
+        <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-[0.03] mix-blend-overlay" />
 
         {/* Soft Pink Orb */}
         <motion.div
           style={{ y: yBg, opacity: opacityBg }}
-          className="absolute -top-[10%] -left-[10%] w-[800px] h-[800px] rounded-full blur-[120px]"
+          className="absolute -top-[10%] -left-[10%] w-[800px] h-[800px] rounded-full blur-[120px] will-change-transform"
           animate={{ scale: [1, 1.1, 1] }}
           transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
         >
@@ -62,7 +62,7 @@ const WhyChooseUs: React.FC<WhyChooseUsProps> = ({ dictionary }) => {
         {/* Soft Teal Orb */}
         <motion.div
           style={{ y: useTransform(scrollYProgress, [0, 1], [0, 50]) }}
-          className="absolute top-[20%] -right-[10%] w-[600px] h-[600px] rounded-full blur-[100px]"
+          className="absolute top-[20%] -right-[10%] w-[600px] h-[600px] rounded-full blur-[100px] will-change-transform"
           animate={{ scale: [1, 1.2, 1] }}
           transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 2 }}
         >

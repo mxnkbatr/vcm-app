@@ -71,7 +71,7 @@ export default function AestheticFooter() {
         <div className="absolute top-[0%] -right-[10%] w-[900px] h-[900px] bg-gradient-to-b from-emerald-100 via-teal-50 to-transparent rounded-full blur-[100px] opacity-60" />
 
         {/* Noise Texture */}
-        <div className={`absolute inset-0 opacity-[0.3] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay`} />
+        <div className={`absolute inset-0 opacity-[0.3] bg-[url('/noise.svg')] mix-blend-overlay`} />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6">
