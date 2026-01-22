@@ -195,7 +195,7 @@ const HeroSection = () => {
         />
 
         {/* Noise Texture */}
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-soft-light" />
+        <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-20 mix-blend-soft-light" />
 
         {/* Animated Blobs - DISABLED ON MOBILE */}
         {!isMobile && (
@@ -343,6 +343,7 @@ const HeroSection = () => {
                       src={active.img}
                       alt={t(active.title)}
                       fill
+                      quality={85}
                       className="object-cover transform scale-105 group-hover:scale-110 transition-transform duration-700"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       priority

@@ -100,6 +100,15 @@ const Hero = () => {
 
   const activeSlide = HERO_SLIDES[slideIndex];
 
+  const [isMobile, setIsMobile] = useState(true);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   return (
     <section className="relative h-[100dvh] min-h-[700px] w-full bg-slate-900 text-white flex items-center justify-center overflow-hidden selection:bg-red-500 selection:text-white">
 
@@ -108,11 +117,13 @@ const Hero = () => {
         {/* Placeholder for Video - Replace src with your actual video file */}
         {/* Desktop Video Background */}
         <div className="hidden md:block absolute inset-0 w-full h-full">
-          <CloudinaryPlayer
-            publicId="A_cinematic_highquality_202601201908_j5s2n_kkoosh"
-            cloudName="dxoxdiuwr"
-            className="w-full h-full object-cover opacity-50 scale-105 pointer-events-none"
-          />
+          {!isMobile && (
+            <CloudinaryPlayer
+              publicId="A_cinematic_highquality_202601201908_j5s2n_kkoosh"
+              cloudName="dxoxdiuwr"
+              className="w-full h-full object-cover opacity-50 scale-105 pointer-events-none"
+            />
+          )}
         </div>
 
         {/* Mobile Static Image Background */}
@@ -121,6 +132,7 @@ const Hero = () => {
             src="https://res.cloudinary.com/dxoxdiuwr/video/upload/f_auto,q_auto,so_0/v1/A_cinematic_highquality_202601201908_j5s2n_kkoosh.jpg"
             alt="Hero Background"
             fill
+            quality={85}
             className="object-cover opacity-50 scale-105"
             priority
             fetchPriority="high"
