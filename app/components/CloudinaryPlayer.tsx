@@ -30,7 +30,7 @@ const CloudinaryPlayer = ({ publicId, className, cloudName = process.env.NEXT_PU
                 poster={posterUrl}
                 style={{ objectFit: 'cover' }}
                 // @ts-ignore
-                fetchpriority="low" 
+                fetchPriority="low" 
             >
                 {/* Prefer WebM for better compression/quality ratio on supported browsers */}
                 <source src={`${baseUrl}/q_auto:eco,vc_auto,w_800,c_limit,f_webm/${publicId}.webm`} type="video/webm" />

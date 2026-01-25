@@ -16,6 +16,7 @@ export async function GET(req: Request) {
         // Parse Query Parameters
         const { searchParams } = new URL(req.url);
         const id = searchParams.get("id");
+        const country = searchParams.get("country");
 
         if (id) {
             const lesson = await Lesson.findById(id).populate('attendees', '_id clerkId fullName email photo');
@@ -27,8 +28,16 @@ export async function GET(req: Request) {
             });
         }
 
+        // Base query
+        const query: any = { status: { $ne: 'archived' } };
+        
+        // Filter by country if provided
+        if (country) {
+            query.countryTag = country;
+        }
+
         // Return visible lessons, sort by newest
-        const lessons = await Lesson.find({ status: { $ne: 'archived' } })
+        const lessons = await Lesson.find(query)
             .sort({ createdAt: -1 })
             .populate('attendees', '_id clerkId fullName email photo');
 

@@ -29,11 +29,26 @@ export async function GET(req: Request) {
     return NextResponse.json(user);
   }
 
-  // Sort by newest first
-  const users = await User.find({}).sort({ createdAt: -1 });
+  // Fetch all users sorted by role (Students first) then by update date
+  // We sort role descending so 'student' (s) comes before 'guest' (g)
+  const rawUsers = await User.find({}).sort({ role: -1, updatedAt: -1 });
 
-  // Map Mongo _id to string if needed, otherwise send as is
-  return NextResponse.json(users);
+  // Deduplicate by email (or clerkId if preferred)
+  const uniqueUsers: any[] = [];
+  const seenEmails = new Set();
+
+  for (const user of rawUsers) {
+    if (!user.email) {
+       uniqueUsers.push(user);
+       continue;
+    }
+    if (!seenEmails.has(user.email)) {
+      seenEmails.add(user.email);
+      uniqueUsers.push(user);
+    }
+  }
+
+  return NextResponse.json(uniqueUsers);
 }
 
 // 2. PUT: The critical part that SAVES changes
@@ -51,23 +66,49 @@ export async function PUT(req: Request) {
     if (action === 'update_user') {
       if (!userId) return NextResponse.json({ error: "Missing User ID" }, { status: 400 });
 
-      // 1. Update MongoDB (The Permanent Save)
       const updatedUser = await User.findByIdAndUpdate(
         userId,
         {
           role: data.role,
           country: data.country,
           step: data.step,
+          status: data.status,
+          fullName: data.fullName
         },
-        { new: true } // Return the updated document
+        { new: true }
       );
 
-      // 2. Sync Clerk Metadata (So permissions work immediately)
       if (updatedUser && updatedUser.clerkId) {
         const client = await clerkClient();
         await client.users.updateUserMetadata(updatedUser.clerkId, {
           publicMetadata: {
-            role: data.role, // "student", "admin", "guest"
+            role: data.role,
+          },
+        });
+      }
+
+      return NextResponse.json({ success: true, user: updatedUser });
+    }
+
+    // --- CASE MASTER: FULL CONTROL ---
+    if (action === 'master_update') {
+      if (!userId) return NextResponse.json({ error: "Missing User ID" }, { status: 400 });
+
+      // Clean the data to avoid updating immutable fields if any, though MongoDB handles _id
+      const { _id, clerkId, createdAt, ...updateData } = data;
+
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { $set: updateData },
+        { new: true }
+      );
+
+      // Sync metadata if role changed
+      if (updateData.role && updatedUser && updatedUser.clerkId) {
+        const client = await clerkClient();
+        await client.users.updateUserMetadata(updatedUser.clerkId, {
+          publicMetadata: {
+            role: updateData.role,
           },
         });
       }

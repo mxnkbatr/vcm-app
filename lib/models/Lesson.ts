@@ -11,6 +11,7 @@ const LessonSchema = new Schema(
             en: { type: String, required: true },
         },
         category: { type: String, required: true }, // e.g., 'grammar', 'culture', 'vocabulary'
+        countryTag: { type: String, default: "General" }, // e.g., 'Germany', 'Belgium', 'Austria', 'Switzerland'
         icon: { type: String, default: "FaBook" },
         color: { type: String, default: "blue" },
         focus: {

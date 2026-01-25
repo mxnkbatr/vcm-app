@@ -1,0 +1,193 @@
+{
+  "common": {
+    "startJourney": "Reise beginnen",
+    "howItWorks": "Wie es funktioniert",
+    "verified": "Verifiziert",
+    "openNow": "Jetzt geöffnet",
+    "explore": "Entdecken",
+    "trusted": "Weltweit von Familien und Studenten geschätzt.",
+    "loading": "Profil wird geladen..."
+  },
+  "navbar": {
+    "logo": "MONGOLISCHES AUPAIR",
+    "home": "Startseite",
+    "about": "Über uns",
+    "program": "Au-Pair-Programm",
+    "events": "Veranstaltungen",
+    "lessons": "Lektionen",
+    "booking": "Buchung",
+    "news": "Neuigkeiten",
+    "dashboard": "Dashboard",
+    "signin": "Anmelden",
+    "register": "Registrieren",
+    "germany": "Deutschland",
+    "austria": "Österreich",
+    "switzerland": "Schweiz",
+    "belgium": "Belgien",
+    "desc_de": "Lernen Sie die Sprache kostenlos in Deutschland",
+    "desc_at": "Lernen Sie die Sprache kostenlos in Österreich",
+    "desc_ch": "Lernen Sie die Sprache kostenlos in der Schweiz",
+    "desc_be": "Lernen Sie die Sprache kostenlos in Belgien"
+  },
+  "dashboard": {
+    "hello": "Guten Tag",
+    "activeStudent": "Aktiver Student",
+    "guestAccount": "Gastkonto",
+    "findEvents": "Veranstaltungen finden",
+    "applicationSnapshot": "Bewerbungsübersicht",
+    "fullRecord": "Vollständiger synchronisierter Datensatz",
+    "missing": "Fehlt",
+    "identity": "Identität & Kontakt",
+    "sex": "Geschlecht",
+    "nationality": "Staatsangehörigkeit",
+    "birth": "Geburtsdatum",
+    "phoneMobile": "Telefon / Mobil",
+    "address": "Aktuelle Adresse",
+    "family": "Familie & Hintergrund",
+    "fatherJob": "Beruf des Vaters",
+    "motherJob": "Beruf der Mutter",
+    "languages": "Sprachen",
+    "education": "Bildung",
+    "driverLicense": "Führerschein",
+    "yes": "Ja",
+    "no": "Nein",
+    "childcare": "Kinderbetreuung & Aufgaben",
+    "ageExperience": "Erfahrung nach Alter",
+    "noneListed": "Keine Angaben",
+    "household": "Haushaltsfähigkeiten",
+    "timeline": "Zeitplan",
+    "motivation": "Ihr persönliches Motivationsschreiben",
+    "motivationMissing": "Sie haben noch kein Motivationsschreiben eingereicht. Das Ausfüllen hilft Ihrer Bewerbung ungemein.",
+    "currentStep": "Aktueller Schritt",
+    "ready": "Bereit",
+    "pending": "Bewerbung ausstehend",
+    "underReview": "In Prüfung",
+    "startJourneyDesc": "Sie sind derzeit als Gast angemeldet. Bewerben Sie sich jetzt, um Student zu werden.",
+    "applyNow": "Jetzt bewerben",
+    "actionRequired": "Handlungsbedarf",
+    "history": "Verlauf",
+    "noActivity": "Keine aktuellen Aktivitäten",
+    "studyMaterial": "Studienmaterial",
+    "languageTips": "Sprachtipps",
+    "cultureGuide": "Kulturführer",
+    "steps": {
+      "Applied": "Beantragt",
+      "Documents": "Dokumente",
+      "Interview": "Interview",
+      "Matching": "Vermittlung",
+      "Visa": "Visum",
+      "Departure": "Abreise"
+    },
+    "instructions": {
+      "Applied": {
+        "title": "Erste Prüfung",
+        "action": "Unser Team prüft derzeit Ihre Anfrage. Bitte warten Sie auf die Genehmigung für die Dokumentenphase.",
+        "button": "Programmdetails anzeigen"
+      },
+      "Documents": {
+        "title": "Dokumente benötigt",
+        "action": "Ihre Bewerbung wurde genehmigt! Bitte laden Sie Ihren Reisepass und Ihre Zeugnisse hoch.",
+        "button": "Jetzt hochladen"
+      },
+      "Interview": {
+        "title": "Agentur-Interview",
+        "action": "Bereiten Sie sich auf Ihr Auswahlgespräch vor. Wir werden Sie für einen Termin kontaktieren.",
+        "button": "Vorbereitungstipps"
+      },
+      "Matching": {
+        "title": "Gastfamilien-Vermittlung",
+        "action": "Ihr Profil ist online! Wir teilen es mit Gastfamilien. Bitte bleiben Sie erreichbar.",
+        "button": "Meine Bewerbung"
+      },
+      "Visa": {
+        "title": "Visumverfahren",
+        "action": "Vermittlung erfolgreich! Bereiten Sie Ihre Unterlagen vor und vereinbaren Sie einen Termin.",
+        "button": "Visum-Checkliste"
+      },
+      "Departure": {
+        "title": "Finale Abreise",
+        "action": "Visum erteilt! Packen Sie Ihre Koffer und prüfen Sie den Leitfaden für Ihre Reise nach Europa.",
+        "button": "Reiseführer"
+      }
+    }
+  },
+  "hero": {
+    "germany": {
+      "title": "Deutschland",
+      "subtitle": "Wirtschaftliches Herz Europas",
+      "desc": "Meistern Sie die Sprache in einer weltweit führenden Nation, während Sie die europäische Kultur erleben und Ihre Karriere starten."
+    },
+    "austria": {
+      "title": "Österreich",
+      "subtitle": "Wiege der klassischen Kunst",
+      "desc": "Eine einmalige Gelegenheit, Deutsch inmitten der atemberaubenden Schönheit der Alpen zu meistern."
+    },
+    "belgium": {
+      "title": "Belgien",
+      "subtitle": "Internationales Zentrum",
+      "desc": "Erleben Sie eine multilinguale Kultur am Hauptsitz der Europäischen Union."
+    },
+    "switzerland": {
+      "title": "Schweiz",
+      "subtitle": "Höchste Lebensqualität",
+      "desc": "Leben Sie mit dem weltweit höchsten Taschengeld, reinster Luft und sicherster Umgebung."
+    }
+  },
+  "Auth": {
+    "home": "Startseite",
+    "future": "Zukunft",
+    "signupSubtitle": "Der erste Schritt, um die Welt zu reisen, eine Sprache zu lernen und eine neue Kultur zu erleben.",
+    "fullNamePlaceholder": "Vollständiger Name",
+    "emailPlaceholder": "E-Mail-Adresse",
+    "passwordPlaceholder": "Passwort",
+    "signUpButton": "Registrieren",
+    "alreadyHaveAccount": "Hast du schon ein Konto?",
+    "signIn": "Anmelden"
+  },
+  "events": {
+    "back": "Zurück zu Veranstaltungen",
+    "date": "Datum",
+    "time": "Zeit",
+    "location": "Ort",
+    "category": "Kategorie",
+    "share": "Teilen",
+    "join": "Jetzt registrieren",
+    "joined": "Registriert",
+    "attendees": "Teilnehmer",
+    "university": "Universität",
+    "loginRequired": "Anmeldung erforderlich",
+    "notFound": "Veranstaltung nicht gefunden",
+    "returnToEvents": "Zurück zu Veranstaltungen",
+    "registrationSuccess": "Registrierung erfolgreich!",
+    "joinedSuccess": "Du bist für diese Veranstaltung registriert. Wir sehen uns dort!",
+    "secureSpot": "Sichere dir deinen Platz für diese Veranstaltung. Begrenzte Plätze verfügbar!",
+    "readyToJoin": "Bereit beizutreten?"
+  },
+  "news": {
+    "back": "Zurück zum Feed",
+    "published": "Veröffentlicht am",
+    "author": "Von",
+    "share": "Teilen",
+    "subscribe": "Bleib auf dem Laufenden",
+    "readingTime": "Min. Lesezeit",
+    "saveArticle": "Artikel speichern",
+    "comments": "Kommentare",
+    "write": "Schreiben",
+    "subscribeDesc": "Verpasse nicht das nächste Update. Werde Teil unserer wöchentlichen Zusammenfassung mit über 1.200 Mitgliedern.",
+    "joinCommunity": "Gemeinschaft beitreten",
+    "placeholderEmail": "Deine E-Mail-Adresse"
+  },
+  "opportunities": {
+    "back": "Zurück",
+    "applyNow": "Jetzt bewerben",
+    "deadline": "Frist",
+    "posted": "Veröffentlicht",
+    "location": "Ort",
+    "requirements": "Anforderungen",
+    "share": "Teilen",
+    "about": "Über",
+    "loading": "Wird geladen...",
+    "notFound": "Möglichkeit nicht gefunden",
+    "applyDesc": "Verpasse diese Chance nicht. Bewerbungsschluss ist am {deadline}."
+  }
+}

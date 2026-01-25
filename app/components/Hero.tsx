@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { Link } from "@/navigation";
 import { AnimatePresence, Variants } from "framer-motion";
 import { Motion as motion } from "./MotionProxy";
 import Image from "next/image";
@@ -13,94 +13,77 @@ import {
   FaChevronLeft,
   FaCheckCircle
 } from "react-icons/fa";
-import { useLanguage } from "../context/LanguageContext";
+import { useTranslations, useLocale } from "next-intl";
 
 /* ────────────────────── Config & Data ────────────────────── */
 const COUNTRY_DATA = [
   {
     id: "germany",
+    key: "germany",
     colors: {
-      primary: "#F59E0B", // Amber 500
-      secondary: "#FFFBEB", // Amber 50
-      accent: "#B45309", // Amber 700
+      primary: "#F59E0B",
+      secondary: "#FFFBEB",
+      accent: "#B45309",
       gradient: "from-amber-400 to-orange-500"
     },
     flag: "🇩🇪",
     iso: "DEU",
-    img: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&q=30&w=400", // German Street/Architecture
-    title: { mn: "Герман", en: "Germany" },
-    subtitle: { mn: "Европын Эдийн Засгийн Төв", en: "Economic Heart of Europe" },
-    desc: {
-      mn: "Дэлхийн тэргүүлэгч улсад хэл сурангаа, Европын соёлтой танилцаж, ирээдүйн карьераа эхлүүл. Герман хэлний мэдлэгээ орчинд нь дээшлүүлэх шилдэг боломж.",
-      en: "Master the language in a world-leading nation while experiencing European culture and kickstarting your career."
-    },
+    img: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&q=30&w=400",
     stat: "12-24 Months",
     link: "/aupair/germany"
   },
   {
     id: "austria",
+    key: "austria",
     colors: {
-      primary: "#F43F5E", // Rose 500
-      secondary: "#FFF1F2", // Rose 50
-      accent: "#9F1239", // Rose 800
+      primary: "#F43F5E",
+      secondary: "#FFF1F2",
+      accent: "#9F1239",
       gradient: "from-rose-400 to-red-600"
     },
     flag: "🇦🇹",
     iso: "AUT",
-    img: "https://images.unsplash.com/photo-1516550893923-42d28e5677af?auto=format&fit=crop&q=30&w=400", // Vienna/Alps
-    title: { mn: "Австри", en: "Austria" },
-    subtitle: { mn: "Сонгодог Урлагийн Өлгий", en: "Cradle of Classical Art" },
-    desc: {
-      mn: "Альпийн нурууны байгалийн үзэсгэлэн дунд амьдарч, Герман хэлийг төгс эзэмших алтан боломж. Вена хотын түүх соёлтой танилцаж, мартагдашгүй дурсамж бүтээ.",
-      en: "A golden opportunity to master German while living amidst the breathtaking beauty of the Alps."
-    },
+    img: "https://images.unsplash.com/photo-1516550893923-42d28e5677af?auto=format&fit=crop&q=30&w=400",
     stat: "High Safety",
     link: "/aupair/austria"
   },
   {
     id: "belgium",
+    key: "belgium",
     colors: {
-      primary: "#EAB308", // Yellow 500
-      secondary: "#FEFCE8", // Yellow 50
-      accent: "#854D0E", // Yellow 800
+      primary: "#EAB308",
+      secondary: "#FEFCE8",
+      accent: "#854D0E",
       gradient: "from-yellow-400 to-amber-600"
     },
     flag: "🇧🇪",
     iso: "BEL",
-    img: "https://images.unsplash.com/photo-1559410545-0112ea057b99?auto=format&fit=crop&q=30&w=400", // Brussels
-    title: { mn: "Бельги", en: "Belgium" },
-    subtitle: { mn: "Олон Улсын Төв", en: "International Hub" },
-    desc: {
-      mn: "Европын холбооны төв байранд ажиллаж, олон хэл, олон соёлыг нэг дор мэдрэх боломж. Франц, Герман, Голланд хэлийг нэгэн зэрэг суралцах таатай орчин.",
-      en: "Experience multilingual culture at the headquarters of the European Union."
-    },
+    img: "https://images.unsplash.com/photo-1559410545-0112ea057b99?auto=format&fit=crop&q=30&w=400",
     stat: "Multi-Lang",
     link: "/aupair/belgium"
   },
   {
     id: "switzerland",
+    key: "switzerland",
     colors: {
-      primary: "#EF4444", // Red 500
-      secondary: "#FEF2F2", // Red 50
-      accent: "#991B1B", // Red 800
+      primary: "#EF4444",
+      secondary: "#FEF2F2",
+      accent: "#991B1B",
       gradient: "from-red-500 to-rose-600"
     },
     flag: "🇨🇭",
     iso: "CHE",
-    img: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?auto=format&fit=crop&q=30&w=400", // Swiss Alps
-    title: { mn: "Швейцарь", en: "Switzerland" },
-    subtitle: { mn: "Амьдралын Чанар", en: "Highest Quality of Life" },
-    desc: {
-      mn: "Дэлхийн хамгийн өндөр халаасны мөнгө, хамгийн цэвэр агаар, хамгийн аюулгүй орчинд амьдрах боломж. Альпийн нурууны байгаль, өндөр амьжиргааг мэдэр.",
-      en: "Live with the world's highest allowance, purest air, and safest environment."
-    },
+    img: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?auto=format&fit=crop&q=30&w=400",
     stat: "Top Allowance",
     link: "/aupair/switzerland"
   }
 ];
 
 const HeroSection = () => {
-  const { language, t } = useLanguage();
+  const t = useTranslations("hero");
+  const common = useTranslations("common");
+  const locale = useLocale();
+  
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
@@ -116,7 +99,6 @@ const HeroSection = () => {
 
   const active = COUNTRY_DATA[index];
 
-  // Handle slide changes
   const changeSlide = (newDirection: number) => {
     setDirection(newDirection);
     if (newDirection === 1) {
@@ -126,7 +108,6 @@ const HeroSection = () => {
     }
   };
 
-  // 1. TEXT VARIANTS
   const textContainerVariant: Variants = {
     hidden: { opacity: 0 },
     visible: {
@@ -146,7 +127,6 @@ const HeroSection = () => {
     exit: { opacity: 0, x: isMobile ? 10 : 20 }
   };
 
-  // 2. CARD VARIANTS (3D Effect)
   const cardVariants: Variants = {
     enter: (dir: number) => ({
       x: isMobile ? (dir > 0 ? 50 : -50) : (dir > 0 ? 200 : -200),
@@ -180,20 +160,13 @@ const HeroSection = () => {
 
   return (
     <section className="relative w-full min-h-[95vh] flex items-center bg-slate-50 overflow-hidden py-24 lg:py-0">
-
-      {/* ────────────────── 1. FLUID ATMOSPHERIC BACKGROUND ────────────────── */}
       <div className="absolute inset-0 z-0">
-        {/* Transitioning Background Color */}
         <motion.div
           animate={{ backgroundColor: active.colors.secondary }}
           transition={{ duration: 1 }}
           className="absolute inset-0"
         />
-
-        {/* Noise Texture */}
         <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-20 mix-blend-soft-light" />
-
-        {/* Animated Blobs - DISABLED ON MOBILE */}
         {mounted && !isMobile && (
           <>
             <motion.div
@@ -214,10 +187,7 @@ const HeroSection = () => {
       </div>
 
       <div className="container mx-auto px-6 relative z-10 grid lg:grid-cols-2 gap-16 h-full items-center">
-
-        {/* ────────────────── 2. LEFT: CONTENT ────────────────── */}
         <div className="flex flex-col justify-center order-2 lg:order-1">
-
           <AnimatePresence mode="wait">
             <motion.div
               key={index}
@@ -227,7 +197,6 @@ const HeroSection = () => {
               exit="exit"
               className="space-y-8"
             >
-              {/* Top Badge */}
               <motion.div variants={textItemVariant} className="flex items-center gap-3">
                 <span
                   className="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest bg-white shadow-sm border border-slate-100 flex items-center gap-2"
@@ -237,15 +206,13 @@ const HeroSection = () => {
                 </span>
               </motion.div>
 
-              {/* Main Headline */}
               <motion.div variants={textItemVariant} className="relative z-20">
                 <h2 className="text-6xl md:text-7xl lg:text-8xl font-black text-slate-900 leading-[0.95] tracking-tight">
-                  Explore <br />
+                  {common('explore')} <br />
                   <span className={`text-transparent bg-clip-text bg-gradient-to-r ${active.colors.gradient}`}>
-                    {t(active.title)}
+                    {t(`${active.key}.title`)}
                   </span>
                 </h2>
-                {/* Decorative Underline */}
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: isMobile ? 80 : 120 }}
@@ -255,26 +222,22 @@ const HeroSection = () => {
                 />
               </motion.div>
 
-              {/* Description */}
               <motion.div variants={textItemVariant} className="max-w-xl">
-                <h3 className="text-xl font-bold text-slate-800 mb-2">{t(active.subtitle)}</h3>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">{t(`${active.key}.subtitle`)}</h3>
                 <p className="text-lg text-slate-600 leading-relaxed font-medium">
-                  {t(active.desc)}
+                  {t(`${active.key}.desc`)}
                 </p>
               </motion.div>
 
-              {/* Action Buttons */}
               <motion.div variants={textItemVariant} className="flex flex-wrap items-center gap-4 pt-2">
                 <Link href={active.link}>
                   <motion.button
                     whileHover={!isMobile ? { scale: 1.05, paddingRight: "2.5rem" } : {}}
                     whileTap={{ scale: 0.95 }}
-                    className={`group relative px-8 py-4 rounded-full text-white font-bold text-lg shadow-xl shadow-${active.colors.primary}/20 overflow-hidden flex items-center transition-all bg-gradient-to-r ${active.colors.gradient}`}
+                    className={`group relative px-8 py-4 rounded-full text-white font-bold text-lg shadow-xl overflow-hidden flex items-center transition-all bg-gradient-to-r ${active.colors.gradient}`}
                   >
-                    <span className="relative z-10">{language === 'mn' ? 'Бүртгүүлэх' : 'Start Journey'}</span>
+                    <span className="relative z-10">{common('startJourney')}</span>
                     <FaArrowRight className="absolute right-6 opacity-0 group-hover:opacity-100 transition-all transform translate-x-4 group-hover:translate-x-0" />
-
-                    {/* Shine Effect */}
                     <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 ease-in-out z-0" />
                   </motion.button>
                 </Link>
@@ -283,11 +246,10 @@ const HeroSection = () => {
                   <div className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 group-hover:bg-slate-900 group-hover:text-white transition-colors">
                     <FaPlayCircle size={14} />
                   </div>
-                  <span>How it works</span>
+                  <span>{common('howItWorks')}</span>
                 </button>
               </motion.div>
 
-              {/* Trust Indicator */}
               <motion.div variants={textItemVariant} className="flex items-center gap-4 pt-6 opacity-80">
                 <div className="flex -space-x-2">
                   <div className="w-8 h-8 rounded-full bg-slate-200 border-2 border-white" />
@@ -295,18 +257,14 @@ const HeroSection = () => {
                   <div className="w-8 h-8 rounded-full bg-slate-600 border-2 border-white flex items-center justify-center text-[10px] font-bold text-white">500+</div>
                 </div>
                 <div className="text-xs font-semibold text-slate-500">
-                  Trusted by families & <br /> students worldwide.
+                  {common('trusted')}
                 </div>
               </motion.div>
-
             </motion.div>
           </AnimatePresence>
         </div>
 
-        {/* ────────────────── 3. RIGHT: 3D CARD STACK ────────────────── */}
         <div className="relative order-1 lg:order-2 h-[500px] lg:h-[600px] flex items-center justify-center lg:justify-end perspective-[2000px]">
-
-          {/* Huge ISO Watermark (Behind) */}
           <motion.div
             key={`iso-${active.iso}`}
             initial={{ opacity: 0, x: 50 }}
@@ -319,7 +277,6 @@ const HeroSection = () => {
             {active.iso}
           </motion.div>
 
-          {/* The Image Card Container */}
           <div className="relative w-[320px] md:w-[380px] aspect-[3/4] z-20">
             <AnimatePresence initial={false} custom={direction} mode="popLayout">
               <motion.div
@@ -330,14 +287,13 @@ const HeroSection = () => {
                 animate="center"
                 exit="exit"
                 className="absolute inset-0 rounded-[2.5rem] overflow-hidden bg-white shadow-2xl"
-                style={{ boxShadow: `0 30px 60px -12px ${active.colors.primary}60` }} // Dynamic Colored Shadow
+                style={{ boxShadow: `0 30px 60px -12px ${active.colors.primary}60` }}
               >
                 <div className="w-full h-full relative group">
-                  {/* Background Image */}
                   <div className="relative w-full h-full">
                     <Image
                       src={active.img}
-                      alt={t(active.title)}
+                      alt={t(`${active.key}.title`)}
                       fill
                       unoptimized
                       className="object-cover transform scale-105 group-hover:scale-110 transition-transform duration-700"
@@ -345,28 +301,22 @@ const HeroSection = () => {
                       priority={index === 0}
                     />
                   </div>
-
-                  {/* Gradient Overlay */}
                   <div className={`absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80`} />
-
-                  {/* Top UI */}
                   <div className="absolute top-0 inset-x-0 p-6 flex justify-between items-start">
                     <div className="w-14 h-14 rounded-2xl bg-white/90 backdrop-blur-sm flex items-center justify-center text-3xl shadow-lg">
                       {active.flag}
                     </div>
                     <div className="px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-sm border border-white/20 text-white text-[10px] font-bold uppercase tracking-wide flex items-center gap-1">
-                      <FaCheckCircle className="text-emerald-400" /> Verified
+                      <FaCheckCircle className="text-emerald-400" /> {common('verified')}
                     </div>
                   </div>
-
-                  {/* Bottom Info Glass Card */}
                   <div className="absolute bottom-6 left-6 right-6">
                     <div className="bg-white/10 backdrop-blur-md border border-white/20 p-5 rounded-3xl text-white">
-                      <h4 className="text-2xl font-bold mb-1">{t(active.title)}</h4>
+                      <h4 className="text-2xl font-bold mb-1">{t(`${active.key}.title`)}</h4>
                       <div className="flex items-center gap-3 text-xs font-medium text-slate-200">
                         <span>Program ID: #{active.iso}00{index + 1}</span>
                         <span className="w-1 h-1 bg-white/50 rounded-full" />
-                        <span>Open Now</span>
+                        <span>{common('openNow')}</span>
                       </div>
                     </div>
                   </div>
@@ -374,7 +324,6 @@ const HeroSection = () => {
               </motion.div>
             </AnimatePresence>
 
-            {/* Navigation Buttons (Floating) */}
             <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex gap-4 z-30">
               <button
                 onClick={() => changeSlide(-1)}
@@ -392,10 +341,8 @@ const HeroSection = () => {
                 <FaChevronRight size={18} />
               </button>
             </div>
-
           </div>
 
-          {/* Decorative Card Stack (Visual Depth) - DISABLED ON MOBILE */}
           {mounted && !isMobile && (
             <motion.div
               animate={{
@@ -407,7 +354,6 @@ const HeroSection = () => {
             />
           )}
         </div>
-
       </div>
     </section>
   );

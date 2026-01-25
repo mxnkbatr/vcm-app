@@ -36,6 +36,34 @@ const UserSchema = new mongoose.Schema(
     documentsReviewedBy: { type: String, default: "" },    // Admin who reviewed
     documentsApprovedAt: { type: Date },
 
+    // --- DETAILED PROFILE ---
+    profile: {
+      sex: { type: String },
+      dob: { type: Date },
+      placeOfBirth: { type: String },
+      nationality: { type: String },
+      religion: { type: String },
+      phone: { type: String },
+      mobile: { type: String },
+      skype: { type: String },
+      bestTime: { type: String },
+      address: {
+        street: { type: String },
+        number: { type: String },
+        postalCode: { type: String },
+        city: { type: String },
+        country: { type: String },
+      },
+      fatherProfession: { type: String },
+      motherProfession: { type: String },
+      hobbies: { type: String },
+      educationLevel: { type: String },
+      languages: { type: String },
+      childcareExperience: { type: [String], default: [] },
+      householdTasks: { type: [String], default: [] },
+      motivation: { type: String },
+    },
+
     createdAt: { type: Date, default: Date.now },
   },
   { timestamps: true }

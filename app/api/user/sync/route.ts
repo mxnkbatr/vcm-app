@@ -30,17 +30,19 @@ export async function POST(req: Request) {
     // 4. Database Operation
     console.log("4. Attempting MongoDB Update/Create...");
     
-    // Using simple create first to see if findOneAndUpdate is the issue,
-    // but findOneAndUpdate is safer for duplicates.
     const user = await User.findOneAndUpdate(
       { clerkId: clerkUser.id },
       {
-        clerkId: clerkUser.id,
-        email: clerkUser.emailAddresses[0].emailAddress,
-        studentId: studentId ? studentId.toUpperCase() : "NO-ID",
-        fullName: fullName || "New User",
-        university: university || "MNUMS",
-        role: "guest", // Default role
+        $set: {
+          email: clerkUser.emailAddresses[0].emailAddress,
+          studentId: studentId ? studentId.toUpperCase() : "NO-ID",
+          fullName: fullName || "New User",
+          university: university || "MNUMS",
+        },
+        $setOnInsert: {
+          clerkId: clerkUser.id,
+          role: "guest",
+        }
       },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );

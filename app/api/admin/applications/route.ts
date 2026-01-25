@@ -32,9 +32,21 @@ export async function GET() {
 
   try {
     await connectToDB();
-    const applications = await Application.find({}).sort({ createdAt: -1 });
-    return NextResponse.json(applications);
+    
+    // We want to fetch applications and if they have a userId (clerkId), attach the user's detailed profile
+    const applications = await Application.find({}).sort({ createdAt: -1 }).lean();
+    
+    const enrichedApplications = await Promise.all(applications.map(async (app: any) => {
+      if (app.userId) {
+        const user = await User.findOne({ clerkId: app.userId }).select('profile').lean();
+        return { ...app, userProfile: user?.profile || null };
+      }
+      return { ...app, userProfile: null };
+    }));
+
+    return NextResponse.json(enrichedApplications);
   } catch (error) {
+    console.error("Fetch applications error:", error);
     return NextResponse.json({ error: "Failed to fetch applications" }, { status: 500 });
   }
 }
@@ -57,20 +69,25 @@ export async function PUT(req: Request) {
     application.status = status;
     await application.save();
 
-    // If approved and user exists, upgrade user to student
+    // If approved and user exists, upgrade user to student and sync latest info
     if (status === 'approved' && application.userId) {
        const country = PROGRAM_MAP[application.programId] || "General";
        
        await User.findOneAndUpdate(
          { clerkId: application.userId },
          { 
-            role: 'student', // Note: Case sensitive? Frontend uses 'Student' in display, but 'member' in DB. Let's use 'student' (lowercase) to match DB convention likely, or 'Student' if that's what we decided. 
-            // In User.ts default is "member".
-            // In Admin page, mock users had "Student".
-            // I'll use "student" (lowercase) as code usually normalizes it, but I'll check admin page display logic.
-            country: country,
-            step: "Documents"
-         }
+            $set: {
+                role: 'student', 
+                country: country,
+                step: "Documents",
+                fullName: `${application.firstName} ${application.lastName}`,
+                email: application.email,
+                "profile.phone": application.phone,
+                "profile.languages": `Level: ${application.level}`,
+                "profile.motivation": application.message
+            }
+         },
+         { new: true, upsert: true }
        );
     }
 

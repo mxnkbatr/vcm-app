@@ -1,0 +1,193 @@
+{
+  "common": {
+    "startJourney": "Start Journey",
+    "howItWorks": "How it works",
+    "verified": "Verified",
+    "openNow": "Open Now",
+    "explore": "Explore",
+    "trusted": "Trusted by families & students worldwide.",
+    "loading": "Loading Profile..."
+  },
+  "navbar": {
+    "logo": "MONGOLIAN AUPAIR",
+    "home": "Home",
+    "about": "About",
+    "program": "Au Pair Program",
+    "events": "Events",
+    "lessons": "Lessons",
+    "booking": "Booking",
+    "news": "News",
+    "dashboard": "Dashboard",
+    "signin": "Sign In",
+    "register": "Register",
+    "germany": "Germany",
+    "austria": "Austria",
+    "switzerland": "Switzerland",
+    "belgium": "Belgium",
+    "desc_de": "Learn language for free in Germany",
+    "desc_at": "Learn language for free in Austria",
+    "desc_ch": "Learn language for free in Switzerland",
+    "desc_be": "Learn language for free in Belgium"
+  },
+  "dashboard": {
+    "hello": "Hello",
+    "activeStudent": "Active Student",
+    "guestAccount": "Guest Account",
+    "findEvents": "Find Events",
+    "applicationSnapshot": "Application Snapshot",
+    "fullRecord": "Full synchronized record",
+    "missing": "Missing",
+    "identity": "Identity & Contact",
+    "sex": "Sex",
+    "nationality": "Nationality",
+    "birth": "Birth",
+    "phoneMobile": "Phone / Mobile",
+    "address": "Current Address",
+    "family": "Family & Background",
+    "fatherJob": "Father's Job",
+    "motherJob": "Mother's Job",
+    "languages": "Languages",
+    "education": "Education",
+    "driverLicense": "Driver License",
+    "yes": "Yes",
+    "no": "No",
+    "childcare": "Childcare & Tasks",
+    "ageExperience": "Age Experience",
+    "noneListed": "None listed",
+    "household": "Household Capabilities",
+    "timeline": "Timeline",
+    "motivation": "Your Personal Motivation Letter",
+    "motivationMissing": "You haven't provided a motivation letter yet. Completing this helps your application immensely.",
+    "currentStep": "Current Step",
+    "ready": "Ready",
+    "pending": "Application Pending",
+    "underReview": "Under Review",
+    "startJourneyDesc": "You are currently a Guest. Apply now to become a Student.",
+    "applyNow": "Apply Now",
+    "actionRequired": "Action Required",
+    "history": "History",
+    "noActivity": "No Recent Activity",
+    "studyMaterial": "Study Material",
+    "languageTips": "Language Tips",
+    "cultureGuide": "Culture Guide",
+    "steps": {
+      "Applied": "Applied",
+      "Documents": "Documents",
+      "Interview": "Interview",
+      "Matching": "Matching",
+      "Visa": "Visa",
+      "Departure": "Departure"
+    },
+    "instructions": {
+      "Applied": {
+        "title": "Initial Review",
+        "action": "Our team is currently verifying your request. Please wait for approval to start the document phase.",
+        "button": "View Program Details"
+      },
+      "Documents": {
+        "title": "Documents Needed",
+        "action": "You are approved! Please upload your passport, certificates, and medical records to proceed.",
+        "button": "Go to Uploads"
+      },
+      "Interview": {
+        "title": "Agency Interview",
+        "action": "Prepare for your screening. We will contact you via Skype or Phone to schedule your interview.",
+        "button": "Preparation Tips"
+      },
+      "Matching": {
+        "title": "Family Matching",
+        "action": "Your profile is live! We are sharing it with host families. Keep your phone reachable for matching calls.",
+        "button": "My Application"
+      },
+      "Visa": {
+        "title": "Visa Process",
+        "action": "Match found! Prepare your embassy documents and schedule your visa appointment immediately.",
+        "button": "Visa Checklist"
+      },
+      "Departure": {
+        "title": "Final Departure",
+        "action": "Visa granted! Pack your bags and check your pre-departure guide for your trip to Europe.",
+        "button": "Travel Guide"
+      }
+    }
+  },
+  "hero": {
+    "germany": {
+      "title": "Germany",
+      "subtitle": "Economic Heart of Europe",
+      "desc": "Master the language in a world-leading nation while experiencing European culture and kickstarting your career."
+    },
+    "austria": {
+      "title": "Austria",
+      "subtitle": "Cradle of Classical Art",
+      "desc": "A golden opportunity to master German while living amidst the breathtaking beauty of the Alps."
+    },
+    "belgium": {
+      "title": "Belgium",
+      "subtitle": "International Hub",
+      "desc": "Experience multilingual culture at the headquarters of the European Union."
+    },
+    "switzerland": {
+      "title": "Switzerland",
+      "subtitle": "Highest Quality of Life",
+      "desc": "Live with the world's highest allowance, purest air, and safest environment."
+    }
+  },
+  "Auth": {
+    "home": "Home",
+    "future": "Future",
+    "signupSubtitle": "The first step to traveling the world, learning a language, and experiencing a new culture.",
+    "fullNamePlaceholder": "Full Name",
+    "emailPlaceholder": "Email Address",
+    "passwordPlaceholder": "Password",
+    "signUpButton": "Sign Up",
+    "alreadyHaveAccount": "Already have an account?",
+    "signIn": "Sign In"
+  },
+  "events": {
+    "back": "Back to Events",
+    "date": "Date",
+    "time": "Time",
+    "location": "Location",
+    "category": "Category",
+    "share": "Share",
+    "join": "Register Now",
+    "joined": "Registered",
+    "attendees": "Attendees",
+    "university": "University",
+    "loginRequired": "Login Required",
+    "notFound": "Event Not Found",
+    "returnToEvents": "Return to Events",
+    "registrationSuccess": "Registration Success!",
+    "joinedSuccess": "You are registered for this event. See you there!",
+    "secureSpot": "Secure your spot for this event. Limited seats available!",
+    "readyToJoin": "Ready to join?"
+  },
+  "news": {
+    "back": "Back to Feed",
+    "published": "Published on",
+    "author": "By",
+    "share": "Share",
+    "subscribe": "Stay in the loop",
+    "readingTime": "min read",
+    "saveArticle": "Save Article",
+    "comments": "Comments",
+    "write": "Write",
+    "subscribeDesc": "Don't miss the next update. Join 1,200+ members in our weekly digest.",
+    "joinCommunity": "Join Community",
+    "placeholderEmail": "Your email address"
+  },
+  "opportunities": {
+    "back": "Back",
+    "applyNow": "Apply Now",
+    "deadline": "Deadline",
+    "posted": "Posted",
+    "location": "Location",
+    "requirements": "Requirements",
+    "share": "Share",
+    "about": "About",
+    "loading": "Loading...",
+    "notFound": "Opportunity Not Found",
+    "applyDesc": "Don't miss this chance. Applications close on {deadline}."
+  }
+}

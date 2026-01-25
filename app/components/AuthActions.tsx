@@ -6,7 +6,7 @@ import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { Motion as motion } from "./MotionProxy";
 
 interface AuthActionsProps {
-  lang: "mn" | "en";
+  lang: "mn" | "en"| "de";
   BRAND: { RED: string };
   CONTENT: any;
   isMobile?: boolean;

@@ -1,25 +1,53 @@
 import { NextResponse } from "next/server";
-import { connectToDB } from "@/lib/db";
+import connectToDB from "@/lib/db";
 import Application from "@/lib/models/Application";
-import { currentUser } from "@clerk/nextjs/server";
+import User from "@/lib/models/User";
+import { auth } from "@clerk/nextjs/server";
 
 export async function POST(req: Request) {
   try {
     await connectToDB();
-    
-    // Get current user if logged in
-    const user = await currentUser();
-    
-    const body = await req.json();
-    
+    const { userId: clerkId } = await auth();
+    const data = await req.json();
+
+    const {
+      programId,
+      firstName,
+      lastName,
+      email,
+      phone,
+      age,
+      level,
+      message,
+    } = data;
+
+    // Validation
+    if (!programId || !firstName || !lastName || !email || !phone || !age || !level) {
+      return NextResponse.json(
+        { error: "Registration incomplete. Please fill all required fields." },
+        { status: 400 }
+      );
+    }
+
     const application = await Application.create({
-      ...body,
-      userId: user ? user.id : undefined // Link to Clerk ID if available
+      programId,
+      firstName,
+      lastName,
+      email,
+      phone,
+      age,
+      level,
+      message,
+      userId: clerkId, // Store the clerkId directly for reliable lookup
+      status: 'pending'
     });
 
-    return NextResponse.json({ success: true, application }, { status: 201 });
-  } catch (error) {
-    console.error("Application submission error:", error);
-    return NextResponse.json({ error: "Failed to submit application" }, { status: 500 });
+    return NextResponse.json(application, { status: 201 });
+  } catch (error: any) {
+    console.error("Application creation error:", error);
+    return NextResponse.json(
+      { error: "Failed to submit application" },
+      { status: 500 }
+    );
   }
 }

@@ -4,6 +4,7 @@ import { connectToDB } from "@/lib/db";
 import User from "@/lib/models/User";
 import News from "@/lib/models/News";
 import Event from "@/lib/models/Events";
+import Application from "@/lib/models/Application";
 
 async function isAdmin() {
   const clerkUser = await currentUser();
@@ -29,17 +30,17 @@ export async function GET() {
   await connectToDB();
 
   try {
-    const [totalUsers, blogsPublished, pendingBookings] = await Promise.all([
+    const [totalUsers, blogsPublished, pendingApplications] = await Promise.all([
       User.countDocuments({}),
       News.countDocuments({ status: 'published' }),
-      Event.countDocuments({ status: 'upcoming' })
+      Application.countDocuments({ status: 'pending' })
     ]);
 
     return NextResponse.json({
       totalUsers,
       blogsPublished,
-      pendingBookings,
-      countries: 4 // Placeholder as requested
+      pendingApplications,
+      countries: 4 
     });
   } catch (error) {
     console.error("Stats Error:", error);

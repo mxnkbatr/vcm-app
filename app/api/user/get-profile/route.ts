@@ -32,7 +32,7 @@ export async function GET(req: Request) {
       });
     }
 
-    console.log("User found in DB:", user.email);
+    console.log("User found in DB:", user.email, "Role:", user.role, "Step:", user.step, "Badges:", user.badges, "Points:", user.points,  "Profile:", user.profile);
     // Mock activity for now if empty
     const activity = user.activityHistory || [];
 
