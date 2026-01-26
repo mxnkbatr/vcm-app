@@ -201,7 +201,7 @@ const UsSection = () => {
                 <div className="aspect-[3/4] relative group">
                   {/* Using a professional business image from Unsplash */}
                   <Image
-                    src="/ceo.webp"
+                    src="https://res.cloudinary.com/dc127wztz/image/upload/v1768996172/zu47lypqyoup0ylylou2.webp"
                     alt="Agency Founder"
                     fill
                     className="object-cover transform scale-100 group-hover:scale-105 transition-transform duration-700 ease-in-out"
