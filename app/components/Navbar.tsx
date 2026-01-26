@@ -42,21 +42,9 @@ export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
   const pathname = usePathname();
-  const { resolvedTheme, setTheme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const { scrollY } = useScroll();
   const isMobile = useIsMobile();
-  const content = {
-    login: { en: "Log In", mn: "Нэвтрэх", de: "Anmelden" },
-    dashboard: { en: "Dashboard", mn: "Хяналтын самбар", de: "Dashboard" },
-    home: t("home"),
-    about: t("about"),
-    program: t("program"),
-    events: t("events"),
-    lessons: t("lessons"),
-    booking: t("booking"),
-    news: t("news"),
-    logo: t("logo"),
-  };
 
   useEffect(() => setMounted(true), []);
 
@@ -191,7 +179,7 @@ export default function Navbar() {
           <div className="flex items-center gap-2 shrink-0">
             <LanguageToggle />
             <div className="h-5 w-[1px] bg-current/10 mx-1" />
-            <AuthActions lang={language} BRAND={BRAND} CONTENT={content} isMobile={false} />
+            <AuthActions BRAND={BRAND} isMobile={false} />
           </div>
         </nav>
       </motion.header>
@@ -216,7 +204,7 @@ export default function Navbar() {
 
         <div className="flex items-center gap-2 pointer-events-auto min-w-[120px] justify-end">
           <LanguageToggle />
-          <AuthActions lang={language} BRAND={BRAND} CONTENT={content} isMobile={true} />
+          <AuthActions BRAND={BRAND} isMobile={true} />
         </div>
       </div>
 

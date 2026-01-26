@@ -8,7 +8,7 @@ import Application from "@/lib/models/Application";
 
 async function isAdmin() {
   const clerkUser = await currentUser();
-  
+
   if (!clerkUser) return false;
 
   // 1. Check metadata directly (Fastest)
@@ -30,17 +30,23 @@ export async function GET() {
   await connectToDB();
 
   try {
-    const [totalUsers, blogsPublished, pendingApplications] = await Promise.all([
+    const [totalUsers, blogsPublished, pendingApplications, studentsCount, adminsCount, guestsCount] = await Promise.all([
       User.countDocuments({}),
       News.countDocuments({ status: 'published' }),
-      Application.countDocuments({ status: 'pending' })
+      Application.countDocuments({ status: 'pending' }),
+      User.countDocuments({ role: 'student' }),
+      User.countDocuments({ role: 'admin' }),
+      User.countDocuments({ role: 'guest' })
     ]);
 
     return NextResponse.json({
       totalUsers,
       blogsPublished,
       pendingApplications,
-      countries: 4 
+      studentsCount,
+      adminsCount,
+      guestsCount,
+      countries: 4
     });
   } catch (error) {
     console.error("Stats Error:", error);

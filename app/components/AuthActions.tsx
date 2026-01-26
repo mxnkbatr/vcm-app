@@ -4,15 +4,15 @@ import React from "react";
 import { Link } from "@/navigation";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { Motion as motion } from "./MotionProxy";
+import { useTranslations } from "next-intl";
 
 interface AuthActionsProps {
-  lang: "mn" | "en" | "de";
   BRAND: { RED: string };
-  CONTENT: any;
   isMobile?: boolean;
 }
 
-const AuthActions = ({ lang, BRAND, CONTENT, isMobile }: AuthActionsProps) => {
+const AuthActions = ({ BRAND, isMobile }: AuthActionsProps) => {
+  const t = useTranslations("Auth");
   if (isMobile) {
     return (
       <>
@@ -23,7 +23,7 @@ const AuthActions = ({ lang, BRAND, CONTENT, isMobile }: AuthActionsProps) => {
               className="px-4 h-9 rounded-full text-white text-[9px] font-black tracking-widest uppercase shadow-lg shadow-red-900/30 border border-white/20 whitespace-nowrap"
               style={{ backgroundColor: BRAND.RED }}
             >
-              {CONTENT.login[lang]}
+              {t('signIn')}
             </motion.button>
           </Link>
         </SignedOut>
@@ -46,7 +46,7 @@ const AuthActions = ({ lang, BRAND, CONTENT, isMobile }: AuthActionsProps) => {
             className="text-[9px] font-black uppercase tracking-widest opacity-70 hover:opacity-100 border-b-2 hidden xl:block"
             style={{ borderColor: BRAND.RED }}
           >
-            {CONTENT.dashboard[lang]}
+            {t('dashboard')}
           </Link>
           <div className="w-8 h-8 flex items-center justify-center">
             <UserButton />
@@ -60,7 +60,7 @@ const AuthActions = ({ lang, BRAND, CONTENT, isMobile }: AuthActionsProps) => {
             className="px-5 py-2 min-w-[80px] rounded-full text-white text-[9px] font-black uppercase tracking-widest shadow-xl shadow-red-900/20 transition-all active:scale-95 hover:brightness-110"
             style={{ backgroundColor: BRAND.RED }}
           >
-            {CONTENT.login[lang]}
+            {t('signIn')}
           </button>
         </Link>
       </SignedOut>

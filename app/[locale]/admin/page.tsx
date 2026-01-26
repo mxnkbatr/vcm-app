@@ -40,6 +40,7 @@ import {
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { useTranslations } from 'next-intl';
 import LessonsManager from "@/app/components/admin/LessonsManager";
 
 // --- CONSTANTS ---
@@ -96,8 +97,8 @@ const SidebarItem = ({ icon: Icon, label, active, onClick }: any) => (
    <button
       onClick={onClick}
       className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-bold transition-all ${active
-            ? "bg-white text-slate-900 shadow-sm"
-            : "text-slate-500 hover:bg-slate-200/50 hover:text-slate-700"
+         ? "bg-white text-slate-900 shadow-sm"
+         : "text-slate-500 hover:bg-slate-200/50 hover:text-slate-700"
          }`}
    >
       <Icon size={18} className={active ? "text-[#E31B23]" : "text-slate-400"} />
@@ -117,6 +118,7 @@ const TabButton = ({ active, onClick, icon: Icon, label }: any) => (
 );
 
 const UserMasterManagementModal = ({ user, onClose, onSave }: { user: any; onClose: () => void; onSave: (data: any) => void }) => {
+   const t = useTranslations("admin");
    const [activeTab, setActiveTab] = useState("basic");
    const [formData, setFormData] = useState({ ...user });
 
@@ -144,13 +146,13 @@ const UserMasterManagementModal = ({ user, onClose, onSave }: { user: any; onClo
                <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white"><Settings size={24} /></div>
                   <div>
-                     <h3 className="text-2xl font-black">Master User Management</h3>
-                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Complete control over ID: {user._id}</p>
+                     <h3 className="text-2xl font-black">{t("modals.master.title")}</h3>
+                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">{t("modals.master.control")}: {user._id}</p>
                   </div>
                </div>
                <div className="flex bg-slate-100 p-1 rounded-xl">
-                  {["basic", "profile", "documents"].map((t: any) => (
-                     <button key={t} onClick={() => setActiveTab(t)} className={`px-6 py-2 rounded-lg text-xs font-black uppercase transition-all ${activeTab === t ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}>{t}</button>
+                  {["basic", "profile", "documents"].map((tab: any) => (
+                     <button key={tab} onClick={() => setActiveTab(tab)} className={`px-6 py-2 rounded-lg text-xs font-black uppercase transition-all ${activeTab === tab ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}>{tab}</button>
                   ))}
                </div>
                <button onClick={onClose} className="p-3 hover:bg-slate-200 rounded-full transition-colors"><X size={20} /></button>
@@ -160,9 +162,9 @@ const UserMasterManagementModal = ({ user, onClose, onSave }: { user: any; onClo
                {activeTab === "basic" && (
                   <div className="grid grid-cols-2 gap-8">
                      <div className="space-y-6">
-                        <h4 className="text-xs font-black uppercase text-[#E31B23] tracking-widest">Core Information</h4>
-                        <Input label="Full Name" value={formData.fullName} onChange={(v: string) => setFormData({ ...formData, fullName: v })} />
-                        <Input label="Email Address" value={formData.email} onChange={(v: string) => setFormData({ ...formData, email: v })} />
+                        <h4 className="text-xs font-black uppercase text-[#E31B23] tracking-widest">{t("modals.master.core")}</h4>
+                        <Input label={t("modals.master.fullName")} value={formData.fullName} onChange={(v: string) => setFormData({ ...formData, fullName: v })} />
+                        <Input label={t("modals.master.email")} value={formData.email} onChange={(v: string) => setFormData({ ...formData, email: v })} />
                         <div className="grid grid-cols-2 gap-4">
                            <div>
                               <label className="block text-xs font-bold text-slate-500 mb-1">Role</label>
@@ -179,7 +181,7 @@ const UserMasterManagementModal = ({ user, onClose, onSave }: { user: any; onClo
                         </div>
                      </div>
                      <div className="space-y-6">
-                        <h4 className="text-xs font-black uppercase text-[#E31B23] tracking-widest">Journey Details</h4>
+                        <h4 className="text-xs font-black uppercase text-[#E31B23] tracking-widest">{t("modals.master.journey")}</h4>
                         <div className="grid grid-cols-2 gap-4">
                            <div>
                               <label className="block text-xs font-bold text-slate-500 mb-1">Country</label>
@@ -298,6 +300,7 @@ const UserMasterManagementModal = ({ user, onClose, onSave }: { user: any; onClo
 };
 
 const ApplicationDetailsModal = ({ app, onClose, onMasterEdit }: { app: any; onClose: () => void; onMasterEdit: (user: any) => void }) => {
+   const t = useTranslations("admin");
    const profile = app.userProfile;
    return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -348,10 +351,10 @@ const ApplicationDetailsModal = ({ app, onClose, onMasterEdit }: { app: any; onC
                               <User size={14} /> Personal Details
                            </h4>
                            <div className="grid grid-cols-2 gap-4">
-                              <div><p className="text-[10px] font-bold text-slate-400 uppercase">Sex</p><p className="font-bold text-sm capitalize">{profile.sex || "-"}</p></div>
-                              <div><p className="text-[10px] font-bold text-slate-400 uppercase">Nationality</p><p className="font-bold text-sm">{profile.nationality || "-"}</p></div>
+                              <div><p className="text-[10px] font-bold text-slate-400 uppercase">{t("users.expanded.sex")}</p><p className="font-bold text-sm capitalize">{profile.sex || "-"}</p></div>
+                              <div><p className="text-[10px] font-bold text-slate-400 uppercase">{t("users.expanded.nationality")}</p><p className="font-bold text-sm">{profile.nationality || "-"}</p></div>
                               <div><p className="text-[10px] font-bold text-slate-400 uppercase">DOB</p><p className="font-bold text-sm">{profile.dob ? new Date(profile.dob).toLocaleDateString() : "-"}</p></div>
-                              <div><p className="text-[10px] font-bold text-slate-400 uppercase">Religion</p><p className="font-bold text-sm">{profile.religion || "-"}</p></div>
+                              <div><p className="text-[10px] font-bold text-slate-400 uppercase">{t("users.expanded.religion")}</p><p className="font-bold text-sm">{profile.religion || "-"}</p></div>
                            </div>
                         </section>
                         <section>
@@ -397,6 +400,7 @@ const ApplicationDetailsModal = ({ app, onClose, onMasterEdit }: { app: any; onC
 
 // --- MAIN PAGE ---
 export default function AdminDashboard() {
+   const t = useTranslations("admin");
    const [activeTab, setActiveTab] = useState("dashboard");
    const [loading, setLoading] = useState(true);
    const [expandedUser, setExpandedUser] = useState<string | null>(null);
@@ -413,9 +417,12 @@ export default function AdminDashboard() {
    const [lessons, setLessons] = useState<any[]>([]);
 
    const [stats, setStats] = useState({
-      activeStudents: 0,
+      totalUsers: 0,
       pendingApps: 0,
       articles: 0,
+      studentsCount: 0,
+      adminsCount: 0,
+      guestsCount: 0,
       todaysBookings: 0
    });
 
@@ -493,9 +500,12 @@ export default function AdminDashboard() {
          if (statsRes.ok) {
             const s = await statsRes.json();
             setStats({
-               activeStudents: s.totalUsers || 0,
-               pendingApps: s.pendingBookings || 0,
+               totalUsers: s.totalUsers || 0,
+               pendingApps: s.pendingApplications || 0,
                articles: s.blogsPublished || 0,
+               studentsCount: s.studentsCount || 0,
+               adminsCount: s.adminsCount || 0,
+               guestsCount: s.guestsCount || 0,
                todaysBookings: 0
             });
          }
@@ -616,19 +626,19 @@ export default function AdminDashboard() {
                   <span className="font-black text-xl tracking-tight">AuPair<span className="text-[#E31B23]">Admin</span></span>
                </div>
                <nav className="space-y-1">
-                  <SidebarItem icon={LayoutDashboard} label="Dashboard" active={activeTab === "dashboard"} onClick={() => setActiveTab("dashboard")} />
-                  <SidebarItem icon={Users} label="Members & Roles" active={activeTab === "users"} onClick={() => setActiveTab("users")} />
-                  <SidebarItem icon={ClipboardList} label="Applications" active={activeTab === "applications"} onClick={() => setActiveTab("applications")} />
-                  <SidebarItem icon={Calendar} label="Events & Jobs" active={activeTab === "events"} onClick={() => setActiveTab("events")} />
-                  <SidebarItem icon={FaBook} label="Au Pair Lessons" active={activeTab === "lessons"} onClick={() => setActiveTab("lessons")} />
-                  <SidebarItem icon={FileText} label="Blog & Content" active={activeTab === "blog"} onClick={() => setActiveTab("blog")} />
+                  <SidebarItem icon={LayoutDashboard} label={t("sidebar.dashboard")} active={activeTab === "dashboard"} onClick={() => setActiveTab("dashboard")} />
+                  <SidebarItem icon={Users} label={t("sidebar.users")} active={activeTab === "users"} onClick={() => setActiveTab("users")} />
+                  <SidebarItem icon={ClipboardList} label={t("sidebar.applications")} active={activeTab === "applications"} onClick={() => setActiveTab("applications")} />
+                  <SidebarItem icon={Calendar} label={t("sidebar.events")} active={activeTab === "events"} onClick={() => setActiveTab("events")} />
+                  <SidebarItem icon={FaBook} label={t("sidebar.lessons")} active={activeTab === "lessons"} onClick={() => setActiveTab("lessons")} />
+                  <SidebarItem icon={FileText} label={t("sidebar.blog")} active={activeTab === "blog"} onClick={() => setActiveTab("blog")} />
                </nav>
             </div>
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3">
                <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 font-bold">A</div>
                <div>
-                  <p className="text-sm font-bold">Administrator</p>
-                  <p className="text-[10px] text-[#00C896] font-bold uppercase">Online</p>
+                  <p className="text-sm font-bold">{t("sidebar.role")}</p>
+                  <p className="text-[10px] text-[#00C896] font-bold uppercase">{t("sidebar.online")}</p>
                </div>
             </div>
          </aside>
@@ -640,9 +650,9 @@ export default function AdminDashboard() {
             <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
                <div>
                   <h1 className="text-3xl font-black text-slate-900 mb-1 capitalize tracking-tight">
-                     {activeTab === "blog" ? "Blog & Content Library" : activeTab}
+                     {activeTab === "blog" ? t("header.blog") : t(`sidebar.${activeTab}`)}
                   </h1>
-                  <p className="text-slate-400 text-sm font-bold">Overview and management.</p>
+                  <p className="text-slate-400 text-sm font-bold">{t("header.overview")}</p>
                </div>
                <div className="flex gap-4">
                   <button className="w-10 h-10 rounded-full bg-white border border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#E31B23] hover:shadow-md transition-all relative">
@@ -655,23 +665,25 @@ export default function AdminDashboard() {
             {/* ─── DASHBOARD VIEW ─── */}
             {activeTab === "dashboard" && (
                <div className="space-y-8">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                     <StatCard label="Active Students" val={stats.activeStudents} icon={Users} color={BRAND.RED} />
-                     <StatCard label="Pending Applications" val={stats.pendingApps} icon={UserCheck} color={BRAND.GREEN} />
-                     <StatCard label="Articles" val={stats.articles} icon={FileText} color="#F59E0B" />
-                     <StatCard label="Today's Bookings" val={stats.todaysBookings} icon={Clock} color="#3B82F6" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+                     <StatCard label={t("dashboard.stats.totalUsers")} val={stats.totalUsers} icon={Users} color={BRAND.DARK} />
+                     <StatCard label={t("dashboard.stats.students")} val={stats.studentsCount} icon={GraduationCap} color={BRAND.RED} />
+                     <StatCard label={t("dashboard.stats.admins")} val={stats.adminsCount} icon={UserCheck} color={BRAND.GREEN} />
+                     <StatCard label={t("dashboard.stats.guests")} val={stats.guestsCount} icon={User} color="#64748B" />
+                     <StatCard label={t("dashboard.stats.pendingApps")} val={stats.pendingApps} icon={ClipboardList} color="#F59E0B" />
+                     <StatCard label={t("dashboard.stats.articles")} val={stats.articles} icon={FileText} color="#3B82F6" />
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                      <div className="lg:col-span-2 bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100">
                         <div className="flex justify-between items-center mb-6">
-                           <h3 className="font-black text-lg text-slate-800">Booking Queue</h3>
-                           <button onClick={() => setActiveTab("bookings")} className="text-[10px] font-black bg-slate-50 px-3 py-1 rounded-lg uppercase text-slate-400">View All</button>
+                           <h3 className="font-black text-lg text-slate-800">{t("dashboard.bookings.queue")}</h3>
+                           <button onClick={() => setActiveTab("bookings")} className="text-[10px] font-black bg-slate-50 px-3 py-1 rounded-lg uppercase text-slate-400">{t("dashboard.bookings.viewAll")}</button>
                         </div>
 
                         {/* --- UPCOMING BOOKINGS --- */}
                         <div className="mb-8">
-                           <h4 className="text-xs font-black text-[#E31B23] uppercase tracking-widest mb-4">Upcoming Appointments</h4>
+                           <h4 className="text-xs font-black text-[#E31B23] uppercase tracking-widest mb-4">{t("dashboard.bookings.upcoming")}</h4>
                            <div className="space-y-3">
                               {upcomingBookings.length > 0 ? upcomingBookings.slice(0, 3).map((b: any) => (
                                  <div key={b.id} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all">
@@ -688,8 +700,8 @@ export default function AdminDashboard() {
                                     <div className="flex gap-2">
                                        {b.status === 'pending' ? (
                                           <>
-                                             <button onClick={() => handleUpdateBooking(b.id, 'confirmed')} className="px-3 py-1.5 rounded-lg bg-green-50 text-[#00C896] text-[10px] font-black uppercase hover:bg-[#00C896] hover:text-white transition-colors">Confirm</button>
-                                             <button onClick={() => handleUpdateBooking(b.id, 'rejected')} className="px-3 py-1.5 rounded-lg bg-red-50 text-[#E31B23] text-[10px] font-black uppercase hover:bg-[#E31B23] hover:text-white transition-colors">Reject</button>
+                                             <button onClick={() => handleUpdateBooking(b.id, 'confirmed')} className="px-3 py-1.5 rounded-lg bg-green-50 text-[#00C896] text-[10px] font-black uppercase hover:bg-[#00C896] hover:text-white transition-colors">{t("dashboard.bookings.confirm")}</button>
+                                             <button onClick={() => handleUpdateBooking(b.id, 'rejected')} className="px-3 py-1.5 rounded-lg bg-red-50 text-[#E31B23] text-[10px] font-black uppercase hover:bg-[#E31B23] hover:text-white transition-colors">{t("dashboard.bookings.reject")}</button>
                                           </>
                                        ) : (
                                           <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase ${b.status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
@@ -699,14 +711,14 @@ export default function AdminDashboard() {
                                     </div>
                                  </div>
                               )) : (
-                                 <p className="text-sm text-slate-400 font-medium italic">No upcoming appointments.</p>
+                                 <p className="text-sm text-slate-400 font-medium italic">{t("dashboard.bookings.noUpcoming")}</p>
                               )}
                            </div>
                         </div>
 
                         {/* --- PAST / HISTORY --- */}
                         <div>
-                           <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Recent History</h4>
+                           <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">{t("dashboard.bookings.history")}</h4>
                            <div className="space-y-3 opacity-80 hover:opacity-100 transition-opacity">
                               {pastBookings.length > 0 ? pastBookings.slice(0, 3).map((b: any) => (
                                  <div key={b.id} className="flex items-center justify-between p-3 bg-[#FAFAFA] rounded-xl border border-slate-50">
@@ -722,7 +734,7 @@ export default function AdminDashboard() {
                                     <span className={`text-[10px] font-bold uppercase ${b.status === 'completed' ? 'text-green-600' : 'text-slate-400'}`}>{b.status}</span>
                                  </div>
                               )) : (
-                                 <p className="text-sm text-slate-400 font-medium italic">No history available.</p>
+                                 <p className="text-sm text-slate-400 font-medium italic">{t("dashboard.bookings.noHistory")}</p>
                               )}
                            </div>
                         </div>
@@ -730,13 +742,13 @@ export default function AdminDashboard() {
 
                      <div className="bg-slate-900 text-white rounded-[2.5rem] p-8 relative overflow-hidden flex flex-col justify-center">
                         <div className="absolute top-0 right-0 w-48 h-48 bg-[#E31B23] rounded-full blur-[90px] opacity-20" />
-                        <h3 className="font-black text-lg mb-6 relative z-10">Quick Actions</h3>
+                        <h3 className="font-black text-lg mb-6 relative z-10">{t("dashboard.quickActions.title")}</h3>
                         <div className="space-y-3 relative z-10">
                            <button onClick={() => setActiveTab("blog")} className="w-full py-4 rounded-2xl bg-white/5 hover:bg-[#E31B23] text-sm font-bold flex items-center justify-center gap-2 transition-all border border-white/10">
-                              <Plus size={16} /> Write Blog Post
+                              <Plus size={16} /> {t("dashboard.quickActions.writeBlog")}
                            </button>
                            <button onClick={() => setActiveTab("applications")} className="w-full py-4 rounded-2xl bg-white/5 hover:bg-[#00C896] text-sm font-bold flex items-center justify-center gap-2 transition-all border border-white/10">
-                              <Users size={16} /> Verify New Users
+                              <Users size={16} /> {t("dashboard.quickActions.verifyUsers")}
                            </button>
                         </div>
                      </div>
@@ -748,16 +760,16 @@ export default function AdminDashboard() {
             {activeTab === "applications" && (
                <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
                   <div className="p-6 border-b border-slate-50">
-                     <h2 className="text-xl font-black text-slate-900">Program Applications</h2>
+                     <h2 className="text-xl font-black text-slate-900">{t("applications.title")}</h2>
                   </div>
                   <div className="overflow-x-auto">
                      <table className="w-full text-left min-w-[800px]">
                         <thead className="bg-[#FAFAFA] text-slate-400 text-[10px] uppercase font-black tracking-widest">
                            <tr>
-                              <th className="px-8 py-4">Applicant</th>
-                              <th className="px-8 py-4">Program</th>
-                              <th className="px-8 py-4">Status</th>
-                              <th className="px-8 py-4 text-right">Actions</th>
+                              <th className="px-8 py-4">{t("applications.table.applicant")}</th>
+                              <th className="px-8 py-4">{t("applications.table.program")}</th>
+                              <th className="px-8 py-4">{t("applications.table.status")}</th>
+                              <th className="px-8 py-4 text-right">{t("applications.table.actions")}</th>
                            </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
@@ -770,7 +782,7 @@ export default function AdminDashboard() {
                                     </div>
                                  </td>
                                  <td className="px-8 py-5 text-sm">{app.programId}</td>
-                                 <td className="px-8 py-5"><span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase ${app.status === 'approved' ? 'bg-green-50 text-[#00C896]' : app.status === 'rejected' ? 'bg-red-50 text-[#E31B23]' : 'bg-amber-50 text-amber-500'}`}>{app.status}</span></td>
+                                 <td className="px-8 py-5"><span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase ${app.status === 'approved' ? 'bg-green-50 text-[#00C896]' : app.status === 'rejected' ? 'bg-red-50 text-[#E31B23]' : 'bg-amber-50 text-amber-500'}`}>{t("status." + app.status.lower())}</span></td>
                                  <td className="px-8 py-5 text-right">
                                     <div className="flex justify-end gap-2">
                                        <button onClick={() => setSelectedApp(app)} className="p-2 bg-slate-100 text-slate-600 hover:bg-slate-900 hover:text-white rounded-xl transition-all"><Eye size={16} /></button>
@@ -796,18 +808,18 @@ export default function AdminDashboard() {
                   <div className="p-6 border-b border-slate-50 flex justify-between items-center">
                      <div className="relative">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                        <input type="text" placeholder="Search members..." className="pl-12 pr-4 py-3 bg-[#FAFAFA] rounded-xl text-sm font-bold w-64 focus:outline-none focus:ring-2 focus:ring-[#E31B23]/20 transition-all" />
+                        <input type="text" placeholder={t("users.search")} className="pl-12 pr-4 py-3 bg-[#FAFAFA] rounded-xl text-sm font-bold w-64 focus:outline-none focus:ring-2 focus:ring-[#E31B23]/20 transition-all" />
                      </div>
                   </div>
                   <div className="overflow-x-auto">
                      <table className="w-full text-left min-w-[800px]">
                         <thead className="bg-[#FAFAFA] text-slate-400 text-[10px] uppercase font-black tracking-widest">
                            <tr>
-                              <th className="px-8 py-4">User</th>
-                              <th className="px-8 py-4">Role</th>
-                              <th className="px-8 py-4">Status</th>
-                              <th className="px-8 py-4">Journey</th>
-                              <th className="px-8 py-4 text-right">Actions</th>
+                              <th className="px-8 py-4">{t("users.table.user")}</th>
+                              <th className="px-8 py-4">{t("users.table.role")}</th>
+                              <th className="px-8 py-4">{t("applications.table.status")}</th>
+                              <th className="px-8 py-4">{t("users.table.journey")}</th>
+                              <th className="px-8 py-4 text-right">{t("applications.table.actions")}</th>
                            </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
@@ -826,7 +838,7 @@ export default function AdminDashboard() {
                                              <div className="flex items-center gap-2">
                                                 <p className="font-bold text-sm text-slate-900">{u.name}</p>
                                                 {u.role === 'Student' && (
-                                                   <span className="text-[8px] bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded-md font-black uppercase">Active Student</span>
+                                                   <span className="text-[8px] bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded-md font-black uppercase">{t("users.activeStudent")}</span>
                                                 )}
                                              </div>
                                              <p className="text-xs text-slate-400 font-medium">{u.email}</p>
@@ -834,7 +846,7 @@ export default function AdminDashboard() {
                                        </div>
                                     </td>
                                     <td className="px-8 py-5"><span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase ${u.role === 'Admin' ? 'bg-slate-800 text-white' : u.role === 'Student' ? 'bg-blue-50 text-blue-600' : 'bg-orange-50 text-orange-600'}`}>{u.role}</span></td>
-                                    <td className="px-8 py-5"><span className={`text-[10px] font-bold uppercase tracking-widest ${u.status === 'Active' ? 'text-[#00C896]' : u.status === 'Suspended' ? 'text-red-500' : 'text-amber-500'}`}>{u.status}</span></td>
+                                    <td className="px-8 py-5"><span className={`text-[10px] font-bold uppercase tracking-widest ${u.status === 'Active' ? 'text-[#00C896]' : u.status === 'Suspended' ? 'text-red-500' : 'text-amber-500'}`}>{t("status." + u.status.toLowerCase())}</span></td>
                                     <td className="px-8 py-5">
                                        {u.role === 'Student' ? (
                                           <div className="flex items-center gap-4 text-xs font-medium text-slate-500 bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-sm">
@@ -860,33 +872,33 @@ export default function AdminDashboard() {
                                           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="overflow-hidden">
                                              <div className="pb-10 pt-4 grid grid-cols-1 md:grid-cols-3 gap-8 border-t border-slate-50">
                                                 <div className="space-y-4">
-                                                   <h4 className="text-[10px] font-black uppercase text-[#E31B23] tracking-widest flex items-center gap-2"><User size={12} /> Personal Details</h4>
+                                                   <h4 className="text-[10px] font-black uppercase text-[#E31B23] tracking-widest flex items-center gap-2"><User size={12} /> {t("users.expanded.personal")}</h4>
                                                    <div className="grid grid-cols-2 gap-4 bg-[#FAFAFA] p-4 rounded-2xl border border-slate-100">
-                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">Sex</p><p className={`text-xs font-bold ${u.profile?.sex ? 'text-slate-900' : 'text-slate-300 italic'}`}>{u.profile?.sex || "Missing"}</p></div>
-                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">Nationality</p><p className={`text-xs font-bold ${u.profile?.nationality ? 'text-slate-900' : 'text-slate-300 italic'}`}>{u.profile?.nationality || "Missing"}</p></div>
-                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">Birth</p><p className={`text-xs font-bold ${u.profile?.dob ? 'text-slate-900' : 'text-slate-300 italic'}`}>{u.profile?.dob ? new Date(u.profile.dob).toLocaleDateString() : "Missing"}</p></div>
-                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">Religion</p><p className={`text-xs font-bold ${u.profile?.religion ? 'text-slate-900' : 'text-slate-300 italic'}`}>{u.profile?.religion || "Missing"}</p></div>
+                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">{t("users.expanded.sex")}</p><p className={`text-xs font-bold ${u.profile?.sex ? 'text-slate-900' : 'text-slate-300 italic'}`}>{u.profile?.sex || t("users.missing")}</p></div>
+                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">{t("users.expanded.nationality")}</p><p className={`text-xs font-bold ${u.profile?.nationality ? 'text-slate-900' : 'text-slate-300 italic'}`}>{u.profile?.nationality || t("users.missing")}</p></div>
+                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">{t("users.expanded.birth")}</p><p className={`text-xs font-bold ${u.profile?.dob ? 'text-slate-900' : 'text-slate-300 italic'}`}>{u.profile?.dob ? new Date(u.profile.dob).toLocaleDateString() : t("users.missing")}</p></div>
+                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">{t("users.expanded.religion")}</p><p className={`text-xs font-bold ${u.profile?.religion ? 'text-slate-900' : 'text-slate-300 italic'}`}>{u.profile?.religion || t("users.missing")}</p></div>
                                                    </div>
                                                 </div>
                                                 <div className="space-y-4">
-                                                   <h4 className="text-[10px] font-black uppercase text-[#E31B23] tracking-widest flex items-center gap-2"><MapPin size={12} /> Contact & Address</h4>
+                                                   <h4 className="text-[10px] font-black uppercase text-[#E31B23] tracking-widest flex items-center gap-2"><MapPin size={12} /> {t("users.expanded.contact")}</h4>
                                                    <div className="grid grid-cols-1 gap-3 bg-[#FAFAFA] p-4 rounded-2xl border border-slate-100">
-                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">Phone / Mobile</p><p className="text-xs font-bold text-slate-900">{u.profile?.phone || u.phone || "Missing"} / {u.profile?.mobile || "Missing"}</p></div>
-                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">Address</p><p className={`text-xs font-bold ${u.profile?.address?.city ? 'text-slate-900' : 'text-slate-300 italic'}`}>{u.profile?.address?.city ? `${u.profile.address.street || ""}, ${u.profile.address.city}, ${u.profile.address.country}` : "Address incomplete"}</p></div>
+                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">{t("users.expanded.phone")}</p><p className="text-xs font-bold text-slate-900">{u.profile?.phone || u.phone || t("users.missing")} / {u.profile?.mobile || t("users.missing")}</p></div>
+                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">{t("users.expanded.address")}</p><p className={`text-xs font-bold ${u.profile?.address?.city ? 'text-slate-900' : 'text-slate-300 italic'}`}>{u.profile?.address?.city ? `${u.profile.address.street || ""}, ${u.profile.address.city}, ${u.profile.address.country}` : t("users.incomplete")}</p></div>
                                                    </div>
                                                 </div>
                                                 <div className="space-y-4">
-                                                   <h4 className="text-[10px] font-black uppercase text-[#E31B23] tracking-widest flex items-center gap-2"><GraduationCap size={12} /> Education & Language</h4>
+                                                   <h4 className="text-[10px] font-black uppercase text-[#E31B23] tracking-widest flex items-center gap-2"><GraduationCap size={12} /> {t("users.expanded.education")}</h4>
                                                    <div className="grid grid-cols-1 gap-3 bg-[#FAFAFA] p-4 rounded-2xl border border-slate-100">
-                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">Education</p><p className={`text-xs font-bold ${u.profile?.educationLevel ? 'text-slate-900' : 'text-slate-300 italic'}`}>{u.profile?.educationLevel || "Missing"}</p></div>
-                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">Languages</p><p className={`text-xs font-bold ${u.profile?.languages ? 'text-slate-900' : 'text-slate-300 italic'}`}>{u.profile?.languages || "Missing"}</p></div>
+                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">{t("users.expanded.level")}</p><p className={`text-xs font-bold ${u.profile?.educationLevel ? 'text-slate-900' : 'text-slate-300 italic'}`}>{u.profile?.educationLevel || t("users.missing")}</p></div>
+                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">{t("users.expanded.languages")}</p><p className={`text-xs font-bold ${u.profile?.languages ? 'text-slate-900' : 'text-slate-300 italic'}`}>{u.profile?.languages || t("users.missing")}</p></div>
                                                    </div>
                                                 </div>
                                                 <div className="col-span-1 md:col-span-3 bg-slate-900 rounded-2xl p-6 text-white relative overflow-hidden">
                                                    <div className="absolute top-0 right-0 w-32 h-32 bg-[#E31B23] rounded-full blur-[60px] opacity-20" />
-                                                   <h4 className="text-[10px] font-black uppercase text-[#E31B23] tracking-widest mb-3">Latest Motivation Letter</h4>
+                                                   <h4 className="text-[10px] font-black uppercase text-[#E31B23] tracking-widest mb-3">{t("users.expanded.motivation")}</h4>
                                                    <p className={`text-xs font-medium leading-relaxed ${u.profile?.motivation ? 'text-slate-200' : 'text-slate-500 italic'}`}>
-                                                      {u.profile?.motivation ? `"${u.profile.motivation}"` : "No motivation letter sync'd yet."}
+                                                      {u.profile?.motivation ? `"${u.profile.motivation}"` : t("users.expanded.noMotivation")}
                                                    </p>
                                                 </div>
                                              </div>
@@ -933,13 +945,13 @@ export default function AdminDashboard() {
                   <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-white rounded-[2rem] w-full max-w-lg p-8 shadow-2xl border border-slate-100">
                         <div className="flex justify-between items-center mb-8">
-                           <h3 className="text-2xl font-black">Edit Member</h3>
+                           <h3 className="text-2xl font-black">{t("modals.editMember")}</h3>
                            <button onClick={() => setIsEditingUser(null)} className="p-2 hover:bg-slate-50 rounded-full"><X size={20} /></button>
                         </div>
 
                         <div className="space-y-6">
                            <div>
-                              <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block tracking-widest">User Role</label>
+                              <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block tracking-widest">{t("modals.userRole")}</label>
                               <div className="grid grid-cols-3 gap-3">
                                  {ROLES.map((role: any) => (
                                     <button key={role} onClick={() => setUserForm({ ...userForm, role })}
@@ -954,7 +966,7 @@ export default function AdminDashboard() {
                            </div>
 
                            <div>
-                              <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block tracking-widest">Account Status</label>
+                              <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block tracking-widest">{t("modals.accountStatus")}</label>
                               <div className="grid grid-cols-3 gap-3">
                                  {STATUSES.map((status: any) => (
                                     <button key={status} onClick={() => setUserForm({ ...userForm, status })}
@@ -971,7 +983,7 @@ export default function AdminDashboard() {
                            {userForm.role === "Student" && (
                               <div className="space-y-4 bg-[#FAFAFA] p-5 rounded-2xl border border-slate-100">
                                  <div>
-                                    <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block tracking-widest">Target Country</label>
+                                    <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block tracking-widest">{t("modals.targetCountry")}</label>
                                     <div className="relative">
                                        <select value={userForm.country} onChange={e => setUserForm({ ...userForm, country: e.target.value })}
                                           className="w-full bg-white border-2 border-slate-200 rounded-xl p-3 text-sm font-bold outline-none focus:border-[#00C896] appearance-none">
@@ -981,7 +993,7 @@ export default function AdminDashboard() {
                                     </div>
                                  </div>
                                  <div>
-                                    <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block tracking-widest">Progress Step</label>
+                                    <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block tracking-widest">{t("modals.progressStep")}</label>
                                     <div className="relative">
                                        <select value={userForm.step} onChange={e => setUserForm({ ...userForm, step: e.target.value })}
                                           className="w-full bg-white border-2 border-slate-200 rounded-xl p-3 text-sm font-bold outline-none focus:border-[#E31B23] appearance-none">
@@ -996,7 +1008,7 @@ export default function AdminDashboard() {
                         </div>
 
                         <button onClick={handleSaveUser} className="w-full bg-[#E31B23] text-white font-black py-4 rounded-xl mt-8 shadow-xl shadow-red-100 hover:bg-red-700 transition-all uppercase text-xs tracking-[0.2em] hover:-translate-y-1">
-                           Save & Update DB
+                           {t("modals.saveUpdate")}
                         </button>
                      </motion.div>
                   </div>
@@ -1047,6 +1059,7 @@ export default function AdminDashboard() {
 
 // --- NEW COMPONENT: EVENTS & JOBS MANAGER ---
 function EventsManager({ events, opportunities, onRefresh }: any) {
+   const t = useTranslations("admin");
    const fileInputRef = useRef<HTMLInputElement>(null);
    const [activeTab, setActiveTab] = useState<"event" | "opportunity">("event");
    const [isModalOpen, setIsModalOpen] = useState(false);
@@ -1189,11 +1202,11 @@ function EventsManager({ events, opportunities, onRefresh }: any) {
       <div className="space-y-6">
          <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
             <div className="flex bg-slate-100 p-1 rounded-lg">
-               <TabButton active={activeTab === "event"} onClick={() => setActiveTab("event")} icon={FaCalendarAlt} label="Events" />
-               <TabButton active={activeTab === "opportunity"} onClick={() => setActiveTab("opportunity")} icon={FaHandsHelping} label="Jobs & Opps" />
+               <TabButton active={activeTab === "event"} onClick={() => setActiveTab("event")} icon={FaCalendarAlt} label={t("events.tabs.event")} />
+               <TabButton active={activeTab === "opportunity"} onClick={() => setActiveTab("opportunity")} icon={FaHandsHelping} label={t("events.tabs.opportunity")} />
             </div>
             <button onClick={() => { setFormData({ id: "", titleMn: "", titleEn: "", descMn: "", descEn: "", locationMn: "", locationEn: "", providerMn: "", providerEn: "", date: "", category: "workshop", type: "volunteer", link: "#", imageUrl: "" }); setIsModalOpen(true); }} className="flex items-center gap-2 bg-[#E31B23] text-white px-6 py-2.5 rounded-lg font-bold shadow-lg">
-               <FaPlus /> Post New {activeTab === "event" ? "Event" : "Opportunity"}
+               <FaPlus /> {t("events.postNew", { type: activeTab === "event" ? t("events.tabs.event") : t("events.tabs.opportunity") })}
             </button>
          </div>
 
@@ -1202,44 +1215,44 @@ function EventsManager({ events, opportunities, onRefresh }: any) {
                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                   <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
                      <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                        <h3 className="text-xl font-bold">{formData.id ? "Edit Item" : "Create Item"}</h3>
+                        <h3 className="text-xl font-bold">{formData.id ? t("events.manage.edit") : t("events.manage.create")}</h3>
                         <button onClick={() => setIsModalOpen(false)}><FaTimes /></button>
                      </div>
                      <div className="overflow-y-auto p-6 space-y-6">
                         <div className="col-span-2">
-                           <h4 className="text-sm font-bold text-red-600 uppercase mb-2">1. Cover Image</h4>
+                           <h4 className="text-sm font-bold text-red-600 uppercase mb-2">{t("events.manage.cover")}</h4>
                            <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50 transition-colors relative" onClick={() => fileInputRef.current?.click()}>
-                              {uploadingImage ? <FaSpinner className="animate-spin text-3xl text-red-500" /> : formData.imageUrl ? <div className="relative h-48 w-full"><Image src={formData.imageUrl} alt="Preview" fill className="object-cover rounded-lg" /></div> : <div className="py-4"><FaCloudUploadAlt className="text-4xl text-slate-400 mx-auto" /><p>Click to upload</p></div>}
+                              {uploadingImage ? <FaSpinner className="animate-spin text-3xl text-red-500" /> : formData.imageUrl ? <div className="relative h-48 w-full"><Image src={formData.imageUrl} alt="Preview" fill className="object-cover rounded-lg" /></div> : <div className="py-4"><FaCloudUploadAlt className="text-4xl text-slate-400 mx-auto" /><p>{t("events.manage.upload")}</p></div>}
                               <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
                            </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                           <Input label="Title (MN)" value={formData.titleMn} onChange={(v: any) => setFormData({ ...formData, titleMn: v })} />
-                           <Input label="Title (EN)" value={formData.titleEn} onChange={(v: any) => setFormData({ ...formData, titleEn: v })} />
+                           <Input label={t("events.manage.titleMn")} value={formData.titleMn} onChange={(v: any) => setFormData({ ...formData, titleMn: v })} />
+                           <Input label={t("events.manage.titleEn")} value={formData.titleEn} onChange={(v: any) => setFormData({ ...formData, titleEn: v })} />
                            {activeTab === "opportunity" && (
                               <>
-                                 <Input label="Provider (MN)" value={formData.providerMn} onChange={(v: any) => setFormData({ ...formData, providerMn: v })} />
-                                 <Input label="Provider (EN)" value={formData.providerEn} onChange={(v: any) => setFormData({ ...formData, providerEn: v })} />
-                                 <Input label="Type (volunteer/internship/scholarship)" value={formData.type} onChange={(v: any) => setFormData({ ...formData, type: v })} />
-                                 <Input label="External Link" value={formData.link} onChange={(v: any) => setFormData({ ...formData, link: v })} />
+                                 <Input label={t("events.manage.providerMn")} value={formData.providerMn} onChange={(v: any) => setFormData({ ...formData, providerMn: v })} />
+                                 <Input label={t("events.manage.providerEn")} value={formData.providerEn} onChange={(v: any) => setFormData({ ...formData, providerEn: v })} />
+                                 <Input label={t("events.manage.type")} value={formData.type} onChange={(v: any) => setFormData({ ...formData, type: v })} />
+                                 <Input label={t("events.manage.externalLink")} value={formData.link} onChange={(v: any) => setFormData({ ...formData, link: v })} />
                               </>
                            )}
-                           <Input label="Location (MN)" value={formData.locationMn} onChange={(v: any) => setFormData({ ...formData, locationMn: v })} />
-                           <Input label="Location (EN)" value={formData.locationEn} onChange={(v: any) => setFormData({ ...formData, locationEn: v })} />
-                           <Input type="date" label={activeTab === "event" ? "Event Date" : "Deadline"} value={formData.date} onChange={(v: any) => setFormData({ ...formData, date: v })} />
+                           <Input label={t("events.manage.locationMn")} value={formData.locationMn} onChange={(v: any) => setFormData({ ...formData, locationMn: v })} />
+                           <Input label={t("events.manage.locationEn")} value={formData.locationEn} onChange={(v: any) => setFormData({ ...formData, locationEn: v })} />
+                           <Input type="date" label={activeTab === "event" ? t("events.manage.eventDate") : t("events.manage.deadline")} value={formData.date} onChange={(v: any) => setFormData({ ...formData, date: v })} />
                            {activeTab === "event" && (
                               <>
-                                 <Input label="Category" value={formData.category} onChange={(v: any) => setFormData({ ...formData, category: v })} />
-                                 <Input label="Registration Link" value={formData.link} onChange={(v: any) => setFormData({ ...formData, link: v })} />
+                                 <Input label={t("events.manage.category")} value={formData.category} onChange={(v: any) => setFormData({ ...formData, category: v })} />
+                                 <Input label={t("events.manage.regLink")} value={formData.link} onChange={(v: any) => setFormData({ ...formData, link: v })} />
                               </>
                            )}
                         </div>
-                        <TextArea label="Description (MN)" value={formData.descMn} onChange={(v: any) => setFormData({ ...formData, descMn: v })} />
-                        <TextArea label="Description (EN)" value={formData.descEn} onChange={(v: any) => setFormData({ ...formData, descEn: v })} />
+                        <TextArea label={t("events.manage.descMn")} value={formData.descMn} onChange={(v: any) => setFormData({ ...formData, descMn: v })} />
+                        <TextArea label={t("events.manage.descEn")} value={formData.descEn} onChange={(v: any) => setFormData({ ...formData, descEn: v })} />
                      </div>
                      <div className="p-6 border-t flex justify-end gap-3">
                         <button onClick={() => setIsModalOpen(false)} className="px-6 py-2">Cancel</button>
-                        <button onClick={handleSubmit} disabled={loading || uploadingImage} className="px-6 py-2 bg-[#E31B23] text-white rounded-lg">{loading ? "Saving..." : "Save Now"}</button>
+                        <button onClick={handleSubmit} disabled={loading || uploadingImage} className="px-6 py-2 bg-[#E31B23] text-white rounded-lg">{loading ? t("events.manage.saving") : t("events.manage.save")}</button>
                      </div>
                   </motion.div>
                </div>
@@ -1249,7 +1262,7 @@ function EventsManager({ events, opportunities, onRefresh }: any) {
          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <table className="w-full text-left">
                <thead className="bg-slate-50 text-slate-500 text-sm uppercase">
-                  <tr><th className="p-4">Image</th><th className="p-4">Title</th><th className="p-4">Date/Deadline</th><th className="p-4 text-right">Actions</th></tr>
+                  <tr><th className="p-4">{t("events.table.image")}</th><th className="p-4">{t("events.table.title")}</th><th className="p-4">{t("events.table.date")}</th><th className="p-4 text-right">{t("events.table.actions")}</th></tr>
                </thead>
                <tbody className="divide-y divide-slate-100">
                   {activeList.map((item: any) => (
@@ -1272,6 +1285,7 @@ function EventsManager({ events, opportunities, onRefresh }: any) {
 
 // --- NEW COMPONENT: CONTENT MANAGER ---
 function ContentManager({ blogs, onRefresh }: any) {
+   const t = useTranslations("admin");
    const fileInputRef = useRef<HTMLInputElement>(null);
    const [isCreating, setIsCreating] = useState(false);
    const [loading, setLoading] = useState(false);
@@ -1358,9 +1372,9 @@ function ContentManager({ blogs, onRefresh }: any) {
    return (
       <div className="space-y-6">
          <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-            <h2 className="text-xl font-bold text-slate-800">Articles & Content</h2>
+            <h2 className="text-xl font-bold text-slate-800">{t("blog.title")}</h2>
             <button onClick={() => { setFormData({ id: "", titleMn: "", titleEn: "", descMn: "", descEn: "", summaryMn: "", summaryEn: "", author: "Admin", status: "published", imageUrl: "" }); setIsCreating(true); }} className="flex items-center gap-2 bg-[#E31B23] text-white px-6 py-2.5 rounded-lg font-bold shadow-lg">
-               <FaPlus /> Add Content
+               <FaPlus /> {t("blog.add")}
             </button>
          </div>
 
@@ -1369,26 +1383,26 @@ function ContentManager({ blogs, onRefresh }: any) {
                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                   <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
                      <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                        <h3 className="text-xl font-bold">Manage Article</h3>
+                        <h3 className="text-xl font-bold">{t("blog.manage")}</h3>
                         <button onClick={() => setIsCreating(false)}><FaTimes /></button>
                      </div>
                      <div className="overflow-y-auto p-6 space-y-6">
                         <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed rounded-xl p-4 flex items-center justify-center cursor-pointer hover:bg-slate-50">
-                           {uploadingImage ? <FaSpinner className="animate-spin" /> : formData.imageUrl ? <div className="relative h-32 w-full"><Image src={formData.imageUrl} alt="Preview" fill className="object-cover rounded" /></div> : <div className="text-center"><FaImage className="text-2xl mx-auto" /><p>Upload Image</p></div>}
+                           {uploadingImage ? <FaSpinner className="animate-spin" /> : formData.imageUrl ? <div className="relative h-32 w-full"><Image src={formData.imageUrl} alt="Preview" fill className="object-cover rounded" /></div> : <div className="text-center"><FaImage className="text-2xl mx-auto" /><p>{t("blog.upload")}</p></div>}
                            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                           <Input label="Title (MN)" value={formData.titleMn} onChange={(v: any) => setFormData({ ...formData, titleMn: v })} />
-                           <Input label="Title (EN)" value={formData.titleEn} onChange={(v: any) => setFormData({ ...formData, titleEn: v })} />
-                           <Input label="Summary (MN)" value={formData.summaryMn} onChange={(v: any) => setFormData({ ...formData, summaryMn: v })} />
-                           <Input label="Summary (EN)" value={formData.summaryEn} onChange={(v: any) => setFormData({ ...formData, summaryEn: v })} />
+                           <Input label={t("events.manage.titleMn")} value={formData.titleMn} onChange={(v: any) => setFormData({ ...formData, titleMn: v })} />
+                           <Input label={t("events.manage.titleEn")} value={formData.titleEn} onChange={(v: any) => setFormData({ ...formData, titleEn: v })} />
+                           <Input label={t("blog.summaryMn")} value={formData.summaryMn} onChange={(v: any) => setFormData({ ...formData, summaryMn: v })} />
+                           <Input label={t("blog.summaryEn")} value={formData.summaryEn} onChange={(v: any) => setFormData({ ...formData, summaryEn: v })} />
                         </div>
-                        <TextArea label="Content (MN)" value={formData.descMn} onChange={(v: any) => setFormData({ ...formData, descMn: v })} />
-                        <TextArea label="Content (EN)" value={formData.descEn} onChange={(v: any) => setFormData({ ...formData, descEn: v })} />
+                        <TextArea label={t("blog.contentMn")} value={formData.descMn} onChange={(v: any) => setFormData({ ...formData, descMn: v })} />
+                        <TextArea label={t("blog.contentEn")} value={formData.descEn} onChange={(v: any) => setFormData({ ...formData, descEn: v })} />
                      </div>
                      <div className="p-6 border-t flex justify-end gap-3">
                         <button onClick={() => setIsCreating(false)} className="px-6 py-2">Cancel</button>
-                        <button onClick={handleSubmit} disabled={loading || uploadingImage} className="px-6 py-2 bg-[#E31B23] text-white rounded-lg">Save Article</button>
+                        <button onClick={handleSubmit} disabled={loading || uploadingImage} className="px-6 py-2 bg-[#E31B23] text-white rounded-lg">{t("blog.save")}</button>
                      </div>
                   </motion.div>
                </div>
@@ -1398,7 +1412,7 @@ function ContentManager({ blogs, onRefresh }: any) {
          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <table className="w-full text-left">
                <thead className="bg-slate-50 text-slate-500 text-sm uppercase">
-                  <tr><th className="p-4">Media</th><th className="p-4">Title</th><th className="p-4 text-right">Actions</th></tr>
+                  <tr><th className="p-4">{t("events.table.image")}</th><th className="p-4">{t("events.table.title")}</th><th className="p-4 text-right">{t("events.table.actions")}</th></tr>
                </thead>
                <tbody className="divide-y divide-slate-100">
                   {blogs.map((item: any) => (

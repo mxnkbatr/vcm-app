@@ -796,6 +796,7 @@
     "desc_be": "Lernen Sie die Sprache kostenlos in Belgien"
   },
   "dashboard": {
+    "loading": "Profil wird geladen...",
     "hello": "Guten Tag",
     "activeStudent": "Aktiver Student",
     "guestAccount": "Gastkonto",
@@ -905,6 +906,7 @@
     }
   },
   "Auth": {
+    "dashboard": "Dashboard",
     "home": "Startseite",
     "future": "Zukunft",
     "signupSubtitle": "Der erste Schritt, um die Welt zu reisen, eine Sprache zu lernen und eine neue Kultur zu erleben.",
@@ -973,5 +975,194 @@
     "scholarships": "Stipendien",
     "internships": "Praktika",
     "volunteering": "Freiwilligenarbeit"
+  },
+  "admin": {
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "users": "Mitglieder & Rollen",
+      "applications": "Bewerbungen",
+      "events": "Veranstaltungen & Jobs",
+      "lessons": "Au-Pair-Lektionen",
+      "blog": "Blog & Inhalte",
+      "role": "Administrator",
+      "online": "Online"
+    },
+    "header": {
+      "blog": "Blog- & Inhaltsbibliothek",
+      "overview": "Übersicht und Verwaltung."
+    },
+    "dashboard": {
+      "stats": {
+        "activeStudents": "Aktive Studenten",
+        "pendingApps": "Ausstehende Bewerbungen",
+        "articles": "Artikel",
+        "todaysBookings": "Heutige Buchungen",
+        "totalUsers": "Gesamtbenutzer",
+        "students": "Studenten",
+        "admins": "Admins",
+        "guests": "Gäste"
+      },
+      "bookings": {
+        "queue": "Buchungswarteschlange",
+        "viewAll": "Alle anzeigen",
+        "upcoming": "Anstehende Termine",
+        "noUpcoming": "Keine anstehenden Termine.",
+        "history": "Letzte Historie",
+        "noHistory": "Keine Historie verfügbar.",
+        "confirm": "Bestätigen",
+        "reject": "Ablehnen"
+      },
+      "quickActions": {
+        "title": "Schnellaktionen",
+        "writeBlog": "Blogbeitrag schreiben",
+        "verifyUsers": "Neue Benutzer verifizieren"
+      }
+    },
+    "applications": {
+      "title": "Programmbewerbungen",
+      "table": {
+        "applicant": "Bewerber",
+        "program": "Programm",
+        "status": "Status",
+        "actions": "Aktionen"
+      },
+      "status": {
+        "approved": "Genehmigt",
+        "rejected": "Abgelehnt",
+        "pending": "Ausstehend"
+      }
+    },
+    "users": {
+      "search": "Mitglieder suchen...",
+      "table": {
+        "user": "Benutzer",
+        "role": "Rolle",
+        "status": "Status",
+        "journey": "Reise",
+        "actions": "Aktionen"
+      },
+      "activeStudent": "Aktiver Student",
+      "missing": "Fehlt",
+      "incomplete": "Adresse unvollständig",
+      "expanded": {
+        "personal": "Persönliche Details",
+        "contact": "Kontakt & Adresse",
+        "education": "Bildung & Sprache",
+        "motivation": "Neuestes Motivationsschreiben",
+        "noMotivation": "Noch kein Motivationsschreiben synchronisiert.",
+        "sex": "Geschlecht",
+        "nationality": "Staatsangehörigkeit",
+        "birth": "Geburt",
+        "religion": "Religion",
+        "phone": "Telefon / Mobil",
+        "address": "Adresse",
+        "level": "Bildung",
+        "languages": "Sprachen"
+      }
+    },
+    "modals": {
+      "editMember": "Mitglied bearbeiten",
+      "userRole": "Benutzerrolle",
+      "accountStatus": "Kontostatus",
+      "targetCountry": "Zielland",
+      "progressStep": "Fortschrittsschritt",
+      "saveUpdate": "Speichern & DB aktualisieren",
+      "master": {
+        "title": "Master-Benutzerverwaltung",
+        "control": "Vollständige Kontrolle über ID",
+        "core": "Kerninformationen",
+        "journey": "Reisedetails",
+        "personal": "Persönliche Details",
+        "fullName": "Vollständiger Name",
+        "email": "E-Mail-Adresse",
+        "contact": "Kontakt & Standort",
+        "background": "Hintergrund",
+        "experience": "Erfahrung",
+        "internal": "Interne Überprüfung",
+        "reviewedBy": "Überprüft von",
+        "notReviewed": "Noch nicht überprüft",
+        "approvalDate": "Genehmigungsdatum",
+        "discard": "Änderungen verwerfen",
+        "saveMaster": "Master-Datensatz speichern",
+        "uploaded": "Hochgeladen",
+        "notProvided": "Nicht bereitgestellt",
+        "directUrl": "Direkter URL-Link",
+        "pasteUrl": "URL zum Ändern einfügen...",
+        "addressInfo": "Adressinformationen"
+      },
+      "application": {
+        "title": "Bewerbungsdetails",
+        "fullControl": "Vollständige Kontrolle",
+        "email": "E-Mail",
+        "phone": "Telefon",
+        "age": "Alter",
+        "level": "Niveau",
+        "notCompleted": "Detailliertes Studentenprofil noch nicht ausgefüllt.",
+        "personal": "Persönliche Details",
+        "address": "Adresse & Kontakt",
+        "experience": "Erfahrung",
+        "ages": "Alter",
+        "motivation": "Motivationsschreiben",
+        "noMotivation": "Keine Motivation angegeben."
+      }
+    },
+    "events": {
+      "title": "Veranstaltungen & Jobs",
+      "tabs": {
+        "event": "Veranstaltungen",
+        "opportunity": "Jobs & Möglichkeiten"
+      },
+      "postNew": "Neuer {type} posten",
+      "manage": {
+        "edit": "Element bearbeiten",
+        "create": "Element erstellen",
+        "cover": "Titelbild",
+        "upload": "Zum Hochladen klicken",
+        "titleMn": "Titel (MN)",
+        "titleEn": "Titel (EN)",
+        "providerMn": "Anbieter (MN)",
+        "providerEn": "Anbieter (EN)",
+        "type": "Typ (Freiwilligenarbeit/Praktikum/Stipendium)",
+        "externalLink": "Externer Link",
+        "locationMn": "Ort (MN)",
+        "locationEn": "Ort (EN)",
+        "eventDate": "Veranstaltungsdatum",
+        "deadline": "Frist",
+        "category": "Kategorie",
+        "regLink": "Registrierungslink",
+        "descMn": "Beschreibung (MN)",
+        "descEn": "Beschreibung (EN)",
+        "cancel": "Abbrechen",
+        "save": "Jetzt speichern",
+        "saving": "Speichere...",
+        "uploadFailed": "Hochladen fehlgeschlagen."
+      },
+      "table": {
+        "image": "Bild",
+        "title": "Titel",
+        "date": "Datum/Frist",
+        "actions": "Aktionen"
+      }
+    },
+    "blog": {
+      "title": "Artikel & Inhalte",
+      "add": "Inhalt hinzufügen",
+      "manage": "Artikel verwalten",
+      "upload": "Bild hochladen",
+      "titleMn": "Titel (MN)",
+      "titleEn": "Titel (EN)",
+      "summaryMn": "Zusammenfassung (MN)",
+      "summaryEn": "Zusammenfassung (EN)",
+      "contentMn": "Inhalt (MN)",
+      "contentEn": "Inhalt (EN)",
+      "save": "Artikel speichern"
+    },
+    "status": {
+      "active": "Aktiv",
+      "pending": "Ausstehend",
+      "suspended": "Suspendiert",
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt"
+    }
   }
 }

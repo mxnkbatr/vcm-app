@@ -101,7 +101,7 @@ export default function AustriaClient() {
                <div className="relative h-[600px] hidden lg:block perspective-1000">
                   <motion.div style={{ y: yHero, rotateY: -12, rotateX: 6 }} className="absolute right-8 top-8 w-[420px] h-[550px] bg-white p-3 rounded-[3rem] shadow-2xl border-[6px] border-white z-20">
                      <div className="relative w-full h-full rounded-[2.5rem] overflow-hidden bg-slate-100">
-                        <Image src="https://images.unsplash.com/photo-1520509414578-d9cbf09933a1?auto=format&fit=crop&w=800&q=80" alt="Vienna" fill className="object-cover" />
+                        <Image src="https://www.state.gov/wp-content/uploads/2018/11/Austria-2109x1406.jpg" alt="Vienna" fill className="object-cover" />
                         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/50" />
                         <div className="absolute bottom-8 left-8 text-white">
                            <p className="font-serif italic text-lg opacity-90">Explore</p>

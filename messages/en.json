@@ -796,6 +796,7 @@
     "desc_be": "Learn language for free in Belgium"
   },
   "dashboard": {
+    "loading": "Loading Profile...",
     "hello": "Hello",
     "activeStudent": "Active Student",
     "guestAccount": "Guest Account",
@@ -828,6 +829,11 @@
     "ready": "Ready",
     "pending": "Application Pending",
     "underReview": "Under Review",
+    "completeApplication": "Complete Application",
+    "destination": "Destination",
+    "appliedFor": "You applied for",
+    "on": "on",
+    "startYourJourney": "Start Your Journey",
     "startJourneyDesc": "You are currently a Guest. Apply now to become a Student.",
     "applyNow": "Apply Now",
     "actionRequired": "Action Required",
@@ -905,6 +911,7 @@
     }
   },
   "Auth": {
+    "dashboard": "Dashboard",
     "home": "Home",
     "future": "Future",
     "signupSubtitle": "The first step to traveling the world, learning a language, and experiencing a new culture.",
@@ -981,5 +988,194 @@
     "scholarships": "Scholarships",
     "internships": "Internships",
     "volunteering": "Volunteering"
+  },
+  "admin": {
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "users": "Members & Roles",
+      "applications": "Applications",
+      "events": "Events & Jobs",
+      "lessons": "Au Pair Lessons",
+      "blog": "Blog & Content",
+      "role": "Administrator",
+      "online": "Online"
+    },
+    "header": {
+      "blog": "Blog & Content Library",
+      "overview": "Overview and management."
+    },
+    "dashboard": {
+      "stats": {
+        "activeStudents": "Active Students",
+        "pendingApps": "Pending Applications",
+        "articles": "Articles",
+        "todaysBookings": "Today's Bookings",
+        "totalUsers": "Total Users",
+        "students": "Students",
+        "admins": "Admins",
+        "guests": "Guests"
+      },
+      "bookings": {
+        "queue": "Booking Queue",
+        "viewAll": "View All",
+        "upcoming": "Upcoming Appointments",
+        "noUpcoming": "No upcoming appointments.",
+        "history": "Recent History",
+        "noHistory": "No history available.",
+        "confirm": "Confirm",
+        "reject": "Reject"
+      },
+      "quickActions": {
+        "title": "Quick Actions",
+        "writeBlog": "Write Blog Post",
+        "verifyUsers": "Verify New Users"
+      }
+    },
+    "applications": {
+      "title": "Program Applications",
+      "table": {
+        "applicant": "Applicant",
+        "program": "Program",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "pending": "Pending"
+      }
+    },
+    "users": {
+      "search": "Search members...",
+      "table": {
+        "user": "User",
+        "role": "Role",
+        "status": "Status",
+        "journey": "Journey",
+        "actions": "Actions"
+      },
+      "activeStudent": "Active Student",
+      "missing": "Missing",
+      "incomplete": "Address incomplete",
+      "expanded": {
+        "personal": "Personal Details",
+        "contact": "Contact & Address",
+        "education": "Education & Language",
+        "motivation": "Latest Motivation Letter",
+        "noMotivation": "No motivation letter sync'd yet.",
+        "sex": "Sex",
+        "nationality": "Nationality",
+        "birth": "Birth",
+        "religion": "Religion",
+        "phone": "Phone / Mobile",
+        "address": "Address",
+        "level": "Education",
+        "languages": "Languages"
+      }
+    },
+    "modals": {
+      "editMember": "Edit Member",
+      "userRole": "User Role",
+      "accountStatus": "Account Status",
+      "targetCountry": "Target Country",
+      "progressStep": "Progress Step",
+      "saveUpdate": "Save & Update DB",
+      "master": {
+        "title": "Master User Management",
+        "control": "Complete control over ID",
+        "core": "Core Information",
+        "journey": "Journey Details",
+        "personal": "Personal Details",
+        "fullName": "Full Name",
+        "email": "Email Address",
+        "contact": "Contact & Location",
+        "background": "Background",
+        "experience": "Experience",
+        "internal": "Internal Review",
+        "reviewedBy": "Reviewed By",
+        "notReviewed": "Not reviewed yet",
+        "approvalDate": "Approval Date",
+        "discard": "Discard Changes",
+        "saveMaster": "Save Master Record",
+        "uploaded": "Uploaded",
+        "notProvided": "Not Provided",
+        "directUrl": "Direct URL Link",
+        "pasteUrl": "Paste URL to change...",
+        "addressInfo": "Address Info"
+      },
+      "application": {
+        "title": "Application Details",
+        "fullControl": "Full Control",
+        "email": "Email",
+        "phone": "Phone",
+        "age": "Age",
+        "level": "Level",
+        "notCompleted": "Detailed student profile not yet completed.",
+        "personal": "Personal Details",
+        "address": "Address & Contact",
+        "experience": "Experience",
+        "ages": "Ages",
+        "motivation": "Motivation Letter",
+        "noMotivation": "No motivation provided."
+      }
+    },
+    "events": {
+      "title": "Events & Jobs",
+      "tabs": {
+        "event": "Events",
+        "opportunity": "Jobs & Opps"
+      },
+      "postNew": "Post New {type}",
+      "manage": {
+        "edit": "Edit Item",
+        "create": "Create Item",
+        "cover": "Cover Image",
+        "upload": "Click to upload",
+        "titleMn": "Title (MN)",
+        "titleEn": "Title (EN)",
+        "providerMn": "Provider (MN)",
+        "providerEn": "Provider (EN)",
+        "type": "Type (volunteer/internship/scholarship)",
+        "externalLink": "External Link",
+        "locationMn": "Location (MN)",
+        "locationEn": "Location (EN)",
+        "eventDate": "Event Date",
+        "deadline": "Deadline",
+        "category": "Category",
+        "regLink": "Registration Link",
+        "descMn": "Description (MN)",
+        "descEn": "Description (EN)",
+        "cancel": "Cancel",
+        "save": "Save Now",
+        "saving": "Saving...",
+        "uploadFailed": "Upload failed."
+      },
+      "table": {
+        "image": "Image",
+        "title": "Title",
+        "date": "Date/Deadline",
+        "actions": "Actions"
+      }
+    },
+    "blog": {
+      "title": "Articles & Content",
+      "add": "Add Content",
+      "manage": "Manage Article",
+      "upload": "Upload Image",
+      "titleMn": "Title (MN)",
+      "titleEn": "Title (EN)",
+      "summaryMn": "Summary (MN)",
+      "summaryEn": "Summary (EN)",
+      "contentMn": "Content (MN)",
+      "contentEn": "Content (EN)",
+      "save": "Save Article"
+    },
+    "status": {
+      "active": "Active",
+      "pending": "Pending",
+      "suspended": "Suspended",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    }
   }
 }

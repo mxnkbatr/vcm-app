@@ -13,11 +13,11 @@ import {
    ArrowRight,
    Loader2,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import BeforeLoginNews from "../../components/BeforeLoginNews";
-import { useLanguage } from "../../context/LanguageContext";
 
 export default function AuPairRegisterPage() {
-   const { t } = useLanguage();
+   const t = useTranslations("Auth");
    const router = useRouter();
    const { isLoaded, signUp, setActive } = useSignUp();
 
@@ -81,11 +81,11 @@ export default function AuPairRegisterPage() {
             // This is where "Registration incomplete" usually happens
             console.error("Unexpected Sign up status:", result.status);
             console.log("Verification info:", result.verifications);
-            
+
             if (result.verifications.emailAddress?.status === "unverified") {
-                setError("Email verification required. Please check your inbox or Clerk settings.");
+               setError("Email verification required. Please check your inbox or Clerk settings.");
             } else {
-                setError(`Registration incomplete (Status: ${result.status}). Check Clerk dashboard settings.`);
+               setError(`Registration incomplete (Status: ${result.status}). Check Clerk dashboard settings.`);
             }
          }
       } catch (err: any) {
@@ -116,7 +116,7 @@ export default function AuPairRegisterPage() {
                      className="inline-flex items-center gap-2 text-[10px] font-black text-slate-400 hover:text-red-600 uppercase tracking-[0.2em] transition-colors group"
                   >
                      <ChevronLeft size={12} className="group-hover:-translate-x-1 transition-transform" />
-                     {t({ mn: "Нүүр хуудас", en: "Home" })}
+                     {t('home')}
                   </Link>
                </div>
 
@@ -127,16 +127,13 @@ export default function AuPairRegisterPage() {
                      className="absolute -top-10 -left-10 w-24 h-24 bg-red-100 rounded-full blur-3xl opacity-50"
                   />
                   <h1 className="text-5xl md:text-6xl font-black text-slate-900 mb-3 tracking-tight leading-[0.95] relative z-10">
-                     {t({ mn: "Ирээдүйн", en: "Future" })} <br />
+                     {t('future')} <br />
                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-rose-500">
                         Au Pair.
                      </span>
                   </h1>
                   <p className="text-slate-500 font-bold text-sm leading-relaxed max-w-sm relative z-10">
-                     {t({
-                        mn: "Дэлхийгээр аялж, хэл сурч, шинэ соёлтой танилцах эхний алхам.",
-                        en: "The first step to traveling the world, learning a language, and experiencing a new culture."
-                     })}
+                     {t('signupSubtitle')}
                   </p>
                </div>
 
@@ -151,7 +148,7 @@ export default function AuPairRegisterPage() {
                         type="text"
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
-                        placeholder={t({ mn: "Бүтэн Нэр (Full Name)", en: "Full Name" })}
+                        placeholder={t('fullNamePlaceholder')}
                         className="w-full bg-white border-2 border-slate-100 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 rounded-[1.5rem] py-5 pl-14 pr-6 text-sm font-bold text-slate-900 placeholder:text-slate-300 transition-all shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] outline-none"
                         required
                      />
@@ -166,7 +163,7 @@ export default function AuPairRegisterPage() {
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder={t({ mn: "И-мэйл хаяг", en: "Email Address" })}
+                        placeholder={t('emailPlaceholder')}
                         className="w-full bg-white border-2 border-slate-100 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 rounded-[1.5rem] py-5 pl-14 pr-6 text-sm font-bold text-slate-900 placeholder:text-slate-300 transition-all shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] outline-none"
                         required
                      />
@@ -181,7 +178,7 @@ export default function AuPairRegisterPage() {
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        placeholder={t({ mn: "Нууц үг", en: "Password" })}
+                        placeholder={t('passwordPlaceholder')}
                         className="w-full bg-white border-2 border-slate-100 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 rounded-[1.5rem] py-5 pl-14 pr-6 text-sm font-bold text-slate-900 placeholder:text-slate-300 transition-all shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] outline-none"
                         required
                      />
@@ -201,7 +198,7 @@ export default function AuPairRegisterPage() {
                      className="w-full bg-slate-900 hover:bg-red-600 text-white font-black text-xs uppercase tracking-[0.25em] py-6 rounded-[1.5rem] shadow-xl hover:shadow-2xl hover:shadow-red-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-3 mt-4 group"
                   >
                      {isLoading ? <Loader2 className="animate-spin" size={18} /> : (
-                        <>{t({ mn: "Бүртгүүлэх", en: "Sign Up" })} <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" /></>
+                        <>{t('signUpButton')} <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" /></>
                      )}
                   </button>
 
@@ -213,8 +210,8 @@ export default function AuPairRegisterPage() {
                {/* Login Link */}
                <div className="mt-8 text-center">
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                     {t({ mn: "Бүртгэлтэй юу?", en: "Already have an account?" })}
-                     <Link href="/sign-in" className="text-red-500 ml-2 hover:text-slate-900 transition-colors underline decoration-2 underline-offset-4">{t({ mn: "Нэвтрэх", en: "Sign In" })}</Link>
+                     {t('alreadyHaveAccount')}
+                     <Link href="/sign-in" className="text-red-500 ml-2 hover:text-slate-900 transition-colors underline decoration-2 underline-offset-4">{t('signIn')}</Link>
                   </p>
                </div>
 

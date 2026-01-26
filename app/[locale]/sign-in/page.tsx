@@ -5,10 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSignIn } from "@clerk/nextjs";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import BeforeLoginNews from "../../components/BeforeLoginNews";
 import { ArrowRight, ChevronLeft, Fingerprint, KeyRound, Loader2, Lock, Mail, ShieldCheck } from "lucide-react";
 
 export default function SignInPage() {
+  const t = useTranslations("Auth");
   const router = useRouter();
   const { isLoaded, signIn, setActive } = useSignIn();
 
@@ -70,7 +72,7 @@ export default function SignInPage() {
               className="inline-flex items-center gap-2 text-[10px] font-black text-slate-400 hover:text-red-600 uppercase tracking-[0.2em] transition-colors group"
             >
               <ChevronLeft size={12} className="group-hover:-translate-x-1 transition-transform" />
-              Нүүр хуудас
+              {t('home')}
             </Link>
           </div>
 
@@ -81,13 +83,13 @@ export default function SignInPage() {
               className="absolute -top-10 -left-10 w-24 h-24 bg-emerald-100 rounded-full blur-3xl opacity-50"
             />
             <h1 className="text-5xl md:text-6xl font-black text-slate-900 mb-3 tracking-tight leading-[0.95] relative z-10">
-              Welcome <br />
+              {t('welcome')} <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-500">
-                Back.
+                {t('back')}
               </span>
             </h1>
             <p className="text-slate-500 font-bold text-sm leading-relaxed max-w-sm relative z-10">
-              Хувийн мэдээлэл болон хөтөлбөрийн явцаа шалгахын тулд нэвтэрнэ үү.
+              {t('signinSubtitle')}
             </p>
           </div>
 
@@ -102,7 +104,7 @@ export default function SignInPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="И-мэйл хаяг"
+                placeholder={t('emailPlaceholder')}
                 className="w-full bg-white border-2 border-slate-100 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 rounded-[1.5rem] py-5 pl-14 pr-6 text-sm font-bold text-slate-900 placeholder:text-slate-300 transition-all shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] outline-none"
                 required
               />
@@ -125,7 +127,7 @@ export default function SignInPage() {
               </div>
               <div className="text-right pr-2">
                 <Link href="#" className="text-[10px] font-black uppercase tracking-wider text-slate-400 hover:text-emerald-600 transition-colors">
-                  Нууц үгээ мартсан?
+                  {t('forgotPassword')}
                 </Link>
               </div>
             </div>
@@ -144,7 +146,7 @@ export default function SignInPage() {
               className="w-full bg-slate-900 hover:bg-emerald-600 text-white font-black text-xs uppercase tracking-[0.25em] py-6 rounded-[1.5rem] shadow-xl hover:shadow-2xl hover:shadow-emerald-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-3 mt-6 group"
             >
               {isLoading ? <Loader2 className="animate-spin" size={18} /> : (
-                <>Нэвтрэх <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" /></>
+                <>{t('signInButton')} <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" /></>
               )}
             </button>
 
@@ -156,8 +158,8 @@ export default function SignInPage() {
           {/* Sign Up Link */}
           <div className="mt-8 text-center">
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-              Шинэ гишүүн үү?
-              <Link href="/sign-up" className="text-emerald-600 ml-2 hover:text-slate-900 transition-colors underline decoration-2 underline-offset-4">Бүртгүүлэх</Link>
+              {t('newMember')}
+              <Link href="/sign-up" className="text-emerald-600 ml-2 hover:text-slate-900 transition-colors underline decoration-2 underline-offset-4">{t('signUpButton')}</Link>
             </p>
           </div>
 
@@ -222,10 +224,10 @@ export default function SignInPage() {
           </div>
 
           <div className="text-center relative z-10">
-            <h3 className="text-2xl font-black text-slate-800 mb-2">Secure Access</h3>
+            <h3 className="text-2xl font-black text-slate-800 mb-2">{t('secureAccess')}</h3>
             <div className="flex items-center justify-center gap-2 text-emerald-600 bg-emerald-50 px-4 py-2 rounded-full border border-emerald-100 shadow-sm">
               <Lock size={24} />
-              <span className="text-[10px] font-black uppercase tracking-widest">Encrypted</span>
+              <span className="text-[10px] font-black uppercase tracking-widest">{t('encrypted')}</span>
             </div>
           </div>
 

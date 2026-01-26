@@ -31,24 +31,9 @@ export async function GET(req: Request) {
 
   // Fetch all users sorted by role (Students first) then by update date
   // We sort role descending so 'student' (s) comes before 'guest' (g)
-  const rawUsers = await User.find({}).sort({ role: -1, updatedAt: -1 });
+  const users = await User.find({}).sort({ role: -1, updatedAt: -1 });
 
-  // Deduplicate by email (or clerkId if preferred)
-  const uniqueUsers: any[] = [];
-  const seenEmails = new Set();
-
-  for (const user of rawUsers) {
-    if (!user.email) {
-       uniqueUsers.push(user);
-       continue;
-    }
-    if (!seenEmails.has(user.email)) {
-      seenEmails.add(user.email);
-      uniqueUsers.push(user);
-    }
-  }
-
-  return NextResponse.json(uniqueUsers);
+  return NextResponse.json(users);
 }
 
 // 2. PUT: The critical part that SAVES changes
