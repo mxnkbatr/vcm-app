@@ -1264,8 +1264,52 @@
       "other": "Andere",
       "highschool": "Gymnasium / Fachoberschule",
       "university": "Universität / Hochschule",
-      "vocational": "Berufsausbildung"
+      "vocational": "Berufsausbildung",
+      "childcare": {
+        "0-1": "0-1 Jahre",
+        "1-3": "1-3 Jahre",
+        "3-5": "3-5 Jahre",
+        "5-12": "5-12 Jahre",
+        "12-18": "12-18 Jahre"
+      }
     },
     "saveContinue": "Speichern & Weiter"
+  },
+  "SubmitDocuments": {
+    "back": "Zurück zum Dashboard",
+    "title": "Dokumente einreichen",
+    "subtitle": "Optional: Sie können diese jetzt oder später in Ihrem Studentenprofil hochladen.",
+    "progress": "Upload-Fortschritt",
+    "finishTitle": "Einrichtung abschließen?",
+    "finishDesc": "Klicken Sie auf Senden, um fortzufahren. Alle jetzt nicht hochgeladenen Dokumente können später hinzugefügt werden.",
+    "submitBtn": "Registrierung abschließen",
+    "processing": "Verarbeitung...",
+    "uploadError": "Upload fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "successMsg": "Einreichung erfolgreich! Sie können verbleibende Dokumente später in Ihrem Profil hochladen.",
+    "submitError": "Übermittlung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "labels": {
+      "passport": "Reisepass",
+      "emongoliaCert": "E-Mongolia Registrierungsbescheinigung",
+      "marriageCert": "Heiratsurkunde",
+      "residenceCert": "Wohnsitzbescheinigung",
+      "birthCert": "Geburtsurkunde",
+      "educationCert": "Bildungsabschluss (Abitur)",
+      "bachelorDiploma": "Bachelor-Diplom",
+      "driverLicense": "Führerschein",
+      "englishCert": "Englisch-Zertifikat (IELTS/TOEFL B1-B2)",
+      "medicalRecords": "Medizinische Unterlagen",
+      "mentalHealthExam": "Psychiatrische Untersuchung",
+      "professionalExp": "Berufserfahrung"
+    },
+    "card": {
+      "pdfOnly": "Nur PDF",
+      "imageOrPdf": "JPG, PNG oder PDF",
+      "required": "Erforderlich",
+      "uploaded": "Dokument hochgeladen",
+      "viewFile": "Hochgeladene Datei ansehen →",
+      "uploading": "Wird hochgeladen...",
+      "clickUpload": "Zum Hochladen klicken",
+      "maxSize": "Max. 10MB"
+    }
   }
 }

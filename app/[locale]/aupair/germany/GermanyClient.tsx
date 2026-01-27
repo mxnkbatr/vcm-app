@@ -122,7 +122,7 @@ export default function GermanyClient() {
                <div className="relative h-[600px] hidden lg:block perspective-1000">
                   <motion.div style={{ y: yHero, rotateY: -10, rotateX: 5 }} className="absolute right-8 top-8 w-[420px] h-[550px] bg-white p-3 rounded-[3rem] shadow-2xl border-[6px] border-white z-20">
                      <div className="relative w-full h-full rounded-[2.5rem] overflow-hidden bg-slate-100">
-                        <Image src="https://images.unsplash.com/photo-1599946347371-88a3064ea17d?auto=format&fit=crop&w=800&q=80" alt="Berlin" fill className="object-cover" />
+                        <Image src="https://1001traveldestinations.wordpress.com/wp-content/uploads/2013/02/1001-travel-destinations-berliner-dom-frontansicht-wallpaper.jpg?w=625&h=390" alt="Berlin" fill className="object-cover" />
                         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40" />
                         <div className="absolute bottom-8 left-8 text-white">
                            <p className="font-serif italic text-lg opacity-90">Discover</p>

@@ -1277,8 +1277,52 @@
       "other": "Other",
       "highschool": "High School",
       "university": "University",
-      "vocational": "Vocational Training"
+      "vocational": "Vocational Training",
+      "childcare": {
+        "0-1": "0-1 years",
+        "1-3": "1-3 years",
+        "3-5": "3-5 years",
+        "5-12": "5-12 years",
+        "12-18": "12-18 years"
+      }
     },
     "saveContinue": "Save & Continue"
+  },
+  "SubmitDocuments": {
+    "back": "Back to Dashboard",
+    "title": "Submit Documents",
+    "subtitle": "Optional: You can upload these now or later in your student profile.",
+    "progress": "Upload Progress",
+    "finishTitle": "Finish setup?",
+    "finishDesc": "Click submit to continue. Any documents not uploaded now can be added later.",
+    "submitBtn": "Complete Registration",
+    "processing": "Processing...",
+    "uploadError": "Upload failed. Please try again.",
+    "successMsg": "Submission successful! You can upload remaining documents later in your profile.",
+    "submitError": "Failed to submit. Please try again.",
+    "labels": {
+      "passport": "Passport",
+      "emongoliaCert": "E-mongolia Registration Certificate",
+      "marriageCert": "Marriage Certificate",
+      "residenceCert": "Residence Certificate",
+      "birthCert": "Birth Certificate",
+      "educationCert": "Education Certificate (High School)",
+      "bachelorDiploma": "Bachelor's Diploma",
+      "driverLicense": "Driver's License",
+      "englishCert": "English Certificate (IELTS/TOEFL B1-B2)",
+      "medicalRecords": "Medical Records",
+      "mentalHealthExam": "Mental Health Examination",
+      "professionalExp": "Professional Experience"
+    },
+    "card": {
+      "pdfOnly": "PDF only",
+      "imageOrPdf": "JPG, PNG or PDF",
+      "required": "Required",
+      "uploaded": "Document uploaded",
+      "viewFile": "View uploaded file →",
+      "uploading": "Uploading...",
+      "clickUpload": "Click to upload",
+      "maxSize": "Max 10MB"
+    }
   }
 }

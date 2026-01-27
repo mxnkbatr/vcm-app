@@ -231,11 +231,12 @@ export default function MemberDashboard() {
    if (!userData) return null;
 
    const isStudent = userData.role === 'student';
-   const currentStepIndex = userData.step ? STEPS.indexOf(userData.step) : -1;
+   const normalizedStep = (!userData.step || userData.step === "-") ? "Applied" : userData.step;
+   const currentStepIndex = STEPS.indexOf(normalizedStep);
    const progressPercent = Math.max(5, ((currentStepIndex + 1) / STEPS.length) * 100);
    const pendingApp = userApps.find(a => a.status === 'pending');
 
-   const stepKey = userData.step || "Applied";
+   const stepKey = normalizedStep;
    const currentInstruction = {
       title: t(`instructions.${stepKey}.title`),
       action: t(`instructions.${stepKey}.action`),
@@ -301,7 +302,7 @@ export default function MemberDashboard() {
                         <div className="space-y-8 mt-12">
                            <div className="space-y-3">
                               <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-slate-500">
-                                 <span className="flex items-center gap-2">{t('currentStep')}: <span className="text-white bg-slate-900 px-2 py-0.5 rounded ml-1">{t(`steps.${userData.step || "Applied"}`)}</span></span>
+                                 <span className="flex items-center gap-2">{t('currentStep')}: <span className="text-white bg-slate-900 px-2 py-0.5 rounded ml-1">{t(`steps.${normalizedStep}`)}</span></span>
                                  <span className="text-[#E31B23]">{Math.round(progressPercent)}% {t('ready')}</span>
                               </div>
                               <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden relative">

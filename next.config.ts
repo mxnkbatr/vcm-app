@@ -18,6 +18,18 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'images.pexels.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '1001traveldestinations.wordpress.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.worldatlas.com',
+      },
+      {
+        protocol: 'https',
         hostname: 'img.clerk.com',
       },
       {

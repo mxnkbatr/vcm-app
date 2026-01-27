@@ -58,7 +58,7 @@ const COUNTRY_DATA = [
     },
     flag: "🇧🇪",
     iso: "BEL",
-    img: "https://images.unsplash.com/photo-1559410545-0112ea057b99?auto=format&fit=crop&q=30&w=400",
+    img: "https://cdn.britannica.com/61/90461-050-7E15DFEB/Grand-Place-Brussels.jpg?w=300",
     stat: "Multi-Lang",
     link: "/aupair/belgium"
   },
@@ -314,11 +314,7 @@ const HeroSection = () => {
                   <div className="absolute bottom-6 left-6 right-6">
                     <div className="bg-white/10 backdrop-blur-md border border-white/20 p-5 rounded-3xl text-white">
                       <h4 className="text-2xl font-bold mb-1">{t(`${active.key}.title`)}</h4>
-                      <div className="flex items-center gap-3 text-xs font-medium text-slate-200">
-                        <span>Program ID: #{active.iso}00{index + 1}</span>
-                        <span className="w-1 h-1 bg-white/50 rounded-full" />
-                        <span>{common('openNow')}</span>
-                      </div>
+                      
                     </div>
                   </div>
                 </div>

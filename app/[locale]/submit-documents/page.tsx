@@ -5,27 +5,34 @@ import { useUser } from "@clerk/nextjs";
 import { Upload, FileText, CheckCircle, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
-const DOCUMENT_FIELDS = [
-    { key: "passport", label: "Passport", type: "image-or-pdf", required: false },
-    { key: "emongoliaCert", label: "E-mongolia Registration Certificate", type: "pdf", required: false },
-    { key: "marriageCert", label: "Marriage Certificate", type: "pdf", required: false },
-    { key: "residenceCert", label: "Residence Certificate", type: "pdf", required: false },
-    { key: "birthCert", label: "Birth Certificate", type: "pdf", required: false },
-    { key: "educationCert", label: "Education Certificate (High School)", type: "pdf", required: false },
-    { key: "bachelorDiploma", label: "Bachelor's Diploma", type: "pdf", required: false },
-    { key: "driverLicense", label: "Driver's License", type: "image-or-pdf", required: false },
-    { key: "englishCert", label: "English Certificate (IELTS/TOEFL B1-B2)", type: "image-or-pdf", required: false },
-    { key: "medicalRecords", label: "Medical Records", type: "pdf", required: false },
-    { key: "mentalHealthExam", label: "Mental Health Examination", type: "pdf", required: false },
-    { key: "professionalExp", label: "Professional Experience", type: "pdf", required: false },
+const DOCUMENT_KEYS = [
+    { key: "passport", type: "image-or-pdf", required: false },
+    { key: "emongoliaCert", type: "pdf", required: false },
+    { key: "marriageCert", type: "pdf", required: false },
+    { key: "residenceCert", type: "pdf", required: false },
+    { key: "birthCert", type: "pdf", required: false },
+    { key: "educationCert", type: "pdf", required: false },
+    { key: "bachelorDiploma", type: "pdf", required: false },
+    { key: "driverLicense", type: "image-or-pdf", required: false },
+    { key: "englishCert", type: "image-or-pdf", required: false },
+    { key: "medicalRecords", type: "pdf", required: false },
+    { key: "mentalHealthExam", type: "pdf", required: false },
+    { key: "professionalExp", type: "pdf", required: false },
 ];
 
 export default function SubmitDocuments() {
+    const t = useTranslations("SubmitDocuments");
     const { user } = useUser();
     const [documents, setDocuments] = useState<Record<string, string>>({});
     const [uploading, setUploading] = useState<Record<string, boolean>>({});
     const [submitting, setSubmitting] = useState(false);
+
+    const DOCUMENT_FIELDS = DOCUMENT_KEYS.map(field => ({
+        ...field,
+        label: t(`labels.${field.key}`)
+    }));
 
     const handleUpload = async (key: string, file: File) => {
         setUploading({ ...uploading, [key]: true });
@@ -45,7 +52,7 @@ export default function SubmitDocuments() {
             setDocuments({ ...documents, [key]: url });
         } catch (error) {
             console.error("Upload error:", error);
-            alert("Upload failed. Please try again.");
+            alert(t("uploadError"));
         } finally {
             setUploading({ ...uploading, [key]: false });
         }
@@ -62,13 +69,13 @@ export default function SubmitDocuments() {
             });
 
             if (res.ok) {
-                alert("Submission successful! You can upload remaining documents later in your profile.");
+                alert(t("successMsg"));
                 window.location.href = "/dashboard";
             } else {
                 throw new Error("Submission failed");
             }
         } catch (error) {
-            alert("Failed to submit. Please try again.");
+            alert(t("submitError"));
         } finally {
             setSubmitting(false);
         }
@@ -82,15 +89,15 @@ export default function SubmitDocuments() {
                 {/* Header */}
                 <div className="mb-10">
                     <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-900 mb-4">
-                        <ArrowLeft size={16} /> Back to Dashboard
+                        <ArrowLeft size={16} /> {t("back")}
                     </Link>
-                    <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-3">Submit Documents</h1>
-                    <p className="text-lg text-slate-500 italic">Optional: You can upload these now or later in your student profile.</p>
+                    <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-3">{t("title")}</h1>
+                    <p className="text-lg text-slate-500 italic">{t("subtitle")}</p>
 
                     {/* Progress Bar */}
                     <div className="mt-6 bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
                         <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm font-bold text-slate-700">Upload Progress</span>
+                            <span className="text-sm font-bold text-slate-700">{t("progress")}</span>
                             <span className="text-sm font-bold text-[#E31B23]">{uploadedCount} / {DOCUMENT_FIELDS.length}</span>
                         </div>
                         <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
@@ -114,6 +121,7 @@ export default function SubmitDocuments() {
                                 url={documents[field.key]}
                                 uploading={uploading[field.key]}
                                 onUpload={(file) => handleUpload(field.key, file)}
+                                t={t}
                             />
                         ))}
                     </div>
@@ -123,8 +131,8 @@ export default function SubmitDocuments() {
                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                         <div>
-                            <p className="text-sm font-bold text-slate-700 mb-1">Finish setup?</p>
-                            <p className="text-xs text-slate-500">Click submit to continue. Any documents not uploaded now can be added later.</p>
+                            <p className="text-sm font-bold text-slate-700 mb-1">{t("finishTitle")}</p>
+                            <p className="text-xs text-slate-500">{t("finishDesc")}</p>
                         </div>
                         <button
                             onClick={handleSubmit}
@@ -136,10 +144,10 @@ export default function SubmitDocuments() {
                         >
                             {submitting ? (
                                 <span className="flex items-center justify-center gap-2">
-                                    <Loader2 className="animate-spin" size={20} /> Processing...
+                                    <Loader2 className="animate-spin" size={20} /> {t("processing")}
                                 </span>
                             ) : (
-                                "Complete Registration"
+                                t("submitBtn")
                             )}
                         </button>
                     </div>
@@ -149,11 +157,12 @@ export default function SubmitDocuments() {
     );
 }
 
-const DocumentUploadCard = ({ field, url, uploading, onUpload }: {
-    field: typeof DOCUMENT_FIELDS[0];
+const DocumentUploadCard = ({ field, url, uploading, onUpload, t }: {
+    field: any;
     url: string;
     uploading: boolean;
     onUpload: (file: File) => void;
+    t: any;
 }) => (
     <div className={`border-2 border-dashed rounded-2xl p-6 transition-all ${url
         ? "border-[#00C896] bg-green-50/30"
@@ -165,12 +174,12 @@ const DocumentUploadCard = ({ field, url, uploading, onUpload }: {
             <div className="flex-1">
                 <p className="text-sm font-bold text-slate-900 mb-1">{field.label}</p>
                 <p className="text-xs text-slate-500">
-                    {field.type === "pdf" ? "PDF only" : "JPG, PNG or PDF"}
+                    {field.type === "pdf" ? t("card.pdfOnly") : t("card.imageOrPdf")}
                 </p>
             </div>
             {field.required && !url && (
                 <span className="px-2 py-0.5 bg-red-100 text-red-600 text-[10px] font-black uppercase rounded">
-                    Required
+                    {t("card.required")}
                 </span>
             )}
             {url && (
@@ -181,7 +190,7 @@ const DocumentUploadCard = ({ field, url, uploading, onUpload }: {
         {url ? (
             <div className="space-y-2">
                 <div className="flex items-center gap-2 text-[#00C896] text-sm font-bold">
-                    <CheckCircle size={16} /> Document uploaded
+                    <CheckCircle size={16} /> {t("card.uploaded")}
                 </div>
                 <a
                     href={url}
@@ -189,7 +198,7 @@ const DocumentUploadCard = ({ field, url, uploading, onUpload }: {
                     rel="noopener noreferrer"
                     className="text-xs text-[#E31B23] hover:underline font-bold flex items-center gap-1"
                 >
-                    View uploaded file →
+                    {t("card.viewFile")}
                 </a>
             </div>
         ) : (
@@ -199,13 +208,13 @@ const DocumentUploadCard = ({ field, url, uploading, onUpload }: {
                     {uploading ? (
                         <>
                             <Loader2 className="animate-spin text-[#E31B23] mb-2" size={24} />
-                            <span className="text-sm font-bold text-[#E31B23]">Uploading...</span>
+                            <span className="text-sm font-bold text-[#E31B23]">{t("card.uploading")}</span>
                         </>
                     ) : (
                         <>
                             <Upload size={24} className="text-slate-400 mb-2" />
-                            <span className="text-sm font-bold text-slate-600">Click to upload</span>
-                            <span className="text-xs text-slate-400 mt-1">Max 10MB</span>
+                            <span className="text-sm font-bold text-slate-600">{t("card.clickUpload")}</span>
+                            <span className="text-xs text-slate-400 mt-1">{t("card.maxSize")}</span>
                         </>
                     )}
                 </div>

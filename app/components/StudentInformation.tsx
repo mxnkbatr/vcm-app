@@ -309,15 +309,18 @@ export default function StudentInformation({ onSuccess }: StudentInformationProp
                            <div className="space-y-4">
                               <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">{t("labels.childcare")}</label>
                               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                 {['0-1 years', '1-3 years', '3-5 years', '5-12 years', '12-18 years'].map((age) => (
-                                    <label key={age} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${formData.childcareExperience.includes(age) ? 'bg-[#E31B23]/5 border-[#E31B23] text-[#E31B23]' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
-                                       <input type="checkbox" value={age} checked={formData.childcareExperience.includes(age)} onChange={(e) => handleCheckboxChange(e, 'childcareExperience')} className="hidden" />
-                                       <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${formData.childcareExperience.includes(age) ? 'border-[#E31B23] bg-[#E31B23]' : 'border-slate-300'}`}>
-                                          {formData.childcareExperience.includes(age) && <CheckCircle2 size={10} className="text-white" />}
-                                       </div>
-                                       <span className="text-xs font-bold">{age}</span>
-                                    </label>
-                                 ))}
+                                 {['0-1', '1-3', '3-5', '5-12', '12-18'].map((key) => {
+                                    const label = t(`options.childcare.${key}`);
+                                    return (
+                                       <label key={key} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${formData.childcareExperience.includes(label) ? 'bg-[#E31B23]/5 border-[#E31B23] text-[#E31B23]' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
+                                          <input type="checkbox" value={label} checked={formData.childcareExperience.includes(label)} onChange={(e) => handleCheckboxChange(e, 'childcareExperience')} className="hidden" />
+                                          <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${formData.childcareExperience.includes(label) ? 'border-[#E31B23] bg-[#E31B23]' : 'border-slate-300'}`}>
+                                             {formData.childcareExperience.includes(label) && <CheckCircle2 size={10} className="text-white" />}
+                                          </div>
+                                          <span className="text-xs font-bold">{label}</span>
+                                       </label>
+                                    );
+                                 })}
                               </div>
                            </div>
                         </div>
