@@ -37,11 +37,7 @@ export async function POST(req: Request) {
 
     await connectToDB();
 
-    // Create a unique room name for LiveKit
-    // Format: booking_{userId}_{timestamp}
-    const livekitRoom = `booking_${user.id}_${Date.now()}`;
-
-    const newBooking = await Booking.create({
+    const newBooking = new Booking({
       userId: user.id,
       serviceId: service.id,
       serviceTitle: service.title,
@@ -51,9 +47,12 @@ export async function POST(req: Request) {
       email,
       phone,
       note,
-      status: 'pending', // Changed to pending - requires admin approval
-      livekitRoom
+      status: 'pending'
     });
+
+    // Use the persistent database ID for the LiveKit room
+    newBooking.livekitRoom = `room_${newBooking._id}`;
+    await newBooking.save();
 
     // Send notification email to admin
     const adminEmail = process.env.ADMIN_EMAIL;

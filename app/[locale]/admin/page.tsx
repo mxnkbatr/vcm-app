@@ -23,7 +23,8 @@ import {
    ChevronDown,
    LayoutDashboard,
    ClipboardList,
-   Calendar
+   Calendar,
+   Video
 } from "lucide-react";
 import {
    FaBook,
@@ -42,6 +43,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useTranslations } from 'next-intl';
 import LessonsManager from "@/app/components/admin/LessonsManager";
+import { Link } from "@/navigation";
 
 // --- CONSTANTS ---
 const ROLES = ["Admin", "Student", "Guest"];
@@ -472,7 +474,8 @@ export default function AdminDashboard() {
                date: b.date,
                status: b.status,
                email: b.email,
-               phone: b.phone
+               phone: b.phone,
+               livekitRoom: b.livekitRoom
             }));
 
             setBookings(processedBookings);
@@ -711,9 +714,16 @@ export default function AdminDashboard() {
                                              <button onClick={() => handleUpdateBooking(b.id, 'rejected')} className="px-3 py-1.5 rounded-lg bg-red-50 text-[#E31B23] text-[10px] font-black uppercase hover:bg-[#E31B23] hover:text-white transition-colors">{t("dashboard.bookings.reject")}</button>
                                           </>
                                        ) : (
-                                          <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase ${b.status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
-                                             {b.status}
-                                          </span>
+                                          <div className="flex items-center gap-2">
+                                             <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase ${b.status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                                                {b.status}
+                                             </span>
+                                             {b.status === 'confirmed' && (
+                                                <Link href={`/meeting/${b.livekitRoom || b.id}`} target="_blank" className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all">
+                                                   <Video size={14} />
+                                                </Link>
+                                             )}
+                                          </div>
                                        )}
                                     </div>
                                  </div>
@@ -1444,4 +1454,3 @@ function ContentManager({ blogs, onRefresh }: any) {
       </div>
    );
 }
-

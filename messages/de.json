@@ -101,7 +101,8 @@
     "buttons": {
       "back": "Zurück",
       "continue": "Weiter",
-      "confirm": "Bestätigen"
+      "confirm": "Bestätigen",
+      "joinMeeting": "Videoanruf beitreten"
     },
     "summary": {
       "title": "Buchungsinformationen",
@@ -132,6 +133,10 @@
         "price": "50.000₮",
         "desc": "Vorbereitung der Visumsunterlagen, Überprüfung und Beratung."
       }
+    },
+    "myBookings": {
+      "title": "Meine Buchungen",
+      "empty": "Sie haben noch keine Buchungen."
     }
   },
   "NewsPage": {

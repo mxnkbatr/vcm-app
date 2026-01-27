@@ -1,45 +1,49 @@
 import { AccessToken } from "livekit-server-sdk";
-import { NextResponse } from "next/server";
-import { currentUser } from "@clerk/nextjs/server";
+import { NextRequest, NextResponse } from "next/server";
+export const dynamic = 'force-dynamic'; // <--- ADD THIS AT THE TOP
+export async function GET(req: NextRequest) {
+  // 1. Get query parameters - useToken components send 'roomName' and 'identity'
+  const room = req.nextUrl.searchParams.get("roomName") || req.nextUrl.searchParams.get("room");
+  const username = req.nextUrl.searchParams.get("identity") || req.nextUrl.searchParams.get("username"); 
 
-export async function GET(req: Request) {
+  // 2. Validate parameters
+  if (!room) {
+    return NextResponse.json({ error: 'Missing "roomName" query parameter' }, { status: 400 });
+  }
+  if (!username) {
+    return NextResponse.json({ error: 'Missing "identity" query parameter' }, { status: 400 });
+  }
+
+  // 3. Check Environment Variables
+  const apiKey = process.env.LIVEKIT_API_KEY;
+  const apiSecret = process.env.LIVEKIT_API_SECRET;
+  const wsUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL;
+
+  if (!apiKey || !apiSecret || !wsUrl) {
+    return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
+  }
+
   try {
-    const user = await currentUser();
-    const { searchParams } = new URL(req.url);
-    const room = searchParams.get("room");
-    const username = searchParams.get("username") || user?.firstName || "Guest";
-
-    if (!room) {
-      return NextResponse.json(
-        { error: 'Missing "room" query parameter' },
-        { status: 400 }
-      );
-    }
-    
-    // Check if keys are available
-    if (!process.env.LIVEKIT_API_KEY || !process.env.LIVEKIT_API_SECRET) {
-       return NextResponse.json(
-        { error: "Server misconfigured" },
-        { status: 500 }
-      );
-    }
-
-    const apiKey = process.env.LIVEKIT_API_KEY;
-    const apiSecret = process.env.LIVEKIT_API_SECRET;
-    
-    // Create token
+    // 4. Create Token
     const at = new AccessToken(apiKey, apiSecret, {
       identity: username,
-      // For simplicity, using room name as identity prefix could avoid collisions but username is fine for now
+      // Optional: Add a display name if sent by client
+      name: req.nextUrl.searchParams.get("name") || username, 
     });
 
-    at.addGrant({ room, roomJoin: true, canPublish: true, canSubscribe: true });
+    at.addGrant({
+      roomJoin: true,
+      room: room,
+      canPublish: true,
+      canSubscribe: true,
+      canPublishData: true, // Needed for chat
+    });
 
-    const token = await at.toJwt();
-
-    return NextResponse.json({ token });
+    // 5. Return Token
+    const jwt = await at.toJwt();
+    return NextResponse.json({ accessToken: jwt }); // useToken expects 'token' or 'accessToken'
   } catch (error) {
-    console.error("LiveKit token error:", error);
+    console.error(error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

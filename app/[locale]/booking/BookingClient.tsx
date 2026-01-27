@@ -52,7 +52,7 @@ interface BookingFormData {
 
 // --- DATA ---
 const ALL_TIMES = [
-   "10:00", "11:00", "13:00", "14:00", "15:30", "16:30", "18:00"
+    "10:00", "10:10","11:00", "13:00", "14:00", "15:30", "16:30", "18:00"
 ];
 
 // --- ANIMATION VARIANTS ---
@@ -494,6 +494,49 @@ export default function BookingClient() {
                         </div>
                      </div>
                   </div>
+
+                  {/* My Bookings List */}
+                  {myBookings.length > 0 && (
+                     <div className="mt-8 bg-white rounded-[2.5rem] shadow-xl border border-slate-100 p-8">
+                        <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-2">
+                           <CalendarIcon size={20} className="text-red-600" />
+                           {t("myBookings.title")}
+                        </h3>
+                        <div className="space-y-4">
+                           {myBookings.map((b) => (
+                              <div key={b._id} className="flex flex-col md:flex-row md:items-center justify-between p-5 rounded-3xl bg-slate-50 border border-slate-100 group transition-all hover:bg-white hover:shadow-lg">
+                                 <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-red-600 shadow-sm">
+                                       <Clock size={20} />
+                                    </div>
+                                    <div>
+                                       <h4 className="font-bold text-slate-900">{b.serviceTitle}</h4>
+                                       <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">{b.date} • {b.time}</p>
+                                    </div>
+                                 </div>
+                                 <div className="flex items-center gap-3 mt-4 md:mt-0">
+                                    <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${
+                                       b.status === 'confirmed' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
+                                       b.status === 'rejected' ? 'bg-red-100 text-red-700 border border-red-200' :
+                                       'bg-amber-100 text-amber-700 border border-amber-200'
+                                    }`}>
+                                       {b.status}
+                                    </span>
+                                    {b.status === 'confirmed' && (
+                                       <Link 
+                                          href={`/meeting/${b.livekitRoom || b._id}`}
+                                          target="_blank"
+                                          className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 transition-all active:scale-95 shadow-md"
+                                       >
+                                          <Video size={14} /> {t("buttons.joinMeeting") || "Join Call"}
+                                       </Link>
+                                    )}
+                                 </div>
+                              </div>
+                           ))}
+                        </div>
+                     </div>
+                  )}
                </div>
 
             </div>

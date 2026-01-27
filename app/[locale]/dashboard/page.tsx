@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import {
    Clock, Calendar, MapPin, ArrowUpRight, Activity,
-   CheckCircle2, Shield, Zap, MoreHorizontal, ChevronRight, Loader2,
+   CheckCircle2, Shield, MoreHorizontal, Loader2,
    Settings, Plane, Globe, BookOpen, AlertCircle,
    Sparkles,
    FileText,
@@ -15,9 +15,10 @@ import {
    Phone,
    GraduationCap,
    Baby,
-   Heart
+   Heart,
+   Video
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
 
 // --- CONSTANTS ---
@@ -83,7 +84,7 @@ const FullSnapshotSection = ({ profile }: { profile: any }) => {
             </div>
          ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-               <DashboardCard className="lg:col-span-1 !p-8">
+               <DashboardCard className="lg:col-span-1 p-8!">
                   <h3 className="flex items-center gap-2 text-[#E31B23] font-black text-[10px] uppercase tracking-widest mb-6">
                      <User size={14} /> {t('identity')}
                   </h3>
@@ -106,7 +107,7 @@ const FullSnapshotSection = ({ profile }: { profile: any }) => {
                   </div>
                </DashboardCard>
 
-               <DashboardCard className="lg:col-span-1 !p-8">
+               <DashboardCard className="lg:col-span-1 p-8!">
                   <h3 className="flex items-center gap-2 text-[#E31B23] font-black text-[10px] uppercase tracking-widest mb-6">
                      <Heart size={14} /> {t('family')}
                   </h3>
@@ -121,12 +122,12 @@ const FullSnapshotSection = ({ profile }: { profile: any }) => {
                      </div>
                      <div className="flex justify-between items-center bg-slate-900 text-white p-4 rounded-2xl">
                         <p className="text-[8px] font-black text-slate-400 uppercase">{t('driverLicense')}</p>
-                        <span className={`text-[10px] font-black uppercase ${profile.driversLicense === 'yes' ? 'text-emerald-400' : 'text-rose-400'}`}>{profile.driversLicense === 'yes' ? t('yes') : t('no')}</span>
+                        <span className={`text-[10px] font-black uppercase ${profile.driversLicense === 'yes' ? t('yes') : t('no')}`}>{profile.driversLicense === 'yes' ? t('yes') : t('no')}</span>
                      </div>
                   </div>
                </DashboardCard>
 
-               <DashboardCard className="lg:col-span-1 !p-8">
+               <DashboardCard className="lg:col-span-1 p-8!">
                   <h3 className="flex items-center gap-2 text-[#E31B23] font-black text-[10px] uppercase tracking-widest mb-6">
                      <Baby size={14} /> {t('childcare')}
                   </h3>
@@ -157,7 +158,7 @@ const FullSnapshotSection = ({ profile }: { profile: any }) => {
                   </div>
                </DashboardCard>
 
-               <DashboardCard className="lg:col-span-3 !p-10 bg-slate-50 border-none">
+               <DashboardCard className="lg:col-span-3 p-10! bg-slate-50 border-none">
                   <h3 className="flex items-center gap-2 text-[#E31B23] font-black text-[10px] uppercase tracking-widest mb-6">
                      <FileText size={14} /> {t('motivation')}
                   </h3>
@@ -181,10 +182,18 @@ export default function MemberDashboard() {
    const [userData, setUserData] = useState<UserData | null>(null);
    const [activities, setActivities] = useState<ActivityLog[]>([]);
    const [userApps, setUserApps] = useState<any[]>([]);
+   const [bookings, setBookings] = useState<any[]>([]);
    const [loading, setLoading] = useState(true);
 
+   const formatDate = (date: string) => {
+      try {
+         return new Date(date.replace(/-/g, "/")).toLocaleDateString(locale === 'mn' ? 'mn-MN' : 'en-US', { month: 'short', day: 'numeric' });
+      } catch (e) {
+         return date;
+      }
+   };
+
    useEffect(() => {
-      // Fast check for admins to redirect immediately
       if (isLoaded && user?.publicMetadata?.role === 'admin') {
          router.replace('/admin');
          return;
@@ -206,8 +215,9 @@ export default function MemberDashboard() {
                }
                setUserData(data.user);
                setActivities(data.activity || []);
+               setBookings(data.bookings || []);
             } else {
-               setUserData({ _id: "new", fullName: user.fullName || "Guest", email: user.primaryEmailAddress?.emailAddress || "", role: "guest" });
+               setUserData({ _id: "new", fullName: user.fullName || "Guest User", email: user.primaryEmailAddress?.emailAddress || "", role: "guest" });
             }
             if (appsRes.ok) setUserApps(await appsRes.json());
          } catch (e) {
@@ -220,7 +230,7 @@ export default function MemberDashboard() {
    }, [isLoaded, user, router]);
 
    if (!isLoaded || loading) return (
-      <div className="min-h-[100dvh] flex items-center justify-center bg-[#FAFAFA]">
+      <div className="min-h-dvh flex items-center justify-center bg-[#FAFAFA]">
          <div className="flex flex-col items-center gap-4">
             <Loader2 className="w-10 h-10 animate-spin text-[#E31B23]" />
             <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">{t('loading')}</p>
@@ -236,21 +246,43 @@ export default function MemberDashboard() {
    const progressPercent = Math.max(5, ((currentStepIndex + 1) / STEPS.length) * 100);
    const pendingApp = userApps.find(a => a.status === 'pending');
 
+   // 1. Next CONFIRMED meeting (for joining)
+   const now = new Date();
+   const upcomingConfirmed = bookings
+      .filter(b => b.status === 'confirmed')
+      .filter(b => {
+         const meetingDate = new Date(`${b.date}T${b.time}`);
+         return meetingDate >= new Date(now.getTime() - 60 * 60 * 1000); 
+      })
+      .sort((a, b) => new Date(`${a.date}T${a.time}`).getTime() - new Date(`${b.date}T${b.time}`).getTime())[0];
+
+   // 2. Absolute LATEST booking (most recently created)
+   const latestBooking = bookings.length > 0 ? [...bookings].sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+   )[0] : null;
+
    const stepKey = normalizedStep;
-   const currentInstruction = {
+   
+   // Instruction logic: Priority to Confirmed Calls
+   const currentInstruction = upcomingConfirmed ? {
+      title: "Priority: Video Call",
+      action: `Hello ${userData.fullName.split(' ')[0]}, your ${upcomingConfirmed.serviceTitle} starts at ${upcomingConfirmed.time}. Be ready to join!`,
+      button: "Join Call Now",
+      link: `/meeting/${upcomingConfirmed.livekitRoom || upcomingConfirmed._id}`,
+      isMeeting: true
+   } : {
       title: t(`instructions.${stepKey}.title`),
       action: t(`instructions.${stepKey}.action`),
       button: t(`instructions.${stepKey}.button`),
-      link: STEP_INSTRUCTIONS[stepKey]?.link || "/aupair"
+      link: STEP_INSTRUCTIONS[stepKey]?.link || "/aupair",
+      isMeeting: false
    };
 
-   const formatDate = (date: string) => new Date(date.replace(/-/g, "/")).toLocaleDateString(locale === 'mn' ? 'mn-MN' : 'en-US', { month: 'short', day: 'numeric' });
-
    return (
-      <div className="min-h-[100dvh] bg-[#FAFAFA] font-sans text-slate-900 pt-28 pb-12 px-6">
+      <div className="min-h-dvh bg-[#FAFAFA] font-sans text-slate-900 pt-28 pb-12 px-6">
          <div className="fixed inset-0 pointer-events-none">
-            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[#E31B23] rounded-full blur-[200px] opacity-[0.03]" />
-            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#00C896] rounded-full blur-[200px] opacity-[0.03]" />
+            <div className="absolute top-0 right-0 w-200 h-200 bg-[#E31B23] rounded-full blur-[200px] opacity-[0.03]" />
+            <div className="absolute bottom-0 left-0 w-150 h-150 bg-[#00C896] rounded-full blur-[200px] opacity-[0.03]" />
          </div>
 
          <div className="relative z-10 max-w-7xl mx-auto space-y-16">
@@ -263,7 +295,7 @@ export default function MemberDashboard() {
                      </p>
                   </div>
                   <h1 className="text-4xl md:text-6xl font-black tracking-tighter leading-none mb-1 text-slate-900">
-                     {t('hello')}, <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E31B23] to-rose-400">{userData.fullName}</span>
+                     {t('hello')}, <br /><span className="text-transparent bg-clip-text bg-linear-to-r from-[#E31B23] to-rose-400">{userData.fullName}</span>
                   </h1>
                </motion.div>
                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex gap-3">
@@ -275,12 +307,12 @@ export default function MemberDashboard() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-4 gap-6">
-               <DashboardCard className="md:col-span-3 lg:col-span-2 row-span-2 !p-0 border-t-4 border-t-[#E31B23]">
+               <DashboardCard className="md:col-span-3 lg:col-span-2 row-span-2 p-0! border-t-4 border-t-[#E31B23]">
                   <div className="relative h-full p-8 flex flex-col justify-between z-10">
                      <div className="flex justify-between items-start">
                         <div className="flex items-center gap-6">
                            <div className="relative">
-                              <div className="w-20 h-20 rounded-[1.5rem] p-1 shadow-xl bg-white ring-4 ring-slate-50 rotate-[-3deg]">
+                              <div className="w-20 h-20 rounded-3xl p-1 shadow-xl bg-white ring-4 ring-slate-50 -rotate-3">
                                  <Image src={user?.imageUrl || "/logo.jpg"} alt="User" width={80} height={80} className="rounded-[1.2rem] w-full h-full object-cover" />
                               </div>
                               {isStudent && <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1.5 shadow-lg border border-slate-100"><Shield size={14} className="text-[#00C896] fill-[#00C896]/20" /></div>}
@@ -307,7 +339,7 @@ export default function MemberDashboard() {
                               </div>
                               <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden relative">
                                  <motion.div initial={{ width: 0 }} animate={{ width: `${progressPercent}%` }} transition={{ duration: 1.5, ease: "circOut" }} className="h-full bg-[#E31B23] relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.2)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.2)_75%,transparent_75%,transparent)] bg-[length:1rem_1rem] animate-[progress_1s_linear_infinite]" />
+                                    <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.2)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.2)_75%,transparent_75%,transparent)] bg-size-[1rem_1rem] animate-[progress_1s_linear_infinite]" />
                                  </motion.div>
                               </div>
                               <div className="flex justify-between mt-2">
@@ -337,46 +369,110 @@ export default function MemberDashboard() {
                   </div>
                </DashboardCard>
 
-               <DashboardCard className="md:col-span-3 lg:col-span-2 !p-0 group relative overflow-hidden bg-slate-900" delay={0.1}>
-                  <div className="absolute inset-0 z-0 opacity-40 group-hover:opacity-30 transition-opacity duration-500">
-                     {userData.country === "Germany" && <Image src="https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=800&q=80" alt="Germany" fill className="object-cover" />}
-                     {userData.country === "Belgium" && <Image src="https://images.unsplash.com/photo-1572084682035-c54363297371?auto=format&fit=crop&w=800&q=80" alt="Belgium" fill className="object-cover" />}
-                     {!userData.country && <Image src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=800&q=80" alt="Travel" fill className="object-cover" />}
-                  </div>
+               <DashboardCard className={`md:col-span-3 lg:col-span-2 p-0! group relative overflow-hidden ${currentInstruction.isMeeting ? 'bg-[#E31B23]' : 'bg-slate-900'}`} delay={0.1}>
+                  {currentInstruction.isMeeting ? (
+                     <div className="absolute inset-0 z-0 opacity-20 bg-[radial-gradient(circle_at_50%_50%,#ffffff,transparent)] animate-pulse" />
+                  ) : (
+                     <div className="absolute inset-0 z-0 opacity-40 group-hover:opacity-30 transition-opacity duration-500">
+                        {userData.country === "Germany" && <Image src="https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=800&q=80" alt="Germany" fill className="object-cover" />}
+                        {userData.country === "Belgium" && <Image src="https://images.unsplash.com/photo-1572084682035-c54363297371?auto=format&fit=crop&w=800&q=80" alt="Belgium" fill className="object-cover" />}
+                        {!userData.country && <Image src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=800&q=80" alt="Travel" fill className="object-cover" />}
+                     </div>
+                  )}
+                  
                   <div className="relative z-10 h-full p-8 flex flex-col justify-between text-white">
                      <div className="flex justify-between items-center">
-                        <span className="bg-[#E31B23] text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-md shadow-lg">{t('actionRequired')}</span>
-                        <Globe size={18} className="opacity-80" />
+                        <span className={`${currentInstruction.isMeeting ? 'bg-white text-[#E31B23]' : 'bg-[#E31B23] text-white'} text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-md shadow-lg`}>
+                           {currentInstruction.isMeeting ? "Next Up" : t('actionRequired')}
+                        </span>
+                        {currentInstruction.isMeeting ? <Video size={18} className="animate-bounce" /> : <Globe size={18} className="opacity-80" />}
                      </div>
                      <div>
                         <h3 className="text-3xl font-black tracking-tight leading-none mb-3">{currentInstruction.title}</h3>
-                        <p className="text-xs font-bold text-slate-300 opacity-90 max-w-xs leading-relaxed">{currentInstruction.action}</p>
+                        <p className={`text-xs font-bold ${currentInstruction.isMeeting ? 'text-white' : 'text-slate-300'} opacity-90 max-w-xs leading-relaxed`}>{currentInstruction.action}</p>
                      </div>
-                     <Link href={currentInstruction.link} className="mt-6 w-full py-3 bg-white/10 backdrop-blur border border-white/20 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-white hover:text-slate-900 transition-all flex items-center justify-center gap-2">
-                        {currentInstruction.button} <ArrowUpRight size={14} />
-                     </Link>
-                  </div>
-               </DashboardCard>
-
-               <DashboardCard className="md:col-span-4 lg:col-span-2 !p-0" delay={0.4}>
-                  <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                     <h3 className="font-black text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 text-slate-900"><Activity size={14} className="text-[#E31B23]" /> {t('history')}</h3>
-                  </div>
-                  <div className="p-4 space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar">
-                     {activities.length > 0 ? activities.map((act, i) => (
-                        <div key={i} className="flex items-center gap-4 p-4 rounded-3xl transition-all cursor-default hover:bg-slate-50 group">
-                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-white border border-slate-100 shadow-sm text-slate-500 group-hover:text-[#E31B23]`}>{act.type === 'event' ? <Calendar size={16} /> : <FileText size={16} />}</div>
-                           <div className="flex-1 min-w-0"><h4 className="text-sm font-bold truncate text-slate-900">{act.title}</h4><p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{formatDate(act.date)}</p></div>
-                        </div>
-                     )) : (
-                        <div className="py-12 flex flex-col items-center justify-center text-slate-400 opacity-50"><AlertCircle size={32} className="mb-2" /><p className="text-xs font-bold uppercase tracking-wide">{t('noActivity')}</p></div>
+                     
+                     {currentInstruction.isMeeting ? (
+                        <Link 
+                           href={currentInstruction.link} 
+                           target="_blank"
+                           className="mt-6 w-full py-4 bg-white text-[#E31B23] rounded-xl text-xs font-black uppercase tracking-[0.2em] hover:scale-[1.02] transition-all flex items-center justify-center gap-2 shadow-2xl"
+                        >
+                           {currentInstruction.button} <ArrowUpRight size={14} />
+                        </Link>
+                     ) : (
+                        <Link href={currentInstruction.link} className="mt-6 w-full py-3 bg-white/10 backdrop-blur border border-white/20 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-white hover:text-slate-900 transition-all flex items-center justify-center gap-2">
+                           {currentInstruction.button} <ArrowUpRight size={14} />
+                        </Link>
                      )}
                   </div>
                </DashboardCard>
 
-               <DashboardCard className="md:col-span-4 lg:col-span-2 !p-0 overflow-hidden bg-[#FFF5F5] border-red-100" delay={0.5}>
+               {/* LATEST BOOKING STATUS */}
+               <DashboardCard className="md:col-span-4 lg:col-span-2 p-0!" delay={0.4}>
+                  <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                     <h3 className="font-black text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 text-slate-900"><Clock size={14} className="text-[#E31B23]" /> Latest Appointment</h3>
+                     {latestBooking && (
+                        <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${
+                           latestBooking.status === 'confirmed' ? 'bg-emerald-500 text-white' : 
+                           latestBooking.status === 'rejected' ? 'bg-red-500 text-white' : 
+                           'bg-amber-500 text-white'
+                        }`}>
+                           {latestBooking.status}
+                        </span>
+                     )}
+                  </div>
+                  <div className="p-6">
+                     {latestBooking ? (
+                        <div className="space-y-4">
+                           <div className="flex items-start gap-4">
+                              <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center text-white shrink-0 shadow-lg">
+                                 <Calendar size={24} />
+                              </div>
+                              <div>
+                                 <h4 className="text-lg font-black text-slate-900 leading-tight">{latestBooking.serviceTitle}</h4>
+                                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
+                                    {formatDate(latestBooking.date)} at {latestBooking.time}
+                                 </p>
+                              </div>
+                           </div>
+                           
+                           <div className={`p-4 rounded-2xl border ${
+                              latestBooking.status === 'confirmed' ? 'bg-emerald-50 border-emerald-100 text-emerald-800' :
+                              latestBooking.status === 'rejected' ? 'bg-red-50 border-red-100 text-red-800' :
+                              'bg-amber-50 border-amber-100 text-amber-800'
+                           }`}>
+                              <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">Current Status</p>
+                              <p className="text-sm font-bold">
+                                 {latestBooking.status === 'confirmed' ? "Your appointment is confirmed. See you in the meeting room!" : 
+                                  latestBooking.status === 'rejected' ? "Unfortunately, this time is unavailable. Please try booking another slot." : 
+                                  "Our team is reviewing your request. We will notify you shortly."}
+                              </p>
+                           </div>
+
+                           {latestBooking.status === 'confirmed' && (
+                              <Link 
+                                 href={`/meeting/${latestBooking.livekitRoom || latestBooking._id}`}
+                                 target="_blank"
+                                 className="flex items-center justify-center gap-2 w-full py-3 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-[0.2em] hover:bg-[#E31B23] transition-all"
+                              >
+                                 <Video size={14} /> Join Meeting Room
+                              </Link>
+                           )}
+                        </div>
+                     ) : (
+                        <div className="py-10 text-center space-y-3">
+                           <AlertCircle className="mx-auto text-slate-200" size={40} />
+                           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No appointments found</p>
+                           <Link href="/booking" className="inline-block text-[10px] font-black text-[#E31B23] hover:underline uppercase tracking-widest">Book your first call →</Link>
+                        </div>
+                     )}
+                  </div>
+               </DashboardCard>
+
+               <DashboardCard className="md:col-span-4 lg:col-span-2 p-0! overflow-hidden bg-[#FFF5F5] border-red-100" delay={0.5}>
                   <div className="p-8 h-full flex flex-col justify-center relative">
-                     <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-white to-transparent opacity-50" />
+                     <div className="absolute top-0 right-0 w-32 h-full bg-linear-to-l from-white to-transparent opacity-50" />
                      <h3 className="font-black text-xl text-[#E31B23] mb-4">{t('studyMaterial')}</h3>
                      <div className="grid grid-cols-2 gap-4 relative z-10">
                         <button className="bg-white p-4 rounded-2xl shadow-sm hover:shadow-md transition-all text-left group"><BookOpen size={20} className="text-slate-400 mb-2 group-hover:text-[#E31B23] transition-colors" /><span className="text-xs font-bold text-slate-900 block">{t('languageTips')}</span></button>

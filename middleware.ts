@@ -23,7 +23,8 @@ const isPublicRoute = createRouteMatcher([
     '/sign-in(.*)',
     '/sign-up(.*)',
     '/api/events(.*)',
-    '/api/news(.*)'
+    '/api/news(.*)',
+    '/api/livekit(.*)'
 ]);
 
 // 1. Mark the function as 'async'

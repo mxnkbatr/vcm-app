@@ -101,7 +101,8 @@
     "buttons": {
       "back": "Back",
       "continue": "Continue",
-      "confirm": "Confirm"
+      "confirm": "Confirm",
+      "joinMeeting": "Join Video Call"
     },
     "summary": {
       "title": "Booking Information",
@@ -132,7 +133,8 @@
         "price": "50,000₮",
         "desc": "Visa document preparation, review, and advice."
       }
-    }
+    },
+    "myBookings": "My Appointments"
   },
   "NewsPage": {
     "metadata": {

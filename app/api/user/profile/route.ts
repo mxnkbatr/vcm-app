@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import { connectToDB } from "@/lib/db";
 import User from "@/lib/models/User";
+import Booking from "@/lib/models/Booking";
 
 export async function GET(req: Request) {
   console.log("GET /api/user/profile hit");
@@ -15,7 +16,10 @@ export async function GET(req: Request) {
     }
 
     console.log("Clerk user ID:", clerkUser.id);
-    const user = await User.findOne({ clerkId: clerkUser.id });
+    const [user, bookings] = await Promise.all([
+      User.findOne({ clerkId: clerkUser.id }),
+      Booking.find({ userId: clerkUser.id }).sort({ createdAt: -1 })
+    ]);
 
     if (!user) {
       console.log("User not found in DB, returning fallback");
@@ -28,6 +32,7 @@ export async function GET(req: Request) {
               profile: null
           },
           activity: [],
+          bookings: bookings || [],
           isNewUser: true
       });
     }
@@ -49,7 +54,8 @@ export async function GET(req: Request) {
             points: user.points || 0,
             profile: user.profile || null
         },
-        activity 
+        activity,
+        bookings: bookings || []
     });
 
   } catch (error) {
