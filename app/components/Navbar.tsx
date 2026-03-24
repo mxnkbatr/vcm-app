@@ -93,10 +93,10 @@ export default function Navbar() {
           style={{ WebkitBackdropFilter: "blur(12px)" }}
           className={`
           z-[100] transform-gpu pointer-events-auto flex items-center justify-between transition-[background-color,border-color,shadow,padding] duration-700 relative
-          w-[98%] xl:w-[1250px] py-3 px-6 rounded-full border backdrop-blur-md text-[#001829] dark:text-slate-100
+          w-[98%] xl:w-[1250px] py-3 px-6 rounded-full border backdrop-blur-md text-[#001829]
           ${isScrolled
-              ? "bg-white/95 border-emerald-100 shadow-[0_20px_40px_-15px_rgba(0,200,150,0.2)] dark:bg-[#00101a]/95 dark:border-red-900/40 dark:shadow-black"
-              : "bg-white/80 border-white/20 shadow-none dark:bg-[#00101a]/80 dark:border-white/5"}
+              ? "bg-white/95 border-emerald-100 shadow-[0_20px_40px_-15px_rgba(0,200,150,0.2)]"
+              : "bg-white/80 border-white/20 shadow-none"}
         `}>
           <Link href="/" className="flex items-center gap-3 group shrink-0">
             <div className="relative w-10 h-10 overflow-hidden rounded-full border-2 border-white/50 shadow-md bg-white">
@@ -125,7 +125,7 @@ export default function Navbar() {
                     href={item.href}
                     className={`flex items-center gap-1 px-3 py-2 rounded-full text-[10px] font-bold uppercase tracking-wide transition-[color,background-color,shadow] duration-300 whitespace-nowrap
                       ${isActive
-                        ? "bg-white text-[#00C896] shadow-[0_0_15px_rgba(0,200,150,0.4)] dark:bg-[#00C896]/10 dark:shadow-[0_0_15px_rgba(0,200,150,0.5)]"
+                        ? "bg-white text-[#00C896] shadow-[0_0_15px_rgba(0,200,150,0.4)]"
                         : "opacity-80 hover:opacity-100 hover:text-[#00C896] hover:bg-[#00C896]/5 hover:shadow-[0_0_20px_rgba(0,200,150,0.6)]"}`
                     }
                   >
@@ -141,14 +141,14 @@ export default function Navbar() {
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
                         transition={{ duration: 0.2 }}
                         style={{ WebkitBackdropFilter: "blur(16px)" }}
-                        className="transform-gpu absolute top-full left-1/2 -translate-x-1/2 mt-4 w-[600px] p-4 rounded-3xl border shadow-xl z-[100] backdrop-blur-lg bg-white/95 border-emerald-50 text-slate-800 dark:bg-[#00101a]/95 dark:border-white/10 dark:text-slate-200"
+                        className="transform-gpu absolute top-full left-1/2 -translate-x-1/2 mt-4 w-[600px] p-4 rounded-3xl border shadow-xl z-[100] backdrop-blur-lg bg-white/95 border-emerald-50 text-slate-800"
                       >
                         <div className="grid grid-cols-2 gap-3">
                           {AU_PAIR_COUNTRIES.map((country) => (
                             <Link
                               key={country.code}
                               href={country.href}
-                              className="group flex items-start gap-4 p-3 rounded-2xl transition-all border duration-300 shadow-sm border-transparent hover:bg-[#00C896]/5 hover:border-[#00C896]/30 dark:hover:bg-[#00C896]/10"
+                              className="group flex items-start gap-4 p-3 rounded-2xl transition-all border duration-300 shadow-sm border-transparent hover:bg-[#00C896]/5 hover:border-[#00C896]/30"
                             >
                               <span className="text-3xl shadow-sm rounded-md overflow-hidden">{country.flag}</span>
                               <div>
@@ -181,7 +181,7 @@ export default function Navbar() {
 
       <div className="lg:hidden fixed top-0 left-0 right-0 z-[100] px-5 py-4 flex justify-between items-center pointer-events-none">
         <Link href="/" className="pointer-events-auto">
-          <div style={{ WebkitBackdropFilter: "blur(12px)" }} className="transform-gpu flex items-center gap-2 p-1.5 pr-4 rounded-full backdrop-blur-md border shadow-2xl transition-all duration-500 bg-white/90 border-slate-100 dark:bg-black/80 dark:border-white/10">
+          <div style={{ WebkitBackdropFilter: "blur(12px)" }} className="transform-gpu flex items-center gap-2 p-1.5 pr-4 rounded-full backdrop-blur-md border shadow-2xl transition-all duration-500 bg-white/90 border-slate-100">
             <div className="relative w-8 h-8 rounded-full overflow-hidden border border-white/50 bg-white">
               <Image
                 src="/image.png"
@@ -204,7 +204,7 @@ export default function Navbar() {
       </div>
 
       <div className="lg:hidden fixed bottom-6 left-0 right-0 z-[100] px-2 flex justify-center">
-        <nav style={{ WebkitBackdropFilter: isMobile ? "blur(8px)" : "blur(16px)" }} className="transform-gpu grid grid-cols-5 items-end justify-between w-full max-w-[420px] px-1 py-3 pb-3 rounded-[2rem] border shadow-lg backdrop-blur-lg transition-all duration-700 bg-white/95 border-slate-200 text-slate-500 shadow-[0_10px_30px_rgba(0,0,0,0.1)] dark:bg-[#0F172A]/95 dark:border-white/10 dark:text-slate-400 dark:shadow-black">
+        <nav style={{ WebkitBackdropFilter: isMobile ? "blur(8px)" : "blur(16px)" }} className="transform-gpu grid grid-cols-5 items-end justify-between w-full max-w-[420px] px-1 py-3 pb-3 rounded-[2rem] border shadow-lg backdrop-blur-lg transition-all duration-700 bg-white/95 border-slate-200 text-slate-500 shadow-[0_10px_30px_rgba(0,0,0,0.1)]">
           {mobileNav.map((item) => {
             const isActive = pathname === item.href;
             if (item.isMain) {
