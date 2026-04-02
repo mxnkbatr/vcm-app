@@ -24,7 +24,7 @@ import {
    LayoutDashboard,
    ClipboardList,
    Calendar,
-   Video
+   ShoppingBag
 } from "lucide-react";
 import {
    FaBook,
@@ -43,6 +43,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useTranslations } from 'next-intl';
 import LessonsManager from "@/app/components/admin/LessonsManager";
+import ShoppingManager from "@/app/components/admin/ShoppingManager";
 import { Link } from "@/navigation";
 
 // --- CONSTANTS ---
@@ -83,9 +84,9 @@ const TextArea = ({ label, value, onChange, placeholder }: any) => (
    </div>
 );
 
-const StatCard = ({ label, val, icon: Icon, color }: any) => (
+const StatCard = ({ label, val, icon: Icon, colorClass }: any) => (
    <div className="bg-white p-6 rounded-4xl shadow-sm border border-slate-100 flex items-center gap-5">
-      <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg" style={{ backgroundColor: color }}>
+      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg ${colorClass}`}>
          <Icon size={24} />
       </div>
       <div>
@@ -355,7 +356,7 @@ const ApplicationDetailsModal = ({ app, onClose, onMasterEdit }: { app: any; onC
                            <div className="grid grid-cols-2 gap-4">
                               <div><p className="text-[10px] font-bold text-slate-400 uppercase">{t("users.expanded.sex")}</p><p className="font-bold text-sm capitalize">{profile.sex || "-"}</p></div>
                               <div><p className="text-[10px] font-bold text-slate-400 uppercase">{t("users.expanded.nationality")}</p><p className="font-bold text-sm">{profile.nationality || "-"}</p></div>
-                              <div><p className="text-[10px] font-bold text-slate-400 uppercase">DOB</p><p className="font-bold text-sm">{profile.dob ? new Date(profile.dob).toLocaleDateString() : "-"}</p></div>
+                              <div><p className="text-[10px] font-bold text-slate-400 uppercase">{t("users.expanded.birth")}</p><p className="font-bold text-sm">{profile.dob ? new Date(profile.dob).toLocaleDateString() : "-"}</p></div>
                               <div><p className="text-[10px] font-bold text-slate-400 uppercase">{t("users.expanded.religion")}</p><p className="font-bold text-sm">{profile.religion || "-"}</p></div>
                            </div>
                         </section>
@@ -642,6 +643,7 @@ export default function AdminDashboard() {
                   <SidebarItem icon={Calendar} label={t("sidebar.events")} active={activeTab === "events"} onClick={() => setActiveTab("events")} />
                   <SidebarItem icon={FaBook} label={t("sidebar.lessons")} active={activeTab === "lessons"} onClick={() => setActiveTab("lessons")} />
                   <SidebarItem icon={FileText} label={t("sidebar.blog")} active={activeTab === "blog"} onClick={() => setActiveTab("blog")} />
+                  <SidebarItem icon={ShoppingBag} label={t("sidebar.shopping") || "Shopping"} active={activeTab === "shopping"} onClick={() => setActiveTab("shopping")} />
                </nav>
             </div>
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3">
@@ -676,12 +678,12 @@ export default function AdminDashboard() {
             {activeTab === "dashboard" && (
                <div className="space-y-8">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-                     <StatCard label={t("dashboard.stats.totalUsers")} val={stats.totalUsers} icon={Users} color={BRAND.DARK} />
-                     <StatCard label={t("dashboard.stats.students")} val={stats.studentsCount} icon={GraduationCap} color={BRAND.RED} />
-                     <StatCard label={t("dashboard.stats.admins")} val={stats.adminsCount} icon={UserCheck} color={BRAND.GREEN} />
-                     <StatCard label={t("dashboard.stats.guests")} val={stats.guestsCount} icon={User} color="#64748B" />
-                     <StatCard label={t("dashboard.stats.pendingApps")} val={stats.pendingApps} icon={ClipboardList} color="#F59E0B" />
-                     <StatCard label={t("dashboard.stats.articles")} val={stats.articles} icon={FileText} color="#3B82F6" />
+                     <StatCard label={t("dashboard.stats.totalUsers")} val={stats.totalUsers} icon={Users} colorClass="bg-slate-900" />
+                     <StatCard label={t("dashboard.stats.students")} val={stats.studentsCount} icon={GraduationCap} colorClass="bg-[#E31B23]" />
+                     <StatCard label={t("dashboard.stats.admins")} val={stats.adminsCount} icon={UserCheck} colorClass="bg-[#00C896]" />
+                     <StatCard label={t("dashboard.stats.guests")} val={stats.guestsCount} icon={User} colorClass="bg-slate-500" />
+                     <StatCard label={t("dashboard.stats.pendingApps")} val={stats.pendingApps} icon={ClipboardList} colorClass="bg-amber-500" />
+                     <StatCard label={t("dashboard.stats.articles")} val={stats.articles} icon={FileText} colorClass="bg-blue-500" />
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -718,11 +720,6 @@ export default function AdminDashboard() {
                                              <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase ${b.status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
                                                 {b.status}
                                              </span>
-                                             {b.status === 'confirmed' && (
-                                                <Link href={`/meeting/${b.livekitRoom || b.id}`} target="_blank" className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all">
-                                                   <Video size={14} />
-                                                </Link>
-                                             )}
                                           </div>
                                        )}
                                     </div>
@@ -771,6 +768,11 @@ export default function AdminDashboard() {
                      </div>
                   </div>
                </div>
+            )}
+
+            {/* ─── SHOPPING MANAGEMENT ─── */}
+            {activeTab === "shopping" && (
+               <ShoppingManager />
             )}
 
             {/* ─── APPLICATIONS MANAGEMENT ─── */}
@@ -897,14 +899,14 @@ export default function AdminDashboard() {
                                                 <div className="space-y-4">
                                                    <h4 className="text-[10px] font-black uppercase text-[#E31B23] tracking-widest flex items-center gap-2"><User size={12} /> {t("users.expanded.personal")}</h4>
                                                    <div className="grid grid-cols-2 gap-4 bg-[#FAFAFA] p-4 rounded-2xl border border-slate-100">
-                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">{t("users.expanded.sex")}</p><p className={`text-xs font-bold ${u.profile?.sex ? 'text-slate-900' : 'text-slate-300 italic'}`}>{u.profile?.sex || t("users.missing")}</p></div>
-                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">{t("users.expanded.nationality")}</p><p className={`text-xs font-bold ${u.profile?.nationality ? 'text-slate-900' : 'text-slate-300 italic'}`}>{u.profile?.nationality || t("users.missing")}</p></div>
-                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">{t("users.expanded.birth")}</p><p className={`text-xs font-bold ${u.profile?.dob ? 'text-slate-900' : 'text-slate-300 italic'}`}>{u.profile?.dob ? new Date(u.profile.dob).toLocaleDateString() : t("users.missing")}</p></div>
-                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">{t("users.expanded.religion")}</p><p className={`text-xs font-bold ${u.profile?.religion ? 'text-slate-900' : 'text-slate-300 italic'}`}>{u.profile?.religion || t("users.missing")}</p></div>
+                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">{t("users.expanded.sex")}</p><p className="text-xs font-bold text-slate-900">{u.profile?.sex || u.phone || t("users.missing")} / {u.profile?.mobile || t("users.missing")}</p></div>
+                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">{t("users.expanded.nationality")}</p><p className="text-xs font-bold text-slate-900">{u.profile?.nationality || t("users.missing")}</p></div>
+                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">{t("users.expanded.birth")}</p><p className="text-xs font-bold text-slate-900">{u.profile?.dob ? new Date(u.profile.dob).toLocaleDateString() : t("users.missing")}</p></div>
+                                                      <div><p className="text-[8px] font-bold text-slate-400 uppercase">{t("users.expanded.religion")}</p><p className="text-xs font-bold text-slate-900">{u.profile?.religion || t("users.missing")}</p></div>
                                                    </div>
                                                 </div>
                                                 <div className="space-y-4">
-                                                   <h4 className="text-[10px] font-black uppercase text-[#E31B23] tracking-widest flex items-center gap-2"><MapPin size={12} /> {t("users.expanded.contact")}</h4>
+                                                   <h4 className="text-[10px] font-black uppercase text-[#E31B23] tracking-widest flex items-center gap-2"><MapPin size={14} /> {t("users.expanded.contact")}</h4>
                                                    <div className="grid grid-cols-1 gap-3 bg-[#FAFAFA] p-4 rounded-2xl border border-slate-100">
                                                       <div><p className="text-[8px] font-bold text-slate-400 uppercase">{t("users.expanded.phone")}</p><p className="text-xs font-bold text-slate-900">{u.profile?.phone || u.phone || t("users.missing")} / {u.profile?.mobile || t("users.missing")}</p></div>
                                                       <div><p className="text-[8px] font-bold text-slate-400 uppercase">{t("users.expanded.address")}</p><p className={`text-xs font-bold ${u.profile?.address?.city ? 'text-slate-900' : 'text-slate-300 italic'}`}>{u.profile?.address?.city ? `${u.profile.address.street || ""}, ${u.profile.address.city}, ${u.profile.address.country}` : t("users.incomplete")}</p></div>
@@ -1284,10 +1286,10 @@ function EventsManager({ events, opportunities, onRefresh }: any) {
 
          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <table className="w-full text-left">
-               <thead className="bg-slate-50 text-slate-500 text-sm uppercase">
+               <thead className="bg-[#FAFAFA] text-slate-400 text-[10px] uppercase">
                   <tr><th className="p-4">{t("events.table.image")}</th><th className="p-4">{t("events.table.title")}</th><th className="p-4">{t("events.table.date")}</th><th className="p-4 text-right">{t("events.table.actions")}</th></tr>
                </thead>
-               <tbody className="divide-y divide-slate-100">
+               <tbody className="divide-y divide-slate-50">
                   {activeList.map((item: any) => (
                      <tr key={item._id} className="hover:bg-slate-50">
                         <td className="p-4"><Image src={item.image} alt={item.title?.en || "Event"} width={48} height={48} className="w-12 h-12 object-cover rounded" /></td>

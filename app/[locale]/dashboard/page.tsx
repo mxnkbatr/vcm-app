@@ -16,7 +16,8 @@ import {
    GraduationCap,
    Baby,
    Heart,
-   Video
+   Video,
+
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
@@ -260,14 +261,8 @@ export default function MemberDashboard() {
 
    const stepKey = normalizedStep;
    
-   // Instruction logic: Priority to Confirmed Calls
-   const currentInstruction = upcomingConfirmed ? {
-      title: "Priority: Video Call",
-      action: `Hello ${userData.fullName.split(' ')[0]}, your ${upcomingConfirmed.serviceTitle} starts at ${upcomingConfirmed.time}. Be ready to join!`,
-      button: "Join Call Now",
-      link: `/meeting/${upcomingConfirmed.livekitRoom || upcomingConfirmed._id}`,
-      isMeeting: true
-   } : {
+   // Instruction logic
+   const currentInstruction = {
       title: t(`instructions.${stepKey}.title`),
       action: t(`instructions.${stepKey}.action`),
       button: t(`instructions.${stepKey}.button`),
@@ -379,29 +374,19 @@ export default function MemberDashboard() {
                   
                   <div className="relative z-10 h-full p-8 flex flex-col justify-between text-white">
                      <div className="flex justify-between items-center">
-                        <span className={`${currentInstruction.isMeeting ? 'bg-white text-[#E31B23]' : 'bg-[#E31B23] text-white'} text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-md shadow-lg`}>
-                           {currentInstruction.isMeeting ? "Next Up" : t('actionRequired')}
+                        <span className="bg-[#E31B23] text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-md shadow-lg">
+                           {t('actionRequired')}
                         </span>
-                        {currentInstruction.isMeeting ? <Video size={18} className="animate-bounce" /> : <Globe size={18} className="opacity-80" />}
+                        <Globe size={18} className="opacity-80" />
                      </div>
                      <div>
                         <h3 className="text-3xl font-black tracking-tight leading-none mb-3">{currentInstruction.title}</h3>
-                        <p className={`text-xs font-bold ${currentInstruction.isMeeting ? 'text-white' : 'text-slate-300'} opacity-90 max-w-xs leading-relaxed`}>{currentInstruction.action}</p>
+                        <p className="text-xs font-bold text-slate-300 opacity-90 max-w-xs leading-relaxed">{currentInstruction.action}</p>
                      </div>
                      
-                     {currentInstruction.isMeeting ? (
-                        <Link 
-                           href={currentInstruction.link} 
-                           target="_blank"
-                           className="mt-6 w-full py-4 bg-white text-[#E31B23] rounded-xl text-xs font-black uppercase tracking-[0.2em] hover:scale-[1.02] transition-all flex items-center justify-center gap-2 shadow-2xl"
-                        >
-                           {currentInstruction.button} <ArrowUpRight size={14} />
-                        </Link>
-                     ) : (
-                        <Link href={currentInstruction.link} className="mt-6 w-full py-3 bg-white/10 backdrop-blur border border-white/20 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-white hover:text-slate-900 transition-all flex items-center justify-center gap-2">
-                           {currentInstruction.button} <ArrowUpRight size={14} />
-                        </Link>
-                     )}
+                     <Link href={currentInstruction.link} className="mt-6 w-full py-3 bg-white/10 backdrop-blur border border-white/20 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-white hover:text-slate-900 transition-all flex items-center justify-center gap-2">
+                        {currentInstruction.button} <ArrowUpRight size={14} />
+                     </Link>
                   </div>
                </DashboardCard>
 
@@ -448,20 +433,16 @@ export default function MemberDashboard() {
                            </div>
 
                            {latestBooking.status === 'confirmed' && (
-                              <Link 
-                                 href={`/meeting/${latestBooking.livekitRoom || latestBooking._id}`}
-                                 target="_blank"
-                                 className="flex items-center justify-center gap-2 w-full py-3 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-[0.2em] hover:bg-[#E31B23] transition-all"
-                              >
-                                 <Video size={14} /> Join Meeting Room
-                              </Link>
+                              <div className="flex items-center justify-center gap-2 w-full py-3 bg-emerald-500 text-white rounded-xl text-xs font-black uppercase tracking-[0.2em]">
+                                 <CheckCircle2 size={14} /> Appointment Confirmed
+                              </div>
                            )}
                         </div>
                      ) : (
                         <div className="py-10 text-center space-y-3">
                            <AlertCircle className="mx-auto text-slate-200" size={40} />
                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No appointments found</p>
-                           <Link href="/booking" className="inline-block text-[10px] font-black text-[#E31B23] hover:underline uppercase tracking-widest">Book your first call →</Link>
+                           <Link href="/booking" className="inline-block text-[10px] font-black text-[#E31B23] hover:underline uppercase tracking-widest">Book your first appointment →</Link>
                         </div>
                      )}
                   </div>

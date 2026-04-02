@@ -10,6 +10,7 @@ import {
   Moon,
   BookOpen,
   CalendarClock,
+  ShoppingBag,
   Ticket,
   Plane,
   ChevronDown,
@@ -61,14 +62,14 @@ export default function Navbar() {
     { name: t("program"), href: "/aupair", hasDropdown: true },
     { name: t("events"), href: "/events" },
     { name: t("lessons"), href: "/lessons" },
-    { name: t("booking"), href: "/booking" },
+    { name: t("shop"), href: "/booking" },
     { name: t("news"), href: "/news" },
   ];
 
   const mobileNav = [
     { id: "home", icon: Home, href: "/", label: t("home") },
     { id: "aupair", icon: Plane, href: "/aupair", label: t("program") },
-    { id: "booking", icon: CalendarClock, href: "/booking", label: t("booking"), isMain: true },
+    { id: "booking", icon: ShoppingBag, href: "/shop", label: t("shop"), isMain: true },
     { id: "events", icon: Ticket, href: "/events", label: t("events") },
     { id: "news", icon: BookOpen, href: "/news", label: t("news") },
   ];

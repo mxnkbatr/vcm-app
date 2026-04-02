@@ -780,14 +780,14 @@
     "card4_text": "Förderung der persönlichen und beruflichen Entwicklung durch kulturellen Austausch."
   },
   "navbar": {
-    "logo": "MONGOLISCHES AUPAIR",
-    "home": "Startseite",
-    "about": "Über uns",
+    "logo": "AuPair",
+    "home": "Home",
+    "about": "Über Uns",
     "program": "Au-Pair-Programm",
     "events": "Veranstaltungen",
-    "lessons": "Lektionen",
-    "booking": "Buchung",
-    "news": "Neuigkeiten",
+    "lessons": "Unterricht",
+    "shop": "Geschäft",
+    "news": "Nachrichten",
     "dashboard": "Dashboard",
     "signin": "Anmelden",
     "register": "Registrieren",
@@ -984,13 +984,13 @@
   "admin": {
     "sidebar": {
       "dashboard": "Dashboard",
-      "users": "Mitglieder & Rollen",
+      "users": "Benutzerverwaltung",
       "applications": "Bewerbungen",
-      "events": "Veranstaltungen & Jobs",
-      "lessons": "Au-Pair-Lektionen",
-      "blog": "Blog & Inhalte",
-      "role": "Administrator",
-      "online": "Online"
+      "events": "Veranstaltungen",
+      "lessons": "Unterricht",
+      "blog": "Blog & Nachrichten",
+      "shopping": "Geschäft",
+      "role": "Super-Admin"
     },
     "header": {
       "blog": "Blog- & Inhaltsbibliothek",

@@ -411,7 +411,7 @@
       "title": "Program",
       "highlight": "Requirements",
       "list": [
-        "Age: 18-26",
+        "Age: 18-27",
         "Unmarried",
         "Good health",
         "No criminal record",
@@ -777,13 +777,13 @@
     "card4_text": "Fostering personal and professional development through cultural exchange."
   },
   "navbar": {
-    "logo": "MONGOLIAN AUPAIR",
+    "logo": "AuPair",
     "home": "Home",
-    "about": "About",
+    "about": "About Us",
     "program": "Au Pair Program",
     "events": "Events",
     "lessons": "Lessons",
-    "booking": "Booking",
+    "shop": "Shop",
     "news": "News",
     "dashboard": "Dashboard",
     "signin": "Sign In",
@@ -994,13 +994,13 @@
   "admin": {
     "sidebar": {
       "dashboard": "Dashboard",
-      "users": "Members & Roles",
+      "users": "Users Management",
       "applications": "Applications",
-      "events": "Events & Jobs",
-      "lessons": "Au Pair Lessons",
-      "blog": "Blog & Content",
-      "role": "Administrator",
-      "online": "Online"
+      "events": "Events",
+      "lessons": "Lessons",
+      "blog": "Blog & News",
+      "shopping": "Shopping",
+      "role": "Super Admin"
     },
     "header": {
       "blog": "Blog & Content Library",

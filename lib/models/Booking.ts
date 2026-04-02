@@ -20,9 +20,7 @@ const BookingSchema = new Schema(
       default: 'pending'
     },
 
-    // Video Call Info
-    meetingUrl: { type: String }, // Optional: external link
-    livekitRoom: { type: String }, // Internal LiveKit room name
+
   },
   { timestamps: true }
 );
