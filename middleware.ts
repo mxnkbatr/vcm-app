@@ -1,5 +1,6 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextRequest, NextResponse } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
+import { getToken } from 'next-auth/jwt';
 
 const intlMiddleware = createMiddleware({
     locales: ['en', 'mn', 'de'],
@@ -7,55 +8,82 @@ const intlMiddleware = createMiddleware({
     localePrefix: 'always'
 });
 
-const isPublicRoute = createRouteMatcher([
+const publicPaths = [
     '/',
-    '/:locale',
-    '/:locale/sign-in(.*)',
-    '/:locale/sign-up(.*)',
-    '/:locale/join',
-    '/:locale/about',
-    '/:locale/aupair(.*)',
-    '/:locale/lessons(.*)',
-    '/:locale/events(.*)',
-    '/:locale/news(.*)',
-    '/:locale/contact',
-    '/:locale/booking',
-    '/:locale/shop(.*)',
-    '/sign-in(.*)',
-    '/sign-up(.*)',
-    '/api/events(.*)',
-    '/api/news(.*)',
-    '/api/livekit(.*)',
-    '/api/shopping(.*)'
-]);
+    '/sign-in',
+    '/sign-up',
+    '/join',
+    '/about',
+    '/news',
+    '/lessons',
+    '/events',
+    '/contact',
+    '/booking',
+    '/shop',
+    '/booking',
+    '/shop',
+    '/programs',
+    '/complete-profile',
+];
 
-// 1. Mark the function as 'async'
-export default clerkMiddleware(async (auth, req) => {
-    console.log('[Middleware] Processing URL:', req.url);
+function isPublicRoute(pathname: string): boolean {
+    // API auth routes are always public
+    if (pathname.startsWith('/api/auth')) return true;
 
-    // 2. Await the auth() call to get the actual data
-    const authObj = await auth();
-    const userId = authObj.userId;
-    const redirectToSignIn = authObj.redirectToSignIn;
+    // Public API routes
+    const publicApis = ['/api/events', '/api/news', '/api/livekit', '/api/shopping', '/api/lessons', '/api/posts'];
+    if (publicApis.some(api => pathname.startsWith(api))) return true;
 
-    // 3. Protect Private Routes manually
-    // If the route is NOT public AND the user is NOT logged in
-    if (!isPublicRoute(req) && !userId) {
-        console.log('[Middleware] Protected route accessed without user, redirecting');
-        return redirectToSignIn({ returnBackUrl: req.url });
+    // Remove locale prefix for path matching
+    const pathWithoutLocale = pathname.replace(/^\/(en|mn|de)/, '') || '/';
+
+    // Check public paths
+    return publicPaths.some(p => {
+        if (p === '/') return pathWithoutLocale === '/';
+        return pathWithoutLocale === p || pathWithoutLocale.startsWith(p + '/');
+    });
+}
+
+export default async function middleware(req: NextRequest) {
+    const { pathname } = req.nextUrl;
+    // console.log('[Middleware] Processing URL:', req.url);
+
+    // Skip static files
+    if (pathname.startsWith('/_next') || pathname.includes('.')) {
+        return NextResponse.next();
     }
 
-    // 4. Run i18n Middleware
-    if (req.nextUrl.pathname.startsWith('/api')) {
-        console.log('[Middleware] API route detected, skipping intlMiddleware');
-        return; // Pass through to Next.js handler
+    // API routes — check auth but skip intl
+    if (pathname.startsWith('/api')) {
+        if (isPublicRoute(pathname)) {
+            return NextResponse.next();
+        }
+
+        // Check NextAuth token for protected API routes
+        const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+        if (!token) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+        
+        return NextResponse.next();
     }
 
-    console.log('[Middleware] Delegating to intlMiddleware');
-    const response = intlMiddleware(req);
-    console.log('[Middleware] intlMiddleware response status:', response.status);
-    return response;
-});
+    // Non-API routes — check auth for protected pages, then run intl
+    const localeMatch = pathname.match(/^\/(en|mn|de)/);
+    const locale = localeMatch ? localeMatch[1] : 'en';
+
+    if (!isPublicRoute(pathname)) {
+        const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+        if (!token) {
+            const signInUrl = new URL(`/${locale}/sign-in`, req.url);
+            signInUrl.searchParams.set('callbackUrl', req.url);
+            return NextResponse.redirect(signInUrl);
+        }
+    }
+
+    // Run i18n middleware
+    return intlMiddleware(req);
+}
 
 export const config = {
     matcher: [

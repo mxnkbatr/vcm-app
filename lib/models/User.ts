@@ -3,37 +3,57 @@ import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema(
   {
-    clerkId: { type: String, required: true, unique: true },
-    email: { type: String, required: true },
+    phone: { type: String, unique: true, sparse: true },
+    email: { type: String, sparse: true },
+    password: { type: String }, // bcrypt hashed, null for Google-only users
+    googleId: { type: String, sparse: true },
+    authProvider: { type: String, enum: ["credentials", "google"], default: "credentials" },
+
     fullName: { type: String },
     photo: { type: String },
-    role: { type: String, default: "guest" }, // admin, student, guest
 
-    // --- NEW FIELDS FOR TRACKING ---
-    country: { type: String, default: "-" }, // e.g. "Germany"
-    step: { type: String, default: "-" },    // e.g. "Visa Process"
+    affiliation: { type: String }, // e.g. School or Organization
+    program: { type: String }, // e.g. And, Edu, VClub
 
+
+    // Roles: guest, volunteer, general_and, general_edu, general_vclub, admin
+    role: { type: String, default: "guest" },
+
+    // Legacy: keep for data migration compatibility
+    clerkId: { type: String, sparse: true },
+
+    // --- TRACKING ---
+    country: { type: String, default: "-" },
+    step: { type: String, default: "-" },
     badges: { type: [String], default: [] },
+
+    eventsAttendedCount: { type: Number, default: 0 },
+    activityHistory: [{
+      type: { type: String },
+      title: { type: String },
+      date: { type: Date },
+      points: { type: Number },
+      status: { type: String },
+    }],
 
     // --- DOCUMENT STORAGE ---
     documents: {
-      passport: { type: String, default: "" },           // Cloudinary URL for JPG or PDF
-      emongoliaCert: { type: String, default: "" },      // PDF URL
-      marriageCert: { type: String, default: "" },       // PDF URL (optional)
-      residenceCert: { type: String, default: "" },      // PDF URL
-      birthCert: { type: String, default: "" },          // PDF URL
-      educationCert: { type: String, default: "" },      // PDF URL
-      bachelorDiploma: { type: String, default: "" },    // PDF URL
-      driverLicense: { type: String, default: "" },      // Cloudinary or PDF URL
-      englishCert: { type: String, default: "" },        // Cloudinary or PDF URL (IELTS/TOEFL)
-      medicalRecords: { type: String, default: "" },     // Scanned document URL
-      mentalHealthExam: { type: String, default: "" },   // Scanned document URL
-      professionalExp: { type: String, default: "" },    // PDF URL (optional)
+      passport: { type: String, default: "" },
+      emongoliaCert: { type: String, default: "" },
+      marriageCert: { type: String, default: "" },
+      residenceCert: { type: String, default: "" },
+      birthCert: { type: String, default: "" },
+      educationCert: { type: String, default: "" },
+      bachelorDiploma: { type: String, default: "" },
+      driverLicense: { type: String, default: "" },
+      englishCert: { type: String, default: "" },
+      medicalRecords: { type: String, default: "" },
+      mentalHealthExam: { type: String, default: "" },
+      professionalExp: { type: String, default: "" },
     },
 
-    // Document submission tracking
     documentsSubmitted: { type: Boolean, default: false },
-    documentsReviewedBy: { type: String, default: "" },    // Admin who reviewed
+    documentsReviewedBy: { type: String, default: "" },
     documentsApprovedAt: { type: Date },
 
     // --- DETAILED PROFILE ---
@@ -56,6 +76,8 @@ const UserSchema = new mongoose.Schema(
       },
       fatherProfession: { type: String },
       motherProfession: { type: String },
+      brothers: { type: Number },
+      sisters: { type: Number },
       hobbies: { type: String },
       educationLevel: { type: String },
       languages: { type: String },
@@ -63,8 +85,6 @@ const UserSchema = new mongoose.Schema(
       householdTasks: { type: [String], default: [] },
       motivation: { type: String },
     },
-
-    createdAt: { type: Date, default: Date.now },
   },
   { timestamps: true }
 );

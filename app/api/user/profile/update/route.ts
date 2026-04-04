@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import connectToDB from "@/lib/db";
 import User from "@/lib/models/User";
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUserId } from "@/lib/authHelpers";
 
 export async function POST(req: Request) {
   try {
     await connectToDB();
-    const { userId: clerkId } = await auth();
-    if (!clerkId) {
+    const userId = await getAuthUserId();
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -70,8 +70,8 @@ export async function POST(req: Request) {
       documentsSubmitted: true,
     };
 
-    const user = await User.findOneAndUpdate(
-      { clerkId },
+    const user = await User.findByIdAndUpdate(
+      userId,
       { $set: profileUpdate },
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );

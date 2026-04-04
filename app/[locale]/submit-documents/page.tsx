@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useSession } from "next-auth/react";
 import { Upload, FileText, CheckCircle, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -24,7 +24,8 @@ const DOCUMENT_KEYS = [
 
 export default function SubmitDocuments() {
     const t = useTranslations("SubmitDocuments");
-    const { user } = useUser();
+    const { data: session } = useSession();
+    const user = session?.user;
     const [documents, setDocuments] = useState<Record<string, string>>({});
     const [uploading, setUploading] = useState<Record<string, boolean>>({});
     const [submitting, setSubmitting] = useState(false);

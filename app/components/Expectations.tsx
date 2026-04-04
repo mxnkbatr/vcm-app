@@ -4,155 +4,131 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   GraduationCap,
-  FileCheck,
-  Search,
-  Plane,
-  ArrowRight,
-  Clock
+  Star,
+  Home,
+  Gift,
+  ArrowUpRight,
+  Sparkles,
+  ShoppingBag,
+  CheckCircle2
 } from "lucide-react";
 import {
   useMotionValue,
   useSpring,
-  useTransform
+  useTransform,
 } from "framer-motion";
 import { Motion as motion } from "./MotionProxy";
 import { useTheme } from "next-themes";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 
 // --- BRAND CONFIG ---
 const BRAND = {
-  RED: "#E31B23",
-  RED_SOFT: "rgba(227, 27, 35, 0.1)",
-  GREEN: "#00C896",
-  GREEN_SOFT: "rgba(0, 200, 150, 0.1)",
-  DARK: "#0F172A"
+  PRIMARY: "#0EA5E9",       // Sky Blue
+  PRIMARY_SOFT: "rgba(14, 165, 233, 0.1)",
+  ACCENT: "#38BDF8",        // Lighter Sky
+  DARK: "#0F172A",          // Slate 900
 };
 
-// --- 3D STEP CARD ---
-const StepCard = ({ step, index, isDark }: any) => {
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-
-  const mouseXSpring = useSpring(x, { stiffness: 120, damping: 20 });
-  const mouseYSpring = useSpring(y, { stiffness: 120, damping: 20 });
-
-  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["5deg", "-5deg"]);
-  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-5deg", "5deg"]);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    x.set((e.clientX - rect.left) / rect.width - 0.5);
-    y.set((e.clientY - rect.top) / rect.height - 0.5);
-  };
-
-  const handleMouseLeave = () => { x.set(0); y.set(0); };
-
-  // Alternating colors for badges/numbers only
-  const isEven = index % 2 !== 0;
-  const accentColor = isEven ? BRAND.GREEN : BRAND.RED;
-  const accentSoft = isEven ? BRAND.GREEN_SOFT : BRAND.RED_SOFT;
-
+// --- SHOP UI MARKETPLACE CARD ---
+const MarketCard = ({ item, index, isDark }: any) => {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.15, duration: 0.6 }}
-      style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      className={`
-        relative group h-full p-8 rounded-[2rem] border overflow-hidden flex flex-col justify-between transition-all duration-500
+      layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      whileHover={{ y: -5 }}
+      transition={{ delay: index * 0.1 }}
+      className={`relative group rounded-[2rem] overflow-hidden cursor-pointer h-full border transition-all duration-500 min-h-[450px] flex flex-col
         ${isDark
-          ? "bg-[#0F172A] border-white/5 hover:border-white/10"
-          : "bg-white border-slate-100 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] hover:shadow-xl hover:border-slate-200"}
-      `}
+          ? "bg-slate-900 border-white/5 hover:border-sky-500/20"
+          : "bg-white border-slate-100 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_-15px_rgba(14,165,233,0.15)] hover:border-sky-200"
+        }`}
     >
-      {/* 3D Content Container */}
-      <div className="relative z-10 transform translate-z-20">
-
-        {/* Top Row: Number & Badge */}
-        <div className="flex justify-between items-start mb-8">
-          {/* Step Number Circle */}
-          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black shadow-lg transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}
-            style={{ backgroundColor: accentColor, color: 'white', boxShadow: `0 10px 20px -5px ${accentSoft}` }}>
-            {step.id}
-          </div>
-
-          {/* Duration Badge */}
-          <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border backdrop-blur-md transition-colors`}
-            style={{
-              borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
-              color: accentColor,
-              backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : '#FAFAFA'
-            }}>
-            <Clock size={10} />
-            {step.duration}
+      {/* Image Container Area (Using beautiful gradients + icons since these are programs, not physical goods) */}
+      <div className="relative w-full h-64 overflow-hidden bg-gradient-to-br from-sky-50 to-white flex items-center justify-center">
+        <item.icon size={80} strokeWidth={1} className="group-hover:scale-[1.15] transition-transform duration-700 text-sky-200 drop-shadow-sm" />
+        
+        {/* Category pill */}
+        <div className="absolute top-4 left-4 z-10">
+           <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-sky-600 border border-white/50 backdrop-blur-md bg-white/90 shadow-sm">
+            Program
           </span>
-        </div>
-
-        {/* Content */}
-        <div className="mb-2">
-          <step.icon className={`w-8 h-8 mb-5 transition-colors duration-300`}
-            style={{ color: isDark ? 'rgba(255,255,255,0.8)' : '#334155' }} />
-
-          {/* TITLE - UPDATED: No Gradient, just solid Red on hover */}
-          <h3 className={`text-2xl font-black mb-3 leading-tight transition-colors duration-300
-               ${isDark ? "text-white" : "text-slate-900"} 
-               group-hover:text-[#E31B23]`}
-          >
-            {step.title}
-          </h3>
-
-          <p className={`text-sm font-medium leading-relaxed
-               ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-            {step.desc}
-          </p>
         </div>
       </div>
 
+      {/* Content */}
+      <div className="p-6 flex flex-col flex-grow relative z-20">
+        <div className="flex justify-between items-start mb-4 gap-4">
+          <h3 className={`text-xl font-black tracking-tight line-clamp-2 transition-colors ${isDark ? 'text-white' : 'text-slate-900 group-hover:text-sky-600'}`}>
+            {item.title}
+          </h3>
+          <span className={`text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-full whitespace-nowrap bg-sky-50 text-sky-600 flex items-center gap-1`}>
+            <Sparkles size={10} />
+            {item.price}
+          </span>
+        </div>
+        
+        <p className={`text-sm leading-relaxed mb-6 line-clamp-3 flex-grow ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+          {item.desc}
+        </p>
+
+        {/* Footer Area */}
+        <div className="mt-auto pt-4 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+          <div className={`text-xs font-bold uppercase tracking-wider text-sky-500 flex items-center gap-1.5`}>
+            <CheckCircle2 size={12} />
+            Available
+          </div>
+          
+          <div className={`flex items-center gap-2 font-black uppercase tracking-widest text-[10px] transition-all ${isDark ? 'text-white' : 'text-slate-900 group-hover:text-sky-600'}`}>
+            Explore
+            <span className="p-1.5 rounded-full text-white shadow-md bg-sky-500 group-hover:scale-110 transition-transform">
+              <ArrowUpRight size={12} />
+            </span>
+          </div>
+        </div>
+      </div>
     </motion.div>
   );
 };
 
 // --- MAIN SECTION ---
-export default function Expectations() {
-  const t = useTranslations("Expectations");
-  const locale = useLocale();
+export default function Marketplace() {
+  const t = useTranslations("Marketplace");
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
   const isDark = mounted && (theme === 'dark');
 
-  const steps = [
+  const items = [
     {
       id: 1,
       icon: GraduationCap,
-      title: t("step1_title"),
-      desc: t("step1_desc"),
-      duration: t("step1_duration"),
+      title: t("item1_title"),
+      desc: t("item1_desc"),
+      price: t("item1_price"),
     },
     {
       id: 2,
-      icon: FileCheck,
-      title: t("step2_title"),
-      desc: t("step2_desc"),
-      duration: t("step2_duration"),
+      icon: Star,
+      title: t("item2_title"),
+      desc: t("item2_desc"),
+      price: t("item2_price"),
     },
     {
       id: 3,
-      icon: Search,
-      title: t("step3_title"),
-      desc: t("step3_desc"),
-      duration: t("step3_duration"),
+      icon: Home,
+      title: t("item3_title"),
+      desc: t("item3_desc"),
+      price: t("item3_price"),
     },
     {
       id: 4,
-      icon: Plane,
-      title: t("step4_title"),
-      desc: t("step4_desc"),
-      duration: t("step4_duration"),
+      icon: Gift,
+      title: t("item4_title"),
+      desc: t("item4_desc"),
+      price: t("item4_price"),
     }
   ];
 
@@ -160,42 +136,42 @@ export default function Expectations() {
 
   return (
     <section className={`relative py-24 md:py-32 overflow-hidden transition-colors duration-700
-       ${isDark ? "bg-slate-950" : "bg-slate-50"}`}>
+       ${isDark ? "bg-slate-950" : "bg-slate-50/50"}`}>
 
       {/* BACKGROUND EFFECTS */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay" />
 
-        {/* Red Blob (Top Left) */}
+        {/* Sky Blob 1 */}
         <motion.div
-          animate={{ scale: [1, 1.1, 1], opacity: [0.03, 0.06, 0.03] }}
-          transition={{ duration: 15, repeat: Infinity }}
-          style={{ backgroundColor: BRAND.RED }}
-          className="absolute top-0 left-0 w-[1000px] h-[1000px] rounded-full blur-[150px] mix-blend-multiply"
+          animate={{ scale: [1, 1.1, 1], opacity: [0.05, 0.1, 0.05], x: [0, 40, 0] }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+          style={{ backgroundColor: BRAND.PRIMARY }}
+          className="absolute -top-[10%] -left-[10%] w-[800px] h-[800px] rounded-full blur-[120px] mix-blend-multiply"
         />
 
-        {/* Green Blob (Bottom Right) */}
+        {/* Sky Blob 2 */}
         <motion.div
-          animate={{ scale: [1, 1.2, 1], opacity: [0.03, 0.06, 0.03] }}
-          transition={{ duration: 20, repeat: Infinity }}
-          style={{ backgroundColor: BRAND.GREEN }}
-          className="absolute bottom-0 right-0 w-[800px] h-[800px] rounded-full blur-[150px] mix-blend-multiply"
+          animate={{ scale: [1, 1.2, 1], opacity: [0.03, 0.08, 0.03], x: [0, -30, 0] }}
+          transition={{ duration: 18, repeat: Infinity, delay: 2, ease: "easeInOut" }}
+          style={{ backgroundColor: BRAND.ACCENT }}
+          className="absolute bottom-0 right-[5%] w-[600px] h-[600px] rounded-full blur-[100px] mix-blend-multiply"
         />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6">
 
         {/* HEADER SECTION */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10 mb-20">
-          <div className="max-w-3xl">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10 mb-20 text-center lg:text-left">
+          <div className="max-w-2xl mx-auto lg:mx-0">
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="flex items-center gap-3 mb-6"
+              className="flex items-center justify-center lg:justify-start gap-3 mb-6"
             >
-              <div className="w-10 h-[2px]" style={{ backgroundColor: BRAND.GREEN }} />
-              <span className="text-xs font-black uppercase tracking-[0.25em]" style={{ color: BRAND.GREEN }}>
+              <div className="w-8 h-1 rounded-full" style={{ backgroundColor: BRAND.PRIMARY }} />
+              <span className="text-xs font-black uppercase tracking-[0.25em]" style={{ color: BRAND.PRIMARY }}>
                 {t("badge")}
               </span>
             </motion.div>
@@ -204,17 +180,17 @@ export default function Expectations() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className={`text-5xl md:text-7xl font-black tracking-tighter leading-[0.9] mb-6
+              className={`text-5xl md:text-6xl font-black tracking-tighter leading-[1] mb-6
                        ${isDark ? "text-white" : "text-slate-900"}`}
             >
-              {t("title")}<span style={{ color: BRAND.RED }}>.</span>
+              {t("title")}<span style={{ color: BRAND.PRIMARY }}>.</span>
             </motion.h2>
 
             <motion.p
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className={`text-lg md:text-xl font-medium max-w-xl ${isDark ? "text-slate-400" : "text-slate-500"}`}
+              className={`text-lg font-medium leading-relaxed ${isDark ? "text-slate-400" : "text-slate-500"}`}
             >
               {t("subtitle")}
             </motion.p>
@@ -222,12 +198,12 @@ export default function Expectations() {
 
           {/* CTA Button */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <Link href="/contact" className={`group relative inline-flex items-center gap-4 px-10 py-5 rounded-full transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 overflow-hidden`}
-              style={{ backgroundColor: BRAND.RED, boxShadow: `0 15px 30px -10px ${BRAND.RED_SOFT}` }}>
+            <Link href="/programs" className={`group relative inline-flex items-center gap-4 px-10 py-5 rounded-full transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 overflow-hidden`}
+              style={{ backgroundColor: BRAND.PRIMARY, boxShadow: `0 15px 30px -10px rgba(14, 165, 233, 0.3)` }}>
 
               {/* Shine Effect */}
               <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
@@ -235,26 +211,17 @@ export default function Expectations() {
               <span className="relative z-10 text-xs font-bold uppercase tracking-[0.15em] text-white">
                 {t("start")}
               </span>
-              <div className="relative z-10 w-6 h-6 rounded-full bg-white text-[#E31B23] flex items-center justify-center group-hover:scale-110 group-hover:rotate-[-45deg] transition-transform duration-300">
-                <ArrowRight size={12} strokeWidth={3} />
+              <div className="relative z-10 w-8 h-8 rounded-full bg-sky-500 ring-2 ring-white/20 text-white flex items-center justify-center group-hover:bg-white group-hover:text-sky-500 group-hover:ring-transparent transition-all duration-300">
+                <ShoppingBag size={14} strokeWidth={2} />
               </div>
             </Link>
           </motion.div>
         </div>
 
-        {/* STEPS GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
-
-          {/* Visual Connector Line (Dotted) */}
-          <div className={`hidden lg:block absolute top-[4.5rem] left-0 right-0 h-[2px] -z-10`}
-            style={{
-              backgroundImage: `linear-gradient(to right, ${BRAND.RED} 20%, transparent 20%, transparent 25%, ${BRAND.GREEN} 25%, ${BRAND.GREEN} 45%, transparent 45%, transparent 50%, ${BRAND.RED} 50%, ${BRAND.RED} 70%, transparent 70%, transparent 75%, ${BRAND.GREEN} 75%)`,
-              opacity: 0.2
-            }}
-          />
-
-          {steps.map((step, index) => (
-            <StepCard key={step.id} step={step} index={index} isDark={isDark} />
+        {/* MARKETPLACE GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {items.map((item, index) => (
+            <MarketCard key={item.id} item={item} index={index} isDark={isDark} />
           ))}
         </div>
 

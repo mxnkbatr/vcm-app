@@ -6,10 +6,14 @@ import { Link } from "@/navigation";
 import {
    Play,
    Clock,
-   BarChart,
    BookOpen,
    ArrowRight,
-   Loader2
+   Loader2,
+   Users,
+   GraduationCap,
+   Sparkles,
+   Globe,
+   TrendingUp
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
@@ -47,73 +51,110 @@ export default function LessonsClient() {
 
    const getDifficultyColor = (level: string) => {
       switch (level) {
-         case 'beginner': return "bg-emerald-100 text-emerald-600";
-         case 'intermediate': return "bg-blue-100 text-blue-600";
-         case 'advanced': return "bg-red-100 text-red-600";
-         default: return "bg-slate-100 text-slate-600";
+         case 'beginner': return "bg-sky-50 text-sky-600 border border-sky-100";
+         case 'intermediate': return "bg-blue-50 text-blue-600 border border-blue-100";
+         case 'advanced': return "bg-indigo-50 text-indigo-600 border border-indigo-100";
+         default: return "bg-slate-50 text-slate-600 border border-slate-100";
+      }
+   };
+
+   const getDifficultyIcon = (level: string) => {
+      switch (level) {
+         case 'beginner': return <Sparkles size={10} />;
+         case 'intermediate': return <TrendingUp size={10} />;
+         case 'advanced': return <GraduationCap size={10} />;
+         default: return null;
       }
    };
 
    if (loading) {
       return (
          <div className="min-h-screen flex items-center justify-center bg-white">
-            <Loader2 className="animate-spin text-red-600" size={48} />
+            <Loader2 className="animate-spin text-sky-500" size={40} />
          </div>
       );
    }
 
    return (
-      <div className="min-h-screen bg-[#F8F9FC] text-slate-800 font-sans selection:bg-red-500 selection:text-white pb-20">
+      <div className="min-h-screen bg-white text-slate-800 font-sans selection:bg-sky-100 selection:text-sky-900 pb-20">
 
-         {/* ─── 1. HERO SECTION ─── */}
-         <section className="relative pt-32 pb-20 px-6 overflow-hidden">
-            {/* Animated Orbs */}
-            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-red-50 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/4 pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-50 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/4 pointer-events-none" />
+         {/* ─── HERO SECTION ─── */}
+         <section className="relative pt-28 pb-16 px-6 overflow-hidden">
+            {/* Subtle background */}
+            <div className="absolute inset-0 pointer-events-none">
+               <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-sky-50 rounded-full blur-[120px] opacity-60" />
+               <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-blue-50 rounded-full blur-[120px] opacity-40" />
+               <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:28px_28px] opacity-25" />
+            </div>
 
-            <div className="max-w-7xl mx-auto relative z-10 text-center">
+            <div className="max-w-4xl mx-auto relative z-10 text-center">
                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-red-50 text-red-600 shadow-sm mb-6"
+                  transition={{ duration: 0.5 }}
+                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-50 border border-sky-100 text-sky-600 shadow-sm mb-5"
                >
-                  <BookOpen size={16} />
-                  <span className="text-xs font-black uppercase tracking-widest">{t("badge")}</span>
+                  <BookOpen size={14} />
+                  <span className="text-[10px] font-bold uppercase tracking-widest">{t("badge")}</span>
                </motion.div>
+
                <motion.h1
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="text-5xl md:text-7xl font-black text-slate-900 mb-6 tracking-tighter"
+                  transition={{ delay: 0.1, duration: 0.5 }}
+                  className="text-3xl sm:text-4xl md:text-[3rem] font-extrabold text-slate-900 mb-4 tracking-tight leading-tight"
                >
-                  {t("heroTitle")} <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-emerald-600">{t("heroTitleHighlight")}</span>
+                  {t("heroTitle")}{" "}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-sky-600">
+                     {t("heroTitleHighlight")}
+                  </span>
                </motion.h1>
+
                <motion.p
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto font-medium"
+                  transition={{ delay: 0.2, duration: 0.5 }}
+                  className="text-base text-slate-500 max-w-lg mx-auto font-medium leading-relaxed"
                >
                   {t("heroDesc")}
                </motion.p>
+
+               {/* Quick stats */}
+               <motion.div
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.5 }}
+                  className="flex flex-wrap justify-center gap-6 mt-8"
+               >
+                  {[
+                     { icon: <BookOpen size={16} />, label: `${lessons.length} ${locale === 'mn' ? 'Хичээл' : 'Courses'}` },
+                     { icon: <Globe size={16} />, label: locale === 'mn' ? 'Олон хэл' : 'Multi-language' },
+                     { icon: <GraduationCap size={16} />, label: locale === 'mn' ? 'Гэрчилгээтэй' : 'Certified' },
+                  ].map((stat, i) => (
+                     <div key={i} className="flex items-center gap-2 text-sm text-slate-500 font-medium">
+                        <span className="text-sky-500">{stat.icon}</span>
+                        {stat.label}
+                     </div>
+                  ))}
+               </motion.div>
             </div>
          </section>
 
-         {/* ─── 2. LESSONS GRID ─── */}
-         <section className="px-6 py-10">
-            <div className="max-w-7xl mx-auto">
+         {/* ─── LESSONS GRID ─── */}
+         <section className="px-6 py-8">
+            <div className="max-w-6xl mx-auto">
                {lessons.length > 0 ? (
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                      {lessons.map((lesson, idx) => {
                         const titleText = lesson.title[locale] || lesson.title["en"];
                         const descText = lesson.description[locale] || lesson.description["en"];
                         return (
                            <motion.div
                               key={lesson._id}
-                              initial={{ opacity: 0, y: 20 }}
+                              initial={{ opacity: 0, y: 16 }}
                               animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: idx * 0.1 }}
-                              className="group bg-white rounded-[2.5rem] overflow-hidden border border-slate-100 hover:border-red-100 hover:shadow-2xl transition-all flex flex-col"
+                              transition={{ delay: idx * 0.08 }}
+                              className="group bg-white rounded-2xl overflow-hidden border border-slate-100 hover:border-sky-200 hover:shadow-lg hover:shadow-sky-50 transition-all flex flex-col"
                            >
                               {/* Thumbnail */}
                               <div className="relative aspect-video overflow-hidden">
@@ -121,49 +162,55 @@ export default function LessonsClient() {
                                     src={lesson.image}
                                     alt={titleText}
                                     fill
-                                    className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                    className="object-cover group-hover:scale-105 transition-transform duration-500"
                                     unoptimized
                                  />
-                                 <div className="absolute inset-0 bg-slate-900/20 group-hover:bg-slate-900/40 transition-colors flex items-center justify-center">
-                                    <div className="w-16 h-16 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-red-600 shadow-xl scale-0 group-hover:scale-100 transition-transform duration-500">
-                                       <Play fill="currentColor" size={28} />
+                                 <div className="absolute inset-0 bg-slate-900/10 group-hover:bg-slate-900/30 transition-colors flex items-center justify-center">
+                                    <div className="w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-sky-500 shadow-lg scale-0 group-hover:scale-100 transition-transform duration-400">
+                                       <Play fill="currentColor" size={20} />
                                     </div>
                                  </div>
-                                 <span className="absolute top-6 left-6 px-4 py-1 rounded-full bg-white/90 backdrop-blur text-slate-900 text-[10px] font-black uppercase tracking-widest shadow-sm">
+                                 <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/90 backdrop-blur-sm text-slate-700 text-[10px] font-bold uppercase tracking-wider shadow-sm">
                                     {t(`category.${lesson.category}`)}
                                  </span>
                               </div>
 
                               {/* Content */}
-                              <div className="p-8 flex-1 flex flex-col">
-                                 <div className="flex items-center justify-between mb-4">
-                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${getDifficultyColor(lesson.difficulty)}`}>
+                              <div className="p-5 flex-1 flex flex-col">
+                                 <div className="flex items-center justify-between mb-3">
+                                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${getDifficultyColor(lesson.difficulty)}`}>
+                                       {getDifficultyIcon(lesson.difficulty)}
                                        {t(`difficulty.${lesson.difficulty}`)}
                                     </span>
-                                    <span className="flex items-center gap-1 text-xs font-bold text-slate-400">
-                                       <Clock size={14} /> {lesson.duration}
+                                    <span className="flex items-center gap-1 text-xs font-medium text-slate-400">
+                                       <Clock size={12} /> {lesson.duration}
                                     </span>
                                  </div>
-                                 <h3 className="text-xl md:text-2xl font-black text-slate-900 mb-3 group-hover:text-red-600 transition-colors leading-tight">
+
+                                 <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-sky-600 transition-colors leading-snug">
                                     {titleText}
                                  </h3>
-                                 <p className="text-slate-500 font-medium text-sm mb-6 line-clamp-2">
+                                 <p className="text-slate-500 text-sm mb-5 line-clamp-2 leading-relaxed">
                                     {descText}
                                  </p>
 
-                                 <div className="mt-auto pt-6 border-t border-slate-50 flex items-center justify-between">
+                                 <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                       <div className="flex -space-x-2">
+                                       <div className="flex -space-x-1.5">
                                           {[1, 2, 3].map(i => (
-                                             <div key={i} className="w-6 h-6 rounded-full border-2 border-white bg-slate-200" />
+                                             <div key={i} className="w-5 h-5 rounded-full border-2 border-white bg-sky-100" />
                                           ))}
                                        </div>
-                                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
-                                          {lesson.studentsJoined} {t("joined")}
+                                       <span className="flex items-center gap-1 text-[10px] font-bold text-slate-400">
+                                          <Users size={10} /> {lesson.studentsJoined} {t("joined")}
                                        </span>
                                     </div>
-                                    <Link href={lesson.videoLink} target="_blank" className="flex items-center gap-2 text-red-600 font-black uppercase tracking-widest text-xs hover:gap-3 transition-all">
-                                       {t("joinClass")} <ArrowRight size={14} />
+                                    <Link
+                                       href={lesson.videoLink}
+                                       target="_blank"
+                                       className="flex items-center gap-1.5 text-sky-500 font-bold uppercase tracking-wider text-[11px] hover:gap-2.5 transition-all"
+                                    >
+                                       {t("joinClass")} <ArrowRight size={12} />
                                     </Link>
                                  </div>
                               </div>
@@ -172,9 +219,13 @@ export default function LessonsClient() {
                      })}
                   </div>
                ) : (
-                  <div className="text-center py-20 bg-white rounded-[3rem] border border-dashed border-slate-200">
-                     <BookOpen size={48} className="mx-auto text-slate-200 mb-4" />
-                     <p className="text-slate-400 font-bold">{t("noLessons")}</p>
+                  /* Empty State */
+                  <div className="text-center py-20 bg-sky-50/50 rounded-2xl border border-dashed border-sky-200">
+                     <div className="w-16 h-16 bg-sky-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <BookOpen size={28} className="text-sky-400" />
+                     </div>
+                     <p className="text-slate-500 font-medium text-sm">{t("noLessons")}</p>
+                     <p className="text-slate-400 text-xs mt-1">{locale === 'mn' ? 'Удахгүй нэмэгдэнэ' : 'Coming soon — stay tuned!'}</p>
                   </div>
                )}
             </div>

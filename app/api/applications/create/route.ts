@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 import connectToDB from "@/lib/db";
 import Application from "@/lib/models/Application";
-import User from "@/lib/models/User";
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUserId } from "@/lib/authHelpers";
 
 export async function POST(req: Request) {
   try {
     await connectToDB();
-    const { userId: clerkId } = await auth();
+    const userId = await getAuthUserId();
     const data = await req.json();
 
     const {
@@ -19,10 +18,11 @@ export async function POST(req: Request) {
       age,
       level,
       message,
+      generalId,
     } = data;
 
     // Validation
-    if (!programId || !firstName || !lastName || !email || !phone || !age || !level) {
+    if (!programId || !firstName || !lastName || !email || !phone || !age || !level || !generalId || !message) {
       return NextResponse.json(
         { error: "Registration incomplete. Please fill all required fields." },
         { status: 400 }
@@ -38,8 +38,9 @@ export async function POST(req: Request) {
       age,
       level,
       message,
-      userId: clerkId, // Store the clerkId directly for reliable lookup
-      status: 'pending'
+      generalId,
+      userId: userId, // Store the db id directly
+      status: 'pending_general'
     });
 
     return NextResponse.json(application, { status: 201 });

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDB } from "@/lib/db";
 import Event from "@/lib/models/Events";
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUserId } from "@/lib/authHelpers";
 
 export const revalidate = 60;
 
@@ -18,8 +18,8 @@ export async function GET(req: Request) {
       query = { category };
     }
 
-    // Sort by date (newest first)
-    const events = await Event.find(query).sort({ date: 1 });
+    // Sort by date (newest first) with a 10-second max execution time
+    const events = await Event.find(query).sort({ date: 1 }).maxTimeMS(10000);
 
     return NextResponse.json(events, { 
       status: 200,
@@ -36,7 +36,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     // 1. Check Auth
-    const { userId } = await auth();
+    const userId = await getAuthUserId();
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

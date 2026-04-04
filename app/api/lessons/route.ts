@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUser } from "@/lib/authHelpers";
 import { connectToDB } from "@/lib/db";
 import Lesson from "@/lib/models/Lesson";
 import User from "@/lib/models/User";
@@ -52,18 +52,12 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
     try {
-        const { userId: clerkId } = await auth();
-        if (!clerkId) {
+        const user = await getAuthUser();
+        if (!user) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
         await connectToDB();
-
-        // Find internal user ID based on Clerk ID
-        const user = await User.findOne({ clerkId });
-        if (!user) {
-            return NextResponse.json({ error: "User not found" }, { status: 404 });
-        }
 
         const { lessonId } = await req.json();
         if (!lessonId) {

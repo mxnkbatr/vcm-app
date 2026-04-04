@@ -1,8 +1,8 @@
 {
   "HomePage": {
     "metadata": {
-      "title": "Mongolian Au Pair | Gateway to Europe",
-      "description": "Connecting Mongolian youth with international Au Pair opportunities in Germany, Austria, Switzerland, and Belgium since 2005."
+      "title": "Volunteer Center of Mongolia ",
+      "description": "Volunteer Center of Mongolia is a non-profit organization that provides volunteering opportunities to Mongolian youth."
     }
   },
   "common": {
@@ -28,7 +28,7 @@
     "explore": "Explore",
     "action": "Action",
     "contact": "Contact",
-    "rights": "© 2024 Mongolian Au Pair.",
+    "rights": "© 2024 Volunteer Center Mongolia.",
     "links": {
       "aboutUs": "About Us",
       "auPairProgram": "Au Pair Program",
@@ -40,22 +40,22 @@
   },
   "EventsPage": {
     "metadata": {
-      "title": "Events | Mongolian Au Pair",
-      "description": "Discover upcoming events, workshops, and language clubs."
+      "title": "Volunteering | Volunteer Center Mongolia",
+      "description": "Discover upcoming volunteering opportunities, workshops, and community service."
     },
-    "upcoming": "Upcoming Events 2025",
-    "heroTitle": "Grow",
+    "upcoming": "Volunteering Opportunities 2025",
+    "heroTitle": "Help",
     "heroTitleHighlight": "Together",
-    "heroDesc": "Learn about the Au Pair program, join language clubs, and participate in cultural events to plan your future.",
+    "heroDesc": "Make a real difference through our diverse volunteering programs and cultural exchange initiatives.",
     "online": "Online",
     "inPerson": "In-Person",
-    "regClosed": "Registration Closed",
-    "regOpen": "Registration Open",
+    "regClosed": "Application Closed",
+    "regOpen": "Application Open",
     "full": "Full",
-    "register": "Register",
+    "register": "Apply Today",
     "newsletterTitle": "Don't miss the",
-    "newsletterTitleHighlight": "next event!",
-    "newsletterDesc": "Get notified about new events and training schedules via email.",
+    "newsletterTitleHighlight": "next opportunity!",
+    "newsletterDesc": "Get notified about new volunteering opportunities and social impact initiatives via email.",
     "emailPlaceholder": "Your email address",
     "joinBtn": "Join",
     "categories": {
@@ -69,7 +69,7 @@
   },
   "BookingPage": {
     "metadata": {
-      "title": "Book an Appointment | Mongolian Au Pair",
+      "title": "Book an Appointment | Volunteer Center Mongolia",
       "description": "Schedule a consultation or interview with our experts."
     },
     "badge": "Online Booking",
@@ -138,10 +138,10 @@
   },
   "NewsPage": {
     "metadata": {
-      "title": "News & Blog | Mongolian Au Pair",
+      "title": "News & Blog | Volunteer Center Mongolia",
       "description": "Stay updated with the latest news, tips, and stories from Europe."
     },
-    "badge": "Mongolian Au Pair Blog",
+    "badge": "VCM Blog",
     "heroTitle": "News &",
     "heroTitleHighlight": "Updates",
     "featured": "Read More",
@@ -156,13 +156,13 @@
   },
   "LessonsPage": {
     "metadata": {
-      "title": "Language Lessons | Mongolian Au Pair",
-      "description": "Access exclusive language and culture lessons for Au Pairs."
+      "title": "Lessons | Volunteer Center Mongolia",
+      "description": "Access exclusive volunteering, language and skill-building lessons from VCM."
     },
-    "badge": "Au Pair Academy",
-    "heroTitle": "Language",
+    "badge": "VCM Academy",
+    "heroTitle": "Volunteering",
     "heroTitleHighlight": "Lessons",
-    "heroDesc": "Special lessons to provide language knowledge and cultural understanding necessary for the Au Pair program.",
+    "heroDesc": "Courses designed to build your skills, knowledge and cultural understanding for our volunteering programs.",
     "registered": "Registered",
     "joined": "Joined",
     "joinClass": "Join Class",
@@ -179,7 +179,7 @@
   "BeforeLoginNews": {
     "badge": "News & Updates",
     "header": "Start Your Adventure Abroad!",
-    "subheader": "Welcome to Mongolian Aupair! We make your path abroad easier than ever before.",
+    "subheader": "Welcome to Volunteer Center Mongolia! We make your path easier than ever before.",
     "simple_title": "Simple & Guided",
     "simple_desc": "Our system guides you step-by-step through your application with smart hints.",
     "flex_title": "Full Flexibility",
@@ -192,64 +192,75 @@
     "scroll": "Scroll for more"
   },
   "HeroSlider": {
-    "slide1_title": "INTERNATIONAL AU PAIR PROGRAM",
-    "slide1_desc": "We offer Mongolian youth the best opportunity to live in European countries while learning a language and experiencing world culture. Over the last 20 years, we have guided more than 3,000 young people on their path of development.",
-    "slide1_location": "Germany",
-    "slide2_title": "TRAVEL EUROPE & GAIN EXPERIENCE",
-    "slide2_desc": "By joining the Au Pair program, you become a member of a host family and experience European customs from within. Monthly pocket money, free room and board, and travel rights await you.",
-    "slide2_location": "Austria",
-    "learnMore": "Learn More",
-    "verified": "Verified Program"
+    "slide1_title": "THE AND VOLUNTEER PROGRAM",
+    "slide1_desc": "Make a meaningful impact by providing home-visit care and psychosocial support to children with special needs. Join a dedicated team of volunteers committed to bringing joy to families who need it most.",
+    "slide1_location": "AND Program",
+    "slide1_duration": "3 Months",
+    "slide1_tag": "Verified Program",
+    "slide1_btn": "Learn More",
+    "slide2_title": "EDU-VOLUNTEER PROGRAM",
+    "slide2_desc": "Share your knowledge and inspire the next generation through online tutoring. We offer passionate high school students and young adults the platform to teach Math, English, and more, helping children succeed academically.",
+    "slide2_location": "EDU-Volunteer",
+    "slide2_duration": "Flexible",
+    "slide2_tag": "Online Tutoring",
+    "slide2_btn": "Apply Now",
+    "slide3_title": "JOIN THE V-CLUB TEAM",
+    "slide3_desc": "Step up as a leader by planning, organizing, and managing impactful community events. V-Club is the creative force behind our initiatives, offering you the perfect opportunity to build project management skills while making a difference.",
+    "slide3_location": "V-Club",
+    "slide3_duration": "Flexible",
+    "slide3_tag": "Community Events",
+    "slide3_btn": "Join the Club"
   },
   "UsSection": {
-    "badge": "Our Legacy",
-    "heading_pre": "Guiding Youth Towards",
-    "heading_seq1": "Global Education",
-    "heading_seq2": "European Culture",
-    "heading_seq3": "A Brighter Future",
-    "heading_post": ".",
-    "desc1": "Established in 2005, our story isn't just about business—it's about opening doors to global opportunities.",
-    "desc2": "Born from the personal Au-Pair experience of our founder in Germany, we bridge the gap between Mongolian ambition and European opportunity.",
-    "quote": "Experience is the clearest lens through which to see the future.",
+    "badge": "Our Mission",
+    "sectionTitle": "About Our Mission",
+    "content": "Since 2007, the Mongolian Volunteer Center has pursued the noble goal of building a humane, democratic society through creative volunteerism. We have successfully implemented over 50 national projects focused on education, child protection, and sustainable livelihoods, creating and scaling model volunteer programs.",
+    "valuesTitle": "Our Core Values",
+    "val1_title": "Volunteer Spirit",
+    "val1_desc": "Driven by the passion and dedication of volunteers at our core.",
+    "val2_title": "Global Impact",
+    "val2_desc": "Creating global change through impactful local action and partnership.",
+    "val3_title": "Community Building",
+    "val3_desc": "Strengthening bonds to build more resilient and supportive communities.",
+    "val4_title": "Passion & Care",
+    "val4_desc": "Infusing genuine passion and care into everything we undertake.",
     "cta": "Discover More",
     "stat_exp": "Experience",
-    "stat_participants": "Participants",
-    "stat_global": "Global History",
-    "stat_reliable": "Reliability",
-    "years": "Years",
-    "founder": "Founder",
-    "certified": "Officially Accredited"
+    "stat_participants": "Volunteers",
+    "stat_global": "Projects",
+    "stat_reliable": "Impact",
+    "years": "Years"
   },
-  "Expectations": {
-    "badge": "The Process",
-    "title": "Your Journey Abroad",
-    "subtitle": "Four simple steps to start your new life in Europe.",
-    "step1_title": "Training",
-    "step1_desc": "Intensive 17-day language course.",
-    "step1_duration": "17 Days",
-    "step2_title": "Proficiency Exam",
-    "step2_desc": "Take the entry-level proficiency test.",
-    "step2_duration": "Exam Day",
-    "step3_title": "Find Family",
-    "step3_desc": "We help you match with a host family.",
-    "step3_duration": "Matching",
-    "step4_title": "Visa & Go",
-    "step4_desc": "Guidance on visa and travel.",
-    "step4_duration": "Departure",
-    "start": "Start Now"
+  "Marketplace": {
+    "badge": "Marketplace",
+    "title": "Explore Opportunities",
+    "subtitle": "Browse available programs, events, and exclusive access passes for our VCM community.",
+    "item1_title": "Summer Language Camp",
+    "item1_desc": "Intensive 4-week German language immersion in Berlin.",
+    "item1_price": "Fully Funded",
+    "item2_title": "V-Club VIP Pass",
+    "item2_desc": "Annual membership to exclusive volunteer networking events.",
+    "item2_price": "Free for Members",
+    "item3_title": "Host Family Matching",
+    "item3_desc": "Premium application review and guaranteed family match.",
+    "item3_price": "Priority",
+    "item4_title": "Cultural Exchange Kit",
+    "item4_desc": "Essentials for your first week in Europe.",
+    "item4_price": "Included",
+    "start": "View All"
   },
   "WhyChooseUs": {
     "badge": "Why Choose Us",
     "title_pre": "Your journey,",
     "title_highlight": "Beautifully Secured.",
     "desc": "We combine heartfelt care with rigorous safety standards to give you the most trusted Au Pair experience.",
-    "card1_title": "Global Network",
-    "card1_desc": "Connecting you to verified families across Europe's most beautiful cities.",
+    "card1_title": "Volunteering & Programs",
+    "card1_desc": "Discover diverse opportunities including local volunteer events and flagship programs like EDU-Volunteer, AND, and V-Club.",
     "card2_title": "Human Support",
     "card2_desc": "No bots here. Just real people ready to help you 24/7.",
     "card2_btn": "Chat Now",
-    "card3_title": "Fair Costs",
-    "card3_desc": "No hidden fees. We prioritize clarity.",
+    "card3_title": "Helping People",
+    "card3_desc": "Empowering communities through impactful volunteer work and shared multicultural experiences.",
     "card4_title": "Safety First",
     "card4_desc": "Strict vetting process for every family. Your safety is our obsession.",
     "card5_title": "Start Your Application",
@@ -667,12 +678,105 @@
       "name": "Enter your name",
       "email": "name@email.com",
       "message": "What are you interested in?"
-    },
-    "buttons": {
-      "send": "Send"
     }
   },
-  "AuPair": {
+  "AndPage": {
+    "metadata": {
+      "title": "AND Program | Community Care | VCM",
+      "description": "Provide psychosocial support to children with special needs through our home-visit volunteer program."
+    },
+    "hero": {
+      "tag": "AND Program",
+      "title": "Community",
+      "highlight": "Care & Support",
+      "sub": "Make a meaningful impact by providing psychosocial support to children with special needs. Join a dedicated team of volunteers committed to bringing joy to families who need it most.",
+      "cta": "Apply as Volunteer",
+      "about": "Learn More"
+    },
+    "info": {
+      "title": "About AND Program",
+      "desc": "The AND Program focuses on home-visit care, providing essential support to families with children who have special needs. Our volunteers help create inclusive environments and offer much-needed respite and emotional support.",
+      "stats": {
+        "focus": {
+          "label": "Focus",
+          "val": "Special Needs"
+        },
+        "type": {
+          "label": "Type",
+          "val": "Home-Visit"
+        },
+        "impact": {
+          "label": "Impact",
+          "val": "Family Support"
+        }
+      }
+    }
+  },
+  "EduPage": {
+    "metadata": {
+      "title": "EDU-Volunteer | Education Support | VCM",
+      "description": "Inspire the next generation by volunteering in schools and learning centers. Share your knowledge and skills."
+    },
+    "hero": {
+      "tag": "EDU-Volunteer",
+      "title": "Inspire the",
+      "highlight": "Next Generation",
+      "sub": "Share your knowledge and skills by volunteering at schools and learning centers. Empower young minds and build a brighter future together through education and mentorship.",
+      "cta": "Start Teaching",
+      "about": "Our Impact"
+    },
+    "info": {
+      "title": "About EDU-Volunteer",
+      "desc": "EDU-Volunteer connects passionate individuals with educational institutions. Whether teaching a language, art, or technology, your contribution helps bridge educational gaps and inspires students to reach their full potential.",
+      "stats": {
+        "focus": {
+          "label": "Focus",
+          "val": "Education"
+        },
+        "type": {
+          "label": "Type",
+          "val": "School-Based"
+        },
+        "reach": {
+          "label": "Reach",
+          "val": "Local Schools"
+        }
+      }
+    }
+  },
+  "VClubPage": {
+    "metadata": {
+      "title": "V-Club | Global Volunteer Community | VCM",
+      "description": "Join our vibrant community of change-makers. Connect, collaborate, and create lasting social impact."
+    },
+    "hero": {
+      "tag": "V-Club",
+      "title": "Join the",
+      "highlight": "Global Community",
+      "sub": "Connect with fellow volunteers, share experiences, and collaborate on large-scale social initiatives. V-Club is where passion meets collective action for a better world.",
+      "cta": "Join the Club",
+      "about": "Recent Events"
+    },
+    "info": {
+      "title": "About V-Club",
+      "desc": "V-Club is the heart of our volunteer network. It's a platform for networking, skill-sharing, and organizing community-driven projects. Members gain access to exclusive workshops, leadership training, and international networking opportunities.",
+      "stats": {
+        "focus": {
+          "label": "Focus",
+          "val": "Networking"
+        },
+        "type": {
+          "label": "Type",
+          "val": "Community"
+        },
+        "network": {
+          "label": "Network",
+          "val": "Global"
+        }
+      }
+    }
+  },
+  "Programs": {
     "cultureExchange": "Culture Exchange",
     "heroTitlePrefix": "International",
     "heroTitleHighlight": "Au-Pair Program",
@@ -777,10 +881,10 @@
     "card4_text": "Fostering personal and professional development through cultural exchange."
   },
   "navbar": {
-    "logo": "AuPair",
+    "logo": "VCM",
     "home": "Home",
     "about": "About Us",
-    "program": "Au Pair Program",
+    "program": "Our Programs",
     "events": "Events",
     "lessons": "Lessons",
     "shop": "Shop",
@@ -788,14 +892,12 @@
     "dashboard": "Dashboard",
     "signin": "Sign In",
     "register": "Register",
-    "germany": "Germany",
-    "austria": "Austria",
-    "switzerland": "Switzerland",
-    "belgium": "Belgium",
-    "desc_de": "Learn language for free in Germany",
-    "desc_at": "Learn language for free in Austria",
-    "desc_ch": "Learn language for free in Switzerland",
-    "desc_be": "Learn language for free in Belgium"
+    "prog_and": "AND Program",
+    "prog_and_desc": "Support for children with special needs",
+    "prog_edu": "EDU-Volunteer",
+    "prog_edu_desc": "Share knowledge and inspire the next generation",
+    "prog_vclub": "V-Club",
+    "prog_vclub_desc": "Join our global volunteer community"
   },
   "dashboard": {
     "loading": "Loading Profile...",
@@ -891,25 +993,20 @@
     }
   },
   "hero": {
-    "germany": {
-      "title": "Germany",
-      "subtitle": "Economic Heart of Europe",
-      "desc": "Master the language in a world-leading nation while experiencing European culture and kickstarting your career."
+    "and_program": {
+      "title": "AND Program",
+      "subtitle": "Home-Visit Volunteer Care",
+      "desc": "Make a meaningful impact by providing psychosocial support to children with special needs. Join a dedicated team bringing joy to families."
     },
-    "austria": {
-      "title": "Austria",
-      "subtitle": "Cradle of Classical Art",
-      "desc": "A golden opportunity to master German while living amidst the breathtaking beauty of the Alps."
+    "edu_volunteer": {
+      "title": "EDU-Volunteer",
+      "subtitle": "Inspire the Next Generation",
+      "desc": "Share your knowledge and skills by volunteering at schools and learning centers. Empower young minds and build a brighter future together."
     },
-    "belgium": {
-      "title": "Belgium",
-      "subtitle": "International Hub",
-      "desc": "Experience multilingual culture at the headquarters of the European Union."
-    },
-    "switzerland": {
-      "title": "Switzerland",
-      "subtitle": "Highest Quality of Life",
-      "desc": "Live with the world's highest allowance, purest air, and safest environment."
+    "v_club": {
+      "title": "V-Club",
+      "subtitle": "Global Volunteer Community",
+      "desc": "Join our vibrant community of change-makers. Connect, collaborate, and create lasting social impact through volunteer events and initiatives."
     }
   },
   "Auth": {
@@ -933,23 +1030,23 @@
     "encrypted": "Encrypted"
   },
   "events": {
-    "back": "Back to Events",
+    "back": "Back to Volunteering",
     "date": "Date",
     "time": "Time",
     "location": "Location",
     "category": "Category",
     "share": "Share",
-    "join": "Register Now",
-    "joined": "Registered",
-    "attendees": "Attendees",
+    "join": "Apply Now",
+    "joined": "Applied",
+    "attendees": "Volunteers",
     "university": "University",
     "loginRequired": "Login Required",
-    "notFound": "Event Not Found",
-    "returnToEvents": "Return to Events",
-    "registrationSuccess": "Registration Success!",
-    "joinedSuccess": "You are registered for this event. See you there!",
-    "secureSpot": "Secure your spot for this event. Limited seats available!",
-    "readyToJoin": "Ready to join?"
+    "notFound": "No Opportunities Found",
+    "returnToEvents": "Back to Volunteering",
+    "registrationSuccess": "Success!",
+    "joinedSuccess": "You have applied for this opportunity.",
+    "secureSpot": "Secure your spot for this volunteering opportunity.",
+    "readyToJoin": "Ready to help?"
   },
   "news": {
     "back": "Back to Feed",

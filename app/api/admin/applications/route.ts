@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { currentUser } from "@clerk/nextjs/server";
+
 import { connectToDB } from "@/lib/db";
 import Application from "@/lib/models/Application";
 import User from "@/lib/models/User";
@@ -16,12 +16,14 @@ export const GET = withAdminAuth(async () => {
   try {
     await connectToDB();
     
-    // We want to fetch applications and if they have a userId (clerkId), attach the user's detailed profile
-    const applications = await Application.find({}).sort({ createdAt: -1 }).lean();
+    // We want to fetch applications strictly awaiting Final Admin Approval
+    const applications = await Application.find({ status: 'pending_admin' }).sort({ createdAt: -1 }).lean();
     
     const enrichedApplications = await Promise.all(applications.map(async (app: any) => {
       if (app.userId) {
-        const user = await User.findOne({ clerkId: app.userId }).select('profile').lean();
+        const isMongoId = /^[0-9a-fA-F]{24}$/.test(app.userId);
+        const query = isMongoId ? { _id: app.userId } : { clerkId: app.userId };
+        const user = await User.findOne(query).select('profile').lean();
         return { ...app, userProfile: user?.profile || null };
       }
       return { ...app, userProfile: null };
@@ -48,15 +50,17 @@ export const PUT = withAdminAuth(async (req: Request) => {
     application.status = status;
     await application.save();
 
-    // If approved and user exists, upgrade user to student and sync latest info
-    if (status === 'approved' && application.userId) {
-       const country = PROGRAM_MAP[application.programId] || "General";
+    // If approved and user exists, upgrade user to volunteer and sync latest info
+    if (status === 'approved_volunteer' && application.userId) {
+       const country = PROGRAM_MAP[application.programId] || "Volunteer Program";
+       const isMongoId = /^[0-9a-fA-F]{24}$/.test(application.userId);
+       const query = isMongoId ? { _id: application.userId } : { clerkId: application.userId };
        
        await User.findOneAndUpdate(
-         { clerkId: application.userId },
+         query,
          { 
             $set: {
-                role: 'student', 
+                role: 'volunteer', 
                 country: country,
                 step: "Documents",
                 fullName: `${application.firstName} ${application.lastName}`,

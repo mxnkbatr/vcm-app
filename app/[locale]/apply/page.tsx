@@ -15,7 +15,7 @@ import {
    Info
 } from "lucide-react";
 import { FaPassport, FaGraduationCap } from "react-icons/fa";
-import StudentInformation from "@/app/components/StudentInformation";
+import { Link } from "@/navigation";
 import { useTranslations } from "next-intl";
 
 // --- BRAND CONFIG ---
@@ -85,8 +85,11 @@ export default function ApplyPage() {
       phone: "",
       age: "",
       level: "A1",
-      message: ""
+      message: "",
+      generalId: ""
    });
+
+   const [generals, setGenerals] = useState<{_id: string, fullName: string, role: string}[]>([]);
 
    // Pre-fill user data from DB
    useEffect(() => {
@@ -124,7 +127,19 @@ export default function ApplyPage() {
             console.error("Error fetching user info:", err);
          }
       };
+      
+      const fetchGenerals = async () => {
+         try {
+            const res = await fetch("/api/generals");
+            if (res.ok) {
+               const data = await res.json();
+               setGenerals(data);
+            }
+         } catch(e) {}
+      };
+
       fetchUserData();
+      fetchGenerals();
    }, []);
 
    const formRef = useRef<HTMLDivElement>(null);
@@ -399,6 +414,33 @@ export default function ApplyPage() {
                                     </div>
                                  </div>
 
+                                 <div className="space-y-2 mb-6">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Select Program General *</label>
+                                    <select
+                                       required
+                                       value={formData.generalId}
+                                       onChange={(e) => setFormData({ ...formData, generalId: e.target.value })}
+                                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#E31B23]"
+                                    >
+                                       <option value="" disabled>Choose a coordinator...</option>
+                                       {generals.map(g => (
+                                          <option key={g._id} value={g._id}>{g.fullName} ({g.role.replace('general_', '').toUpperCase()})</option>
+                                       ))}
+                                    </select>
+                                 </div>
+
+                                 <div className="space-y-2 mb-8">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Letter to the General *</label>
+                                    <textarea
+                                       required
+                                       rows={4}
+                                       placeholder="Please explain why you want to join this program and answer the General's prerequisite questions here..."
+                                       value={formData.message}
+                                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#E31B23]"
+                                    />
+                                 </div>
+
                                  <button
                                     type="submit"
                                     disabled={loading}
@@ -415,11 +457,20 @@ export default function ApplyPage() {
             ) : (
                <motion.div
                   key="step2"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="max-w-6xl mx-auto"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="max-w-3xl mx-auto bg-white rounded-[3rem] p-16 text-center shadow-2xl border border-sky-100"
                >
-                  <StudentInformation onSuccess={() => setStep(3)} />
+                  <div className="w-24 h-24 bg-sky-50 text-sky-500 rounded-full flex items-center justify-center mx-auto mb-8 border border-sky-100 shadow-inner">
+                     <CheckCircle2 size={48} />
+                  </div>
+                  <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tight">Application Submitted</h2>
+                  <p className="text-lg text-slate-500 mb-10 leading-relaxed">
+                     Your application and Letter of Motivation have been securely forwarded to the Program General.
+                  </p>
+                  <Link href="/dashboard" className="bg-sky-600 text-white px-10 py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-sky-600/20 hover:shadow-2xl hover:bg-sky-500 transition-all inline-flex items-center gap-3 active:scale-[0.98]">
+                     Go to Dashboard <ArrowRight size={16} />
+                  </Link>
                </motion.div>
             )}
          </AnimatePresence>

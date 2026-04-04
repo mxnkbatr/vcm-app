@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../globals.css";
 import Navbar from "../components/Navbar";
-import { ClerkProvider } from "@clerk/nextjs";
+import AuthProvider from "../components/AuthProvider";
 import SmoothScroll from "../components/SmoothScroll";
 import dynamic from "next/dynamic";
 import MotionProvider from "../components/MotionProvider";
@@ -19,7 +19,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Aupair Mongolia",
+  title: "Volunteer Center Mongolia",
   description: "Small Actions, Big Differences",
   icons: {
     icon: "/image.png",
@@ -38,26 +38,20 @@ export default async function RootLayout({
 }) {
   const { locale } = await params;
 
-  // Ensure that the incoming `locale` is valid
   if (!locales.includes(locale)) {
     notFound();
   }
 
-  // Providing all messages to the client
-  // side is the easiest way to get started
   const messages = await getMessages();
-  
 
   return (
-    <ClerkProvider>
+    <AuthProvider>
       <html lang={locale} suppressHydrationWarning>
         <head>
           <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
-          <link rel="preconnect" href="https://careful-beetle-54.clerk.accounts.dev" crossOrigin="anonymous" />
           <link rel="preconnect" href="https://grainy-gradients.vercel.app" crossOrigin="anonymous" />
           <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
           <link rel="dns-prefetch" href="https://res.cloudinary.com" />
-          <link rel="dns-prefetch" href="https://careful-beetle-54.clerk.accounts.dev" />
           <link rel="dns-prefetch" href="https://grainy-gradients.vercel.app" />
           <link rel="dns-prefetch" href="https://images.unsplash.com" />
         </head>
@@ -74,6 +68,6 @@ export default async function RootLayout({
           </NextIntlClientProvider>
         </body>
       </html>
-    </ClerkProvider>
+    </AuthProvider>
   );
 }

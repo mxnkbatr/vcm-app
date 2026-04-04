@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { currentUser } from "@clerk/nextjs/server";
+
 import { connectToDB } from "@/lib/db";
 import Event from "@/lib/models/Events";
 import User from "@/lib/models/User";

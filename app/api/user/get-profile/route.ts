@@ -1,39 +1,28 @@
 import { NextResponse } from "next/server";
-import { currentUser } from "@clerk/nextjs/server";
 import { connectToDB } from "@/lib/db";
 import User from "@/lib/models/User";
+import { getAuthUserId } from "@/lib/authHelpers";
 
 export async function GET(req: Request) {
-  console.log("GET /api/user/profile hit");
+  console.log("GET /api/user/get-profile hit");
   try {
     await connectToDB();
-    const clerkUser = await currentUser();
+    const userId = await getAuthUserId();
 
-    if (!clerkUser) {
-      console.log("No Clerk user found");
+    if (!userId) {
+      console.log("No authenticated user found");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    console.log("Clerk user ID:", clerkUser.id);
-    const user = await User.findOne({ clerkId: clerkUser.id });
+    console.log("User ID:", userId);
+    const user = await User.findById(userId);
 
     if (!user) {
-      console.log("User not found in DB, returning fallback");
-      // Return Clerk info as a fallback so the frontend can still show linked account status
-      return NextResponse.json({ 
-          user: {
-              fullName: `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim() || "Guest User",
-              email: clerkUser.emailAddresses[0]?.emailAddress || "",
-              role: "guest",
-              profile: null
-          },
-          activity: [],
-          isNewUser: true
-      });
+      console.log("User not found in DB");
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     console.log("User found in DB:", user.email, "Role:", user.role, "Step:", user.step, "Badges:", user.badges, "Points:", user.points,  "Profile:", user.profile);
-    // Mock activity for now if empty
     const activity = user.activityHistory || [];
 
     return NextResponse.json({ 

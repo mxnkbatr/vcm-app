@@ -10,7 +10,8 @@ import {
    FaVideo,
    FaArrowRight,
    FaBullhorn,
-   FaUserFriends
+   FaUserFriends,
+   FaCalendarAlt
 } from "react-icons/fa";
 import { Clock, MapPin, Filter, Loader2 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
@@ -29,7 +30,7 @@ interface EventItem {
    link?: string;
 }
 
-export default function EventsPageRedGreen() {
+export default function EventsClient() {
    const t = useTranslations("EventsPage");
    const locale = useLocale();
 
@@ -61,10 +62,10 @@ export default function EventsPageRedGreen() {
 
    const getTagColor = (category: string) => {
       switch (category) {
-         case "campaign": return "bg-red-100 text-red-600";
-         case "meeting": return "bg-emerald-100 text-emerald-600";
-         case "workshop": return "bg-slate-100 text-slate-500";
-         default: return "bg-red-50 text-red-500";
+         case "campaign": return "bg-sky-100 text-sky-600";
+         case "meeting": return "bg-blue-100 text-blue-600";
+         case "workshop": return "bg-indigo-100 text-indigo-600";
+         default: return "bg-slate-100 text-slate-500";
       }
    };
 
@@ -75,37 +76,39 @@ export default function EventsPageRedGreen() {
    if (loading) {
       return (
          <div className="min-h-[100dvh] flex items-center justify-center bg-white">
-            <Loader2 className="animate-spin text-red-600" size={48} />
+            <Loader2 className="animate-spin text-sky-500" size={48} />
          </div>
       );
    }
 
    return (
-      <div ref={containerRef} className="min-h-[100dvh] bg-white text-slate-800 font-sans selection:bg-red-500 selection:text-white">
+      <div ref={containerRef} className="min-h-[100dvh] bg-white text-slate-800 font-sans selection:bg-sky-100 selection:text-sky-900 overflow-hidden pb-20">
 
          {/* ─── 1. HERO SECTION ─── */}
-         <section className="relative pt-32 pb-20 px-6 overflow-hidden">
-            {/* Animated Background Shapes */}
-            <div className="absolute inset-0 w-full h-full pointer-events-none">
-               <div className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-red-50 rounded-full blur-[100px] opacity-60" />
-               <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-emerald-50 rounded-full blur-[100px] opacity-60" />
+         <section className="relative pt-28 pb-14 px-6 overflow-hidden z-10 text-center">
+            {/* Ambient Background */}
+            <div className="absolute inset-0 pointer-events-none z-0">
+               <div className="absolute top-[-5%] right-[-5%] w-[500px] h-[500px] bg-sky-50 rounded-full blur-[120px] opacity-50" />
+               <div className="absolute bottom-[-5%] left-[-5%] w-[400px] h-[400px] bg-blue-50 rounded-full blur-[120px] opacity-50" />
+               <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:32px_32px] opacity-30" />
             </div>
 
-            <div className="max-w-7xl mx-auto text-center relative z-10">
+            <div className="max-w-5xl mx-auto relative z-10">
                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8 }}
+                  transition={{ duration: 0.6 }}
                >
-                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-red-100 text-red-600 shadow-sm mb-6">
-                     <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
-                     <span className="text-xs font-bold uppercase tracking-widest">{t("upcoming")}</span>
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-50 border border-sky-100 text-sky-600 shadow-sm mb-5">
+                     <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
+                     <span className="text-[10px] font-bold uppercase tracking-widest">{t("upcoming")}</span>
                   </div>
 
-                  <h1 className="text-5xl md:text-7xl font-black mb-6 leading-tight text-slate-900">
-                     {t("heroTitle")} <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-emerald-600">{t("heroTitleHighlight")}</span>
+                  <h1 className="text-3xl sm:text-4xl md:text-[3.25rem] font-extrabold mb-4 leading-tight tracking-tight text-slate-900">
+                     {t("heroTitle")}{" "}
+                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-sky-600">{t("heroTitleHighlight")}</span>
                   </h1>
-                  <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed font-medium">
+                  <p className="text-base text-slate-500 font-medium max-w-md mx-auto leading-relaxed">
                      {t("heroDesc")}
                   </p>
                </motion.div>
@@ -113,21 +116,20 @@ export default function EventsPageRedGreen() {
          </section>
 
          {/* ─── 2. FILTER & EVENTS GRID ─── */}
-         <section className="py-20 px-6">
-            <div className="max-w-7xl mx-auto">
+         <section className="py-10 px-6 relative z-10">
+            <div className="max-w-6xl mx-auto">
 
                {/* Filters */}
-               <div className="flex flex-wrap justify-center gap-4 mb-16">
+               <div className="flex flex-wrap justify-center gap-2.5 mb-10">
                   {CATEGORIES.map((cat) => (
                      <button
                         key={cat}
                         onClick={() => setActiveFilter(cat)}
-                        className={`px-8 py-3 rounded-2xl font-bold text-sm transition-all shadow-sm flex items-center gap-2 border-2 ${activeFilter === cat
-                           ? "bg-red-600 border-red-600 text-white shadow-red-200 shadow-lg scale-105"
-                           : "bg-white border-slate-100 text-slate-500 hover:border-red-200 hover:text-red-600"
+                        className={`px-5 py-2.5 rounded-full font-bold text-[11px] uppercase tracking-wider transition-all border ${activeFilter === cat
+                           ? "bg-sky-500 border-sky-500 text-white shadow-md shadow-sky-200 scale-[1.03]"
+                           : "bg-white border-slate-200 text-slate-500 hover:border-sky-300 hover:text-sky-600"
                            }`}
                      >
-                        {activeFilter === cat && <Filter size={14} className="fill-white" />}
                         {t(`categories.${cat}`)}
                      </button>
                   ))}
@@ -136,7 +138,7 @@ export default function EventsPageRedGreen() {
                {/* Grid */}
                <motion.div
                   layout
-                  className="grid md:grid-cols-2 lg:grid-cols-2 gap-8"
+                  className="grid md:grid-cols-2 gap-6"
                >
                   <AnimatePresence mode="popLayout">
                      {filteredEvents.map((event) => {
@@ -154,72 +156,71 @@ export default function EventsPageRedGreen() {
                            <motion.div
                               key={event._id}
                               layout
-                              initial={{ opacity: 0, scale: 0.9 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              exit={{ opacity: 0, scale: 0.9 }}
-                              transition={{ duration: 0.3 }}
-                              className="bg-white rounded-[2.5rem] p-4 shadow-sm border border-slate-100 hover:border-emerald-200 hover:shadow-xl transition-all group"
+                              initial={{ opacity: 0, y: 16 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, scale: 0.95 }}
+                              className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:border-sky-200 hover:shadow-lg hover:shadow-sky-50 transition-all group"
                            >
-                              <div className="flex flex-col md:flex-row h-full gap-6">
+                              <div className="flex flex-col sm:flex-row h-full gap-5">
 
-                                 {/* Date & Image */}
-                                 <div className="w-full md:w-48 h-48 md:h-auto relative shrink-0">
-                                    <div className="absolute top-4 left-4 z-20 bg-white/90 backdrop-blur rounded-2xl px-4 py-2 text-center shadow-lg border border-slate-50">
-                                       <span className="block text-xs font-black text-emerald-600 uppercase">{month}</span>
-                                       <span className="block text-2xl font-black text-slate-900">{day}</span>
+                                 {/* Image & Date Badge */}
+                                 <div className="w-full sm:w-48 h-48 sm:h-auto relative shrink-0 rounded-xl overflow-hidden">
+                                    <div className="absolute top-3 left-3 z-20 bg-white/95 backdrop-blur-sm shadow-md rounded-xl px-3.5 py-2 text-center border border-sky-50">
+                                       <span className="block text-[10px] font-bold text-sky-500 uppercase tracking-tight">{month}</span>
+                                       <span className="block text-xl font-extrabold text-slate-800 leading-none">{day}</span>
                                     </div>
                                     <Image
-                                       src={event.image}
+                                       src={event.image || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80"}
                                        alt={titleText}
                                        fill
-                                       className="object-cover rounded-[2rem] group-hover:scale-105 transition-transform duration-500"
+                                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                                     />
                                  </div>
 
                                  {/* Content */}
-                                 <div className="flex-1 py-4 pr-4 flex flex-col justify-between">
-                                    <div>
-                                       <div className="flex items-center gap-3 mb-3">
-                                          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${getTagColor(event.category)}`}>
+                                 <div className="flex-1 py-2 flex flex-col justify-between">
+                                    <div className="space-y-3">
+                                       <div className="flex items-center gap-2 flex-wrap">
+                                          <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${getTagColor(event.category)}`}>
                                              {categoryLabel}
                                           </span>
                                           {isOnline ? (
-                                             <span className="flex items-center gap-1 text-xs font-bold text-slate-400">
-                                                <FaVideo /> {t("online")}
+                                             <span className="flex items-center gap-1 text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                                                <FaVideo className="text-sky-500" size={10} /> {t("online")}
                                              </span>
                                           ) : (
-                                             <span className="flex items-center gap-1 text-xs font-bold text-slate-400">
-                                                <FaUserFriends /> {t("inPerson")}
+                                             <span className="flex items-center gap-1 text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                                                <FaUserFriends className="text-sky-500" size={10} /> {t("inPerson")}
                                              </span>
                                           )}
                                        </div>
-                                       <h3 className="text-2xl font-black text-slate-900 mb-2 leading-tight group-hover:text-red-600 transition-colors">
+                                       <h3 className="text-lg font-bold text-slate-900 leading-snug group-hover:text-sky-600 transition-colors">
                                           {titleText}
                                        </h3>
-                                       <div className="space-y-2">
+                                       <div className="space-y-1.5">
                                           <p className="flex items-center gap-2 text-sm text-slate-500 font-medium">
-                                             <Clock size={16} className="text-emerald-500" /> {event.timeString}
+                                             <Clock size={14} className="text-sky-500" /> {event.timeString}
                                           </p>
                                           <p className="flex items-center gap-2 text-sm text-slate-500 font-medium">
-                                             <MapPin size={16} className="text-emerald-500" /> {locationText}
+                                             <MapPin size={14} className="text-sky-500" /> {locationText}
                                           </p>
                                        </div>
                                     </div>
 
-                                    <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
-                                       <span className={`text-xs font-bold ${isFull ? "text-red-500" : "text-emerald-600"}`}>
+                                    <div className="mt-5 flex items-center justify-between pt-4 border-t border-slate-100">
+                                       <span className={`text-[10px] font-bold uppercase tracking-wider ${isFull ? "text-slate-300" : "text-sky-500"}`}>
                                           {isFull ? t("regClosed") : t("regOpen")}
                                        </span>
                                        <a
                                           href={event.link || "#"}
                                           target="_blank"
                                           rel="noopener noreferrer"
-                                          className={`px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${isFull
-                                             ? "bg-slate-100 text-slate-400 cursor-not-allowed pointer-events-none"
-                                             : "bg-slate-900 text-white hover:bg-red-600 hover:gap-3"
+                                          className={`px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${isFull
+                                             ? "bg-slate-50 text-slate-300 cursor-not-allowed"
+                                             : "bg-sky-500 text-white hover:bg-sky-600 hover:shadow-lg hover:shadow-sky-200"
                                              }`}
                                        >
-                                          {isFull ? t("full") : t("register")} {!isFull && <FaArrowRight />}
+                                          {isFull ? t("full") : t("register")} {!isFull && <FaArrowRight size={10} />}
                                        </a>
                                     </div>
                                  </div>
@@ -232,35 +233,33 @@ export default function EventsPageRedGreen() {
             </div>
          </section>
 
-         {/* ─── 3. NEWSLETTER SECTION ─── */}
-         <section className="py-24 px-6 bg-slate-50 relative overflow-hidden">
-            <div className="max-w-4xl mx-auto text-center relative z-10">
-               <div className="bg-white rounded-[3rem] p-12 shadow-xl border border-red-50 relative overflow-hidden">
-                  {/* Background decoration */}
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-red-50 rounded-bl-full" />
-                  <div className="absolute bottom-0 left-0 w-40 h-40 bg-emerald-50 rounded-tr-full" />
+         {/* ─── 3. NEWSLETTER CTA ─── */}
+         <section className="py-16 px-6">
+            <div className="max-w-3xl mx-auto text-center bg-gradient-to-br from-sky-50 via-white to-sky-50 rounded-2xl p-8 md:p-12 shadow-sm border border-sky-100 relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-48 h-48 bg-sky-100/40 rounded-bl-full" />
+               <div className="absolute bottom-0 left-0 w-24 h-24 bg-sky-100/30 rounded-tr-full" />
 
-                  <div className="relative z-10">
-                     <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-6">
-                        <FaBullhorn />
-                     </div>
-                     <h2 className="text-3xl md:text-5xl font-black mb-6 text-slate-900">
-                        {t("newsletterTitle")} <span className="text-emerald-600">{t("newsletterTitleHighlight")}</span>
-                     </h2>
-                     <p className="text-slate-500 mb-10 max-w-lg mx-auto font-medium">
-                        {t("newsletterDesc")}
-                     </p>
+               <div className="relative z-10 text-center space-y-4">
+                  <div className="w-12 h-12 bg-sky-100 text-sky-500 rounded-xl flex items-center justify-center text-xl mx-auto mb-4">
+                     <FaBullhorn />
+                  </div>
+                  <h2 className="text-xl md:text-2xl font-bold text-slate-800 leading-snug">
+                     {t("newsletterTitle")}{" "}
+                     <span className="text-sky-500">{t("newsletterTitleHighlight")}</span>
+                  </h2>
+                  <p className="text-slate-500 text-sm font-medium max-w-sm mx-auto">
+                     {t("newsletterDesc")}
+                  </p>
 
-                     <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-                        <input
-                           type="email"
-                           placeholder={t("emailPlaceholder")}
-                           className="flex-1 px-6 py-4 rounded-2xl text-slate-900 font-bold bg-slate-50 border border-slate-100 focus:outline-none focus:ring-4 focus:ring-red-100"
-                        />
-                        <button className="px-8 py-4 rounded-2xl bg-red-600 text-white font-black uppercase tracking-widest hover:bg-emerald-600 transition-colors shadow-lg hover:shadow-xl">
-                           {t("joinBtn")}
-                        </button>
-                     </div>
+                  <div className="flex flex-col sm:flex-row gap-2.5 max-w-md mx-auto pt-4">
+                     <input
+                        type="email"
+                        placeholder={t("emailPlaceholder")}
+                        className="flex-1 px-5 py-3 rounded-xl text-sm text-slate-800 font-medium bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-300"
+                     />
+                     <button className="px-6 py-3 rounded-xl bg-sky-500 text-white font-bold text-xs uppercase tracking-wider hover:bg-sky-600 transition-all shadow-md shadow-sky-200 active:scale-95">
+                        {t("joinBtn")}
+                     </button>
                   </div>
                </div>
             </div>

@@ -1,44 +1,32 @@
 import { NextResponse } from "next/server";
-import { currentUser } from "@clerk/nextjs/server";
 import { connectToDB } from "@/lib/db";
 import User from "@/lib/models/User";
 import Booking from "@/lib/models/Booking";
+import { getAuthUserId } from "@/lib/authHelpers";
 
 export async function GET(req: Request) {
   console.log("GET /api/user/profile hit");
   try {
     await connectToDB();
-    const clerkUser = await currentUser();
+    const userId = await getAuthUserId();
 
-    if (!clerkUser) {
-      console.log("No Clerk user found");
+    if (!userId) {
+      console.log("No authenticated user found");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    console.log("Clerk user ID:", clerkUser.id);
+    console.log("User ID:", userId);
     const [user, bookings] = await Promise.all([
-      User.findOne({ clerkId: clerkUser.id }),
-      Booking.find({ userId: clerkUser.id }).sort({ createdAt: -1 })
+      User.findById(userId),
+      Booking.find({ userId }).sort({ createdAt: -1 })
     ]);
 
     if (!user) {
-      console.log("User not found in DB, returning fallback");
-      // Return Clerk info as a fallback so the frontend can still show linked account status
-      return NextResponse.json({ 
-          user: {
-              fullName: `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim() || "Guest User",
-              email: clerkUser.emailAddresses[0]?.emailAddress || "",
-              role: "guest",
-              profile: null
-          },
-          activity: [],
-          bookings: bookings || [],
-          isNewUser: true
-      });
+      console.log("User not found in DB");
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     console.log("User found in DB:", user.email);
-    // Mock activity for now if empty
     const activity = user.activityHistory || [];
 
     return NextResponse.json({ 

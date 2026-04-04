@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
+import { useSession } from "next-auth/react";
 import {
    Clock, Calendar, MapPin, ArrowUpRight, Activity,
    CheckCircle2, Shield, MoreHorizontal, Loader2,
@@ -26,11 +26,11 @@ import { useTranslations, useLocale } from "next-intl";
 const STEPS = ["Applied", "Documents", "Interview", "Matching", "Visa", "Departure"];
 
 const STEP_INSTRUCTIONS: Record<string, { link: string }> = {
-   "Applied": { link: "/aupair" },
+   "Applied": { link: "/programs" },
    "Documents": { link: "/submit-documents" },
    "Interview": { link: "/lessons" },
    "Matching": { link: "#" },
-   "Visa": { link: "/aupair/germany" },
+   "Visa": { link: "/programs/germany" },
    "Departure": { link: "/lessons" }
 };
 
@@ -44,6 +44,9 @@ interface UserData {
    country?: string;
    step?: string;
    profile?: any;
+   phone?: string | null;
+   hasPassword?: boolean;
+   affiliation?: string | null;
 }
 
 interface ActivityLog {
@@ -177,7 +180,9 @@ const FullSnapshotSection = ({ profile }: { profile: any }) => {
 export default function MemberDashboard() {
    const t = useTranslations("dashboard");
    const locale = useLocale();
-   const { user, isLoaded } = useUser();
+   const { data: session, status } = useSession();
+   const isLoaded = status !== "loading";
+   const user = session?.user;
    const router = useRouter();
 
    const [userData, setUserData] = useState<UserData | null>(null);
@@ -195,8 +200,12 @@ export default function MemberDashboard() {
    };
 
    useEffect(() => {
-      if (isLoaded && user?.publicMetadata?.role === 'admin') {
+      if (isLoaded && (user as any)?.role === 'admin') {
          router.replace('/admin');
+         return;
+      }
+      if (isLoaded && (user as any)?.role?.startsWith('general_')) {
+         router.replace('/general');
          return;
       }
 
@@ -216,7 +225,7 @@ export default function MemberDashboard() {
                setBookings(data.bookings || []);
                setUserApps(data.applications || []);
             } else {
-               setUserData({ _id: "new", fullName: user.fullName || "Guest User", email: user.primaryEmailAddress?.emailAddress || "", role: "guest" });
+               setUserData({ _id: "new", fullName: user.name || "Guest User", email: user.email || "", role: "guest" });
             }
          } catch (e) {
             console.error("Dashboard Error:", e);
@@ -266,7 +275,7 @@ export default function MemberDashboard() {
       title: t(`instructions.${stepKey}.title`),
       action: t(`instructions.${stepKey}.action`),
       button: t(`instructions.${stepKey}.button`),
-      link: STEP_INSTRUCTIONS[stepKey]?.link || "/aupair",
+      link: STEP_INSTRUCTIONS[stepKey]?.link || "/programs",
       isMeeting: false
    };
 
@@ -294,7 +303,9 @@ export default function MemberDashboard() {
                   <Link href="/events" className="group relative px-8 py-4 rounded-2xl overflow-hidden transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 bg-[#E31B23]">
                      <span className="relative z-10 text-white font-black text-[10px] uppercase tracking-widest flex items-center gap-2"><Calendar size={14} /> {t('findEvents')}</span>
                   </Link>
-                  <button className="p-4 border border-slate-200 bg-white text-slate-400 hover:text-slate-900 rounded-2xl transition-all active:scale-95"><Settings size={18} /></button>
+                  <Link href="/profile" className="p-4 border border-slate-200 bg-white text-slate-400 hover:text-slate-900 rounded-2xl transition-all active:scale-95 flex items-center justify-center">
+                     <Settings size={18} />
+                  </Link>
                </motion.div>
             </div>
 
@@ -305,7 +316,7 @@ export default function MemberDashboard() {
                         <div className="flex items-center gap-6">
                            <div className="relative">
                               <div className="w-20 h-20 rounded-3xl p-1 shadow-xl bg-white ring-4 ring-slate-50 -rotate-3">
-                                 <Image src={user?.imageUrl || "/logo.jpg"} alt="User" width={80} height={80} className="rounded-[1.2rem] w-full h-full object-cover" />
+                                 <Image src={user?.image || "/logo.jpg"} alt="User" width={80} height={80} className="rounded-[1.2rem] w-full h-full object-cover" />
                               </div>
                               {isStudent && <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1.5 shadow-lg border border-slate-100"><Shield size={14} className="text-[#00C896] fill-[#00C896]/20" /></div>}
                            </div>
@@ -346,15 +357,61 @@ export default function MemberDashboard() {
                         </div>
                      ) : (
                         <div className="mt-10 p-6 bg-slate-50 rounded-3xl border border-slate-100 text-center">
-                           {pendingApp ? (
+                           {(!userData.phone || !userData.hasPassword || !userData.affiliation) ? (
+                              <div className="flex flex-col items-center">
+                                 <div className="w-12 h-12 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-4">
+                                    <AlertCircle size={24} />
+                                 </div>
+                                 <h3 className="text-lg font-black text-slate-900 mb-1 tracking-tight">⚠️ PROFILE INCOMPLETE - ACTION REQUIRED</h3>
+                                 <p className="text-xs font-bold text-slate-500 mb-6 max-w-sm">To apply to the VCM AuPair program, you must update your account details.</p>
+                                 
+                                 <div className="flex flex-col gap-3 w-full max-w-sm mb-8">
+                                    <Link href="/complete-profile" className={`p-4 rounded-xl text-left border flex items-center justify-between group transition-all ${!userData.hasPassword ? 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100' : 'bg-emerald-50 border-emerald-200 text-emerald-700'}`}>
+                                       <span className="text-xs font-bold tracking-tight">{!userData.hasPassword ? '[ Set Password ] (Mandatory)' : 'Password Set ✓'}</span>
+                                       {!userData.hasPassword && <ArrowUpRight size={14} className="group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />}
+                                    </Link>
+                                    
+                                    <Link href="/complete-profile" className={`p-4 rounded-xl text-left border flex items-center justify-between group transition-all ${!userData.phone ? 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100' : 'bg-emerald-50 border-emerald-200 text-emerald-700'}`}>
+                                       <span className="text-xs font-bold tracking-tight">{!userData.phone ? '[ Add Phone Number ] (Mandatory)' : 'Phone Set ✓'}</span>
+                                       {!userData.phone && <ArrowUpRight size={14} className="group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />}
+                                    </Link>
+
+                                    <Link href="/complete-profile" className={`p-4 rounded-xl text-left border flex items-center justify-between group transition-all ${!userData.affiliation ? 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100' : 'bg-emerald-50 border-emerald-200 text-emerald-700'}`}>
+                                       <span className="text-xs font-bold tracking-tight">{!userData.affiliation ? '[ Select School/Affiliation ]' : `Affiliation: ${userData.affiliation} ✓`}</span>
+                                       {!userData.affiliation && <ArrowUpRight size={14} className="group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />}
+                                    </Link>
+                                 </div>
+
+                                 <div className="w-full pt-6 border-t border-slate-200">
+                                    <h4 className="text-md font-black text-slate-900 mb-1">Start Your Journey</h4>
+                                    <p className="text-xs text-slate-500 mb-6">You are currently a Guest. Apply now to become a Student.</p>
+                                    <button disabled className="bg-slate-200 text-slate-400 cursor-not-allowed px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-inner">[ Apply Now ]</button>
+                                    <p className="text-[10px] font-bold text-red-500 mt-4 max-w-[250px] mx-auto text-center leading-relaxed">
+                                       Action Required: You cannot submit your application for review until your Phone Number, Password, and Affiliation status are completed.
+                                    </p>
+                                 </div>
+                              </div>
+                           ) : pendingApp ? (
                               <>
                                  <div className="w-12 h-12 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-3"><Clock size={24} /></div>
-                                 <h3 className="text-lg font-black text-slate-900 mb-1">{t('pending')}</h3>
-                                 <p className="text-xs text-slate-500 mb-4">{t('appliedFor')} <b>{pendingApp.programId}</b> {t('on')} {formatDate(pendingApp.createdAt)}</p>
-                                 <div className="bg-amber-100 text-amber-700 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest inline-block">{t('underReview')}</div>
+                                 <h3 className="text-lg font-black text-slate-900 mb-1 tracking-tight">Application Status: In Review {pendingApp.status === 'pending_general' ? '(Step 1 of 2)' : pendingApp.status === 'pending_admin' ? '(Step 2 of 2)' : ''}</h3>
+                                 <p className="text-xs text-slate-500 mb-4 max-w-[280px] mx-auto leading-relaxed">
+                                    {pendingApp.status === 'pending_general' 
+                                       ? "Your letter has been sent to the Program General. If they accept your application, it will be forwarded to the Admin for final approval."
+                                       : pendingApp.status === 'pending_admin'
+                                       ? "The Program General has reviewed and accepted your application! It is now with the Admin for final verification."
+                                       : `Applied for ${pendingApp.programId} on ${formatDate(pendingApp.createdAt)}`
+                                    }
+                                 </p>
+                                 <div className="bg-amber-100 text-amber-700 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest inline-block shadow-inner">{pendingApp.status.replace('_', ' ').toUpperCase()}</div>
                               </>
                            ) : (
-                              <><Sparkles size={24} className="text-[#E31B23] mx-auto mb-3" /><h3 className="text-lg font-black text-slate-900 mb-2">{t('startYourJourney')}</h3><p className="text-sm text-slate-500 mb-4">{t('startJourneyDesc')}</p><Link href="/apply" className="inline-block bg-slate-900 text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#E31B23] transition-colors">{t('applyNow')}</Link></>
+                              <>
+                                 <Sparkles size={24} className="text-[#00C896] mx-auto mb-3" />
+                                 <h3 className="text-lg font-black text-slate-900 mb-2">{t('startYourJourney')}</h3>
+                                 <p className="text-sm text-slate-500 mb-4">Your profile is complete! {t('startJourneyDesc')}</p>
+                                 <Link href="/apply" className="inline-block bg-slate-900 text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#00C896] transition-colors">{t('applyNow')}</Link>
+                              </>
                            )}
                         </div>
                      )}

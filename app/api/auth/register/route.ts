@@ -1,34 +1,58 @@
+// app/api/auth/register/route.ts
 import { NextResponse } from "next/server";
-import connectToDB from "@/lib/db";
+import { connectToDB } from "@/lib/db";
 import User from "@/lib/models/User";
+import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
   try {
-    await connectToDB();
-    const { clerkId, email, fullName } = await req.json();
+    const { fullName, phone, password } = await req.json();
 
-    if (!clerkId || !email) {
+    if (!phone || !password) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "Phone and password are required" },
         { status: 400 }
       );
     }
 
-    // Upsert the user. Only set role to 'guest' if it's a new document.
-    const user = await User.findOneAndUpdate(
-      { clerkId },
-      { 
-        $set: { email, fullName },
-        $setOnInsert: { role: 'guest' }
-      },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
-    );
+    if (password.length < 6) {
+      return NextResponse.json(
+        { error: "Password must be at least 6 characters" },
+        { status: 400 }
+      );
+    }
 
-    return NextResponse.json(user, { status: 200 });
+    await connectToDB();
+
+    // Check if phone already exists
+    const existing = await User.findOne({ phone });
+    if (existing) {
+      return NextResponse.json(
+        { error: "An account with this phone number already exists" },
+        { status: 409 }
+      );
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // Create user
+    const user = await User.create({
+      fullName: fullName || "New User",
+      phone,
+      password: hashedPassword,
+      authProvider: "credentials",
+      role: "guest",
+    });
+
+    return NextResponse.json(
+      { success: true, userId: user._id.toString() },
+      { status: 201 }
+    );
   } catch (error: any) {
     console.error("Registration error:", error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: error.message || "Registration failed" },
       { status: 500 }
     );
   }

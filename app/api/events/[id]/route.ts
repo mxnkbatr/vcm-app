@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDB } from "@/lib/db";
 import Event from "@/lib/models/Events";
-import User from "@/lib/models/User";
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUser } from "@/lib/authHelpers";
 
 export async function GET(
   request: Request,
@@ -29,19 +28,13 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId: clerkId } = await auth();
-    if (!clerkId) {
+    const user = await getAuthUser();
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { id: eventId } = await params;
     await connectToDB();
-
-    // 1. Find the user in our DB
-    const user = await User.findOne({ clerkId });
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
 
     // 2. Find the event
     const event = await Event.findById(eventId);

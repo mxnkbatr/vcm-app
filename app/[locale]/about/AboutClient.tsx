@@ -11,8 +11,78 @@ import {
   useMotionTemplate,
   Variants
 } from "framer-motion";
-import { FaStar, FaGlobeEurope, FaCertificate, FaHeart, FaUserGraduate, FaPassport } from "react-icons/fa";
-import { useTranslations, useLocale } from "next-intl";
+import { 
+  FaStar, 
+  FaQuoteLeft,
+  FaHandsHelping, 
+  FaGlobe, 
+  FaUsers, 
+  FaHeart 
+} from "react-icons/fa";
+import { useLocale } from "next-intl";
+
+// --- DATA CONTEXTS ---
+const aboutData = {
+  mn: {
+    sectionTitle: "Бидний тухай",
+    content: "Монголын сайн дурынхны төв нь бүтээлч оролцоо бүхий хүмүүнлэг, иргэний ардчилсан нийгмийг бүтээхэд хувь нэмрээ оруулах эрхэм зорилготойгоор 2007 оноос хойш 50 гаруй үндэсний төсөл, хөтөлбөрийг амжилттай хэрэгжүүлж байна. Бид боловсрол, хүүхэд хамгаалал, тогтвортой амьжиргааны чиглэлээр сайн дурынхны загвар хөтөлбөрүүдийг бий болгон, түгээн дэлгэрүүлсээр ирсэн.",
+    valuesTitle: "Бидний Үнэт Зүйлс",
+    values: [
+      { icon: FaHandsHelping, title: "Сайн дурын сэтгэл", description: "Бидний үйл ажиллагааны цөм нь сайн дурынхны хүсэл тэмүүлэл юм." },
+      { icon: FaGlobe, title: "Дэлхийн нөлөө", description: "Орон нутгийн үйлсээрээ дамжуулан дэлхийн өөрчлөлтийг бий болгохыг зорьдог." },
+      { icon: FaUsers, title: "Олон нийтийн хөгжил", description: "Хамтдаа илүү хүчирхэг, ээлтэй нийгмийг цогцлоон бэхжүүлдэг." },
+      { icon: FaHeart, title: "Дур хүсэл ба халамж", description: "Хийж буй бүх зүйлдээ чин сэтгэлийн хандлага, халамжийг шингээдэг." }
+    ]
+  },
+  en: {
+    sectionTitle: "About Our Mission",
+    content: "Since 2007, the Mongolian Volunteer Center has pursued the noble goal of building a humane, democratic society through creative volunteerism. We have successfully implemented over 50 national projects focused on education, child protection, and sustainable livelihoods, creating and scaling model volunteer programs.",
+    valuesTitle: "Our Core Values",
+    values: [
+      { icon: FaHandsHelping, title: "Volunteer Spirit", description: "Driven by the passion and dedication of volunteers at our core." },
+      { icon: FaGlobe, title: "Global Impact", description: "Creating global change through impactful local action and partnership." },
+      { icon: FaUsers, title: "Community Building", description: "Strengthening bonds to build more resilient and supportive communities." },
+      { icon: FaHeart, title: "Passion & Care", description: "Infusing genuine passion and care into everything we undertake." }
+    ]
+  },
+};
+
+const introductionData = {
+  mn: {
+    title: "Үүсгэн байгуулагчийн танилцуулга",
+    founderName: "Б. Цэвэлмаа",
+    founderTitle: "Үүсгэн байгуулагч, Нийгмийн зөвлөх",
+    image: "/tsev.png",
+    signatureImage: "/tsev.png",
+    text: [
+      "Сайн дурын үйлсээр дамжуулан эерэг өөрчлөлтийг бүтээх хүсэл тэмүүлэл минь Монголын сайн дурынхны төвийг үүсгэн байгуулахад хүргэсэн юм. Бид хамтдаа, эх орныхоо өнцөг булан бүрт хүрч, хүмүүнлэг, иргэний нийгмийг цогцлоохын төлөө тууштай ажиллаж байна.",
+      "Бидний үйл ажиллагааны гол цөм нь хүн бүрийн дотор орших тусч сэтгэл бөгөөд тэрхүү сэтгэлийг зөв гольдролд нь оруулж, бодит үйлдэл болгох нь бидний эрхэм зорилго юм. Таныг энэхүү үнэ цэнтэй аялалд нэгдэхийг урьж байна.",
+    ],
+    highlightsTitle: "Онцлох амжилтууд",
+    highlights: [
+      "Нийгмийн ажлын багш, зөвлөх мэргэжилтэн",
+      "50 гаруй үндэсний хэмжээний төсөл, хөтөлбөр удирдсан",
+      "Олон нийтийн оролцоо ба залуучуудын хөгжлийн чиглэлээр мэргэшсэн",
+    ],
+  },
+  en: {
+    title: "Meet Our Founder",
+    founderName: "B. Tsevelmaa",
+    founderTitle: "Founder & Community Engagement Consultant",
+    image: "/tsev.png",
+    signatureImage: "/tsev.png",
+    text: [
+      "My passion for creating positive change through volunteerism led me to establish the Mongolian Volunteer Center. Together, we have reached every corner of our nation, working tirelessly to build a more humane and civil society.",
+      "At the core of our work is the belief in the helping spirit that resides in everyone. Our mission is to channel that spirit into meaningful, tangible action. I invite you to join us on this invaluable journey of contribution and growth.",
+    ],
+    highlightsTitle: "Key Highlights",
+    highlights: [
+      "Certified Social Work Teacher and Consultant",
+      "Led over 50 national-level projects and programs",
+      "Specialist in community engagement and youth development",
+    ],
+  },
+};
 
 // --- ANIMATION VARIANTS ---
 const containerVar: Variants = {
@@ -32,9 +102,8 @@ const itemVar: Variants = {
   }
 };
 
-export default function AboutPageRed() {
-  const t = useTranslations("About");
-  const locale = useLocale();
+export default function AboutPageSky() {
+  const locale = useLocale() as "en" | "mn";
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start end", "end start"] });
@@ -43,18 +112,17 @@ export default function AboutPageRed() {
   const yHero = useTransform(scrollYProgress, [0, 1], [0, -120]);
   const textY = useTransform(scrollYProgress, [0, 0.5], [60, 0]);
 
-  // Map icons for cards
-  const icons = [FaUserGraduate, FaCertificate, FaGlobeEurope, FaPassport];
+  const aboutD = aboutData[locale] || aboutData.en;
+  const introD = introductionData[locale] || introductionData.en;
 
   return (
     <section
       ref={containerRef}
-      className="relative w-full min-h-[100dvh] bg-white overflow-hidden py-32 font-sans selection:bg-[#D93644] selection:text-white"
+      className="relative w-full min-h-[100dvh] bg-white overflow-hidden py-32 font-sans selection:bg-sky-200 selection:text-sky-900"
     >
-
-      {/* ─── 1. WARM RED ATMOSPHERE ─── */}
+      {/* ─── 1. SKY BLUE ATMOSPHERE ─── */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-        {/* Dominant Red Blob Top Right */}
+        {/* Dominant Sky Blob Top Right */}
         <motion.div
           animate={{
             x: [0, 50, -50, 0],
@@ -62,9 +130,9 @@ export default function AboutPageRed() {
             scale: [1, 1.1, 0.9, 1]
           }}
           transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[-15%] right-[-10%] w-[900px] h-[900px] bg-gradient-to-br from-rose-100 via-[#D93644]/10 to-transparent rounded-full blur-[100px] opacity-80"
+          className="absolute top-[-15%] right-[-10%] w-[900px] h-[900px] bg-gradient-to-br from-sky-100 via-sky-300/20 to-transparent rounded-full blur-[100px] opacity-80"
         />
-        {/* Secondary Emerald/Rose Mix Bottom Left */}
+        {/* Secondary Blue/Cyan Mix Bottom Left */}
         <motion.div
           animate={{
             x: [0, -70, 30, 0],
@@ -72,9 +140,9 @@ export default function AboutPageRed() {
             scale: [1, 1.2, 0.8, 1]
           }}
           transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-[-10%] left-[-15%] w-[800px] h-[800px] bg-gradient-to-tr from-[#D93644]/20 via-rose-100 to-emerald-50 rounded-full blur-[100px]"
+          className="absolute bottom-[-10%] left-[-15%] w-[800px] h-[800px] bg-gradient-to-tr from-sky-400/20 via-sky-100 to-blue-50 rounded-full blur-[100px]"
         />
-        {/* Grain Texture for that 'Editorial' look */}
+        {/* Grain Texture */}
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.25] mix-blend-overlay" />
       </div>
 
@@ -90,52 +158,32 @@ export default function AboutPageRed() {
             viewport={{ once: true }}
             variants={containerVar}
             style={{ y: textY }}
-            className="space-y-10 relative pt-10"
+            className="space-y-10 relative -mt-[160px]"
           >
             {/* Tagline */}
-            <motion.div variants={itemVar} className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/90 border border-red-100 shadow-[0_4px_20px_-10px_rgba(217,54,68,0.3)] backdrop-blur-md">
+            <motion.div variants={itemVar} className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/90 border border-sky-100 shadow-[0_4px_20px_-10px_rgba(14,165,233,0.3)] backdrop-blur-md">
               <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D93644] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-[#D93644]"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
               </span>
-              <span className="text-xs font-black uppercase tracking-[0.25em] text-[#D93644]">{t("tag")}</span>
+              <span className="text-xs font-black uppercase tracking-[0.25em] text-sky-500">
+                {locale === 'mn' ? 'Монголын Сайн Дурынхны Төв' : 'Volunteer Center Mongolia'}
+              </span>
             </motion.div>
 
-            {/* Title with Red Dominance */}
-            <motion.h1 variants={itemVar} className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.95] text-slate-900 drop-shadow-sm">
-              <span className="block text-slate-300 relative z-10">
-                {t("heroTitle")}
+            {/* Title with Sky Dominance */}
+            <motion.h1 variants={itemVar} className="text-5xl md:text-7xl font-black tracking-tighter leading-[1.05] text-slate-900 drop-shadow-sm">
+              <span className="block text-slate-800 relative z-10">
+                {aboutD.sectionTitle.split(' ')[0]} 
               </span>
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#D93644] via-rose-500 to-emerald-500 filter drop-shadow-sm">
-                {t("heroHighlight")}
-              </span>
-              <span className="block text-2xl md:text-4xl font-serif italic text-slate-400 mt-4 font-normal">
-                {t("heroSubtitle")}
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-500 to-sky-600 filter drop-shadow-sm">
+                {aboutD.sectionTitle.split(' ').slice(1).join(' ')}
               </span>
             </motion.h1>
 
-            <motion.p variants={itemVar} className="text-xl font-medium text-slate-600 leading-relaxed border-l-[6px] border-rose-300 pl-8 max-w-lg">
-              {t("intro")}
+            <motion.p variants={itemVar} className="text-lg font-medium text-slate-600 leading-relaxed border-l-[6px] border-sky-300 pl-8 max-w-lg">
+              {aboutD.content}
             </motion.p>
-
-            {/* Stats Counter */}
-            <motion.div variants={itemVar} className="grid grid-cols-2 gap-y-10 gap-x-12 pt-4">
-              {[
-                { val: "20", label: t("stat_years"), sub: t("stat_exp") },
-                { val: "3000+", label: t("stat_participants"), sub: t("stat_success") }
-              ].map((stat, i) => (
-                <div key={i} className="group">
-                  <div className="text-6xl font-black text-slate-900 group-hover:text-[#D93644] transition-colors duration-500 relative inline-block">
-                    {stat.val}
-                    {/* Sparkle Icon */}
-                    <FaStar className="absolute -top-2 -right-6 text-2xl text-rose-400 opacity-0 group-hover:opacity-100 transition-all duration-300 animate-pulse" />
-                  </div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-slate-400 mt-2 group-hover:text-emerald-600 transition-colors">
-                    {stat.label} <span className="opacity-50 mx-1 text-red-300">|</span> {stat.sub}
-                  </div>
-                </div>
-              ))}
-            </motion.div>
           </motion.div>
 
           {/* Hero Image */}
@@ -147,117 +195,128 @@ export default function AboutPageRed() {
               whileInView={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)" }}
               viewport={{ once: true }}
               transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
-              // Changed Shadow & Border to Red/Rose tones
-              className="relative z-10 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-rose-900/20 border-[8px] border-white bg-white aspect-[4/5] w-full"
+              className="relative z-10 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-sky-900/20 border-[8px] border-white bg-white aspect-[4/5] w-full"
             >
               <div className="relative w-full h-full group">
+                {/* Fallback image representing volunteering/mission */}
                 <Image
                   src="https://res.cloudinary.com/dc127wztz/image/upload/v1768996172/zu47lypqyoup0ylylou2.webp"
-                  alt="Mongolian Youth"
+                  alt="VCM Mission"
                   fill
                   className="object-cover transition-transform duration-[2s] group-hover:scale-110"
                 />
-                {/* Warm Red Tint Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-rose-900/40 via-transparent to-transparent opacity-60 mix-blend-multiply" />
+                {/* Sky Tint Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-sky-900/40 via-transparent to-transparent opacity-60 mix-blend-multiply" />
               </div>
             </motion.div>
 
-            {/* Rotating Badge - "Established 2005" */}
+            {/* Rotating Badge - "Established 2007" */}
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-              className="absolute -top-12 -right-6 md:-right-12 z-20 w-40 h-40 flex items-center justify-center bg-white rounded-full shadow-2xl border-[6px] border-rose-50"
+              className="absolute -top-12 -right-6 md:-right-12 z-20 w-40 h-40 flex items-center justify-center bg-white rounded-full shadow-2xl border-[6px] border-sky-50"
             >
               <svg viewBox="0 0 100 100" width="150" height="150" className="animate-spin-slow absolute">
                 <path id="curve" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" fill="transparent" />
-                <text className="text-[12px] font-bold uppercase tracking-widest fill-[#D93644]">
+                <text className="text-[11px] font-bold uppercase tracking-[0.2em] fill-sky-500">
                   <textPath href="#curve">
-                    Mongolian Au Pair Agency • 2005 •
+                    Volunteer Center Mongolia • 2007 • 
                   </textPath>
                 </text>
               </svg>
               <div className="relative z-10 flex flex-col items-center leading-none">
-                <span className="text-4xl font-black text-slate-900">20</span>
-                <span className="text-[10px] font-bold uppercase text-red-400 tracking-wider">{t("yearsLabel")}</span>
+                <span className="text-4xl font-black text-slate-900">15+</span>
+                <span className="text-[10px] font-bold uppercase text-sky-400 tracking-wider">
+                  {locale === 'mn' ? 'Жил' : 'Years'}
+                </span>
               </div>
             </motion.div>
           </div>
         </div>
 
-        {/* ─── 3. STORY SECTION ─── */}
-        <div className="grid lg:grid-cols-12 gap-12 mb-32 items-start">
+        {/* ─── 3. FOUNDER SECTION ─── */}
+        <div className="grid lg:grid-cols-12 gap-16 mb-32 items-center">
 
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="lg:col-span-5 relative"
+            className="lg:col-span-4 relative aspect-[3/4] w-full max-w-sm mx-auto"
           >
-            {/* Sticky Heading */}
-            <div className="sticky top-32 space-y-6">
-              <div className="w-20 h-1.5 bg-gradient-to-r from-[#D93644] to-rose-400 rounded-full" />
-              <h2 className="text-4xl md:text-5xl font-black text-slate-900 leading-tight">
-                {t("storyTitle")}
-              </h2>
-
-              {/* Secondary Stats */}
-              <div className="grid grid-cols-2 gap-6 pt-8 border-t border-slate-100">
-                {[
-                  { val: "14", label: t("stat_iapa"), sub: t("stat_iapa_sub") },
-                  { val: "55", label: t("stat_intl"), sub: t("stat_intl_sub") }
-                ].map((stat, i) => (
-                  <div key={i}>
-                    <h4 className="text-4xl font-black text-[#D93644]">{stat.val}</h4>
-                    <p className="text-xs font-bold text-slate-400 uppercase">{stat.label}</p>
-                    <p className="text-[10px] text-slate-400 mt-1">{stat.sub}</p>
-                  </div>
-                ))}
-              </div>
+            {/* Founder Image */}
+            <div className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-tr from-sky-400 to-blue-300 translate-x-4 translate-y-4 -z-10" />
+            <div className="relative w-full h-full rounded-[2.5rem] border-4 border-white shadow-xl overflow-hidden bg-slate-100">
+              <Image
+                src={introD.image}
+                alt={introD.founderName}
+                fill
+                className="object-cover"
+              />
             </div>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="lg:col-span-7 bg-white/60 backdrop-blur-xl rounded-[2.5rem] p-8 md:p-12 border border-rose-50 shadow-[0_20px_60px_-15px_rgba(217,54,68,0.1)] space-y-6"
+            className="lg:col-span-8 bg-white/60 backdrop-blur-xl rounded-[2.5rem] p-8 md:p-12 border border-sky-50 shadow-[0_20px_60px_-15px_rgba(14,165,233,0.1)] space-y-8"
           >
-            <p className="text-lg md:text-xl text-slate-700 leading-relaxed font-medium">
-              {t("storyP1")}
-            </p>
-            <p className="text-lg md:text-xl text-slate-500 leading-relaxed font-light">
-              {t("storyP2")}
-            </p>
-
-            <div className="pt-6">
-              <div className="inline-flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-red-50 to-white border border-red-100">
-                <div className="p-3 bg-white rounded-xl text-[#D93644] shadow-sm">
-                  <FaCertificate size={24} />
-                </div>
-                <div>
-                  <h4 className="font-bold text-slate-900">{t("iapa_member")}</h4>
-                  <p className="text-sm text-red-500/80 font-medium">{t("iapa_full")}</p>
-                </div>
+            <div>
+              <div className="inline-flex gap-2 items-center mb-2">
+                <FaQuoteLeft className="text-sky-300 text-xl" />
+                <h4 className="text-sky-500 font-bold uppercase tracking-widest text-xs">
+                  {introD.title}
+                </h4>
               </div>
+              <h2 className="text-3xl md:text-5xl font-black text-slate-900">
+                {introD.founderName}
+              </h2>
+              <p className="text-sm font-semibold text-sky-600 mt-2">
+                {introD.founderTitle}
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              {introD.text.map((para, i) => (
+                <p key={i} className="text-lg text-slate-600 leading-relaxed font-medium">
+                  {para}
+                </p>
+              ))}
+            </div>
+
+            <div className="pt-6 border-t border-slate-100">
+              <h4 className="font-bold text-slate-900 mb-4">{introD.highlightsTitle}</h4>
+              <ul className="space-y-3">
+                {introD.highlights.map((hlt, i) => (
+                  <li key={i} className="flex items-center gap-3">
+                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-sky-100 text-sky-500 shrink-0">
+                      <FaStar size={10} />
+                    </span>
+                    <span className="text-slate-600 font-medium text-sm">{hlt}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </motion.div>
         </div>
 
-        {/* ─── 4. VALUES (Red-Themed 3D Grid) ─── */}
+        {/* ─── 4. VALUES (Sky-Themed 3D Grid) ─── */}
         <div>
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">{t("valuesTitle")}</h2>
-            {/* Gradient Divider: Red to Emerald */}
-            <div className="w-32 h-1.5 bg-gradient-to-r from-[#D93644] via-rose-400 to-emerald-400 mx-auto rounded-full" />
+            <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">
+              {aboutD.valuesTitle}
+            </h2>
+            {/* Gradient Divider */}
+            <div className="w-32 h-1.5 bg-gradient-to-r from-sky-400 via-blue-400 to-sky-300 mx-auto rounded-full" />
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
-            {[0, 1, 2, 3].map((i) => (
-              <RedTiltCard
+            {aboutD.values.map((val, i) => (
+              <SkyTiltCard
                 key={i}
-                icon={icons[i]}
-                title={t(`card${i + 1}_title`)}
-                text={t(`card${i + 1}_text`)}
+                icon={val.icon}
+                title={val.title}
+                text={val.description}
                 index={i}
               />
             ))}
@@ -269,7 +328,7 @@ export default function AboutPageRed() {
   );
 }
 
-// ─── 3D MAGNETIC CARD (Red Dominant) ───
+// ─── 3D MAGNETIC CARD (Sky Dominant) ───
 interface CardProps {
   icon: any;
   title: string;
@@ -277,7 +336,7 @@ interface CardProps {
   index: number;
 }
 
-const RedTiltCard = ({ icon: Icon, title, text, index }: CardProps) => {
+const SkyTiltCard = ({ icon: Icon, title, text, index }: CardProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -304,9 +363,6 @@ const RedTiltCard = ({ icon: Icon, title, text, index }: CardProps) => {
     y.set(0);
   };
 
-  // Logic: 3 cards Red-themed, 1 card Emerald-themed for accent
-  const isRed = index !== 1; // Arbitrary pattern for variety
-
   return (
     <motion.div
       ref={ref}
@@ -317,10 +373,7 @@ const RedTiltCard = ({ icon: Icon, title, text, index }: CardProps) => {
       viewport={{ margin: "-50px" }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
       style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-      className={`group relative min-h-[240px] p-10 rounded-[2.5rem] bg-white border shadow-xl cursor-pointer perspective-1000 overflow-hidden
-        ${isRed
-          ? "border-red-50 hover:border-red-200 shadow-rose-100/50"
-          : "border-emerald-50 hover:border-emerald-200 shadow-emerald-100/50"}`}
+      className="group relative min-h-[220px] p-10 rounded-[2.5rem] bg-white border border-sky-50 shadow-xl shadow-sky-100/50 hover:border-sky-200 cursor-pointer perspective-1000 overflow-hidden"
     >
       {/* Dynamic Glare */}
       <motion.div
@@ -330,15 +383,11 @@ const RedTiltCard = ({ icon: Icon, title, text, index }: CardProps) => {
 
       <div style={{ transform: "translateZ(30px)" }} className="relative z-10 h-full flex flex-col items-start">
         {/* Icon Box */}
-        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:rotate-6
-          ${isRed
-            ? "bg-rose-50 text-[#D93644] group-hover:bg-[#D93644] group-hover:text-white"
-            : "bg-emerald-50 text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white"}`}>
+        <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 bg-sky-50 text-sky-500 group-hover:bg-sky-500 group-hover:text-white">
           <Icon size={28} />
         </div>
 
-        <h3 className={`text-xl font-black mb-3 group-hover:translate-x-1 transition-transform
-           ${isRed ? "text-slate-900" : "text-slate-900"}`}>
+        <h3 className="text-xl font-black mb-3 group-hover:translate-x-1 transition-transform text-slate-900">
           {title}
         </h3>
 
@@ -348,9 +397,7 @@ const RedTiltCard = ({ icon: Icon, title, text, index }: CardProps) => {
       </div>
 
       {/* Decorative Blob in corner */}
-      <div className={`absolute -right-12 -bottom-12 w-48 h-48 rounded-full blur-[70px] opacity-0 group-hover:opacity-20 transition-opacity duration-500 z-0
-         ${isRed ? "bg-[#D93644]" : "bg-emerald-500"}`}
-      />
+      <div className="absolute -right-12 -bottom-12 w-48 h-48 rounded-full blur-[70px] opacity-0 group-hover:opacity-20 transition-opacity duration-500 z-0 bg-sky-500" />
     </motion.div>
   );
 };

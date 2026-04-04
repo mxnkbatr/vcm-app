@@ -801,13 +801,13 @@ export default function AdminDashboard() {
                                     </div>
                                  </td>
                                  <td className="px-8 py-5 text-sm">{app.programId}</td>
-                                 <td className="px-8 py-5"><span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase ${app.status === 'approved' ? 'bg-green-50 text-[#00C896]' : app.status === 'rejected' ? 'bg-red-50 text-[#E31B23]' : 'bg-amber-50 text-amber-500'}`}>{t("status." + app.status.toLowerCase())}</span></td>
+                                 <td className="px-8 py-5"><span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase ${app.status === 'approved_volunteer' ? 'bg-green-50 text-[#00C896]' : app.status === 'rejected' ? 'bg-red-50 text-[#E31B23]' : 'bg-amber-50 text-amber-500'}`}>{app.status.replace('_', ' ').toLowerCase()}</span></td>
                                  <td className="px-8 py-5 text-right">
                                     <div className="flex justify-end gap-2">
                                        <button onClick={() => setSelectedApp(app)} className="p-2 bg-slate-100 text-slate-600 hover:bg-slate-900 hover:text-white rounded-xl transition-all"><Eye size={16} /></button>
                                        {app.status === 'pending' && (
                                           <>
-                                             <button onClick={() => handleUpdateApplication(app._id, 'approved')} className="p-2 bg-green-50 text-[#00C896] hover:bg-[#00C896] hover:text-white rounded-xl transition-colors"><Check size={16} /></button>
+                                             <button onClick={() => handleUpdateApplication(app._id, 'approved_volunteer')} className="p-2 bg-green-50 text-[#00C896] hover:bg-[#00C896] hover:text-white rounded-xl transition-colors"><Check size={16} /></button>
                                              <button onClick={() => handleUpdateApplication(app._id, 'rejected')} className="p-2 bg-red-50 text-[#E31B23] hover:bg-[#E31B23] hover:text-white rounded-xl transition-colors"><X size={16} /></button>
                                           </>
                                        )}

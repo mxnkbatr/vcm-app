@@ -14,7 +14,11 @@ import {
   FaHourglassHalf,
   FaArrowRight,
   FaQuoteRight,
-  FaCheckCircle
+  FaCheckCircle,
+  FaHandsHelping,
+  FaGlobe,
+  FaUsers,
+  FaHeart
 } from "react-icons/fa";
 import { useTranslations, useLocale } from "next-intl";
 
@@ -37,7 +41,7 @@ const ParallaxBackground = ({ containerRef }: { containerRef: React.RefObject<an
   return (
     <motion.div
       style={{ y: yBackground }}
-      className="absolute -top-[20%] -right-[10%] w-[1000px] h-[1000px] bg-gradient-to-b from-red-100/40 via-orange-50/20 to-transparent rounded-full blur-[100px] mix-blend-multiply"
+      className="absolute -top-[20%] -right-[10%] w-[1000px] h-[1000px] bg-gradient-to-b from-sky-100/50 via-sky-50/20 to-transparent rounded-full blur-[100px] mix-blend-multiply"
     />
   );
 };
@@ -66,11 +70,6 @@ const UsSection = () => {
     { id: 4, val: 100, suffix: "%", label: t("stat_reliable"), icon: FaAward },
   ];
 
-  const headingSequence = [
-    t("heading_seq1"), 2500,
-    t("heading_seq2"), 2500,
-    t("heading_seq3"), 2500
-  ];
 
   // ─── Animation Variants ───
   const containerVar: Variants = {
@@ -101,7 +100,7 @@ const UsSection = () => {
 
         {/* Static Orb for Mobile */}
         {isMobile && (
-          <div className="absolute -top-[10%] -right-[10%] w-[600px] h-[600px] bg-red-100/20 rounded-full blur-[80px]" />
+          <div className="absolute -top-[10%] -right-[10%] w-[600px] h-[600px] bg-sky-100/40 rounded-full blur-[80px]" />
         )}
       </div>
 
@@ -119,65 +118,80 @@ const UsSection = () => {
           >
             {/* Badge */}
             <motion.div variants={textVar} className="mb-8 flex items-center gap-3">
-              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-red-100 text-[#E31B23]">
+              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-sky-100 text-sky-500">
                 <FaAward size={14} />
               </span>
-              <span className="text-sm font-bold uppercase tracking-widest text-slate-500 font-sans">
+              <span className="text-sm font-bold uppercase tracking-widest text-sky-500 font-sans">
                 {t("badge")}
               </span>
             </motion.div>
 
-            {/* Headline with TypeAnimation */}
-            <motion.h2 variants={textVar} className="text-4xl lg:text-6xl font-black text-slate-900 leading-[1.1] mb-8 min-h-[3.3em] lg:min-h-[2.5em]">
-              {t("heading_pre")} <br className="hidden md:block" />
-              <span className="inline-block relative">
-                {/* Highlighter Effect */}
-                <motion.span
-                  initial={{ scaleX: 0 }}
-                  whileInView={{ scaleX: 1 }}
-                  transition={{ delay: isMobile ? 0.2 : 0.5, duration: 0.8 }}
-                  className="absolute bottom-1 lg:bottom-3 left-0 w-full h-3 lg:h-5 bg-[#00C896]/20 -z-10 origin-left -skew-x-6"
-                />
-                <TypeAnimation
-                  key={locale}
-                  sequence={headingSequence}
-                  wrapper="span"
-                  speed={50}
-                  repeat={Infinity}
-                  className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-600"
-                />
-              </span>
-              <span className="text-[#E31B23] ml-1">{t("heading_post")}</span>
+            {/* Static Headline */}
+            <motion.h2 variants={textVar} className="text-4xl lg:text-5xl font-black text-slate-900 leading-[1.1] mb-6">
+              {t("sectionTitle")}
             </motion.h2>
 
             {/* Paragraphs */}
-            <div className="space-y-6 text-lg text-slate-600 leading-relaxed font-medium">
+            <div className="space-y-6 text-lg text-slate-600 leading-relaxed font-medium mb-12">
               <motion.p variants={textVar} className="border-l-2 border-transparent hover:border-slate-300 pl-0 hover:pl-6 transition-all duration-300">
-                {t("desc1")}
-              </motion.p>
-              <motion.p variants={textVar} className="border-l-2 border-transparent hover:border-slate-300 pl-0 hover:pl-6 transition-all duration-300">
-                {t("desc2")}
+                {t("content")}
               </motion.p>
             </div>
 
-            {/* Quote Box */}
-            <motion.div variants={textVar} className="mt-10 p-6 bg-white border border-slate-100 rounded-2xl shadow-sm relative italic text-slate-700 flex gap-4">
-              <div className="text-4xl text-red-200"><FaQuoteRight /></div>
-              <div>
-                <p className="relative z-10 font-semibold text-lg">"{t("quote")}"</p>
-                <p className="text-xs font-bold text-slate-600 mt-2 uppercase tracking-wide">— {t("founder")}</p>
+            {/* Core Values Section */}
+            <motion.div variants={textVar} className="mt-4">
+              <h3 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                <span className="w-8 h-1 bg-sky-500 rounded-full inline-block"></span>
+                {t("valuesTitle")}
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Value 1 */}
+                <div className="p-5 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all group">
+                  <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center text-sky-500 mb-4 group-hover:bg-sky-500 group-hover:text-white transition-all duration-300">
+                    <FaHandsHelping size={20} />
+                  </div>
+                  <h4 className="font-bold text-slate-900 mb-2">{t("val1_title")}</h4>
+                  <p className="text-sm text-slate-600 leading-relaxed">{t("val1_desc")}</p>
+                </div>
+
+                {/* Value 2 */}
+                <div className="p-5 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all group">
+                  <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center text-sky-500 mb-4 group-hover:bg-sky-500 group-hover:text-white transition-all duration-300">
+                    <FaGlobe size={20} />
+                  </div>
+                  <h4 className="font-bold text-slate-900 mb-2">{t("val2_title")}</h4>
+                  <p className="text-sm text-slate-600 leading-relaxed">{t("val2_desc")}</p>
+                </div>
+
+                {/* Value 3 */}
+                <div className="p-5 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all group">
+                  <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center text-sky-500 mb-4 group-hover:bg-sky-500 group-hover:text-white transition-all duration-300">
+                    <FaUsers size={20} />
+                  </div>
+                  <h4 className="font-bold text-slate-900 mb-2">{t("val3_title")}</h4>
+                  <p className="text-sm text-slate-600 leading-relaxed">{t("val3_desc")}</p>
+                </div>
+
+                {/* Value 4 */}
+                <div className="p-5 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all group">
+                  <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center text-sky-500 mb-4 group-hover:bg-sky-500 group-hover:text-white transition-all duration-300">
+                    <FaHeart size={20} />
+                  </div>
+                  <h4 className="font-bold text-slate-900 mb-2">{t("val4_title")}</h4>
+                  <p className="text-sm text-slate-600 leading-relaxed">{t("val4_desc")}</p>
+                </div>
               </div>
             </motion.div>
 
             {/* CTA Button */}
             <motion.div variants={textVar} className="mt-12">
               <Link href="/contact" className="inline-block group">
-                <div className="relative overflow-hidden rounded-full px-10 py-4 bg-[#E31B23] text-white font-bold text-lg shadow-xl shadow-red-500/30 hover:shadow-2xl hover:shadow-red-500/40 transition-all duration-300 transform hover:-translate-y-1">
+                <div className="relative overflow-hidden rounded-full px-10 py-4 bg-sky-500 text-white font-bold text-lg shadow-xl shadow-sky-500/30 hover:shadow-2xl hover:shadow-sky-500/40 transition-all duration-300 transform hover:-translate-y-1">
                   <span className="relative z-10 flex items-center gap-3">
                     {t("cta")}
                     <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
                   </span>
-                  {/* Button Shine */}
                   <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 ease-in-out" />
                 </div>
               </Link>
@@ -211,8 +225,8 @@ const UsSection = () => {
 
                   {/* Name Tag on Image */}
                   <div className="absolute bottom-6 left-6 text-white">
-                    <p className="text-xs font-bold uppercase tracking-widest opacity-80 mb-1">{t("founder")}</p>
-                    <p className="text-2xl font-bold">Mongolian AuPair</p>
+                    <p className="text-xs font-bold uppercase tracking-widest opacity-80 mb-1">{t("sectionTitle")}</p>
+                    <p className="text-2xl font-bold">Volunteer Center Mongolia</p>
                   </div>
                 </div>
               </div>
@@ -224,13 +238,13 @@ const UsSection = () => {
                 className="absolute -bottom-8 -right-8 md:-right-12 bg-white/90 backdrop-blur-md p-6 rounded-[1.5rem] shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] border border-white/60 max-w-[240px]"
               >
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="bg-green-100 text-[#00C896] p-2.5 rounded-xl">
+                  <div className="bg-sky-100 text-sky-500 p-2.5 rounded-xl">
                     <FaCheckCircle className="text-xl" />
                   </div>
-                  <span className="text-xs font-bold text-slate-500 uppercase leading-tight">{t("certified")}</span>
+                  <span className="text-xs font-bold text-slate-500 uppercase leading-tight">Verified</span>
                 </div>
                 <p className="text-sm text-slate-600 font-semibold leading-snug">
-                  Recognized by international Au Pair associations for safety & quality.
+                  Recognized by international volunteering associations for safety & quality.
                 </p>
               </motion.div>
 
@@ -238,7 +252,7 @@ const UsSection = () => {
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: isMobile ? 60 : 25, repeat: Infinity, ease: "linear" }}
-                className="absolute -top-10 -left-10 w-32 h-32 bg-[#E31B23] rounded-full flex items-center justify-center shadow-xl shadow-red-500/30 border-4 border-white z-20"
+                className="absolute -top-10 -left-10 w-32 h-32 bg-sky-500 rounded-full flex items-center justify-center shadow-xl shadow-sky-500/30 border-4 border-white z-20"
               >
                 {/* SVG Curve Text */}
                 <div className="absolute w-full h-full p-1 animate-spin-slow">
@@ -276,14 +290,13 @@ const UsSection = () => {
               whileHover={!isMobile ? { y: -8 } : {}}
               className="bg-white rounded-3xl p-8 border border-slate-100 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] transition-all duration-300 group cursor-default text-center relative overflow-hidden"
             >
-              <stat.icon
-                className={`text-4xl mx-auto mb-4 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6 ${idx % 2 === 0 ? 'text-[#E31B23]' : 'text-[#00C896]'
-                  }`}
-              />
+              <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-sky-50 text-sky-500 flex items-center justify-center group-hover:bg-sky-500 group-hover:text-white transition-all duration-300">
+                <stat.icon className="text-3xl" />
+              </div>
 
               <div className="text-4xl lg:text-5xl font-black text-slate-800 tracking-tight mb-2">
                 <CountUp end={stat.val} duration={2.5} enableScrollSpy scrollSpyOnce />
-                <span className={`text-2xl ml-0.5 ${idx % 2 === 0 ? 'text-red-500' : 'text-green-500'}`}>
+                <span className="text-2xl ml-0.5 text-sky-500">
                   {stat.suffix}
                 </span>
               </div>

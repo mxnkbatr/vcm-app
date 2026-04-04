@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { getAuthUserId, getAuthUser } from "@/lib/authHelpers";
 import { connectToDB } from "@/lib/db";
 import Booking from "@/lib/models/Booking";
 import { sendBookingRequestEmail } from "@/lib/email";
 
 export async function GET() {
   try {
-    const { userId } = await auth();
+    const userId = await getAuthUserId();
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -23,7 +23,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const user = await currentUser();
+    const user = await getAuthUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
     await connectToDB();
 
     const newBooking = new Booking({
-      userId: user.id,
+      userId: user._id.toString(),
       serviceId: service.id,
       serviceTitle: service.title,
       date: date.full,

@@ -187,7 +187,7 @@ export default function LessonsManager({ lessons, onRefresh }: LessonsManagerPro
             {/* Header */}
             <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <div>
-                    <h2 className="text-xl font-bold text-slate-800">Au Pair Lessons</h2>
+                    <h2 className="text-xl font-bold text-slate-800">Volunteering Lessons</h2>
                     <p className="text-sm text-slate-500">Manage curriculum and preparation materials</p>
                 </div>
                 <button

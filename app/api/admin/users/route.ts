@@ -1,9 +1,9 @@
 // app/api/admin/users/route.ts
 import { NextResponse } from "next/server";
-import { currentUser, clerkClient } from "@clerk/nextjs/server";
 import { connectToDB } from "@/lib/db";
 import User from "@/lib/models/User";
 import { withAdminAuth } from "@/lib/adminAuth";
+import { getAuthUser } from "@/lib/authHelpers";
 
 // 1. GET: Fetch all users for the table (or specific user with documents)
 export const GET = withAdminAuth(async (req: Request) => {
@@ -20,46 +20,21 @@ export const GET = withAdminAuth(async (req: Request) => {
     return NextResponse.json(user);
   }
 
-  // Fetch all users sorted by role (Students first) then by update date
+  // Fetch all users sorted by update date
   const mongoUsers = await User.find({}).lean();
-
-  // Fetch all users from Clerk
-  const client = await clerkClient();
-  const clerkUsersResponse = await client.users.getUserList({
-    limit: 500, // Adjust as needed
-  });
-  const clerkUsers = clerkUsersResponse.data;
-
-  // Merge them
-  const mergedUsers = clerkUsers.map((cu: any) => {
-    const mu = mongoUsers.find((u: any) => u.clerkId === cu.id);
-
-    return {
-      _id: mu?._id || cu.id,
-      clerkId: cu.id,
-      fullName: mu?.fullName || `${cu.firstName || ""} ${cu.lastName || ""}`.trim() || cu.username || "Unknown User",
-      email: mu?.email || cu.emailAddresses[0]?.emailAddress,
-      role: mu?.role || cu.publicMetadata?.role || "guest",
-      status: mu?.status || "Active",
-      country: mu?.country || "-",
-      step: mu?.step || "-",
-      photo: cu.imageUrl || mu?.photo,
-      profile: mu?.profile || {},
-      updatedAt: mu?.updatedAt || new Date(cu.updatedAt),
-      createdAt: mu?.createdAt || new Date(cu.createdAt),
-    };
-  });
 
   // Sort: Admins first, then Students, then Guests
   const roleOrder: Record<string, number> = { admin: 3, student: 2, guest: 1 };
-  mergedUsers.sort((a, b) => {
-    const orderA = roleOrder[a.role.toLowerCase()] || 0;
-    const orderB = roleOrder[b.role.toLowerCase()] || 0;
+  mongoUsers.sort((a, b) => {
+    const roleA = (a.role as string) || "guest";
+    const roleB = (b.role as string) || "guest";
+    const orderA = roleOrder[roleA.toLowerCase()] || 0;
+    const orderB = roleOrder[roleB.toLowerCase()] || 0;
     if (orderA !== orderB) return orderB - orderA;
-    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    return new Date(b.updatedAt || new Date()).getTime() - new Date(a.updatedAt || new Date()).getTime();
   });
 
-  return NextResponse.json(mergedUsers);
+  return NextResponse.json(mongoUsers);
 });
 
 // 2. PUT: The critical part that SAVES changes
@@ -71,13 +46,13 @@ export const PUT = withAdminAuth(async (req: Request) => {
     // Destructure the payload sent from AdminDashboard.tsx
     const { userId, action, data } = body;
 
+    // Use clerkId if userId doesn't look like a MongoDB ObjectId to support older users migrating
+    const isMongoId = /^[0-9a-fA-F]{24}$/.test(userId);
+    const query = isMongoId ? { _id: userId } : { clerkId: userId };
+
     // --- CASE A: UPDATE USER DETAILS (Role, Country, Step) ---
     if (action === 'update_user') {
       if (!userId) return NextResponse.json({ error: "Missing User ID" }, { status: 400 });
-
-      // Use clerkId if userId doesn't look like a MongoDB ObjectId
-      const isMongoId = /^[0-9a-fA-F]{24}$/.test(userId);
-      const query = isMongoId ? { _id: userId } : { clerkId: userId };
 
       const updatedUser = await User.findOneAndUpdate(
         query,
@@ -88,21 +63,10 @@ export const PUT = withAdminAuth(async (req: Request) => {
             step: data.step,
             status: data.status,
             fullName: data.fullName,
-            // Ensure clerkId is stored if we are upserting
-            ...(isMongoId ? {} : { clerkId: userId })
           }
         },
         { new: true, upsert: true }
       );
-
-      if (updatedUser && updatedUser.clerkId) {
-        const client = await clerkClient();
-        await client.users.updateUserMetadata(updatedUser.clerkId, {
-          publicMetadata: {
-            role: data.role,
-          },
-        });
-      }
 
       return NextResponse.json({ success: true, user: updatedUser });
     }
@@ -111,27 +75,14 @@ export const PUT = withAdminAuth(async (req: Request) => {
     if (action === 'master_update') {
       if (!userId) return NextResponse.json({ error: "Missing User ID" }, { status: 400 });
 
-      const isMongoId = /^[0-9a-fA-F]{24}$/.test(userId);
-      const query = isMongoId ? { _id: userId } : { clerkId: userId };
-
-      // Clean the data to avoid updating immutable fields if any, though MongoDB handles _id
+      // Clean the data to avoid updating immutable fields if any
       const { _id, clerkId, createdAt, ...updateData } = data;
 
       const updatedUser = await User.findOneAndUpdate(
         query,
-        { $set: { ...updateData, ...(isMongoId ? {} : { clerkId: userId }) } },
+        { $set: updateData },
         { new: true, upsert: true }
       );
-
-      // Sync metadata if role changed
-      if (updateData.role && updatedUser && updatedUser.clerkId) {
-        const client = await clerkClient();
-        await client.users.updateUserMetadata(updatedUser.clerkId, {
-          publicMetadata: {
-            role: updateData.role,
-          },
-        });
-      }
 
       return NextResponse.json({ success: true, user: updatedUser });
     }
@@ -140,19 +91,32 @@ export const PUT = withAdminAuth(async (req: Request) => {
     if (action === 'approve_documents') {
       if (!userId) return NextResponse.json({ error: "Missing User ID" }, { status: 400 });
 
-      const isMongoId = /^[0-9a-fA-F]{24}$/.test(userId);
-      const query = isMongoId ? { _id: userId } : { clerkId: userId };
-
-      const adminUser = await currentUser();
+      const adminUser = await getAuthUser();
       const updatedUser = await User.findOneAndUpdate(
         query,
         {
           $set: {
-            documentsReviewedBy: adminUser?.firstName || "Admin",
+            documentsReviewedBy: adminUser?.fullName || "Admin",
             documentsApprovedAt: new Date(),
           }
         },
         { new: true, upsert: true }
+      );
+
+      return NextResponse.json({ success: true, user: updatedUser });
+    }
+
+    // --- CASE C: ADMIN PASSWORD RESET ---
+    if (action === 'reset_password') {
+      if (!userId || !data.password) return NextResponse.json({ error: "Missing User ID or password" }, { status: 400 });
+
+      const bcrypt = require("bcryptjs");
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+
+      const updatedUser = await User.findOneAndUpdate(
+        query,
+        { $set: { password: hashedPassword } },
+        { new: true }
       );
 
       return NextResponse.json({ success: true, user: updatedUser });
@@ -175,37 +139,10 @@ export const DELETE = withAdminAuth(async (req: Request) => {
 
     if (!id) return NextResponse.json({ error: "ID missing" }, { status: 400 });
 
-    // Find user to get Clerk ID
     const isMongoId = /^[0-9a-fA-F]{24}$/.test(id);
     const query = isMongoId ? { _id: id } : { clerkId: id };
 
-    const userToDelete = await User.findOne(query);
-    if (!userToDelete && !isMongoId) {
-      // If we only have a Clerk ID and no DB record, we still need the Clerk ID to delete from Clerk
-      try {
-        const client = await clerkClient();
-        await client.users.deleteUser(id);
-        return NextResponse.json({ success: true, message: "Deleted from Clerk only" });
-      } catch (err) {
-        return NextResponse.json({ error: "Clerk user not found" }, { status: 404 });
-      }
-    }
-
-    if (!userToDelete) return NextResponse.json({ error: "User not found" }, { status: 404 });
-
-    // Delete from Clerk
-    if (userToDelete.clerkId) {
-      try {
-        const client = await clerkClient();
-        await client.users.deleteUser(userToDelete.clerkId);
-      } catch (err) {
-        console.log("Clerk delete error (ignoring):", err);
-      }
-    }
-
-    // Delete from MongoDB
-    await User.findByIdAndDelete(id);
-
+    await User.findOneAndDelete(query);
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: "Delete failed" }, { status: 500 });

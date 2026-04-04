@@ -4,242 +4,246 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { useSignUp } from "@clerk/nextjs";
+import { signIn } from "next-auth/react";
 import {
-   ChevronLeft,
-   User,
-   Mail,
-   Lock,
-   ArrowRight,
-   Loader2,
+  ChevronLeft,
+  User,
+  Phone,
+  Lock,
+  ArrowRight,
+  Loader2,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import BeforeLoginNews from "../../components/BeforeLoginNews";
 
-export default function AuPairRegisterPage() {
-   const t = useTranslations("Auth");
-   const router = useRouter();
-   const { isLoaded, signUp, setActive } = useSignUp();
+export default function SignUpPage() {
+  const t = useTranslations("Auth");
+  const router = useRouter();
 
-   // --- FORM STATE ---
-   const [fullName, setFullName] = useState("");
-   const [email, setEmail] = useState("");
-   const [password, setPassword] = useState("");
+  // --- FORM STATE ---
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
 
-   // --- UI STATE ---
-   const [error, setError] = useState("");
-   const [isLoading, setIsLoading] = useState(false);
+  // --- UI STATE ---
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-   // --- HANDLERS ---
-   const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!isLoaded || isLoading) return;
+  // --- HANDLERS ---
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isLoading) return;
 
-      setIsLoading(true);
-      setError("");
+    setIsLoading(true);
+    setError("");
 
-      try {
-         console.log("--- Starting Sign Up ---");
-         const result = await signUp.create({
-            emailAddress: email,
-            password,
-            firstName: fullName.split(" ")[0],
-            lastName: fullName.split(" ")[1] || "",
-         });
+    try {
+      // 1. Create account
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullName, phone, password }),
+      });
 
-         console.log("Clerk SignUp Result:", result);
+      const data = await res.json();
 
-         // If verification is disabled in Clerk, status should be complete immediately
-         if (result.status === "complete") {
-            console.log("Sign up complete, setting active session...");
-            await setActive({ session: result.createdSessionId });
+      if (!res.ok) {
+        throw new Error(data.error || "Registration failed");
+      }
 
-            // Sync user to DB
-            try {
-               console.log("Attempting to sync with DB...");
-               const syncRes = await fetch('/api/user/sync', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ fullName })
-               });
-               const syncData = await syncRes.json();
-               if (!syncRes.ok) {
-                  console.error("Sync API error details:", syncData);
-                  // Optional: setError("Sync failed, but account created.");
-               } else {
-                  console.log("DB Sync successful:", syncData);
-               }
-            } catch (syncErr) {
-               console.error("DB Sync fetch exception:", syncErr);
-            }
+      // 2. Log in automatically
+      const signInRes = await signIn("credentials", {
+        redirect: false,
+        phone,
+        password,
+      });
 
-            router.push("/dashboard");
-         } else if (result.status === "missing_requirements") {
-            console.warn("Sign up missing requirements:", result.missingFields);
-            setError("Missing required fields for registration.");
-         } else {
-            // This is where "Registration incomplete" usually happens
-            console.error("Unexpected Sign up status:", result.status);
-            console.log("Verification info:", result.verifications);
+      if (signInRes?.error) {
+        throw new Error("Account created, but couldn't log in automatically. Please sign in.");
+      }
 
-            if (result.verifications.emailAddress?.status === "unverified") {
-               setError("Email verification required. Please check your inbox or Clerk settings.");
-            } else {
-               setError(`Registration incomplete (Status: ${result.status}). Check Clerk dashboard settings.`);
-            }
-         }
-      } catch (err: any) {
-         console.error("Sign up submission error:", err);
-         setError(err.errors?.[0]?.longMessage || "Registration failed.");
-      } finally { setIsLoading(false); }
-   };
+      router.push("/dashboard");
+    } catch (err: any) {
+      setError(err.message || "Registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-   return (
-      <div className="min-h-[100dvh] w-full flex font-sans selection:bg-red-500 selection:text-white overflow-hidden bg-[#FDFBF7]">
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    try {
+      await signIn("google", { callbackUrl: "/dashboard" });
+    } catch (err) {
+      setError("Google sign-in failed.");
+      setIsLoading(false);
+    }
+  };
 
-         {/* ─── LEFT: FORM SECTION (50%) ─── */}
-         <div className="w-full lg:w-1/2 p-6 lg:p-16 flex flex-col justify-center relative z-20">
+  return (
+    <div className="min-h-[100dvh] w-full flex font-sans selection:bg-sky-500 selection:text-white overflow-hidden bg-[#FDFBF7]">
 
-            {/* Subtle Background Pattern */}
-            <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:24px_24px] opacity-50 -z-10" />
+      {/* ─── LEFT: FORM SECTION (50%) ─── */}
+      <div className="w-full lg:w-1/2 p-6 lg:p-16 flex flex-col justify-center relative z-20">
 
-            <motion.div
-               initial={{ opacity: 0, x: -30 }}
-               animate={{ opacity: 1, x: 0 }}
-               transition={{ duration: 0.6, ease: "easeOut" }}
-               className="max-w-md mx-auto w-full"
+        {/* Subtle Background Pattern */}
+        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:24px_24px] opacity-50 -z-10" />
+
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="max-w-md mx-auto w-full"
+        >
+          {/* Back Nav */}
+          <div className="mb-8">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-[10px] font-black text-slate-400 hover:text-sky-600 uppercase tracking-[0.2em] transition-colors group"
             >
-               {/* Back Nav */}
-               <div className="mb-8">
-                  <Link
-                     href="/"
-                     className="inline-flex items-center gap-2 text-[10px] font-black text-slate-400 hover:text-red-600 uppercase tracking-[0.2em] transition-colors group"
-                  >
-                     <ChevronLeft size={12} className="group-hover:-translate-x-1 transition-transform" />
-                     {t('home')}
-                  </Link>
-               </div>
+              <ChevronLeft size={12} className="group-hover:-translate-x-1 transition-transform" />
+              {t('home')}
+            </Link>
+          </div>
 
-               {/* Header */}
-               <div className="mb-10 relative">
-                  <motion.div
-                     initial={{ scale: 0 }} animate={{ scale: 1 }}
-                     className="absolute -top-10 -left-10 w-24 h-24 bg-red-100 rounded-full blur-3xl opacity-50"
-                  />
-                  <h1 className="text-5xl md:text-6xl font-black text-slate-900 mb-3 tracking-tight leading-[0.95] relative z-10">
-                     {t('future')} <br />
-                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-rose-500">
-                        Au Pair.
-                     </span>
-                  </h1>
-                  <p className="text-slate-500 font-bold text-sm leading-relaxed max-w-sm relative z-10">
-                     {t('signupSubtitle')}
-                  </p>
-               </div>
+          {/* Header */}
+          <div className="mb-10 relative">
+            <motion.div
+              initial={{ scale: 0 }} animate={{ scale: 1 }}
+              className="absolute -top-10 -left-10 w-24 h-24 bg-sky-100 rounded-full blur-3xl opacity-50"
+            />
+            <h1 className="text-5xl md:text-6xl font-black text-slate-900 mb-3 tracking-tight leading-[0.95] relative z-10">
+              Join <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-blue-500">
+                VCM.
+              </span>
+            </h1>
+            <p className="text-slate-500 font-bold text-sm leading-relaxed max-w-sm relative z-10">
+              Create an account to start your journey.
+            </p>
+          </div>
 
-               <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
 
-                  {/* FULL NAME */}
-                  <div className="relative group">
-                     <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-red-500 transition-colors">
-                        <User size={20} />
-                     </div>
-                     <input
-                        type="text"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        placeholder={t('fullNamePlaceholder')}
-                        className="w-full bg-white border-2 border-slate-100 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 rounded-[1.5rem] py-5 pl-14 pr-6 text-sm font-bold text-slate-900 placeholder:text-slate-300 transition-all shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] outline-none"
-                        required
-                     />
-                  </div>
-
-                  {/* EMAIL */}
-                  <div className="relative group">
-                     <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-red-500 transition-colors">
-                        <Mail size={20} />
-                     </div>
-                     <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder={t('emailPlaceholder')}
-                        className="w-full bg-white border-2 border-slate-100 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 rounded-[1.5rem] py-5 pl-14 pr-6 text-sm font-bold text-slate-900 placeholder:text-slate-300 transition-all shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] outline-none"
-                        required
-                     />
-                  </div>
-
-                  {/* PASSWORD */}
-                  <div className="relative group">
-                     <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-red-500 transition-colors">
-                        <Lock size={20} />
-                     </div>
-                     <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder={t('passwordPlaceholder')}
-                        className="w-full bg-white border-2 border-slate-100 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 rounded-[1.5rem] py-5 pl-14 pr-6 text-sm font-bold text-slate-900 placeholder:text-slate-300 transition-all shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] outline-none"
-                        required
-                     />
-                  </div>
-
-                  {/* ERROR MSG */}
-                  {error && (
-                     <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="text-red-500 text-[11px] font-black uppercase tracking-wider bg-red-50 p-4 rounded-2xl border border-red-100 text-center">
-                        {error}
-                     </motion.p>
-                  )}
-
-                  {/* SUBMIT BUTTON */}
-                  <button
-                     type="submit"
-                     disabled={isLoading}
-                     className="w-full bg-slate-900 hover:bg-red-600 text-white font-black text-xs uppercase tracking-[0.25em] py-6 rounded-[1.5rem] shadow-xl hover:shadow-2xl hover:shadow-red-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-3 mt-4 group"
-                  >
-                     {isLoading ? <Loader2 className="animate-spin" size={18} /> : (
-                        <>{t('signUpButton')} <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" /></>
-                     )}
-                  </button>
-
-                  {/* Clerk CAPTCHA Placeholder */}
-                  <div id="clerk-captcha" />
-
-               </form>
-
-               {/* Login Link */}
-               <div className="mt-8 text-center">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                     {t('alreadyHaveAccount')}
-                     <Link href="/sign-in" className="text-red-500 ml-2 hover:text-slate-900 transition-colors underline decoration-2 underline-offset-4">{t('signIn')}</Link>
-                  </p>
-               </div>
-
-            </motion.div>
-         </div>
-
-         {/* ─── RIGHT: VISUAL SECTION (50%) ─── */}
-         <div className="hidden lg:flex w-1/2 relative items-center justify-center bg-[#F2F5F8] border-l border-white/50 overflow-hidden">
-
-            {/* Animated Gradients */}
-            <div className="absolute inset-0 w-full h-full">
-               <motion.div
-                  animate={{ scale: [1, 1.1, 1], x: [0, 20, 0] }}
-                  transition={{ duration: 10, repeat: Infinity }}
-                  className="absolute top-[-10%] right-[-10%] w-[700px] h-[700px] bg-red-200 rounded-full blur-[100px] opacity-40"
-               />
-               <motion.div
-                  animate={{ scale: [1, 1.2, 1], x: [0, -20, 0] }}
-                  transition={{ duration: 15, repeat: Infinity }}
-                  className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-emerald-200 rounded-full blur-[100px] opacity-40"
-               />
-               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]" />
+            {/* FULL NAME */}
+            <div className="relative group">
+              <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-sky-500 transition-colors">
+                <User size={20} />
+              </div>
+              <input
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Full Name"
+                className="w-full bg-white border-2 border-slate-100 focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 rounded-[1.5rem] py-4 pl-14 pr-6 text-sm font-bold text-slate-900 placeholder:text-slate-300 transition-all shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] outline-none"
+                required
+              />
             </div>
 
-            <BeforeLoginNews />
+            {/* PHONE */}
+            <div className="relative group">
+              <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-sky-500 transition-colors">
+                <Phone size={20} />
+              </div>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="Phone Number"
+                className="w-full bg-white border-2 border-slate-100 focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 rounded-[1.5rem] py-4 pl-14 pr-6 text-sm font-bold text-slate-900 placeholder:text-slate-300 transition-all shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] outline-none"
+                required
+              />
+            </div>
 
-         </div>
+            {/* PASSWORD */}
+            <div className="relative group">
+              <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-sky-500 transition-colors">
+                <Lock size={20} />
+              </div>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password (min. 6 characters)"
+                className="w-full bg-white border-2 border-slate-100 focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 rounded-[1.5rem] py-4 pl-14 pr-6 text-sm font-bold text-slate-900 placeholder:text-slate-300 transition-all shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] outline-none"
+                required
+                minLength={6}
+              />
+            </div>
+
+            {/* ERROR MSG */}
+            {error && (
+              <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="text-red-500 text-[11px] font-black uppercase tracking-wider bg-red-50 p-4 rounded-2xl border border-red-100 text-center">
+                {error}
+              </motion.p>
+            )}
+
+            {/* SUBMIT BUTTON */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-slate-900 hover:bg-sky-600 text-white font-black text-xs uppercase tracking-[0.25em] py-5 rounded-[1.5rem] shadow-xl hover:shadow-2xl hover:shadow-sky-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-3 mt-4 group"
+            >
+              {isLoading ? <Loader2 className="animate-spin" size={18} /> : (
+                <>Sign Up <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" /></>
+              )}
+            </button>
+          </form>
+
+          {/* Social Login Separator */}
+          <div className="flex items-center gap-4 my-6">
+            <div className="h-px bg-slate-200 flex-1" />
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">or</span>
+            <div className="h-px bg-slate-200 flex-1" />
+          </div>
+
+          {/* Google Login */}
+          <button
+            onClick={handleGoogleSignIn}
+            disabled={isLoading}
+            className="w-full bg-white border-2 border-slate-100 hover:border-sky-200 hover:bg-sky-50 text-slate-700 font-bold text-sm py-4 rounded-[1.5rem] shadow-sm transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+            </svg>
+            Sign up with Google
+          </button>
+
+          {/* Login Link */}
+          <div className="mt-8 text-center">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+              Already have an account?
+              <Link href="/sign-in" className="text-sky-600 ml-2 hover:text-slate-900 transition-colors underline decoration-2 underline-offset-4">Log in</Link>
+            </p>
+          </div>
+
+        </motion.div>
+      </div>
+
+      {/* ─── RIGHT: VISUAL SECTION (50%) ─── */}
+      <div className="hidden lg:flex w-1/2 relative items-center justify-center bg-[#F0FDF4] border-l border-white/50 overflow-hidden">
+
+        {/* Animated Gradients */}
+        <div className="absolute inset-0 w-full h-full">
+          <motion.div
+            animate={{ scale: [1, 1.1, 1], x: [0, 20, 0] }}
+            transition={{ duration: 10, repeat: Infinity }}
+            className="absolute top-[-10%] right-[-10%] w-[700px] h-[700px] bg-sky-200 rounded-full blur-[100px] opacity-40"
+          />
+          <motion.div
+            animate={{ scale: [1, 1.2, 1], x: [0, -20, 0] }}
+            transition={{ duration: 15, repeat: Infinity }}
+            className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-100 rounded-full blur-[100px] opacity-40"
+          />
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]" />
+        </div>
+
+        <BeforeLoginNews />
 
       </div>
-   );
+
+    </div>
+  );
 }

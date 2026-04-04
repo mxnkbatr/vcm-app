@@ -141,10 +141,10 @@
   },
   "NewsPage": {
     "metadata": {
-      "title": "Neuigkeiten | Mongolian Au Pair",
+      "title": "Neuigkeiten | Volunteer Center Mongolia",
       "description": "Bleiben Sie auf dem Laufenden mit den neuesten Nachrichten und Geschichten aus Europa."
     },
-    "badge": "Mongolisches Au-Pair Blog",
+    "badge": "VCM Blog",
     "heroTitle": "News &",
     "heroTitleHighlight": "Updates",
     "featured": "Mehr lesen",
@@ -159,13 +159,13 @@
   },
   "LessonsPage": {
     "metadata": {
-      "title": "Sprachlektionen | Mongolian Au Pair",
-      "description": "Greifen Sie auf exklusive Sprach- und Kulturlektionen für Au-Pairs zu."
+      "title": "Lektionen | Volunteer Center Mongolia",
+      "description": "Zugang zu exklusiven Freiwilligen-, Sprach- und Kompetenzlektionen von VCM."
     },
-    "badge": "Au-Pair-Akademie",
-    "heroTitle": "Sprach",
-    "heroTitleHighlight": "lektionen",
-    "heroDesc": "Spezielle Lektionen zur Vermittlung von Sprachkenntnissen und kulturellem Verständnis für das Au-Pair-Programm.",
+    "badge": "VCM Akademie",
+    "heroTitle": "Freiwilligen",
+    "heroTitleHighlight": "Lektionen",
+    "heroDesc": "Kurse zur Entwicklung Ihrer Fähigkeiten, Kenntnisse und Ihres kulturellen Verständnisses für unsere Freiwilligenprogramme.",
     "registered": "Registriert",
     "joined": "Beigetreten",
     "joinClass": "Kurs beitreten",
@@ -195,64 +195,75 @@
     "scroll": "Scrollen für mehr"
   },
   "HeroSlider": {
-    "slide1_title": "INTERNATIONALES AU-PAIR-PROGRAMM",
-    "slide1_desc": "Wir bieten mongolischen Jugendlichen die beste Möglichkeit, in europäischen Ländern zu leben, eine Sprache zu lernen und Weltkultur zu erleben. In den letzten 20 Jahren haben wir mehr als 3.000 junge Menschen auf ihrem Entwicklungsweg begleitet.",
-    "slide1_location": "Deutschland",
-    "slide2_title": "REISE DURCH EUROPA & SAMMLE ERFAHRUNG",
-    "slide2_desc": "Durch die Teilnahme am Au-Pair-Programm werden Sie Mitglied einer Gastfamilie und erleben europäische Bräuche von innen. Monatliches Taschengeld, freie Kost und Logis sowie Reiserechte erwarten Sie.",
-    "slide2_location": "Österreich",
-    "learnMore": "Mehr erfahren",
-    "verified": "Geprüftes Programm"
+    "slide1_title": "DAS \"AND\" FREIWILLIGENPROGRAMM",
+    "slide1_desc": "Leisten Sie einen wertvollen Beitrag, indem Sie Kinder mit besonderen Bedürfnissen zu Hause betreuen und psychosozial unterstützen. Werden Sie Teil eines engagierten Teams, das Familien in Not Freude und Hilfe bringt.",
+    "slide1_location": "AND Program",
+    "slide1_duration": "3 Monate",
+    "slide1_tag": "Geprüftes Programm",
+    "slide1_btn": "Mehr erfahren",
+    "slide2_title": "EDU-VOLUNTEER PROGRAMM",
+    "slide2_desc": "Teilen Sie Ihr Wissen und inspirieren Sie die nächste Generation durch Online-Nachhilfe. Wir bieten engagierten Schülern und jungen Erwachsenen eine Plattform, um Mathe, Englisch und mehr zu unterrichten und Kindern zum schulischen Erfolg zu verhelfen.",
+    "slide2_location": "EDU-Volunteer",
+    "slide2_duration": "Flexibel",
+    "slide2_tag": "Online-Nachhilfe",
+    "slide2_btn": "Jetzt bewerben",
+    "slide3_title": "WERDEN SIE TEIL DES V-CLUB TEAMS",
+    "slide3_desc": "Übernehmen Sie eine Führungsrolle bei der Planung, Organisation und Durchführung von wirkungsvollen Community-Events. Der V-Club bietet die perfekte Gelegenheit, Projektmanagement-Fähigkeiten aufzubauen und gleichzeitig etwas Positives zu bewirken.",
+    "slide3_location": "V-Club",
+    "slide3_duration": "Flexibel",
+    "slide3_tag": "Community-Events",
+    "slide3_btn": "Dem Club beitreten"
   },
   "UsSection": {
-    "badge": "Unser Erbe",
-    "heading_pre": "Jugend führen zu",
-    "heading_seq1": "Globaler Bildung",
-    "heading_seq2": "Europäischer Kultur",
-    "heading_seq3": "Einer helleren Zukunft",
-    "heading_post": ".",
-    "desc1": "Gegründet im Jahr 2005, geht es in unserer Geschichte nicht nur um Geschäft – es geht darum, Türen zu globalen Möglichkeiten zu öffnen.",
-    "desc2": "Entstanden aus der persönlichen Au-Pair-Erfahrung unseres Gründers in Deutschland, überbrücken wir die Lücke zwischen mongolischem Ehrgeiz und europäischen Möglichkeiten.",
-    "quote": "Erfahrung ist die klarste Linse, durch die man die Zukunft sehen kann.",
-    "cta": "Mehr entdecken",
+    "badge": "Unsere Mission",
+    "sectionTitle": "Über Unsere Mission",
+    "content": "Seit 2007 verfolgt das mongolische Freiwilligenzentrum das edle Ziel, durch kreatives Engagement eine humane, demokratische Gesellschaft aufzubauen. Wir haben erfolgreich über 50 nationale Projekte mit den Schwerpunkten Bildung, Kinderschutz und nachhaltige Existenzsicherung umgesetzt und vorbildliche Freiwilligenprogramme geschaffen.",
+    "valuesTitle": "Unsere Grundwerte",
+    "val1_title": "Freiwilligengeist",
+    "val1_desc": "Angetrieben von der Leidenschaft und dem Engagement unserer ehrenamtlichen Helfer im Kern.",
+    "val2_title": "Globale Wirkung",
+    "val2_desc": "Globale Veränderungen durch wirkungsvolles lokales Handeln und Partnerschaften schaffen.",
+    "val3_title": "Gemeinschaftsaufbau",
+    "val3_desc": "Bindungen stärken, um widerstandsfähigere und unterstützendere Gemeinschaften aufzubauen.",
+    "val4_title": "Leidenschaft & Fürsorge",
+    "val4_desc": "Aufrichtige Leidenschaft und Fürsorge in alles einfließen lassen, was wir unternehmen.",
+    "cta": "Mehr erfahren",
     "stat_exp": "Erfahrung",
-    "stat_participants": "Teilnehmer",
-    "stat_global": "Globale Geschichte",
-    "stat_reliable": "Zuverlässigkeit",
-    "years": "Jahre",
-    "founder": "Gründer",
-    "certified": "Offiziell Akkreditiert"
+    "stat_participants": "Freiwillige",
+    "stat_global": "Projekte",
+    "stat_reliable": "Wirkung",
+    "years": "Jahre"
   },
-  "Expectations": {
-    "badge": "Der Prozess",
-    "title": "Deine Reise ins Ausland",
-    "subtitle": "Vier einfache Schritte, um dein neues Leben in Europa zu beginnen.",
-    "step1_title": "Training",
-    "step1_desc": "Intensiver 17-tägiger Sprachkurs.",
-    "step1_duration": "17 Tage",
-    "step2_title": "Eignungsprüfung",
-    "step2_desc": "Ablegen des Einstufungstests.",
-    "step2_duration": "Prüfungstag",
-    "step3_title": "Familie finden",
-    "step3_desc": "Wir helfen dir, eine Gastfamilie zu finden.",
-    "step3_duration": "Vermittlung",
-    "step4_title": "Visum & Los",
-    "step4_desc": "Beratung zu Visum und Reise.",
-    "step4_duration": "Abreise",
-    "start": "Jetzt starten"
+  "Marketplace": {
+    "badge": "Marktplatz",
+    "title": "Möglichkeiten Entdecken",
+    "subtitle": "Durchsuchen Sie verfügbare Programme, Veranstaltungen und exklusive Zugangspässe für unsere VCM-Community.",
+    "item1_title": "Sommer-Sprachcamp",
+    "item1_desc": "Intensives 4-wöchiges Deutsch-Sprachcamp in Berlin.",
+    "item1_price": "Voll Finanziert",
+    "item2_title": "V-Club VIP Pass",
+    "item2_desc": "Jahresmitgliedschaft für exklusive Volunteer-Networking-Events.",
+    "item2_price": "Kostenlos für Mitglieder",
+    "item3_title": "Gastfamilien-Vermittlung",
+    "item3_desc": "Premium-Bewerbung und garantierte Familienvermittlung.",
+    "item3_price": "Priorität",
+    "item4_title": "Kulturaustausch-Kit",
+    "item4_desc": "Das Wichtigste für deine erste Woche in Europa.",
+    "item4_price": "Inbegriffen",
+    "start": "Alle ansehen"
   },
   "WhyChooseUs": {
     "badge": "Warum wir?",
     "title_pre": "Deine Reise,",
     "title_highlight": "Wunderschön Gesichert.",
     "desc": "Wir kombinieren herzliche Fürsorge mit strengen Sicherheitsstandards, um dir das vertrauenswürdigste Au-Pair-Erlebnis zu bieten.",
-    "card1_title": "Globales Netzwerk",
-    "card1_desc": "Verbindung zu geprüften Familien in den schönsten Städten Europas.",
+    "card1_title": "Freiwilligenarbeit & Programme",
+    "card1_desc": "Entdecke vielfältige Möglichkeiten wie lokale Freiwilligen-Events und Hauptprogramme wie EDU-Volunteer, AND und V-Club.",
     "card2_title": "Menschliche Unterstützung",
     "card2_desc": "Keine Bots hier. Nur echte Menschen, die bereit sind, dir rund um die Uhr zu helfen.",
     "card2_btn": "Jetzt chatten",
-    "card3_title": "Faire Kosten",
-    "card3_desc": "Keine versteckten Gebühren. Wir priorisieren Klarheit.",
+    "card3_title": "Menschen Helfen",
+    "card3_desc": "Gemeinschaften durch wirkungsvolle Freiwilligenarbeit und interkulturelle Erfahrungen stärken.",
     "card4_title": "Sicherheit zuerst",
     "card4_desc": "Strenger Überprüfungsprozess für jede Familie. Deine Sicherheit ist unsere Obsession.",
     "card5_title": "Bewerbung starten",
@@ -675,7 +686,7 @@
       "send": "Senden"
     }
   },
-  "AuPair": {
+  "Programs": {
     "cultureExchange": "Kulturaustausch",
     "heroTitlePrefix": "Internationales",
     "heroTitleHighlight": "Au-Pair Programm",
@@ -780,10 +791,10 @@
     "card4_text": "Förderung der persönlichen und beruflichen Entwicklung durch kulturellen Austausch."
   },
   "navbar": {
-    "logo": "AuPair",
+    "logo": "VCM",
     "home": "Home",
     "about": "Über Uns",
-    "program": "Au-Pair-Programm",
+    "program": "Unsere Programme",
     "events": "Veranstaltungen",
     "lessons": "Unterricht",
     "shop": "Geschäft",
@@ -791,14 +802,12 @@
     "dashboard": "Dashboard",
     "signin": "Anmelden",
     "register": "Registrieren",
-    "germany": "Deutschland",
-    "austria": "Österreich",
-    "switzerland": "Schweiz",
-    "belgium": "Belgien",
-    "desc_de": "Lernen Sie die Sprache kostenlos in Deutschland",
-    "desc_at": "Lernen Sie die Sprache kostenlos in Österreich",
-    "desc_ch": "Lernen Sie die Sprache kostenlos in der Schweiz",
-    "desc_be": "Lernen Sie die Sprache kostenlos in Belgien"
+    "prog_and": "AND Programm",
+    "prog_and_desc": "Unterstützung für Kinder mit besonderen Bedürfnissen",
+    "prog_edu": "EDU-Volunteer",
+    "prog_edu_desc": "Teilen Sie Ihr Wissen und inspirieren Sie",
+    "prog_vclub": "V-Club",
+    "prog_vclub_desc": "Treten Sie unserer globalen Gemeinschaft bei"
   },
   "dashboard": {
     "loading": "Profil wird geladen...",
@@ -889,25 +898,20 @@
     }
   },
   "hero": {
-    "germany": {
-      "title": "Deutschland",
-      "subtitle": "Wirtschaftliches Herz Europas",
-      "desc": "Meistern Sie die Sprache in einer weltweit führenden Nation, während Sie die europäische Kultur erleben und Ihre Karriere starten."
+    "and_program": {
+      "title": "AND Programm",
+      "subtitle": "Hausbesuch-Freiwilligenbetreuung",
+      "desc": "Leisten Sie einen bedeutungsvollen Beitrag, indem Sie Kindern mit besonderen Bedürfnissen psychosoziale Unterstützung bieten."
     },
-    "austria": {
-      "title": "Österreich",
-      "subtitle": "Wiege der klassischen Kunst",
-      "desc": "Eine einmalige Gelegenheit, Deutsch inmitten der atemberaubenden Schönheit der Alpen zu meistern."
+    "edu_volunteer": {
+      "title": "EDU-Volunteer",
+      "subtitle": "Die Nächste Generation Inspirieren",
+      "desc": "Teilen Sie Ihr Wissen und Ihre Fähigkeiten, indem Sie an Schulen und Lernzentren ehrenamtlich arbeiten."
     },
-    "belgium": {
-      "title": "Belgien",
-      "subtitle": "Internationales Zentrum",
-      "desc": "Erleben Sie eine multilinguale Kultur am Hauptsitz der Europäischen Union."
-    },
-    "switzerland": {
-      "title": "Schweiz",
-      "subtitle": "Höchste Lebensqualität",
-      "desc": "Leben Sie mit dem weltweit höchsten Taschengeld, reinster Luft und sicherster Umgebung."
+    "v_club": {
+      "title": "V-Club",
+      "subtitle": "Globale Freiwilligengemeinschaft",
+      "desc": "Treten Sie unserer lebendigen Gemeinschaft bei. Verbinden, zusammenarbeiten und nachhaltige soziale Wirkung erzielen."
     }
   },
   "Auth": {

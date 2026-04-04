@@ -1,61 +1,24 @@
 import { NextResponse } from "next/server";
-import { currentUser } from "@clerk/nextjs/server";
 import { connectToDB } from "@/lib/db";
-import User from "@/lib/models/User";
+import { getAuthUser } from "@/lib/authHelpers";
 
 export async function POST(req: Request) {
   console.log("--------------- STARTING USER SYNC ---------------");
   try {
-    // 1. Connect DB
-    console.log("1. Connecting to DB...");
+    // With NextAuth, the user is already created via credentials register or Google sign-in.
+    // This API route handles any additional sync logic needed, though mostly it is vestigial.
+    // We just return the current user.
     await connectToDB();
-    console.log("   - Connected.");
-
-    // 2. Check Auth
-    console.log("2. Checking Clerk Auth...");
-    const clerkUser = await currentUser();
+    const user = await getAuthUser();
     
-    if (!clerkUser) {
-      console.log("   - No Clerk user found!");
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    console.log("   - User Authenticated:", clerkUser.id);
-
-    // 3. Parse Body
-    const body = await req.json();
-    console.log("3. Payload Received:", body);
-    
-    const { fullName, studentId, university } = body;
-
-    // 4. Database Operation
-    console.log("4. Attempting MongoDB Update/Create...");
-    
-    const user = await User.findOneAndUpdate(
-      { clerkId: clerkUser.id },
-      {
-        $set: {
-          email: clerkUser.emailAddresses[0].emailAddress,
-          studentId: studentId ? studentId.toUpperCase() : "NO-ID",
-          fullName: fullName || "New User",
-          university: university || "MNUMS",
-        },
-        $setOnInsert: {
-          clerkId: clerkUser.id,
-          role: "guest",
-        }
-      },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
-    );
-
-    console.log("5. SUCCESS! User Saved:", user._id);
-    console.log("--------------------------------------------------");
 
     return NextResponse.json({ success: true, user }, { status: 200 });
-
   } catch (error: any) {
     console.error("!!!!! SYNC FAILED !!!!!");
     console.error(error);
-    // Return the actual error message so you can see it in the browser Console/Network tab
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

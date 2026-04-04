@@ -16,66 +16,51 @@ import {
 import { useTranslations, useLocale } from "next-intl";
 
 /* ────────────────────── Config & Data ────────────────────── */
-const COUNTRY_DATA = [
+const PROGRAM_DATA = [
   {
-    id: "germany",
-    key: "germany",
+    id: "edu_volunteer",
+    key: "edu_volunteer",
     colors: {
-      primary: "#F59E0B",
-      secondary: "#FFFBEB",
+      primary: "#0EA5E9",       // Sky Blue
+      secondary: "#F0F9FF",     // Ice white
+      accent: "#0369A1",
+      gradient: "from-sky-400 to-sky-600"
+    },
+    flag: "📚",
+    iso: "EDU",
+    img: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=30&w=400",
+    stat: "6 Months",
+    link: "/programs/edu"
+  },
+  {
+    id: "and_program",
+    key: "and_program",
+    colors: {
+      primary: "#F59E0B",       // Yellow
+      secondary: "#FFFBEB",     // Warm white
       accent: "#B45309",
-      gradient: "from-amber-400 to-orange-500"
+      gradient: "from-amber-400 to-yellow-500"
     },
-    flag: "🇩🇪",
-    iso: "DEU",
-    img: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&q=30&w=400",
-    stat: "12-24 Months",
-    link: "/aupair/germany"
+    flag: "🤝",
+    iso: "AND",
+    img: "https://res.cloudinary.com/dc127wztz/image/upload/q_auto/f_auto/v1775323713/volunteering_zd97wi.png",
+    stat: "3 Months",
+    link: "/programs/and"
   },
   {
-    id: "austria",
-    key: "austria",
+    id: "v_club",
+    key: "v_club",
     colors: {
-      primary: "#F43F5E",
-      secondary: "#FFF1F2",
-      accent: "#9F1239",
-      gradient: "from-rose-400 to-red-600"
+      primary: "#475569",       // Slate 600
+      secondary: "#F8FAFC",     // Light pure slate for the page background
+      accent: "#0F172A",        // Slate 900 for text accents
+      gradient: "from-slate-700 to-slate-900" // Dark gradient for white text buttons
     },
-    flag: "🇦🇹",
-    iso: "AUT",
-    img: "https://images.unsplash.com/photo-1516550893923-42d28e5677af?auto=format&fit=crop&q=30&w=400",
-    stat: "High Safety",
-    link: "/aupair/austria"
-  },
-  {
-    id: "belgium",
-    key: "belgium",
-    colors: {
-      primary: "#EAB308",
-      secondary: "#FEFCE8",
-      accent: "#854D0E",
-      gradient: "from-yellow-400 to-amber-600"
-    },
-    flag: "🇧🇪",
-    iso: "BEL",
-    img: "https://cdn.britannica.com/61/90461-050-7E15DFEB/Grand-Place-Brussels.jpg?w=300",
-    stat: "Multi-Lang",
-    link: "/aupair/belgium"
-  },
-  {
-    id: "switzerland",
-    key: "switzerland",
-    colors: {
-      primary: "#EF4444",
-      secondary: "#FEF2F2",
-      accent: "#991B1B",
-      gradient: "from-red-500 to-rose-600"
-    },
-    flag: "🇨🇭",
-    iso: "CHE",
-    img: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?auto=format&fit=crop&q=30&w=400",
-    stat: "Top Allowance",
-    link: "/aupair/switzerland"
+    flag: "🌍",
+    iso: "VCM",
+    img: "https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&q=30&w=400",
+    stat: "Ongoing",
+    link: "/programs/vclub"
   }
 ];
 
@@ -97,14 +82,14 @@ const HeroSection = () => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const active = COUNTRY_DATA[index];
+  const active = PROGRAM_DATA[index];
 
   const changeSlide = (newDirection: number) => {
     setDirection(newDirection);
     if (newDirection === 1) {
-      setIndex((curr) => (curr + 1) % COUNTRY_DATA.length);
+      setIndex((curr) => (curr + 1) % PROGRAM_DATA.length);
     } else {
-      setIndex((curr) => (curr === 0 ? COUNTRY_DATA.length - 1 : curr - 1));
+      setIndex((curr) => (curr === 0 ? PROGRAM_DATA.length - 1 : curr - 1));
     }
   };
 

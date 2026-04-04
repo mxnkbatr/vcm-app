@@ -50,16 +50,30 @@ const HeroSlider = () => {
       title: t("slide1_title"),
       desc: t("slide1_desc"),
       location: t("slide1_location"),
-      path: "/aupair/germany",
-      duration: "12 Months"
+      path: "/",
+      duration: t("slide1_duration"),
+      tag: t("slide1_tag"),
+      btn: t("slide1_btn")
     },
     {
       id: 2,
       title: t("slide2_title"),
       desc: t("slide2_desc"),
       location: t("slide2_location"),
-      path: "/aupair/austria",
-      duration: "12 Months"
+      path: "/",
+      duration: t("slide2_duration"),
+      tag: t("slide2_tag"),
+      btn: t("slide2_btn")
+    },
+    {
+      id: 3,
+      title: t("slide3_title"),
+      desc: t("slide3_desc"),
+      location: t("slide3_location"),
+      path: "/",
+      duration: t("slide3_duration"),
+      tag: t("slide3_tag"),
+      btn: t("slide3_btn")
     }
   ];
 
@@ -96,29 +110,17 @@ const HeroSlider = () => {
   }, []);
 
   return (
-    <section ref={containerRef} className="relative h-[100dvh] min-h-[700px] w-full bg-slate-900 text-white flex items-center justify-center overflow-hidden selection:bg-red-500 selection:text-white">
+    <section ref={containerRef} className="relative h-[100dvh] min-h-[700px] w-full bg-slate-50 text-slate-900 flex items-center justify-center overflow-hidden selection:bg-sky-500 selection:text-white">
 
       {/* ─── 1. Background (Video/Image) ─── */}
       <div className="absolute inset-0 z-0">
-        {/* Desktop Video Background */}
-        <div className="hidden md:block absolute inset-0 w-full h-full">
-          {mounted && inView && (
-            <CloudinaryPlayer
-              publicId="A_cinematic_highquality_202601201908_j5s2n_kkoosh"
-              cloudName="dxoxdiuwr"
-              poster="https://res.cloudinary.com/dxoxdiuwr/video/upload/f_auto,q_30,so_0/v1/A_cinematic_highquality_202601201908_j5s2n_kkoosh.jpg"
-              className="w-full h-full object-cover opacity-50 scale-105 pointer-events-none"
-            />
-          )}
-        </div>
-
-        {/* Mobile Static Image Background */}
-        <div className="block md:hidden absolute inset-0 w-full h-full">
+        {/* Background Image */}
+        <div className="absolute inset-0 w-full h-full">
           <Image
-            src="https://res.cloudinary.com/dxoxdiuwr/video/upload/f_auto,q_auto,so_0/v1/A_cinematic_highquality_202601201908_j5s2n_kkoosh.jpg"
+            src="https://res.cloudinary.com/dc127wztz/image/upload/q_auto/f_auto/v1775323713/volunteering_zd97wi.png"
             alt="Hero Background"
             fill
-            className="object-cover opacity-50 transition-transform duration-700 will-change-transform"
+            className="object-cover opacity-90 transition-transform duration-700 will-change-transform"
             priority
             loading="eager"
             placeholder="blur"
@@ -129,8 +131,8 @@ const HeroSlider = () => {
         </div>
 
         {/* Gradient Overlay for Text Readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/60 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80" />
+        <div className="absolute inset-0 bg-gradient-to-r from-white via-white/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-transparent to-transparent" />
       </div>
 
       {/* ─── 2. Main Content ─── */}
@@ -150,27 +152,27 @@ const HeroSlider = () => {
               {/* Floating Badges */}
               <motion.div variants={textVariants} className="flex flex-wrap items-center gap-3 mb-8">
                 {/* Location Badge */}
-                <span className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-xs font-bold uppercase tracking-widest text-white shadow-lg">
-                  <FaGlobeEurope className="text-[#00C896]" size={14} />
+                <span className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/40 backdrop-blur-md border border-slate-200 text-xs font-bold uppercase tracking-widest text-slate-800 shadow-md">
+                  <FaGlobeEurope className="text-sky-500" size={14} />
                   {activeSlide.location}
                 </span>
 
                 {/* Verified Badge */}
-                <span className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#00C896]/10 backdrop-blur-md border border-[#00C896]/20 text-xs font-bold uppercase tracking-widest text-[#00C896] shadow-lg">
+                <span className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-500/10 backdrop-blur-md border border-sky-500/20 text-xs font-bold uppercase tracking-widest text-sky-600 shadow-md">
                   <FaUserCheck size={14} />
-                  {t("verified")}
+                  {activeSlide.tag}
                 </span>
               </motion.div>
 
               {/* Headline */}
               <motion.h1
                 variants={textVariants}
-                className="text-5xl md:text-7xl font-black leading-[1.1] mb-8 tracking-tight drop-shadow-2xl"
+                className="text-5xl md:text-7xl font-black leading-[1.1] mb-8 tracking-tight drop-shadow-sm text-slate-900"
               >
                 {activeSlide.title.split(" ").map((word: string, i: number) => (
                   <span key={i} className="inline-block mr-3">
-                    {word === "Au" || word === "Pair" ? (
-                      <span className="text-transparent bg-clip-text bg-gradient-to-br from-white to-slate-400">
+                    {i === 0 ? (
+                      <span className="text-transparent bg-clip-text bg-gradient-to-br from-sky-400 to-sky-600">
                         {word}
                       </span>
                     ) : (
@@ -182,38 +184,37 @@ const HeroSlider = () => {
 
               {/* Description with Vertical Accent Line */}
               <motion.div variants={textVariants} className="flex gap-6 mb-10 pl-2">
-                <div className="w-1 rounded-full bg-gradient-to-b from-[#E31B23] to-transparent h-auto min-h-[60px]" />
-                <p className="text-lg md:text-xl text-slate-300 max-w-xl leading-relaxed font-medium">
+                <div className="w-1 rounded-full bg-gradient-to-b from-sky-500 to-transparent h-auto min-h-[60px]" />
+                <p className="text-lg md:text-xl text-slate-600 max-w-xl leading-relaxed font-medium">
                   {activeSlide.desc}
                 </p>
               </motion.div>
 
               {/* Metadata Stats */}
-              <motion.div variants={textVariants} className="flex items-center gap-8 mb-10 text-sm font-bold text-slate-300">
+              <motion.div variants={textVariants} className="flex items-center gap-8 mb-10 text-sm font-bold text-slate-700">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-[#E31B23]">
+                  <div className="p-2.5 rounded-xl bg-slate-100 border border-slate-200 text-sky-500">
                     <FaClock />
                   </div>
                   <span>{activeSlide.duration}</span>
                 </div>
-                <div className="w-px h-8 bg-slate-700" />
+                <div className="w-px h-8 bg-slate-200" />
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-[#00C896]">
+                  <div className="p-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-800">
                     <FaMapMarkerAlt />
                   </div>
                   <span>{activeSlide.location}</span>
                 </div>
               </motion.div>
 
-              {/* CTA Button */}
-              <motion.div variants={textVariants}>
+            <motion.div variants={textVariants}>
                 <Link href={activeSlide.path}>
                   <motion.button
-                    whileHover={{ scale: 1.02, boxShadow: "0 20px 40px -10px rgba(227, 27, 35, 0.4)" }}
+                    whileHover={{ scale: 1.02, boxShadow: "0 20px 40px -10px rgba(14, 165, 233, 0.4)" }}
                     whileTap={{ scale: 0.98 }}
-                    className="group relative inline-flex items-center gap-4 px-8 py-4 bg-[#E31B23] text-white rounded-full font-bold text-lg overflow-hidden transition-all duration-300"
+                    className="group relative inline-flex items-center gap-4 px-8 py-4 bg-sky-500 text-white rounded-full font-bold text-lg overflow-hidden transition-all duration-300"
                   >
-                    <span className="relative z-10">{t("learnMore")}</span>
+                    <span className="relative z-10">{activeSlide.btn}</span>
                     <span className="relative z-10 p-1 bg-white/20 rounded-full group-hover:rotate-45 transition-transform duration-300">
                       <FaArrowRight size={12} />
                     </span>
@@ -240,20 +241,20 @@ const HeroSlider = () => {
                   className="group relative w-72 flex items-center justify-end gap-6 outline-none"
                 >
                   <div className={`text-right transition-all duration-500 ${isActive ? "opacity-100 translate-x-0" : "opacity-40 translate-x-4 group-hover:opacity-70"}`}>
-                    <p className="text-xs font-bold uppercase tracking-widest text-[#E31B23] mb-1">
+                    <p className="text-xs font-bold uppercase tracking-widest text-sky-500 mb-1">
                       0{index + 1}
                     </p>
-                    <h2 className="text-lg font-bold text-white">
+                    <h2 className="text-lg font-bold text-slate-900">
                       {item.location}
                     </h2>
                   </div>
 
                   {/* Vertical Progress Bar */}
-                  <div className="relative w-[6px] h-[80px] rounded-full overflow-hidden transition-all duration-500 bg-slate-800 shrink-0">
+                  <div className="relative w-[6px] h-[80px] rounded-full overflow-hidden transition-all duration-500 bg-slate-200 shrink-0">
                     {isActive && (
                       <motion.div
                         layoutId="activeGlow"
-                        className="absolute top-0 left-0 w-full bg-gradient-to-b from-[#00C896] to-[#E31B23]"
+                        className="absolute top-0 left-0 w-full bg-gradient-to-b from-sky-400 to-sky-600"
                         initial={{ height: "0%" }}
                         animate={{ height: "100%" }}
                         transition={{ duration: AUTOPLAY_DURATION / 1000, ease: "linear" }}

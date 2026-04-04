@@ -11,10 +11,11 @@ const ApplicationSchema = new Schema(
     age: { type: String, required: true },
     level: { type: String, required: true },
     message: { type: String },
+    generalId: { type: String, required: true },
     status: { 
       type: String, 
-      enum: ['pending', 'approved', 'rejected'], 
-      default: 'pending' 
+      enum: ['draft', 'pending_general', 'pending_admin', 'approved_volunteer', 'rejected'], 
+      default: 'pending_general' 
     }
   },
   { timestamps: true }

@@ -25,11 +25,12 @@ import { useLocale } from "next-intl";
 
 // --- CONFIG & BRAND ---
 const BRAND = {
-  RED: "#E31B23",
-  RED_SOFT: "rgba(227, 27, 35, 0.2)",
-  GREEN: "#00C896",
-  GREEN_SOFT: "rgba(0, 200, 150, 0.2)",
-  DARK: "#0F172A", // Slate 900
+  PRIMARY: "#0EA5E9",       // Sky Blue (was RED)
+  PRIMARY_SOFT: "rgba(14, 165, 233, 0.15)",
+  SECONDARY: "#F0F9FF",     // Ice white overlay
+  ACCENT: "#38BDF8",        // Lighter Sky (was GREEN)
+  ACCENT_SOFT: "rgba(56, 189, 248, 0.15)",
+  DARK: "#0F172A",          // Slate 900
 };
 
 const TABS = [
@@ -108,7 +109,7 @@ const ContentCard = ({ item, lang, isDark, isMobile, type }: any) => {
         relative group rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden cursor-pointer h-full min-h-[400px] border transition-all duration-500
         ${isDark
           ? "bg-slate-900/50 border-white/5 shadow-none hover:bg-slate-800"
-          : "bg-white border-slate-100 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.05)] hover:shadow-[0_25px_50px_-12px_rgba(227,27,35,0.15)]"
+          : "bg-white border-slate-100 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.05)] hover:shadow-[0_25px_50px_-12px_rgba(14,165,233,0.15)]"
         }
       `}
     >
@@ -149,32 +150,32 @@ const ContentCard = ({ item, lang, isDark, isMobile, type }: any) => {
 
           {/* Tags / Metadata */}
           <div className="flex flex-wrap items-center gap-3 mb-3">
-            <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest text-white border border-white/20 backdrop-blur-md"
-              style={{ backgroundColor: BRAND.GREEN_SOFT }}
+            <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest text-sky-700 border border-sky-200/50 backdrop-blur-md"
+              style={{ backgroundColor: BRAND.ACCENT_SOFT }}
             >
               {item.category}
             </span>
 
             <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-300">
               {isBlog ? (
-                <><User size={12} style={{ color: BRAND.RED }} /> {authorName}</>
+                <><User size={12} style={{ color: BRAND.PRIMARY }} /> {authorName}</>
               ) : (
-                <><MapPin size={12} style={{ color: BRAND.RED }} /> {item.location?.[lang] || item.location?.en || 'Online'}</>
+                <><MapPin size={12} style={{ color: BRAND.PRIMARY }} /> {item.location?.[lang] || item.location?.en || 'Online'}</>
               )}
             </span>
           </div>
 
           {/* Title */}
-          <h3 className="text-2xl font-black leading-none tracking-tight mb-3 text-white line-clamp-2 group-hover:text-red-400 transition-colors">
+          <h3 className="text-2xl font-black leading-none tracking-tight mb-3 text-white line-clamp-2 group-hover:text-sky-300 transition-colors">
             {item.title[lang] || item.title.en}
           </h3>
 
           {/* Time or Read Time */}
           <div className="text-xs font-bold flex items-center gap-2 mb-4 text-slate-300">
             {isBlog ? (
-              <> <BookOpen size={14} style={{ color: BRAND.GREEN }} /> {item.readTime || "5 min read"} </>
+              <> <BookOpen size={14} style={{ color: BRAND.ACCENT }} /> {item.readTime || "5 min read"} </>
             ) : (
-              <> <Clock size={14} style={{ color: BRAND.GREEN }} /> {item.timeString} </>
+              <> <Clock size={14} style={{ color: BRAND.ACCENT }} /> {item.timeString} </>
             )}
           </div>
         </div>
@@ -184,7 +185,7 @@ const ContentCard = ({ item, lang, isDark, isMobile, type }: any) => {
           <div className="w-full h-[1px] bg-white/20 mb-4" />
           <Link href={`/${isBlog ? 'news' : 'events'}/${item._id}`} className="flex items-center gap-2 font-black uppercase tracking-widest text-[10px] text-white hover:gap-4 transition-all">
             {lang === 'mn' ? 'Дэлгэрэнгүй' : 'Read More'}
-            <span className="p-1.5 rounded-full text-white shadow-lg" style={{ backgroundColor: BRAND.RED }}>
+            <span className="p-1.5 rounded-full text-white shadow-lg" style={{ backgroundColor: BRAND.PRIMARY }}>
               <ArrowUpRight size={10} />
             </span>
           </Link>
@@ -278,7 +279,7 @@ export default function LatestUpdatesSection() {
         {/* Animated Blobs - DISABLED ON MOBILE */}
         {!isMobile && (
           <>
-            {/* Brand Red Blob */}
+            {/* Brand Primary Blob */}
             <motion.div
               animate={{
                 scale: [1, 1.2, 1],
@@ -286,11 +287,11 @@ export default function LatestUpdatesSection() {
                 x: [0, 50, 0]
               }}
               transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -top-[10%] -right-[10%] w-[800px] h-[800px] rounded-full blur-[120px] mix-blend-multiply"
-              style={{ backgroundColor: isDark ? 'rgba(227, 27, 35, 0.1)' : 'rgba(227, 27, 35, 0.05)' }}
+              className="absolute -top-[10%] -right-[10%] w-[800px] h-[800px] rounded-full blur-[100px] mix-blend-multiply"
+              style={{ backgroundColor: isDark ? 'rgba(14, 165, 233, 0.15)' : 'rgba(14, 165, 233, 0.1)' }}
             />
 
-            {/* Brand Green Blob */}
+            {/* Brand Accent Blob */}
             <motion.div
               animate={{
                 scale: [1, 1.1, 1],
@@ -298,8 +299,8 @@ export default function LatestUpdatesSection() {
                 x: [0, -30, 0]
               }}
               transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-              className="absolute -bottom-[10%] -left-[10%] w-[600px] h-[600px] rounded-full blur-[120px] mix-blend-multiply"
-              style={{ backgroundColor: isDark ? 'rgba(0, 200, 150, 0.1)' : 'rgba(0, 200, 150, 0.05)' }}
+              className="absolute -bottom-[10%] -left-[10%] w-[600px] h-[600px] rounded-full blur-[100px] mix-blend-multiply"
+              style={{ backgroundColor: isDark ? 'rgba(56, 189, 248, 0.1)' : 'rgba(14, 165, 233, 0.05)' }}
             />
           </>
         )}
@@ -329,8 +330,8 @@ export default function LatestUpdatesSection() {
                     {isActive && (
                       <motion.div
                         layoutId="activeContentTab"
-                        className="absolute inset-0 rounded-full -z-10 shadow-lg"
-                        style={{ backgroundColor: BRAND.RED }}
+                        className="absolute inset-0 rounded-full -z-10 shadow-lg shadow-sky-500/20"
+                        style={{ backgroundColor: BRAND.PRIMARY }}
                       />
                     )}
                     {(tab as any)[lang]}
@@ -352,7 +353,7 @@ export default function LatestUpdatesSection() {
                   ? (lang === 'mn' ? 'Арга Хэмжээ' : 'Upcoming Events')
                   : (lang === 'mn' ? 'Мэдээлэл' : 'Latest Insights')
                 }
-                <span style={{ color: BRAND.GREEN }}>.</span>
+                <span style={{ color: BRAND.PRIMARY }}>.</span>
               </motion.h2>
             </div>
           </div>
@@ -369,12 +370,12 @@ export default function LatestUpdatesSection() {
                   key={cat.id}
                   onClick={() => setFilter(cat.id)}
                   className={`
-                       relative whitespace-nowrap px-6 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all flex-shrink-0 border
+                       relative whitespace-nowrap px-6 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all flex-shrink-0 border shadow-sm
                        ${isActive
-                      ? "text-slate-900 border-transparent"
-                      : (isDark ? "text-slate-400 border-white/10 hover:border-white/30" : "text-slate-500 border-slate-200 hover:border-slate-300 bg-white")}
+                      ? "text-white border-transparent"
+                      : (isDark ? "text-slate-400 border-white/10 hover:border-white/30" : "text-slate-500 border-slate-200 hover:border-sky-300 bg-white")}
                     `}
-                  style={{ backgroundColor: isActive ? BRAND.GREEN : 'transparent' }}
+                  style={{ backgroundColor: isActive ? BRAND.PRIMARY : 'transparent' }}
                 >
                   {(cat as any)[lang]}
                 </button>
@@ -387,7 +388,7 @@ export default function LatestUpdatesSection() {
         <div className="min-h-[400px]">
           {loading ? (
             <div className="h-60 flex items-center justify-center">
-              <Loader2 className="animate-spin text-red-500" size={40} />
+              <Loader2 className="animate-spin text-sky-500" size={40} />
             </div>
           ) : filteredItems.length > 0 ? (
             <motion.div
@@ -427,14 +428,14 @@ export default function LatestUpdatesSection() {
         >
           <Link href={activeTab === 'events' ? '/events' : '/news'} className="group relative inline-flex items-center gap-6">
             <span className={`text-xs font-black uppercase tracking-[0.25em] transition-colors
-                 ${isDark ? "text-slate-300 group-hover:text-white" : "text-slate-700 group-hover:text-slate-900"}`}>
+                 ${isDark ? "text-slate-300 group-hover:text-white" : "text-slate-700 group-hover:text-sky-600"}`}>
               {activeTab === 'events'
                 ? (lang === 'mn' ? 'Бүх арга хэмжээг харах' : 'View All Events')
                 : (lang === 'mn' ? 'Бүх нийтлэлийг унших' : 'View All Posts')
               }
             </span>
-            <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-[-45deg] text-white shadow-xl hover:shadow-2xl`}
-              style={{ backgroundColor: BRAND.RED }}>
+            <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-[-45deg] text-white shadow-xl shadow-sky-500/20 hover:shadow-sky-500/40`}
+              style={{ backgroundColor: BRAND.PRIMARY }}>
               <ArrowUpRight size={20} />
             </div>
           </Link>
