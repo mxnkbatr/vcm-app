@@ -63,7 +63,6 @@ export default function Navbar() {
     { name: t("events"), href: "/events" },
     { name: t("lessons"), href: "/lessons" },
     { name: t("shop"), href: "/shop" },
-    { name: t("news"), href: "/news" },
   ];
 
   const mobileNav = [
@@ -71,7 +70,6 @@ export default function Navbar() {
     { id: "programs", icon: Plane, href: "/programs", label: t("program") },
     { id: "booking", icon: ShoppingBag, href: "/shop", label: t("shop"), isMain: true },
     { id: "events", icon: Ticket, href: "/events", label: t("events") },
-    { id: "news", icon: BookOpen, href: "/news", label: t("news") },
   ];
 
   const VCM_PROGRAMS = [
