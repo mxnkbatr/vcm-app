@@ -634,6 +634,7 @@
       "lessons": "Academy",
       "blog": "Blog & News",
       "shopping": "Shopping",
+      "purchases": "Purchases",
       "role": "Super Admin",
       "online": "Online"
     },
@@ -648,6 +649,7 @@
         "articles": "Articles",
         "todaysBookings": "Today's Bookings",
         "totalUsers": "Total Users",
+        "students": "Students",
         "volunteers": "Volunteers",
         "admins": "Admins",
         "guests": "Guests"

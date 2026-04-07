@@ -24,7 +24,8 @@ import {
    LayoutDashboard,
    ClipboardList,
    Calendar,
-   ShoppingBag
+   ShoppingBag,
+   ShoppingCart
 } from "lucide-react";
 import {
    FaBook,
@@ -44,6 +45,7 @@ import Image from "next/image";
 import { useTranslations } from 'next-intl';
 import LessonsManager from "@/app/components/admin/LessonsManager";
 import ShoppingManager from "@/app/components/admin/ShoppingManager";
+import PurchasesManager from "@/app/components/admin/PurchasesManager";
 import { Link } from "@/navigation";
 
 // --- CONSTANTS ---
@@ -647,6 +649,7 @@ export default function AdminDashboard() {
                   <SidebarItem icon={FaBook} label={t("sidebar.lessons")} active={activeTab === "lessons"} onClick={() => setActiveTab("lessons")} />
                   <SidebarItem icon={FileText} label={t("sidebar.blog")} active={activeTab === "blog"} onClick={() => setActiveTab("blog")} />
                   <SidebarItem icon={ShoppingBag} label={t("sidebar.shopping") || "Shopping"} active={activeTab === "shopping"} onClick={() => setActiveTab("shopping")} />
+                  <SidebarItem icon={ShoppingCart} label="Purchases" active={activeTab === "purchases"} onClick={() => setActiveTab("purchases")} />
                </nav>
             </div>
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3">
@@ -775,6 +778,11 @@ export default function AdminDashboard() {
             {/* ─── SHOPPING MANAGEMENT ─── */}
             {activeTab === "shopping" && (
                <ShoppingManager />
+            )}
+
+            {/* ─── PURCHASES MANAGEMENT ─── */}
+            {activeTab === "purchases" && (
+               <PurchasesManager />
             )}
 
             {/* ─── APPLICATIONS MANAGEMENT ─── */}
