@@ -48,56 +48,44 @@ const OpportunityCard = ({ opp, locale, isDark }: { opp: Opportunity, locale: st
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      className={`relative group rounded-[2.5rem] border p-8 transition-all duration-500 overflow-hidden h-full flex flex-col
-        ${isDark 
-          ? "bg-[#001d30]/60 border-white/5 shadow-2xl hover:border-[#00aeef]/40" 
-          : "bg-white border-slate-200 shadow-xl shadow-slate-200/40 hover:border-[#00aeef]/40"}`}
+      exit={{ opacity: 0, scale: 0.95 }}
+      whileTap={{ scale: 0.98 }}
+      className="card overflow-hidden press flex flex-col h-full"
     >
-      <div className="relative z-10 flex flex-col h-full">
-        <div className="flex justify-between items-start mb-6">
-          <div className={`p-4 rounded-3xl transition-colors ${typeBg}`}>
-            <Icon size={28} className={typeColor} />
+      <div className="p-5 flex flex-col h-full space-y-4">
+        <div className="flex justify-between items-start">
+          <div className="icon-box" style={{ background: 'var(--blue-dim)' }}>
+            <Icon size={20} style={{ color: 'var(--blue)' }} />
           </div>
-          <div className={`flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 ${isDark ? "bg-white/5" : "bg-slate-50"}`}>
-             <Clock size={12} className="text-[#00aeef]" />
-             <span className="text-[10px] font-black uppercase tracking-widest opacity-60">
-                {t('deadline')}: {opp.deadline}
-             </span>
+          <div className="badge text-[10px]" style={{ background: 'var(--bg)', color: 'var(--label2)' }}>
+             <Clock size={11} />
+             {opp.deadline}
           </div>
         </div>
 
-        <div className="mb-4">
-          <h3 className={`text-xl font-black mb-2 tracking-tight leading-tight line-clamp-2 ${isDark ? "text-white" : "text-[#001829]"}`}>
-            {title}
-          </h3>
-          <p className={`text-xs font-bold flex items-center gap-2 ${isDark ? "text-[#00aeef]" : "text-[#00aeef]"}`}>
-            <span className={`opacity-40 text-[10px] font-black uppercase tracking-widest ${isDark ? "text-white" : "text-slate-900"}`}>
-                {t('provider')}:
-            </span>
+        <div>
+          <h3 className="t-headline line-clamp-2 mb-1">{title}</h3>
+          <p className="t-caption" style={{ color: 'var(--blue)' }}>
             {provider}
           </p>
         </div>
 
-        <p className={`text-sm opacity-60 leading-relaxed mb-6 line-clamp-3 ${isDark ? "text-white" : "text-slate-600"}`}>
+        <p className="t-footnote line-clamp-3 leading-relaxed" style={{ color: 'var(--label2)' }}>
           {description}
         </p>
 
-        <div className="mt-auto">
-          <div className="flex flex-wrap gap-2 mb-8">
+        <div className="mt-auto pt-2">
+          <div className="flex flex-wrap gap-1.5 mb-4">
             {opp.tags.map(tag => (
-              <span key={tag} className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg ${isDark ? "bg-white/5 text-white/40" : "bg-slate-100 text-slate-400"}`}>
+              <span key={tag} className="badge text-[9px] uppercase tracking-wider" style={{ background: 'var(--bg)', color: 'var(--label3)' }}>
                 #{tag}
               </span>
             ))}
           </div>
 
-          <Link href={`/opportunities/${opp.id}`} className={`w-full py-4 rounded-2xl border font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all
-            ${isDark 
-              ? "border-white/10 text-white hover:bg-[#00aeef] hover:border-[#00aeef]" 
-              : "border-slate-200 text-[#001829] hover:bg-[#001829] hover:text-white"}`}>
+          <Link href={`/opportunities/${opp.id}`} className="btn btn-primary btn-sm btn-full">
             {t('details')}
             <ArrowRight size={14} />
           </Link>
@@ -111,15 +99,12 @@ const OpportunityCard = ({ opp, locale, isDark }: { opp: Opportunity, locale: st
 export default function OpportunitiesPage() {
   const t = useTranslations("opportunities");
   const locale = useLocale();
-  const { theme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<OpportunityType>('all');
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setMounted(true);
     fetchOpportunities();
   }, []);
 
@@ -136,10 +121,6 @@ export default function OpportunitiesPage() {
       setLoading(false);
     }
   };
-
-  if (!mounted) return null;
-
-  const isDark = theme === "dark" || !theme;
 
   const filteredOpps = opportunities.filter(opp => {
     const title = opp.title[locale as keyof typeof opp.title] || opp.title.en;
@@ -158,76 +139,56 @@ export default function OpportunitiesPage() {
     { id: 'volunteer', label: t('volunteering') }
   ] as const;
 
-  return (
-    <div className={`min-h-[100dvh] transition-colors duration-700 pt-32 pb-20 px-6 font-sans
-      ${isDark ? "bg-[#001829] text-white" : "bg-slate-50 text-slate-900"}`}>
-      
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className={`absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full blur-[150px] transition-opacity duration-700
-          ${isDark ? "bg-[#00aeef] opacity-[0.05]" : "bg-sky-200 opacity-[0.3]"}`} />
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay" />
-      </div>
+  if (loading) return (
+    <div className="min-h-dvh flex items-center justify-center" style={{ background: 'var(--bg)' }}>
+      <div className="ios-spinner" />
+    </div>
+  );
 
-      <div className="relative z-10 max-w-7xl mx-auto">
+  return (
+    <div className="page">
+      <div className="page-inner space-y-6">
         
         {/* HEADER */}
-        <div className="text-center mb-20">
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border transition-colors mb-6
-              ${isDark ? "bg-[#00aeef]/10 border-[#00aeef]/30 text-[#00aeef]" : "bg-white border-sky-100 text-[#00aeef] shadow-sm"}`}
-          >
-            <Zap size={14} className="fill-current" />
-            <span className="font-black text-[10px] uppercase tracking-[0.2em]">
+        <div className="pt-2">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="icon-box-sm" style={{ background: 'var(--blue-dim)' }}>
+              <Zap size={14} style={{ color: 'var(--blue)' }} />
+            </div>
+            <span className="t-caption2 uppercase tracking-widest" style={{ color: 'var(--blue)' }}>
                {t('badge')}
             </span>
-          </motion.div>
+          </div>
+          <h1 className="t-large-title">
+            {t('titleMain')} <span style={{ color: 'var(--blue)' }}>{t('titleHighlight')}</span>
+          </h1>
+        </div>
 
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-[0.9]
-              ${isDark ? "text-white" : "text-[#001829]"}`}
-          >
-            {t('titleMain')} <span className="text-[#00aeef]">{t('titleHighlight')}</span>{t('titleEnd')}
-          </motion.h1>
+        {/* SEARCH BAR */}
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2" size={18} style={{ color: 'var(--label3)' }} />
+          <input 
+            type="text" 
+            placeholder={t('searchPlaceholder')}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="input pl-11 pr-11"
+          />
+          {search && (
+            <button onClick={() => setSearch("")} className="absolute right-4 top-1/2 -translate-y-1/2 p-1">
+              <X size={16} style={{ color: 'var(--label3)' }} />
+            </button>
+          )}
+        </div>
 
-          {/* SEARCH BAR */}
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="max-w-2xl mx-auto relative group"
-          >
-            <Search className={`absolute left-6 top-1/2 -translate-y-1/2 transition-colors
-              ${isDark ? "text-white/20 group-focus-within:text-[#00aeef]" : "text-slate-400 group-focus-within:text-[#00aeef]"}`} size={20} />
-            <input 
-              type="text" 
-              placeholder={t('searchPlaceholder')}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className={`w-full py-6 pl-16 pr-6 rounded-[2rem] border text-sm font-bold transition-all focus:outline-none focus:ring-4
-                ${isDark 
-                  ? "bg-white/5 border-white/10 text-white focus:border-[#00aeef] focus:ring-[#00aeef]/10 placeholder:text-white/20" 
-                  : "bg-white border-slate-200 text-[#001829] focus:border-[#00aeef] focus:ring-sky-100 placeholder:text-slate-400 shadow-xl shadow-slate-200/50"}`}
-            />
-            {search && (
-                <button onClick={() => setSearch("")} className="absolute right-6 top-1/2 -translate-y-1/2 p-2 hover:bg-black/5 rounded-full transition-colors">
-                    <X size={18} className="opacity-40" />
-                </button>
-            )}
-          </motion.div>
-
-          {/* FILTER TABS */}
-          <div className="flex flex-wrap justify-center gap-3 mt-12">
+        {/* FILTER TABS */}
+        <div className="overflow-x-auto no-scroll -mx-4 px-4">
+          <div className="seg inline-flex">
             {filterTabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setFilter(tab.id as OpportunityType)}
-                className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all
-                  ${filter === tab.id 
-                    ? "bg-[#00aeef] text-white shadow-xl shadow-[#00aeef]/20 scale-105" 
-                    : isDark ? "bg-white/5 text-white/40 hover:bg-white/10" : "bg-white border border-slate-100 text-slate-400 hover:bg-slate-50"}`}
+                className={`seg-item ${filter === tab.id ? 'on' : ''}`}
               >
                 {tab.label}
               </button>
@@ -236,45 +197,28 @@ export default function OpportunitiesPage() {
         </div>
 
         {/* RESULTS SUMMARY */}
-        <div className="flex items-center gap-4 mb-8 px-4">
-            <Filter size={14} className="opacity-40" />
-            <span className="text-xs font-black uppercase tracking-widest opacity-40">
+        <div className="flex items-center gap-2 px-1">
+            <span className="t-caption2 uppercase tracking-widest" style={{ color: 'var(--label3)' }}>
                 {filteredOpps.length} {t('found')}
             </span>
-            {loading && <span className="text-xs font-bold text-[#00aeef] animate-pulse ml-2">Syncing...</span>}
         </div>
 
         {/* GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="space-y-4 stagger">
           <AnimatePresence mode="popLayout">
-            {loading ? (
-               <div className="col-span-full py-20 flex justify-center">
-                  <Loader2 className="animate-spin text-[#00aeef]" size={32} />
-               </div>
-            ) : filteredOpps.length > 0 ? (
-              filteredOpps.map((opp) => (
-                <OpportunityCard 
-                    key={opp.id} 
-                    opp={opp} 
-                    locale={locale} 
-                    isDark={isDark} 
-                />
-              ))
-            ) : (
-              <motion.div 
-                initial={{ opacity: 0 }} 
-                animate={{ opacity: 1 }}
-                className="col-span-full py-32 text-center"
-              >
-                <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-6">
-                    <Briefcase className="opacity-20" size={40} />
-                </div>
-                <p className="opacity-30 italic font-medium">{t('noResults')}</p>
-              </motion.div>
-            )}
+            {filteredOpps.map(opp => (
+              <OpportunityCard key={opp.id} opp={opp} locale={locale} isDark={false} />
+            ))}
           </AnimatePresence>
         </div>
 
+        {filteredOpps.length === 0 && (
+          <div className="card p-10 text-center">
+            <div className="text-4xl mb-3">🔍</div>
+            <p className="t-headline mb-1">Илэрц олдсонгүй</p>
+            <p className="t-footnote">Өөр түлхүүр үгээр хайж үзнэ үү</p>
+          </div>
+        )}
       </div>
     </div>
   );

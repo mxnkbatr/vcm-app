@@ -2,6 +2,7 @@
 
 import { m, MotionProps } from "framer-motion";
 import React, { useEffect, useState, useMemo } from "react";
+import { useHaptics } from "./useHaptics"; // Import useHaptics
 
 // Hook to detect mobile
 // Optimization: Use a single listener for all motion components
@@ -97,10 +98,25 @@ const Motion = new Proxy(m, {
 
         const Component = React.forwardRef((props: any, ref: any) => {
             const isMobile = useIsMobile();
+            const { triggerHaptic } = useHaptics(); // Initialize useHaptics
 
             if (isMobile) {
                 const Tag = prop as any;
                 const nativeProps = filterProps(props);
+
+                // Add haptic feedback for elements with 'press' class on mobile
+                const hasPressClass = typeof nativeProps.className === 'string' && nativeProps.className.includes('press');
+
+                if (hasPressClass) {
+                    const originalOnTouchStart = nativeProps.onTouchStart;
+                    nativeProps.onTouchStart = (event: React.TouchEvent) => {
+                        triggerHaptic("impactLight"); // Trigger light haptic feedback
+                        if (originalOnTouchStart) {
+                            originalOnTouchStart(event);
+                        }
+                    };
+                }
+
                 return <Tag {...nativeProps} ref={ref} />;
             }
 

@@ -6,14 +6,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
-   Clock, Calendar, MapPin, ArrowUpRight, Activity,
+   Clock, Calendar, MapPin, Activity,
    CheckCircle2, Shield, Settings, BookOpen,
    Sparkles, User, GraduationCap,
    Heart, Video, Lock, CreditCard, ChevronRight,
-   LogOut, Plus, ExternalLink
+   LogOut, Plus, ClipboardList, ShoppingBag
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useTranslations, useLocale } from "next-intl";
+import { useLocale } from "next-intl";
+import { IOSAlert } from "@/app/components/iOSAlert";
 
 // --- CONSTANTS ---
 const STEPS = ["Applied", "Documents", "Interview", "Matching", "Visa", "Departure"];
@@ -72,146 +73,139 @@ interface LessonData {
 }
 
 // --- COMPONENTS ---
-const DashboardCard = ({ children, className = "" }: { children: React.ReactNode; className?: string; delay?: number }) => (
+const DashboardCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
    <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className={`bg-white border border-slate-100 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 ${className}`}
+      className={`card p-6 ${className}`}
    >
       {children}
    </motion.div>
 );
 
 const SectionHeader = ({ icon: Icon, title, subtitle, action }: { icon: any; title: string; subtitle: string; action?: React.ReactNode }) => (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-sky-50 flex items-center justify-center text-sky-500 shadow-sm border border-sky-100">
-                <Icon size={24} />
+    <div className="flex flex-col gap-2 mb-6">
+        <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+                <div className="icon-box-sm" style={{ background: 'var(--blue-dim)' }}>
+                    <Icon size={16} style={{ color: 'var(--blue)' }} />
+                </div>
+                <h2 className="t-headline">{title}</h2>
             </div>
-            <div>
-                <h2 className="text-2xl font-bold text-slate-900 leading-tight">{title}</h2>
-                <p className="text-sm font-medium text-slate-400">{subtitle}</p>
-            </div>
+            {action && <div>{action}</div>}
         </div>
-        {action && (
-            <div>{action}</div>
-        )}
+        <p className="t-caption" style={{ color: 'var(--label3)' }}>{subtitle}</p>
     </div>
 );
 
 const EventCard = ({ event, onRegister, onCancel, isRegistered, locale }: { event: EventData; onRegister?: (id: string) => void; onCancel?: (id: string) => void; isRegistered: boolean; locale: string }) => (
-    <div className="group bg-white border border-slate-100 rounded-3xl overflow-hidden hover:border-sky-200 hover:shadow-xl hover:shadow-sky-500/10 transition-all duration-500 flex flex-col h-full">
-        <div className="relative h-48 w-full overflow-hidden">
+    <motion.div 
+        whileTap={{ scale: 0.98 }}
+        className="card overflow-hidden press flex flex-col h-full"
+    >
+        <div className="relative h-40 w-full overflow-hidden">
             <Image 
                 src={event.image} 
                 alt={event.title[locale as 'en' | 'mn']} 
                 fill 
-                className="object-cover group-hover:scale-110 transition-transform duration-700"
+                className="object-cover"
             />
-            <div className="absolute top-4 left-4">
-                <span className="bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-sky-600 uppercase tracking-widest border border-sky-100">
+            <div className="absolute top-3 left-3">
+                <span className="badge text-[10px] uppercase tracking-widest shadow-sm" style={{ background: 'rgba(255,255,255,0.9)', color: 'var(--blue)' }}>
                     {event.category}
                 </span>
             </div>
             {isRegistered && (
-                <div className="absolute top-4 right-4">
-                    <span className="bg-emerald-500 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-emerald-500/20">
+                <div className="absolute top-3 right-3">
+                    <span className="badge text-[10px] uppercase tracking-widest shadow-sm" style={{ background: 'var(--emerald)', color: 'white' }}>
                         Confirmed
                     </span>
                 </div>
             )}
         </div>
-        <div className="p-6 flex flex-col flex-grow">
-            <div className="flex items-center gap-2 text-slate-400 text-xs font-medium mb-2">
-                <Calendar size={14} className="text-sky-500" />
-                <span>{new Date(event.date).toLocaleDateString(locale === 'mn' ? 'mn-MN' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+        <div className="p-4 flex flex-col flex-grow space-y-3">
+            <div className="flex items-center gap-2 t-caption" style={{ color: 'var(--label3)' }}>
+                <Calendar size={12} style={{ color: 'var(--blue)' }} />
+                <span>{new Date(event.date).toLocaleDateString(locale === 'mn' ? 'mn-MN' : 'en-US', { month: 'short', day: 'numeric' })}</span>
                 <span className="mx-1">•</span>
-                <Clock size={14} className="text-sky-500" />
+                <Clock size={12} style={{ color: 'var(--blue)' }} />
                 <span>{event.timeString}</span>
             </div>
-            <h3 className="text-lg font-bold text-slate-900 mb-2 line-clamp-1 group-hover:text-sky-600 transition-colors">
+            <h3 className="t-headline line-clamp-1">
                 {event.title[locale as 'en' | 'mn']}
             </h3>
-            <p className="text-slate-500 text-xs leading-relaxed mb-6 line-clamp-2 flex-grow">
+            <p className="t-footnote line-clamp-2 flex-grow" style={{ color: 'var(--label2)' }}>
                 {event.description[locale as 'en' | 'mn']}
             </p>
-            <div className="flex items-center gap-2 text-slate-400 text-xs mb-6 font-medium">
-                <MapPin size={14} className="text-sky-500 shrink-0" />
-                <span className="truncate">{event.location[locale as 'en' | 'mn']}</span>
-            </div>
             
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2 pt-2">
                 <Link 
                     href={`/events/${event._id}`}
-                    className="w-full py-3 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 border border-slate-100"
+                    className="btn btn-secondary btn-sm btn-full"
                 >
-                    View Details <ExternalLink size={16} />
+                    Details <ChevronRight size={14} />
                 </Link>
 
                 {isRegistered ? (
                     <button 
                         onClick={() => onCancel && onCancel(event._id)}
-                        className="w-full py-3 text-rose-500 hover:bg-rose-50 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2"
+                        className="t-caption2 font-bold uppercase tracking-widest py-2"
+                        style={{ color: 'var(--red)' }}
                     >
-                        Cancel Registration
+                        Cancel
                     </button>
                 ) : (
                     <button 
                         onClick={() => onRegister && onRegister(event._id)}
-                        className="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-sky-500/20 active:scale-[0.98] flex items-center justify-center gap-2"
+                        className="btn btn-primary btn-sm btn-full"
                     >
-                        Register Now <ArrowUpRight size={16} />
+                        Register
                     </button>
                 )}
             </div>
         </div>
-    </div>
+    </motion.div>
 );
 
 const LessonCard = ({ lesson, onUnlock, locale }: { lesson: LessonData; onUnlock: (id: string) => void; locale: string }) => (
-    <div className={`relative group bg-white border rounded-3xl overflow-hidden transition-all duration-500 ${lesson.isUnlocked ? 'border-slate-100 hover:border-sky-200' : 'border-slate-100'}`}>
-        <div className="p-6">
-            <div className="flex justify-between items-start mb-4">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${lesson.isUnlocked ? 'bg-sky-50 text-sky-500' : 'bg-slate-50 text-slate-400'}`}>
-                    {lesson.isUnlocked ? <Video size={24} /> : <Lock size={24} />}
-                </div>
-                <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
-                    lesson.difficulty === 'beginner' ? 'bg-emerald-50 text-emerald-600' :
-                    lesson.difficulty === 'intermediate' ? 'bg-amber-50 text-amber-600' :
-                    'bg-rose-50 text-rose-600'
-                }`}>
-                    {lesson.difficulty}
-                </span>
+    <motion.div 
+        whileTap={{ scale: 0.98 }}
+        className="card p-4 press flex flex-col space-y-4"
+    >
+        <div className="flex justify-between items-start">
+            <div className="icon-box" style={{ background: lesson.isUnlocked ? 'var(--blue-dim)' : 'var(--bg)', color: lesson.isUnlocked ? 'var(--blue)' : 'var(--label3)' }}>
+                {lesson.isUnlocked ? <Video size={20} /> : <Lock size={20} />}
             </div>
-            <h3 className={`text-lg font-bold mb-2 ${lesson.isUnlocked ? 'text-slate-900' : 'text-slate-400'}`}>
+            <span className="badge text-[9px] uppercase tracking-wider" style={{ background: 'var(--bg)', color: 'var(--label2)' }}>
+                {lesson.difficulty}
+            </span>
+        </div>
+        <div className="space-y-1">
+            <h3 className="t-headline line-clamp-1">
                 {lesson.title[locale as 'en' | 'mn']}
             </h3>
-            <p className="text-slate-500 text-xs leading-relaxed mb-6 line-clamp-2">
+            <p className="t-footnote line-clamp-2" style={{ color: 'var(--label2)' }}>
                 {lesson.description[locale as 'en' | 'mn']}
             </p>
-            
-            <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{lesson.category}</span>
-                {lesson.isUnlocked ? (
-                    <Link href={`/lessons/${lesson._id}`} className="text-sky-500 font-bold text-xs flex items-center gap-1 hover:gap-2 transition-all">
-                        Start Learning <ChevronRight size={16} />
-                    </Link>
-                ) : (
-                    <button 
-                        onClick={() => onUnlock(lesson._id)}
-                        className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-sky-500 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all"
-                    >
-                        Unlock Now <CreditCard size={14} />
-                    </button>
-                )}
-            </div>
         </div>
         
-        {!lesson.isUnlocked && (
-            <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px] pointer-events-none transition-all group-hover:backdrop-blur-none group-hover:bg-white/0" />
-        )}
-    </div>
+        <div className="flex items-center justify-between pt-2">
+            <span className="t-caption2 uppercase tracking-widest" style={{ color: 'var(--label3)' }}>{lesson.category}</span>
+            {lesson.isUnlocked ? (
+                <Link href={`/lessons/${lesson._id}`} className="t-caption font-bold flex items-center gap-1" style={{ color: 'var(--blue)' }}>
+                    Start <ChevronRight size={14} />
+                </Link>
+            ) : (
+                <button 
+                    onClick={() => onUnlock(lesson._id)}
+                    className="btn btn-primary btn-sm"
+                    style={{ fontSize: 10, padding: '4px 12px' }}
+                >
+                    Unlock <CreditCard size={12} className="ml-1" />
+                </button>
+            )}
+        </div>
+    </motion.div>
 );
 
 export default function MemberDashboard() {
@@ -227,6 +221,7 @@ export default function MemberDashboard() {
    const [availableEvents, setAvailableEvents] = useState<EventData[]>([]);
    const [lessons, setLessons] = useState<LessonData[]>([]);
    const [loading, setLoading] = useState(true);
+   const [alert, setAlert] = useState<{ title: string; message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
    useEffect(() => {
       const fetchData = async () => {
@@ -262,50 +257,42 @@ export default function MemberDashboard() {
          return;
       }
 
-      if (isLoaded && user) {
-         fetchData();
-      } else if (isLoaded && !user) {
-         router.replace('/sign-in');
-      }
+      if (isLoaded && user) fetchData();
+      else if (isLoaded && !user) router.replace('/sign-in');
    }, [isLoaded, user, router]);
 
    const handleRegisterEvent = async (eventId: string) => {
        try {
            const res = await fetch(`/api/events/${eventId}`, { method: 'POST' });
            if (res.ok) {
-               // Update lists locally for instant feedback
                const eventToMove = availableEvents.find(e => e._id === eventId);
                if (eventToMove) {
                    setAvailableEvents(prev => prev.filter(e => e._id !== eventId));
                    setAttendedEvents(prev => [eventToMove, ...prev]);
                }
+               setAlert({ title: "Амжилттай!", message: "Арга хэмжээнд бүртгэгдлээ.", type: 'success' });
            } else {
                const data = await res.json();
-               alert(data.error || "Failed to register");
+               setAlert({ title: "Алдаа", message: data.error || "Бүртгэл амжилтгүй боллоо.", type: 'error' });
            }
-       } catch (error) {
-           console.error("Registration error:", error);
-       }
+       } catch (error) { setAlert({ title: "Алдаа", message: "Холболт амжилтгүй боллоо.", type: 'error' }); }
    };
 
    const handleCancelEvent = async (eventId: string) => {
-       if (!confirm("Are you sure you want to cancel your registration?")) return;
        try {
            const res = await fetch(`/api/events/${eventId}`, { method: 'DELETE' });
            if (res.ok) {
-               // Update lists locally
                const eventToMove = attendedEvents.find(e => e._id === eventId);
                if (eventToMove) {
                    setAttendedEvents(prev => prev.filter(e => e._id !== eventId));
                    setAvailableEvents(prev => [eventToMove, ...prev]);
                }
+               setAlert({ title: "Амжилттай!", message: "Бүртгэл цуцлагдлаа.", type: 'info' });
            } else {
                const data = await res.json();
-               alert(data.error || "Failed to cancel registration");
+               setAlert({ title: "Алдаа", message: data.error || "Цуцлалт амжилтгүй боллоо.", type: 'error' });
            }
-       } catch (error) {
-           console.error("Cancellation error:", error);
-       }
+       } catch (error) { setAlert({ title: "Алдаа", message: "Холболт амжилтгүй боллоо.", type: 'error' }); }
    };
 
    const handleUnlockLesson = async (lessonId: string) => {
@@ -316,31 +303,18 @@ export default function MemberDashboard() {
                body: JSON.stringify({ lessonId })
            });
            if (res.ok) {
-               // Update locally
-               setLessons(prev => prev.map(l => l._id === lessonId ? { ...l, isUnlocked: true } : l));
-           } else {
-               alert("Checkout flow triggered (Simulated). In a real app, this would redirect to payment.");
-               // For demo purposes, let's just unlock it
                setLessons(prev => prev.map(l => l._id === lessonId ? { ...l, isUnlocked: true } : l));
            }
-       } catch (error) {
-           console.error("Unlock error:", error);
-       }
+       } catch (error) { console.error(error); }
    };
 
-   if (!isLoaded || loading) return (
-      <div className="min-h-dvh flex items-center justify-center bg-white">
-         <div className="flex flex-col items-center gap-4">
-            <div className="w-16 h-16 relative">
-                <div className="absolute inset-0 border-4 border-sky-100 rounded-full" />
-                <div className="absolute inset-0 border-4 border-sky-500 rounded-full border-t-transparent animate-spin" />
-            </div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Loading Dashboard...</p>
+   if (loading || !userData) {
+      return (
+         <div className="min-h-dvh flex items-center justify-center" style={{ background: 'var(--bg)' }}>
+            <div className="ios-spinner" />
          </div>
-      </div>
-   );
-
-   if (!userData) return null;
+      );
+   }
 
    const isVolunteer = userData.role === 'volunteer' || userData.role === 'student';
    const normalizedStep = (!userData.step || userData.step === "-") ? "Applied" : userData.step;
@@ -348,292 +322,180 @@ export default function MemberDashboard() {
    const progressPercent = Math.max(5, ((currentStepIndex + 1) / STEPS.length) * 100);
 
    return (
-      <div className="min-h-dvh bg-[#FFFFFF] font-sans text-slate-900 pt-28 pb-20 px-6">
-         {/* Background Decoration */}
-         <div className="fixed inset-0 pointer-events-none overflow-hidden">
-            <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-sky-50 rounded-full blur-[120px] opacity-40" />
-            <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-50 rounded-full blur-[100px] opacity-30" />
-         </div>
+      <div className="page">
+         <div className="page-inner space-y-8">
+            
+            {/* WELCOME HEADER */}
+            <div className="pt-2">
+               <p className="t-caption2 uppercase tracking-widest mb-1" style={{ color: 'var(--blue)' }}>
+                  {isVolunteer ? 'Гишүүний хяналтын самбар' : 'Зочны портал'}
+               </p>
+               <h1 className="t-large-title">
+                  Сайн уу,<br />
+                  <span style={{ color: 'var(--blue)' }}>{userData.fullName.split(' ')[0]}</span>
+               </h1>
+            </div>
 
-         <div className="relative z-10 max-w-7xl mx-auto space-y-20">
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-                  <div className="flex items-center gap-3 mb-4">
-                     <span className="flex h-2 w-2 rounded-full bg-sky-500 shadow-[0_0_12px_rgba(14,165,233,0.5)] animate-pulse" />
-                     <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-sky-600">
-                        {isVolunteer ? "Member Dashboard" : "Guest Portal"}
-                     </p>
+            {/* STATUS & JOURNEY */}
+            <div className="grid grid-cols-2 gap-4">
+               <DashboardCard className="!p-5 space-y-3">
+                  <div className="icon-box-sm" style={{ background: 'var(--blue-dim)', color: 'var(--blue)' }}>
+                     <Shield size={16} />
                   </div>
-                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-slate-900">
-                     Welcome back, <br />
-                     <span className="text-sky-500">{userData.fullName}</span>
-                  </h1>
-               </motion.div>
-               
-               <motion.div 
-                    initial={{ opacity: 0, scale: 0.9 }} 
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="flex flex-wrap gap-4"
-               >
-                  <Link href="/profile" className="flex items-center gap-2 px-6 py-3 border border-slate-100 bg-white hover:border-sky-200 hover:text-sky-600 rounded-2xl transition-all shadow-sm">
-                     <Settings size={18} />
-                     <span className="text-xs font-bold uppercase tracking-widest">Settings</span>
-                  </Link>
-                  <button onClick={() => router.push('/api/auth/signout')} className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white hover:bg-sky-600 rounded-2xl transition-all shadow-lg shadow-slate-900/10">
-                     <LogOut size={18} />
-                     <span className="text-xs font-bold uppercase tracking-widest">Sign Out</span>
-                  </button>
-               </motion.div>
+                  <div>
+                     <p className="t-caption2 uppercase tracking-widest mb-0.5" style={{ color: 'var(--label3)' }}>Status</p>
+                     <p className="t-headline capitalize">{userData.role}</p>
+                  </div>
+               </DashboardCard>
+               <DashboardCard className="!p-5 space-y-3">
+                  <div className="icon-box-sm" style={{ background: 'var(--emerald-dim)', color: 'var(--emerald)' }}>
+                     <CheckCircle2 size={16} />
+                  </div>
+                  <div>
+                     <p className="t-caption2 uppercase tracking-widest mb-0.5" style={{ color: 'var(--label3)' }}>Journey</p>
+                     <p className="t-headline">{userData.step || "Discovery"}</p>
+                  </div>
+               </DashboardCard>
             </div>
 
-            {/* Quick Status Bar */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <DashboardCard className="p-8 border-l-4 border-l-sky-500">
-                    <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-2xl bg-sky-50 flex items-center justify-center text-sky-500">
-                            <Shield size={28} />
-                        </div>
-                        <div>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Account Status</p>
-                            <h3 className="text-lg font-bold text-slate-900 capitalize">{userData.role}</h3>
-                        </div>
-                    </div>
-                </DashboardCard>
-                <DashboardCard className="p-8 border-l-4 border-l-emerald-500">
-                    <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-500">
-                            <Calendar size={28} />
-                        </div>
-                        <div>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Joined Events</p>
-                            <h3 className="text-lg font-bold text-slate-900">{attendedEvents.length} Events</h3>
-                        </div>
-                    </div>
-                </DashboardCard>
-                <DashboardCard className="p-8 border-l-4 border-l-amber-500">
-                    <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500">
-                            <BookOpen size={28} />
-                        </div>
-                        <div>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Learning Progress</p>
-                            <h3 className="text-lg font-bold text-slate-900">{lessons.filter(l => l.isUnlocked).length} / {lessons.length} Lessons</h3>
-                        </div>
-                    </div>
-                </DashboardCard>
+            {/* QUICK ACTIONS */}
+            <div className="flex gap-4 overflow-x-auto no-scroll -mx-4 px-4">
+               <Link href="/profile" className="btn btn-secondary btn-sm flex-shrink-0">
+                  <User size={14} /> Profile
+               </Link>
+               <Link href="/shop" className="btn btn-secondary btn-sm flex-shrink-0">
+                  <ShoppingBag size={14} /> Shop
+               </Link>
+               <button onClick={() => {}} className="btn btn-secondary btn-sm flex-shrink-0">
+                  <Settings size={14} /> Settings
+               </button>
+               <button onClick={() => router.push('/api/auth/signout')} className="btn btn-secondary btn-sm flex-shrink-0" style={{ color: 'var(--red)' }}>
+                  <LogOut size={14} /> Logout
+               </button>
             </div>
 
-            {/* Application Progress (Volunteers only) */}
+            {/* PROGRESS BAR (Volunteers only) */}
             {isVolunteer && (
-                <div className="space-y-8">
+                <section>
                     <SectionHeader 
                         icon={Activity} 
-                        title="Application Journey" 
-                        subtitle="Track your progress towards your destination"
+                        title="Миний аялал" 
+                        subtitle="Хөтөлбөрт хамрагдах явц"
                     />
-                    <DashboardCard className="p-10 border-none bg-slate-50/50">
-                        <div className="space-y-10">
-                           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                              <div>
-                                 <h4 className="text-sm font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">Current Step</h4>
-                                 <div className="flex items-center gap-3">
-                                    <span className="text-2xl font-black text-slate-900">Step {currentStepIndex + 1}: {normalizedStep}</span>
-                                    <span className="bg-sky-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Active</span>
-                                 </div>
-                              </div>
-                              <div className="text-right">
-                                 <p className="text-sm font-bold text-sky-600 mb-1">{Math.round(progressPercent)}% Completed</p>
-                                 <div className="w-48 h-2 bg-slate-200 rounded-full overflow-hidden ml-auto">
-                                    <motion.div initial={{ width: 0 }} animate={{ width: `${progressPercent}%` }} className="h-full bg-sky-500" />
-                                 </div>
-                              </div>
-                           </div>
-
-                           <div className="relative pt-8 pb-4">
-                                <div className="absolute top-1/2 left-0 w-full h-1 bg-slate-200 -translate-y-1/2 rounded-full" />
-                                <div className="absolute top-1/2 left-0 h-1 bg-sky-500 -translate-y-1/2 rounded-full transition-all duration-1000" style={{ width: `${progressPercent}%` }} />
-                                
-                                <div className="relative flex justify-between">
-                                    {STEPS.map((step, idx) => {
-                                        const isCompleted = idx < currentStepIndex;
-                                        const isCurrent = idx === currentStepIndex;
-                                        return (
-                                            <div key={step} className="flex flex-col items-center gap-4 relative z-10">
-                                                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 border-4 ${
-                                                    isCompleted ? 'bg-sky-500 border-sky-100 text-white' : 
-                                                    isCurrent ? 'bg-white border-sky-500 text-sky-500' : 
-                                                    'bg-white border-slate-100 text-slate-300'
-                                                }`}>
-                                                    {isCompleted ? <CheckCircle2 size={18} /> : <span className="text-xs font-bold">{idx + 1}</span>}
-                                                </div>
-                                                <span className={`text-[10px] font-bold uppercase tracking-widest ${isCurrent ? 'text-sky-600' : isCompleted ? 'text-slate-900' : 'text-slate-300'}`}>
-                                                    {step}
-                                                </span>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                           </div>
+                    <DashboardCard className="!p-6">
+                        <div className="flex justify-between items-center mb-3">
+                            <span className="t-headline" style={{ fontSize: 15 }}>{normalizedStep}</span>
+                            <span className="t-caption font-bold" style={{ color: 'var(--blue)' }}>{Math.round(progressPercent)}%</span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden" style={{ background: 'var(--bg)' }}>
+                            <motion.div initial={{ width: 0 }} animate={{ width: `${progressPercent}%` }} className="h-full" style={{ background: 'var(--blue)' }} />
+                        </div>
+                        <div className="mt-6 flex justify-between">
+                            {STEPS.map((step, idx) => {
+                                const isCompleted = idx <= currentStepIndex;
+                                return (
+                                    <div key={step} className={`w-2 h-2 rounded-full ${isCompleted ? '' : 'opacity-20'}`} style={{ background: isCompleted ? 'var(--blue)' : 'var(--label4)' }} />
+                                );
+                            })}
                         </div>
                     </DashboardCard>
-                </div>
+                </section>
             )}
 
-            {/* My Events Section */}
-            <div className="space-y-8">
-                <SectionHeader 
-                    icon={Calendar} 
-                    title="My Registered Events" 
-                    subtitle="Manage your upcoming registrations and participation"
-                    action={
-                        <Link href="/events" className="flex items-center gap-2 text-sky-500 font-bold text-sm hover:gap-3 transition-all">
-                            Browse More Events <ChevronRight size={18} />
-                        </Link>
-                    }
-                />
-                
-                {attendedEvents.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {attendedEvents.map(event => (
-                            <EventCard 
-                                key={event._id} 
-                                event={event} 
-                                onCancel={handleCancelEvent}
-                                isRegistered={true} 
-                                locale={locale}
-                            />
-                        ))}
-                    </div>
-                ) : (
-                    <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2rem] p-20 text-center">
-                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border border-slate-100 text-slate-300">
-                            <Calendar size={32} />
+            {/* APPLICATIONS */}
+            <section>
+               <SectionHeader 
+                  icon={ClipboardList} 
+                  title="Миний өргөдлүүд" 
+                  subtitle="Таны илгээсэн хөтөлбөрийн хүсэлтүүд"
+                  action={
+                     <Link href="/programs" className="t-caption font-bold" style={{ color: 'var(--blue)' }}>
+                        Шинэ +
+                     </Link>
+                  }
+               />
+               <div className="space-y-4">
+                  {userApps.length === 0 ? (
+                     <div className="card p-8 text-center" style={{ background: 'var(--bg)' }}>
+                        <p className="t-footnote" style={{ color: 'var(--label3)' }}>Одоогоор өргөдөл байхгүй байна.</p>
+                     </div>
+                  ) : (
+                     userApps.map(app => (
+                        <div key={app._id} className="card p-4 flex items-center gap-4">
+                           <div className="icon-box-sm" style={{ background: 'var(--blue-dim)', color: 'var(--blue)' }}>
+                              <Plus size={16} />
+                           </div>
+                           <div className="flex-1">
+                              <h4 className="t-headline" style={{ fontSize: 14 }}>{app.programId}</h4>
+                              <p className="t-caption" style={{ color: 'var(--label3)' }}>{new Date(app.createdAt).toLocaleDateString()}</p>
+                           </div>
+                           <div className="badge text-[10px]" style={{ background: 'var(--orange-dim)', color: 'var(--orange)' }}>
+                              {app.status || 'Pending'}
+                           </div>
                         </div>
-                        <h3 className="text-xl font-bold text-slate-900 mb-2">No registered events yet</h3>
-                        <p className="text-slate-500 text-sm max-w-md mx-auto mb-8">
-                            Explore our upcoming workshops, campaigns, and meetings to start your journey with VCM.
-                        </p>
-                        <Link href="/events" className="inline-flex items-center gap-2 bg-sky-500 text-white px-8 py-4 rounded-2xl font-bold text-sm hover:bg-sky-600 transition-all shadow-lg shadow-sky-500/25">
-                            Find Events <Plus size={18} />
-                        </Link>
-                    </div>
-                )}
-            </div>
+                     ))
+                  )}
+               </div>
+            </section>
 
-            {/* Available Events Section */}
-            {availableEvents.length > 0 && (
-                <div className="space-y-8">
-                    <SectionHeader 
-                        icon={Sparkles} 
-                        title="Available for Registration" 
-                        subtitle="New opportunities waiting for you"
-                    />
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {availableEvents.map(event => (
-                            <EventCard 
-                                key={event._id} 
-                                event={event} 
-                                onRegister={handleRegisterEvent}
-                                isRegistered={false} 
-                                locale={locale}
-                            />
-                        ))}
-                    </div>
-                </div>
-            )}
+            {/* EVENTS */}
+            <section>
+               <SectionHeader 
+                  icon={Calendar} 
+                  title="Арга хэмжээ" 
+                  subtitle="Танд санал болгож буй үйл ажиллагаанууд"
+                  action={
+                     <Link href="/events" className="t-caption font-bold" style={{ color: 'var(--blue)' }}>
+                        Бүгд →
+                     </Link>
+                  }
+               />
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 stagger">
+                  {availableEvents.slice(0, 2).map(event => (
+                     <EventCard 
+                        key={event._id} 
+                        event={event} 
+                        onRegister={handleRegisterEvent}
+                        isRegistered={attendedEvents.some(e => e._id === event._id)}
+                        locale={locale}
+                     />
+                  ))}
+               </div>
+            </section>
 
-            {/* Lessons Section */}
-            <div className="space-y-8">
-                <SectionHeader 
-                    icon={BookOpen} 
-                    title="Study Modules" 
-                    subtitle="Access your learning materials and unlock new lessons"
-                />
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {lessons.map(lesson => (
-                        <LessonCard 
-                            key={lesson._id} 
-                            lesson={lesson} 
-                            onUnlock={handleUnlockLesson}
-                            locale={locale}
-                        />
-                    ))}
-                    
-                    {lessons.length === 0 && (
-                        <div className="col-span-full py-12 text-center text-slate-400">
-                            No lessons available at the moment.
-                        </div>
-                    )}
-                </div>
-            </div>
+            {/* LESSONS */}
+            <section>
+               <SectionHeader 
+                  icon={BookOpen} 
+                  title="Сургалт & Хичээл" 
+                  subtitle="Мэдлэгээ тэлж, өөрийгөө хөгжүүлээрэй"
+                  action={
+                     <Link href="/lessons" className="t-caption font-bold" style={{ color: 'var(--blue)' }}>
+                        Бүгд →
+                     </Link>
+                  }
+               />
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 stagger">
+                  {lessons.slice(0, 4).map(lesson => (
+                     <LessonCard 
+                        key={lesson._id} 
+                        lesson={lesson} 
+                        onUnlock={handleUnlockLesson}
+                        locale={locale}
+                     />
+                  ))}
+               </div>
+            </section>
 
-            {/* Profile Snapshot */}
-            <div className="space-y-8">
-                <SectionHeader 
-                    icon={User} 
-                    title="Profile Snapshot" 
-                    subtitle="Your recorded information in our system"
-                />
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <DashboardCard className="p-8">
-                        <div className="flex items-center gap-3 mb-6">
-                            <GraduationCap className="text-sky-500" size={20} />
-                            <h3 className="font-bold text-slate-900">Academic Info</h3>
-                        </div>
-                        <div className="space-y-4">
-                            <div>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Education Level</p>
-                                <p className="text-sm font-bold text-slate-900">{userData.profile?.educationLevel || "Not provided"}</p>
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Languages</p>
-                                <p className="text-sm font-bold text-slate-900">{userData.profile?.languages || "Not provided"}</p>
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Affiliation</p>
-                                <p className="text-sm font-bold text-slate-900">{userData.affiliation || "Not provided"}</p>
-                            </div>
-                        </div>
-                    </DashboardCard>
-
-                    <DashboardCard className="p-8">
-                        <div className="flex items-center gap-3 mb-6">
-                            <MapPin className="text-sky-500" size={20} />
-                            <h3 className="font-bold text-slate-900">Contact & Address</h3>
-                        </div>
-                        <div className="space-y-4">
-                            <div>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Phone</p>
-                                <p className="text-sm font-bold text-slate-900">{userData.phone || "Not provided"}</p>
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Email</p>
-                                <p className="text-sm font-bold text-slate-900">{userData.email}</p>
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Current City</p>
-                                <p className="text-sm font-bold text-slate-900">{userData.profile?.address?.city || "Not provided"}</p>
-                            </div>
-                        </div>
-                    </DashboardCard>
-
-                    <DashboardCard className="p-8">
-                        <div className="flex items-center gap-3 mb-6">
-                            <Heart className="text-sky-500" size={20} />
-                            <h3 className="font-bold text-slate-900">Motivation</h3>
-                        </div>
-                        <p className="text-sm text-slate-500 leading-relaxed italic line-clamp-4">
-                            &quot;{userData.profile?.motivation || "No motivation letter submitted yet. Your motivation helps us understand your goals better."}&quot;
-                        </p>
-                        <Link href="/profile" className="inline-block mt-4 text-xs font-bold text-sky-500 hover:underline">
-                            Edit Profile Details →
-                        </Link>
-                    </DashboardCard>
-                </div>
-            </div>
          </div>
+
+         <IOSAlert 
+            isOpen={!!alert} 
+            onClose={() => setAlert(null)} 
+            title={alert?.title || ""} 
+            message={alert?.message || ""} 
+            type={alert?.type} 
+         />
       </div>
    );
 }

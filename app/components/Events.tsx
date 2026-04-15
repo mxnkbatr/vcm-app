@@ -98,6 +98,8 @@ const ContentCard = ({ item, lang, isDark, isMobile, type }: any) => {
       initial={{ opacity: 0, scale: 0.9, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+      whileTap={{ scale: 0.96 }}
+      className="press active:scale-95 transition-transform"
       style={{
         rotateX: isMobile ? 0 : rotateX,
         rotateY: isMobile ? 0 : rotateY,
@@ -204,8 +206,8 @@ const ContentCard = ({ item, lang, isDark, isMobile, type }: any) => {
 };
 
 // --- MAIN SECTION ---
-export default function LatestUpdatesSection() {
-  const lang = useLocale();
+export default function LatestUpdatesSection({ isHorizontal = false }: { isHorizontal?: boolean }) {
+  const lang = useLocale() as any;
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -235,8 +237,6 @@ export default function LatestUpdatesSection() {
 
         if (results[0].status === 'fulfilled') {
           setEvents(results[0].value);
-        } else {
-          console.error("Events error:", results[0].reason);
         }
 
         if (results[1].status === 'fulfilled') {
@@ -248,8 +248,6 @@ export default function LatestUpdatesSection() {
             readTime: "3 min read"
           }));
           setBlogs(mappedBlogs);
-        } else {
-          console.error("News error:", results[1].reason);
         }
       } catch (error) {
         console.error("Failed to fetch data", error);
@@ -261,185 +259,194 @@ export default function LatestUpdatesSection() {
   }, []);
 
   const displayedItems = activeTab === 'events' ? events : blogs;
-  const categories = activeTab === 'events' ? EVENT_CATEGORIES : BLOG_CATEGORIES;
   const filteredItems = displayedItems.filter(item => filter === 'all' || item.category === filter);
 
   if (!mounted) return null;
 
+  if (isHorizontal) {
+    return (
+      <>
+        {loading ? (
+          <div className="w-full h-40 flex items-center justify-center">
+            <div className="ios-spinner" />
+          </div>
+        ) : displayedItems.slice(0, 6).map((item) => {
+          const title = item.title?.[lang] || item.title?.en || "No Title";
+          const isBlog = activeTab === 'blogs';
+          return (
+            <div key={item._id} className="min-w-[300px] snap-start">
+              <Link href={`/${lang}/${isBlog ? 'news' : 'events'}/${item._id}`} className="block">
+                <motion.div
+                  className="card overflow-hidden press active:scale-95 transition-transform"
+                  whileTap={{ scale: 0.96 }}
+                >
+                  <div className="relative h-44 bg-slate-100">
+                    <Image
+                      src={item.image || "/placeholder.jpg"}
+                      alt={title}
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute top-3 left-3 px-2 py-1 bg-white/90 backdrop-blur-md rounded-lg shadow-sm border border-white/50">
+                      <span className="text-[10px] font-black uppercase text-sky-600">
+                        {item.category || "General"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-sm font-bold line-clamp-2 text-slate-900 leading-snug h-10 mb-2">
+                      {title}
+                    </h3>
+                    <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                       <Clock size={12} strokeWidth={2.5} />
+                       <span>{new Date(item.date).toLocaleDateString(lang === 'mn' ? 'mn-MN' : 'en-US', { month: 'short', day: 'numeric' })}</span>
+                    </div>
+                  </div>
+                </motion.div>
+              </Link>
+            </div>
+          );
+        })}
+      </>
+    );
+  }
+
   return (
-    <section className={`relative py-16 sm:py-24 px-4 sm:px-6 overflow-hidden transition-colors duration-700 
-      ${isDark ? "bg-slate-950" : "bg-slate-50"}`
-    }>
+    <section className="py-12 px-4 sm:px-6" style={{ background: 'var(--bg)' }}>
+      <div className="max-w-5xl mx-auto space-y-8">
+        
+        {/* HEADER */}
+        <div className="space-y-6">
+          <div className="seg">
+            {TABS.map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => { setActiveTab(tab.id as any); setFilter('all'); }}
+                  className={`seg-item ${isActive ? 'on' : ''}`}
+                >
+                  {(tab as any)[lang]}
+                </button>
+              )
+            })}
+          </div>
 
-      {/* --- BACKGROUND EFFECTS --- */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Noise Texture */}
-        <div className="absolute inset-0 opacity-[0.04] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay z-0" />
+          <div>
+            <h2 className="t-large-title">
+              {activeTab === 'events'
+                ? (lang === 'mn' ? 'Арга Хэмжээ' : 'Upcoming Events')
+                : (lang === 'mn' ? 'Мэдээлэл' : 'Latest Insights')
+              }
+            </h2>
+            <p className="t-subhead mt-1" style={{ color: 'var(--label2)' }}>
+              {activeTab === 'events' 
+                ? (lang === 'mn' ? 'Ойрын хугацаанд болох үйл ажиллагаанууд' : 'Upcoming activities and gatherings')
+                : (lang === 'mn' ? 'Сүүлийн үеийн мэдээ, зөвлөгөө' : 'Recent news and helpful guides')
+              }
+            </p>
+          </div>
 
-        {/* Animated Blobs - DISABLED ON MOBILE */}
-        {!isMobile && (
-          <>
-            {/* Brand Primary Blob */}
-            <motion.div
-              animate={{
-                scale: [1, 1.2, 1],
-                opacity: [0.1, 0.2, 0.1],
-                x: [0, 50, 0]
-              }}
-              transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -top-[10%] -right-[10%] w-[800px] h-[800px] rounded-full blur-[100px] mix-blend-multiply"
-              style={{ backgroundColor: isDark ? 'rgba(14, 165, 233, 0.15)' : 'rgba(14, 165, 233, 0.1)' }}
-            />
-
-            {/* Brand Accent Blob */}
-            <motion.div
-              animate={{
-                scale: [1, 1.1, 1],
-                opacity: [0.1, 0.15, 0.1],
-                x: [0, -30, 0]
-              }}
-              transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-              className="absolute -bottom-[10%] -left-[10%] w-[600px] h-[600px] rounded-full blur-[100px] mix-blend-multiply"
-              style={{ backgroundColor: isDark ? 'rgba(56, 189, 248, 0.1)' : 'rgba(14, 165, 233, 0.05)' }}
-            />
-          </>
-        )}
-      </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto">
-
-        {/* --- HEADER --- */}
-        <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6 sm:gap-10 mb-10 sm:mb-16">
-
-          <div className="space-y-8">
-            {/* Tabs */}
-            <div className={`inline-flex p-1.5 rounded-full border backdrop-blur-md
-                  ${isDark ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"}`}>
-              {TABS.map((tab) => {
-                const isActive = activeTab === tab.id;
+          {/* CATEGORY FILTERS */}
+          <div className="overflow-x-auto no-scroll -mx-4 px-4">
+            <div className="flex gap-2">
+              {categories.map((cat) => {
+                const isActive = filter === cat.id;
                 return (
                   <button
-                    key={tab.id}
-                    onClick={() => { setActiveTab(tab.id as any); setFilter('all'); }}
-                    className={`relative px-5 sm:px-8 py-2.5 sm:py-3 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all z-10
-                          ${isActive
-                        ? "text-white"
-                        : (isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900")
-                      }`}
+                    key={cat.id}
+                    onClick={() => setFilter(cat.id)}
+                    className="badge press"
+                    style={{ 
+                      background: isActive ? 'var(--blue)' : 'var(--fill2)', 
+                      color: isActive ? 'white' : 'var(--label2)',
+                      padding: '8px 16px',
+                      fontSize: 12
+                    }}
                   >
-                    {isActive && (
-                      <motion.div
-                        layoutId="activeContentTab"
-                        className="absolute inset-0 rounded-full -z-10 shadow-lg shadow-sky-500/20"
-                        style={{ backgroundColor: BRAND.PRIMARY }}
-                      />
-                    )}
-                    {(tab as any)[lang]}
+                    {(cat as any)[lang]}
                   </button>
                 )
               })}
             </div>
-
-            {/* Title */}
-            <div className="relative">
-              <motion.h2
-                key={activeTab}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`text-2xl sm:text-4xl md:text-6xl font-black tracking-tighter leading-[0.9]
-                      ${isDark ? "text-white" : "text-slate-900"}`}
-              >
-                {activeTab === 'events'
-                  ? (lang === 'mn' ? 'Арга Хэмжээ' : 'Upcoming Events')
-                  : (lang === 'mn' ? 'Мэдээлэл' : 'Latest Insights')
-                }
-                <span style={{ color: BRAND.PRIMARY }}>.</span>
-              </motion.h2>
-            </div>
           </div>
-
-          {/* --- CATEGORY FILTERS --- */}
-          <motion.div
-            layout
-            className={`flex overflow-x-auto pb-2 xl:pb-0 gap-2 scrollbar-hide`}
-          >
-            {categories.map((cat) => {
-              const isActive = filter === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => setFilter(cat.id)}
-                  className={`
-                       relative whitespace-nowrap px-6 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all flex-shrink-0 border shadow-sm
-                       ${isActive
-                      ? "text-white border-transparent"
-                      : (isDark ? "text-slate-400 border-white/10 hover:border-white/30" : "text-slate-500 border-slate-200 hover:border-sky-300 bg-white")}
-                    `}
-                  style={{ backgroundColor: isActive ? BRAND.PRIMARY : 'transparent' }}
-                >
-                  {(cat as any)[lang]}
-                </button>
-              )
-            })}
-          </motion.div>
         </div>
 
-        {/* --- GRID CONTENT --- */}
-        <div className="min-h-[400px]">
+        {/* GRID CONTENT */}
+        <div className="min-h-[300px]">
           {loading ? (
-            <div className="h-60 flex items-center justify-center">
-              <Loader2 className="animate-spin text-sky-500" size={40} />
+            <div className="h-40 flex items-center justify-center">
+              <div className="ios-spinner" />
             </div>
           ) : filteredItems.length > 0 ? (
-            <motion.div
-              layout
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8"
-            >
-              <AnimatePresence mode="popLayout">
-                {filteredItems.map((item) => (
-                  <ContentCard
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 stagger">
+              {filteredItems.map((item) => {
+                const title = item.title[lang] || item.title.en;
+                const isBlog = activeTab === 'blogs';
+                const d = new Date(item.date);
+                const dateStr = d.toLocaleDateString(lang === 'mn' ? 'mn-MN' : 'en-US', { month: 'short', day: 'numeric' });
+
+                return (
+                  <motion.div
                     key={item._id}
-                    item={item}
-                    lang={lang}
-                    isDark={isDark}
-                    isMobile={isMobile}
-                    type={activeTab}
-                  />
-                ))}
-              </AnimatePresence>
-            </motion.div>
+                    className="card overflow-hidden press flex flex-col"
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    <Link href={`/${isBlog ? 'news' : 'events'}/${item._id}`} className="block h-full">
+                      <div className="relative h-44 bg-slate-100">
+                        <Image
+                          src={item.image || "/logo.jpg"}
+                          alt={title}
+                          fill
+                          className="object-cover"
+                        />
+                        <div className="absolute top-3 left-3">
+                          <span className="badge" style={{ background: 'rgba(255,255,255,0.9)', color: 'var(--blue)' }}>
+                            {item.category}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="p-4 flex flex-col justify-between flex-1 space-y-3">
+                        <div>
+                          <h3 className="t-headline line-clamp-2">{title}</h3>
+                          <div className="flex items-center gap-2 mt-2">
+                            <span className="t-caption flex items-center gap-1">
+                              <Clock size={11} /> {isBlog ? item.readTime : item.timeString}
+                            </span>
+                            <span className="t-caption flex items-center gap-1">
+                              <MapPin size={11} /> {dateStr}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-end">
+                          <span className="t-caption font-semibold flex items-center gap-0.5" style={{ color: 'var(--blue)' }}>
+                            {lang === 'mn' ? 'Үзэх' : 'View'} <ChevronRight size={13} />
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-32 rounded-[3rem] border-2 border-dashed bg-slate-50/50"
-              style={{ borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#CBD5E1' }}>
-              <div className="p-4 bg-slate-100 rounded-full mb-4">
-                <Clock size={32} className="text-slate-400" />
-              </div>
-              <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">No items found.</p>
+            <div className="card p-12 text-center">
+              <div className="text-4xl mb-3">📭</div>
+              <p className="t-headline">Хоосон байна</p>
             </div>
           )}
         </div>
 
-        {/* --- FOOTER CTA --- */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="mt-24 flex justify-center"
-        >
-          <Link href={activeTab === 'events' ? '/events' : '/news'} className="group relative inline-flex items-center gap-6">
-            <span className={`text-xs font-black uppercase tracking-[0.25em] transition-colors
-                 ${isDark ? "text-slate-300 group-hover:text-white" : "text-slate-700 group-hover:text-sky-600"}`}>
-              {activeTab === 'events'
-                ? (lang === 'mn' ? 'Бүх арга хэмжээг харах' : 'View All Events')
-                : (lang === 'mn' ? 'Бүх нийтлэлийг унших' : 'View All Posts')
-              }
-            </span>
-            <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-[-45deg] text-white shadow-xl shadow-sky-500/20 hover:shadow-sky-500/40`}
-              style={{ backgroundColor: BRAND.PRIMARY }}>
-              <ArrowUpRight size={20} />
-            </div>
+        {/* FOOTER CTA */}
+        <div className="pt-4 flex justify-center">
+          <Link href={activeTab === 'events' ? '/events' : '/news'} className="btn btn-ghost btn-full">
+            {activeTab === 'events'
+              ? (lang === 'mn' ? 'Бүх арга хэмжээг харах' : 'View All Events')
+              : (lang === 'mn' ? 'Бүх нийтлэлийг унших' : 'View All Posts')
+            }
+            <ChevronRight size={16} className="ml-1" />
           </Link>
-        </motion.div>
+        </div>
 
       </div>
     </section>

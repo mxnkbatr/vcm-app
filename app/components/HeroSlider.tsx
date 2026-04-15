@@ -229,44 +229,7 @@ const HeroSlider = () => {
           </AnimatePresence>
         </div>
 
-        {/* RIGHT COLUMN: Cinematic Pagination */}
-        <div className="hidden lg:flex lg:col-span-4 h-full flex-col justify-center items-end pl-12">
-          <div className="flex flex-col gap-6">
-            {slides.map((item, index) => {
-              const isActive = index === slideIndex;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setSlideIndex(index)}
-                  className="group relative w-72 flex items-center justify-end gap-6 outline-none"
-                >
-                  <div className={`text-right transition-all duration-500 ${isActive ? "opacity-100 translate-x-0" : "opacity-40 translate-x-4 group-hover:opacity-70"}`}>
-                    <p className="text-xs font-bold uppercase tracking-widest text-sky-500 mb-1">
-                      0{index + 1}
-                    </p>
-                    <h2 className="text-lg font-bold text-slate-900">
-                      {item.location}
-                    </h2>
-                  </div>
 
-                  {/* Vertical Progress Bar */}
-                  <div className="relative w-[6px] h-[80px] rounded-full overflow-hidden transition-all duration-500 bg-slate-200 shrink-0">
-                    {isActive && (
-                      <motion.div
-                        layoutId="activeGlow"
-                        className="absolute top-0 left-0 w-full bg-gradient-to-b from-sky-400 to-sky-600"
-                        initial={{ height: "0%" }}
-                        animate={{ height: "100%" }}
-                        transition={{ duration: AUTOPLAY_DURATION / 1000, ease: "linear" }}
-                        key={slideIndex}
-                      />
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
       </div>
     </section>
   );

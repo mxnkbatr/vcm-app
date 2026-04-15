@@ -8,9 +8,10 @@ import {
   Star, Users, Globe, Heart, Zap, GraduationCap,
   BookOpen, CalendarDays, ArrowRight, Sparkles,
   ArrowLeft, Send, Loader2, User, Mail, Phone,
-  ChevronDown
+  ChevronDown, X
 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { IOSAlert, IOSSheet } from "./iOSAlert";
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 interface ProgramConfig {
@@ -47,6 +48,7 @@ function ApplyForm({
   onSuccess: () => void;
 }) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     firstName: "", lastName: "", email: "", phone: "",
     age: "", level: "B1", message: "",
@@ -57,6 +59,7 @@ function ApplyForm({
   const handleSubmit = async () => {
     if (!form.firstName || !form.email || !form.message) return;
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch("/api/apply", {
         method: "POST",
@@ -66,160 +69,93 @@ function ApplyForm({
       if (res.ok) onSuccess();
       else throw new Error("Failed");
     } catch {
-      alert("Алдаа гарлаа. Дахин оролдоно уу.");
+      setError("Алдаа гарлаа. Дахин оролдоно уу.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 24 }}
-      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end lg:items-center justify-center p-0 lg:p-6"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white w-full max-w-lg rounded-t-3xl lg:rounded-3xl max-h-[92vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Handle */}
-        <div className="sticky top-0 bg-white pt-3 pb-4 px-6 border-b border-slate-100 z-10">
-          <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-4" />
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">{prog.id} хөтөлбөр</div>
-              <h3 className="text-lg font-black text-slate-900">Өргөдөл гаргах</h3>
-            </div>
-            <button onClick={onClose} className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 text-lg font-bold">
-              ×
-            </button>
-          </div>
-        </div>
-
-        <div className="p-6 space-y-4">
-          {/* Program badge */}
+    <IOSSheet isOpen={true} onClose={onClose} title="Өргөдөл гаргах">
+      <div className="p-6 space-y-5">
+          {/* Program info card */}
           <div
-            className="rounded-2xl p-4 flex items-center gap-3"
+            className="card p-4 flex items-center gap-4"
             style={{ background: `linear-gradient(135deg, ${prog.gradientFrom}15, ${prog.gradientTo}10)` }}
           >
-            <span className="text-3xl">{prog.emoji}</span>
-            <div>
-              <div className="text-xs font-black text-slate-900">{prog.name}</div>
-              <div className="text-[10px] text-slate-500 font-medium">{prog.duration} · {prog.location}</div>
-            </div>
-            <div className={`ml-auto text-[9px] font-black uppercase px-2.5 py-1 rounded-full ${prog.accentBg} ${prog.accentText}`}>
-              {prog.openSlots} нэр
+            <span className="text-4xl">{prog.emoji}</span>
+            <div className="flex-1">
+              <div className="t-headline" style={{ fontSize: 15 }}>{prog.name}</div>
+              <div className="t-footnote">{prog.duration} · {prog.location}</div>
             </div>
           </div>
 
-          {/* Name row */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5 flex items-center gap-1">
-                <User size={9} /> Нэр
-              </label>
-              <input
-                value={form.firstName}
-                onChange={(e) => set("firstName", e.target.value)}
-                placeholder="Батбаяр"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent"
-              />
+          <div className="input-group">
+            <div className="input-row">
+              <User size={18} style={{ color: 'var(--label3)', flexShrink: 0 }} />
+              <input value={form.firstName} onChange={(e) => set("firstName", e.target.value)} placeholder="Нэр" />
             </div>
-            <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5 block">Овог</label>
-              <input
-                value={form.lastName}
-                onChange={(e) => set("lastName", e.target.value)}
-                placeholder="Дорж"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent"
-              />
+            <div className="input-row">
+              <User size={18} style={{ color: 'var(--label3)', flexShrink: 0 }} />
+              <input value={form.lastName} onChange={(e) => set("lastName", e.target.value)} placeholder="Овог" />
             </div>
-          </div>
-
-          <div>
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5 flex items-center gap-1">
-              <Mail size={9} /> Имэйл
-            </label>
-            <input
-              type="email"
-              value={form.email}
-              onChange={(e) => set("email", e.target.value)}
-              placeholder="example@email.com"
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5 flex items-center gap-1">
-                <Phone size={9} /> Утас
-              </label>
-              <input
-                value={form.phone}
-                onChange={(e) => set("phone", e.target.value)}
-                placeholder="+976 ..."
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent"
-              />
+            <div className="input-row">
+              <Mail size={18} style={{ color: 'var(--label3)', flexShrink: 0 }} />
+              <input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="Имэйл хаяг" />
             </div>
-            <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5 block">Нас</label>
-              <input
-                type="number"
-                value={form.age}
-                onChange={(e) => set("age", e.target.value)}
-                placeholder="22"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent"
-              />
+            <div className="input-row">
+              <Phone size={18} style={{ color: 'var(--label3)', flexShrink: 0 }} />
+              <input value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="Утасны дугаар" />
             </div>
-          </div>
-
-          <div>
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5 block">Англи хэлний түвшин</label>
-            <div className="relative">
-              <select
-                value={form.level}
-                onChange={(e) => set("level", e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent appearance-none"
-              >
+            <div className="input-row">
+              <CalendarDays size={18} style={{ color: 'var(--label3)', flexShrink: 0 }} />
+              <input type="number" value={form.age} onChange={(e) => set("age", e.target.value)} placeholder="Нас" />
+            </div>
+            <div className="input-row">
+              <Globe size={18} style={{ color: 'var(--label3)', flexShrink: 0 }} />
+              <select value={form.level} onChange={(e) => set("level", e.target.value)} className="flex-1">
                 <option value="A1">A1 — Анхан шат</option>
                 <option value="A2">A2 — Суурь</option>
                 <option value="B1">B1 — Дунд</option>
                 <option value="B2">B2 — Дунд дээш</option>
                 <option value="C1">C1 — Ахисан</option>
               </select>
-              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             </div>
           </div>
 
-          <div>
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5 block">
-              Урам зоригийн захиа
-            </label>
+          <div className="space-y-2">
+            <label className="t-caption2 uppercase tracking-widest ml-1">Урам зоригийн захиа</label>
             <textarea
               rows={4}
               value={form.message}
               onChange={(e) => set("message", e.target.value)}
               placeholder="Яагаад энэ хөтөлбөрт орохыг хүсэж байгаагаа бичнэ үү..."
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent resize-none"
+              className="input"
+              style={{ borderRadius: 'var(--r-xl)' }}
             />
           </div>
+
+          {error && <p className="t-caption text-center" style={{ color: 'var(--red)' }}>{error}</p>}
 
           <button
             onClick={handleSubmit}
             disabled={loading || !form.firstName || !form.email || !form.message}
-            className={`w-full py-4 rounded-2xl font-black text-sm text-white flex items-center justify-center gap-2 transition-all ${prog.btnBg} disabled:opacity-40 disabled:cursor-not-allowed shadow-lg ${prog.shadowColor}`}
+            className="btn btn-primary btn-full"
+            style={{ opacity: (loading || !form.firstName || !form.email || !form.message) ? 0.5 : 1 }}
           >
-            {loading ? (
-              <Loader2 size={16} className="animate-spin" />
-            ) : (
-              <>Өргөдлөө илгээх <Send size={14} /></>
-            )}
+            {loading ? <div className="ios-spinner !w-5 !h-5" /> : <>Өргөдөл илгээх <Send size={16} className="ml-2" /></>}
           </button>
-        </div>
+          <div className="pb-8" />
       </div>
-    </motion.div>
+      
+      <IOSAlert 
+        isOpen={!!error} 
+        onClose={() => setError(null)} 
+        title="Алдаа" 
+        message={error || ""} 
+        type="error" 
+      />
+    </IOSSheet>
   );
 }
 
@@ -229,28 +165,20 @@ function SuccessScreen({ prog, onDashboard }: { prog: ProgramConfig; onDashboard
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center p-8 text-center"
+      className="page flex flex-col items-center justify-center p-8 text-center"
     >
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-        className={`w-24 h-24 rounded-full ${prog.accentBg} flex items-center justify-center mb-6`}
-      >
-        <CheckCircle2 size={48} className={prog.accentText} />
-      </motion.div>
-      <h2 className="text-3xl font-black text-slate-900 mb-3">Амжилттай илгээлээ!</h2>
-      <p className="text-slate-500 font-medium text-sm leading-relaxed mb-8 max-w-sm">
-        Таны өргөдөл {prog.name}-д амжилттай хүргэгдлээ. VCM-ийн баг 24 цагийн дотор холбогдох болно.
+      <div className="icon-box" style={{ background: 'var(--blue-dim)', color: 'var(--blue)', width: 80, height: 80, borderRadius: 40 }}>
+        <CheckCircle2 size={40} />
+      </div>
+      <h2 className="t-title1 mt-6 mb-2">Амжилттай!</h2>
+      <p className="t-subhead mb-8" style={{ color: 'var(--label2)' }}>
+        Таны өргөдөл {prog.name}-д хүргэгдлээ. VCM-ийн баг 24 цагийн дотор холбогдох болно.
       </p>
       <div className="flex flex-col gap-3 w-full max-w-xs">
-        <Link
-          href="/dashboard"
-          className={`py-4 rounded-2xl font-black text-sm text-white text-center ${prog.btnBg} shadow-lg ${prog.shadowColor}`}
-        >
+        <button onClick={onDashboard} className="btn btn-primary btn-full">
           Миний хуудас руу →
-        </Link>
-        <Link href="/programs" className="py-4 rounded-2xl font-black text-sm text-slate-600 text-center border border-slate-200 bg-slate-50">
+        </button>
+        <Link href="/programs" className="btn btn-ghost btn-full">
           Хөтөлбөрүүд харах
         </Link>
       </div>
@@ -277,172 +205,168 @@ export function ProgramPageClient({ config }: { config: ProgramConfig }) {
 
   return (
     <>
-      <div className="min-h-dvh bg-slate-50 pt-20 pb-28 lg:pb-8">
-        <div className="max-w-2xl mx-auto px-4">
-          <div className="flex flex-col gap-4">
+      <div className="page">
+        <div className="page-inner space-y-5">
+          {/* Back */}
+          <Link href="/programs" className="inline-flex items-center gap-1 t-caption font-semibold press" style={{ color: 'var(--blue)' }}>
+            <ArrowLeft size={16} /> Хөтөлбөрүүд
+          </Link>
 
-            {/* Back */}
-            <Link href="/programs" className="flex items-center gap-2 text-sm font-bold text-slate-500 active:text-slate-800 pt-2 w-fit">
-              <ArrowLeft size={16} /> Хөтөлбөрүүд
-            </Link>
+          {/* Hero */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="card p-6 relative overflow-hidden"
+            style={{ background: `linear-gradient(135deg, ${config.gradientFrom}, ${config.gradientTo})` }}
+          >
+            <div
+              className="absolute right-0 top-0 w-56 h-56 rounded-full opacity-15"
+              style={{ background: "white", filter: "blur(50px)", transform: "translate(30%, -30%)" }}
+            />
+            <div className="relative z-10 flex items-start gap-5">
+              <span className="text-6xl flex-shrink-0">{config.emoji}</span>
+              <div>
+                <div className="t-caption2 text-white/60 uppercase tracking-widest mb-1">{config.id} · VCM хөтөлбөр</div>
+                <h1 className="t-title2 text-white leading-tight mb-3">{config.name}</h1>
+                <div className="flex flex-wrap gap-2">
+                  <span className="text-[11px] font-bold text-white/85 bg-black/20 px-2.5 py-1 rounded-full backdrop-blur-sm flex items-center gap-1">
+                    <Clock size={10} /> {config.duration}
+                  </span>
+                  <span className="text-[11px] font-bold text-white/85 bg-black/20 px-2.5 py-1 rounded-full backdrop-blur-sm flex items-center gap-1">
+                    <MapPin size={10} /> {config.location}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
 
-            {/* Hero */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-3xl p-7 relative overflow-hidden"
-              style={{ background: `linear-gradient(135deg, ${config.gradientFrom}, ${config.gradientTo})` }}
+          {/* About */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
+            className="card p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="icon-box" style={{ background: 'var(--blue-dim)', color: 'var(--blue)' }}>
+                <Globe size={18} />
+              </div>
+              <h2 className="t-headline">Хөтөлбөрийн тухай</h2>
+            </div>
+            <p className="t-subhead" style={{ color: 'var(--label2)', lineHeight: 1.6 }}>{config.heroSub}</p>
+            <div className="flex flex-wrap gap-1.5 mt-4">
+              {config.tags.map((t) => (
+                <span key={t.label} className="badge" style={{ background: 'var(--blue-dim)', color: 'var(--blue)' }}>{t.label}</span>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Features */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+            className="card p-5">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="icon-box" style={{ background: 'var(--blue-dim)', color: 'var(--blue)' }}>
+                <Sparkles size={18} />
+              </div>
+              <h2 className="t-headline">Юу хийх вэ?</h2>
+            </div>
+            <div className="space-y-5">
+              {config.features.map((f, i) => (
+                <div key={i} className="flex items-start gap-4">
+                  <div className="icon-box-sm" style={{ background: 'var(--blue-dim)', color: 'var(--blue)', marginTop: 2 }}>
+                    <f.icon size={16} />
+                  </div>
+                  <div>
+                    <div className="t-headline" style={{ fontSize: 15 }}>{f.title}</div>
+                    <div className="t-subhead" style={{ color: 'var(--label2)', fontSize: 13, lineHeight: 1.5 }}>{f.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Requirements */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+            className="card p-5">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="icon-box" style={{ background: 'var(--blue-dim)', color: 'var(--blue)' }}>
+                <CheckCircle2 size={18} />
+              </div>
+              <h2 className="t-headline">Шаардлага</h2>
+            </div>
+            <div className="space-y-3">
+              {config.requirements.map((r, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: 'var(--blue-dim)' }}>
+                    <div className="w-2 h-2 rounded-full" style={{ background: 'var(--blue)' }} />
+                  </div>
+                  <span className="t-subhead" style={{ color: 'var(--label)' }}>{r}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* How to join steps */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+            className="card p-5">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="icon-box" style={{ background: 'var(--blue-dim)', color: 'var(--blue)' }}>
+                <ArrowRight size={18} />
+              </div>
+              <h2 className="t-headline">Хэрхэн нэгдэх вэ?</h2>
+            </div>
+            <div className="space-y-4">
+              {config.steps.map((s, i) => (
+                <div key={i} className="flex items-start gap-4">
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs font-bold"
+                    style={{ background: `linear-gradient(135deg, ${config.gradientFrom}, ${config.gradientTo})` }}
+                  >
+                    {s.num}
+                  </div>
+                  <div>
+                    <div className="t-headline" style={{ fontSize: 15 }}>{s.title}</div>
+                    <div className="t-subhead" style={{ color: 'var(--label2)', fontSize: 13 }}>{s.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Why Join */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
+            className="card p-6 text-center"
+            style={{ background: 'var(--bg-dark)' }}
+          >
+            <div className="text-3xl mb-3">⭐</div>
+            <p className="t-subhead" style={{ color: 'white', opacity: 0.85, lineHeight: 1.6 }}>{config.whyJoin}</p>
+          </motion.div>
+
+          {/* Apply CTA */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+            className="grid grid-cols-1 gap-3 pb-8">
+            <button
+              onClick={handleApplyClick}
+              className="btn btn-primary btn-full py-5 text-[17px]"
             >
-              <div
-                className="absolute right-0 top-0 w-56 h-56 rounded-full opacity-15"
-                style={{ background: "white", filter: "blur(50px)", transform: "translate(30%, -30%)" }}
-              />
-              <div className="relative z-10 flex items-start gap-4">
-                <span className="text-6xl leading-none flex-shrink-0">{config.emoji}</span>
-                <div>
-                  <div className="text-[9px] font-black uppercase tracking-widest text-white/60 mb-1">{config.id} · VCM хөтөлбөр</div>
-                  <h1 className="text-2xl font-black text-white leading-tight mb-3">{config.name}</h1>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="text-[10px] font-bold text-white/85 bg-white/20 px-2.5 py-1 rounded-full flex items-center gap-1">
-                      <Clock size={9} /> {config.duration}
-                    </span>
-                    <span className="text-[10px] font-bold text-white/85 bg-white/20 px-2.5 py-1 rounded-full flex items-center gap-1">
-                      <MapPin size={9} /> {config.location}
-                    </span>
-                    <span className="text-[10px] font-bold text-white/85 bg-white/20 px-2.5 py-1 rounded-full">
-                      {config.openSlots} нэр боломжтой
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
+              {isSignedIn ? "Өргөдөл гаргах" : "Бүртгүүлж өргөдөл гаргах"} <ArrowRight size={18} className="ml-2" />
+            </button>
+            {!isSignedIn && (
+              <Link href="/sign-in" className="btn btn-ghost btn-full">
+                Аль хэдийн гишүүн бол нэвтрэх
+              </Link>
+            )}
+          </motion.div>
 
-            {/* About */}
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
-              className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-3">
-                <div className={`w-9 h-9 rounded-xl ${config.accentBg} flex items-center justify-center`}>
-                  <Globe size={16} className={config.accentText} />
-                </div>
-                <h2 className="font-black text-slate-900">Хөтөлбөрийн тухай</h2>
-              </div>
-              <p className="text-sm text-slate-500 leading-relaxed font-medium">{config.heroSub}</p>
-              <div className="flex flex-wrap gap-1.5 mt-4">
-                {config.tags.map((t) => (
-                  <span key={t.label} className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${t.bg}`}>{t.label}</span>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Features */}
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-              className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <div className={`w-9 h-9 rounded-xl ${config.accentBg} flex items-center justify-center`}>
-                  <Sparkles size={16} className={config.accentText} />
-                </div>
-                <h2 className="font-black text-slate-900">Юу хийх вэ?</h2>
-              </div>
-              <div className="space-y-4">
-                {config.features.map((f, i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <div className={`w-8 h-8 rounded-xl ${config.accentBg} flex items-center justify-center flex-shrink-0`}>
-                      <f.icon size={14} className={config.accentText} />
-                    </div>
-                    <div>
-                      <div className="text-sm font-black text-slate-900">{f.title}</div>
-                      <div className="text-xs text-slate-500 font-medium leading-relaxed">{f.desc}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Requirements */}
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-              className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <div className={`w-9 h-9 rounded-xl ${config.accentBg} flex items-center justify-center`}>
-                  <CheckCircle2 size={16} className={config.accentText} />
-                </div>
-                <h2 className="font-black text-slate-900">Шаардлага</h2>
-              </div>
-              <div className="space-y-2.5">
-                {config.requirements.map((r, i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <div className={`w-5 h-5 rounded-full ${config.accentBg} flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                      <div className={`w-2 h-2 rounded-full ${config.accentText.replace("text-", "bg-")}`} />
-                    </div>
-                    <span className="text-sm text-slate-700 font-medium">{r}</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* How to join steps */}
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-              className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <div className={`w-9 h-9 rounded-xl ${config.accentBg} flex items-center justify-center`}>
-                  <ArrowRight size={16} className={config.accentText} />
-                </div>
-                <h2 className="font-black text-slate-900">Хэрхэн нэгдэх вэ?</h2>
-              </div>
-              <div className="space-y-3">
-                {config.steps.map((s, i) => (
-                  <div key={i} className="flex items-start gap-4">
-                    <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs font-black"
-                      style={{ background: `linear-gradient(135deg, ${config.gradientFrom}, ${config.gradientTo})` }}
-                    >
-                      {s.num}
-                    </div>
-                    <div>
-                      <div className="text-sm font-black text-slate-900">{s.title}</div>
-                      <div className="text-xs text-slate-500 font-medium">{s.desc}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Why Join */}
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-              className="rounded-3xl p-6 text-center"
-              style={{ background: `linear-gradient(135deg, ${config.gradientFrom}12, ${config.gradientTo}08)` }}
-            >
-              <div className="text-3xl mb-3">⭐</div>
-              <p className="text-sm text-slate-700 font-medium leading-relaxed">{config.whyJoin}</p>
-            </motion.div>
-
-            {/* Apply CTA */}
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-              className="grid grid-cols-1 gap-3 pb-4">
-              <button
-                onClick={handleApplyClick}
-                className={`w-full py-5 rounded-2xl font-black text-base text-white ${config.btnBg} transition-all active:scale-[0.98] shadow-xl ${config.shadowColor} flex items-center justify-center gap-2`}
-              >
-                {isSignedIn ? "Өргөдөл гаргах" : "Бүртгүүлж өргөдөл гаргах"} <ArrowRight size={18} />
-              </button>
-              {!isSignedIn && (
-                <Link href="/sign-in" className="w-full py-4 rounded-2xl font-black text-sm text-slate-700 text-center border border-slate-200 bg-white active:bg-slate-50 transition-colors">
-                  Аль хэдийн гишүүн бол нэвтрэх
-                </Link>
-              )}
-            </motion.div>
-
-          </div>
         </div>
       </div>
 
       {/* Apply Form Sheet */}
-      {showForm && (
-        <ApplyForm
-          prog={config}
-          onClose={() => setShowForm(false)}
-          onSuccess={() => { setShowForm(false); setSuccess(true); }}
-        />
-      )}
+      <AnimatePresence>
+        {showForm && (
+          <ApplyForm
+            prog={config}
+            onClose={() => setShowForm(false)}
+            onSuccess={() => { setShowForm(false); setSuccess(true); }}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }

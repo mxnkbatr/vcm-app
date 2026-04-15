@@ -13,6 +13,7 @@
     "seed": "ts-node --compiler-options {\\\"module\\\":\\\"commonjs\\\"} lib/seed.ts"
   },
   "dependencies": {
+    "@capacitor/haptics": "^8.0.2",
     "@livekit/components-react": "^2.9.19",
     "@livekit/components-styles": "^1.2.0",
     "@types/bcryptjs": "^2.4.6",

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+
 import "../globals.css";
 import Navbar from "../components/Navbar";
 import AuthProvider from "../components/AuthProvider";
@@ -12,11 +12,7 @@ import { notFound } from 'next/navigation';
 
 const Footer = dynamic(() => import("../components/Footer"));
 
-const inter = Inter({
-  subsets: ["latin"],
-  display: 'swap',
-  variable: '--font-inter',
-});
+
 
 export const metadata: Metadata = {
   title: "Volunteer Center Mongolia",
@@ -49,18 +45,22 @@ export default async function RootLayout({
       <html lang={locale} suppressHydrationWarning>
         <head>
           <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
-          <link rel="preconnect" href="https://grainy-gradients.vercel.app" crossOrigin="anonymous" />
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
           <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
           <link rel="dns-prefetch" href="https://res.cloudinary.com" />
-          <link rel="dns-prefetch" href="https://grainy-gradients.vercel.app" />
-          <link rel="dns-prefetch" href="https://images.unsplash.com" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-          <meta name="theme-color" content="#0ea5e9" />
+
+          {/* iOS / Capacitor Native App */}
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+          <meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)" />
+          <meta name="theme-color" content="#1C1C1E" media="(prefers-color-scheme: dark)" />
           <meta name="mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+          <meta name="apple-touch-fullscreen" content="yes" />
+          <meta name="format-detection" content="telephone=no" />
         </head>
-        <body className={`${inter.variable} font-sans overscroll-none`}>
+        <body className={`font-sans overscroll-none bg-[#F2F2F7]`}>
           <NextIntlClientProvider messages={messages}>
             <MotionProvider>
               <SmoothScroll />

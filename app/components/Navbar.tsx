@@ -20,6 +20,7 @@ import { useTranslations, useLocale } from "next-intl";
 import dynamic from "next/dynamic";
 import { useIsMobile } from "./MotionProxy";
 import LanguageToggle from "./LanguageToggle";
+import MobileNavigationBar from "./MobileNavigationBar"; // This import was added in the previous step
 
 // Dynamically import Clerk components to reduce initial JS bundle
 const AuthActions = dynamic(() => import("./AuthActions"), {
@@ -170,70 +171,62 @@ export default function Navbar() {
         </nav>
       </motion.header>
 
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-[100] pointer-events-none" style={{ paddingTop: "env(safe-area-inset-top)" }}>
-        <div className="flex justify-between items-center px-4 py-2.5 pointer-events-auto">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div style={{ WebkitBackdropFilter: "blur(20px)" }} className="flex items-center gap-2.5 py-1.5 px-2 pr-4 rounded-full backdrop-blur-xl bg-white/90 border border-slate-100 shadow-sm">
-              <div className="relative w-8 h-8 rounded-full overflow-hidden bg-white">
-                <Image
-                  src="https://res.cloudinary.com/dc127wztz/image/upload/q_auto/f_auto/v1775390339/logos_xs3a5r.png"
-                  alt="Logo"
-                  fill
-                  priority
-                  sizes="32px"
-                  className="object-cover"
-                  quality={75}
-                />
-              </div>
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-800">{t("logo")}</span>
-            </div>
-          </Link>
+      {/* Mobile Navigation Bar */}
+      <MobileNavigationBar />
 
-          <div className="flex items-center gap-1.5">
-            <LanguageToggle />
-            <AuthActions BRAND={BRAND} isMobile={true} />
-          </div>
-        </div>
-      </div>
-
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[100]">
-        <nav
-          style={{ paddingBottom: "max(0.375rem, env(safe-area-inset-bottom))" }}
-          className="bg-white/95 backdrop-blur-xl border-t border-slate-100 shadow-[0_-1px_3px_rgba(0,0,0,0.04)]"
-        >
-          <div className="grid grid-cols-5 w-full">
-            {[
-              { id: "home", icon: Home, href: "/", label: "Нүүр" },
-              { id: "programs", icon: Plane, href: "/programs", label: "Хөтөлбөр" },
-              { id: "dashboard", icon: LayoutDashboard, href: "/dashboard", label: "Миний" },
-              { id: "events", icon: Ticket, href: "/events", label: "Арга хэмжээ" },
-              { id: "lessons", icon: BookOpen, href: "/lessons", label: "Сургалт" },
-            ].map((item) => {
-              const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
-              return (
-                <Link
-                  key={item.id}
-                  href={item.href}
-                  aria-label={item.label}
-                  className="flex flex-col items-center justify-center py-4 relative"
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="mobileTabIndicator"
-                      className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-full bg-sky-500"
-                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    />
-                  )}
-                  <item.icon
-                    size={24}
-                    strokeWidth={isActive ? 2.2 : 1.6}
-                    className={`transition-colors duration-200 ${isActive ? "text-sky-500" : "text-slate-400"}`}
-                  />
-                </Link>
-              );
-            })}
-          </div>
-        </nav>
+      {/* ══════════════════════════════════════ 
+          MOBILE BOTTOM TAB BAR — iOS Style 
+      ══════════════════════════════════════ */} 
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[100]"> 
+        <nav 
+          className="frosted" 
+          style={{ 
+            borderTop: '0.5px solid var(--sep)', 
+            paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)', 
+          }} 
+        > 
+          <div className="grid grid-cols-5 w-full px-1"> 
+            {[ 
+              { id: 'home',      Icon: Home,           href: '/',          label: 'Нүүр' }, 
+              { id: 'programs',  Icon: Plane,           href: '/programs',  label: 'Хөтөлбөр' }, 
+              { id: 'dashboard', Icon: LayoutDashboard, href: '/dashboard', label: 'Миний' }, 
+              { id: 'events',    Icon: Ticket,          href: '/events',    label: 'Арга хэмжээ' }, 
+              { id: 'lessons',   Icon: BookOpen,        href: '/lessons',   label: 'Сургалт' }, 
+            ].map(({ id, Icon, href, label }) => { 
+              const active = pathname === href || (href !== '/' && pathname.startsWith(href)); 
+              return ( 
+                <Link 
+                  key={id} 
+                  href={href} 
+                  className="press flex flex-col items-center justify-center py-2 relative group active:scale-95 transition-transform" 
+                > 
+                  {active && ( 
+                    <motion.div 
+                      layoutId="tabDot" 
+                      className="absolute top-1 w-1 h-1 bg-sky-500 rounded-full" 
+                      transition={{ type: 'spring', stiffness: 500, damping: 35 }} 
+                    /> 
+                  )} 
+                  <motion.div 
+                    animate={active ? { scale: 1.05, y: -1 } : { scale: 1, y: 0 }} 
+                    transition={{ type: 'spring', stiffness: 500, damping: 30 }} 
+                  > 
+                    <Icon 
+                      size={24} 
+                      strokeWidth={active ? 2.5 : 2} 
+                      className={active ? "text-sky-500" : "text-slate-400"}
+                    /> 
+                  </motion.div> 
+                  <span 
+                    className={`text-[10px] font-bold mt-1 ${active ? "text-sky-500" : "text-slate-400"}`}
+                  > 
+                    {label} 
+                  </span> 
+                </Link> 
+              ); 
+            })} 
+          </div> 
+        </nav> 
       </div>
     </>
   );

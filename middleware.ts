@@ -32,7 +32,7 @@ function isPublicRoute(pathname: string): boolean {
     if (pathname.startsWith('/api/auth')) return true;
 
     // Public API routes
-    const publicApis = ['/api/events', '/api/news', '/api/livekit', '/api/shopping', '/api/lessons', '/api/posts', '/api/purchases'];
+    const publicApis = ['/api/events', '/api/news', '/api/livekit', '/api/shopping', '/api/lessons', '/api/posts', '/api/purchases', '/api/banners'];
     if (publicApis.some(api => pathname.startsWith(api))) return true;
 
     // Remove locale prefix for path matching

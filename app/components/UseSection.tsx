@@ -30,9 +30,9 @@ const COLORS = {
   SLATE: "#64748B",
 };
 
-const ParallaxBackground = ({ containerRef }: { containerRef: React.RefObject<any> }) => {
+const ParallaxBackground = ({ containerRef, isAppView }: { containerRef: React.RefObject<any>, isAppView: boolean }) => {
   const { scrollYProgress } = useScroll({
-    target: containerRef,
+    target: isAppView ? undefined : containerRef,
     offset: ["start end", "end start"]
   });
   const springConfig = { stiffness: 100, damping: 30, restDelta: 0.001 };
@@ -46,46 +46,88 @@ const ParallaxBackground = ({ containerRef }: { containerRef: React.RefObject<an
   );
 };
 
-const UsSection = () => {
+const UsSection = ({ isAppView = false }: { isAppView?: boolean }) => {
   const t = useTranslations("UsSection");
   const locale = useLocale();
   const containerRef = useRef(null);
   const isMobile = useIsMobile();
 
-  // ─── Parallax & Scroll Hooks (Desktop only) ───
   const { scrollYProgress } = useScroll({
-    target: containerRef,
+    target: isAppView ? undefined : containerRef,
     offset: ["start end", "end start"]
   });
 
-  const springConfig = { stiffness: 100, damping: 30, restDelta: 0.001 };
-  const yImage = useSpring(useTransform(scrollYProgress, [0, 1], [50, -50]), springConfig);
-  const rotateImage = useTransform(scrollYProgress, [0, 1], [-3, 3]);
+  const rotateImage = useTransform(scrollYProgress, [0, 1], [-2, 5]);
+  const yImage = useTransform(scrollYProgress, [0, 1], [0, -50]);
 
-  // ─── Content Strategy ───
-  const stats = [
-    { id: 1, val: 20, suffix: t("years"), label: t("stat_exp"), icon: FaHourglassHalf },
-    { id: 2, val: 3000, suffix: "+", label: t("stat_participants"), icon: FaUserGraduate },
-    { id: 3, val: 55, suffix: t("years"), label: t("stat_global"), icon: FaGlobeEurope },
-    { id: 4, val: 100, suffix: "%", label: t("stat_reliable"), icon: FaAward },
-  ];
-
-
-  // ─── Animation Variants ───
   const containerVar: Variants = {
     hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: isMobile ? 0.05 : 0.15, delayChildren: 0.2 } }
+    visible: { 
+      opacity: 1, 
+      transition: { staggerChildren: 0.1, delayChildren: 0.3 } 
+    }
   };
 
   const textVar: Variants = {
-    hidden: { opacity: 0, x: isMobile ? -10 : -30 },
-    visible: { opacity: 1, x: 0, transition: { duration: isMobile ? 0.5 : 0.8, ease: [0.22, 1, 0.36, 1] } }
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } 
+    }
   };
 
   const cardVar: Variants = {
-    hidden: { opacity: 0, y: isMobile ? 20 : 40 },
-    visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 90, damping: 20 } }
+    hidden: { opacity: 0, scale: 0.9, y: 30 },
+    visible: { 
+      opacity: 1, 
+      scale: 1, 
+      y: 0, 
+      transition: { duration: 0.6, ease: "easeOut" } 
+    }
   };
+
+  const stats = [
+    { id: 1, label: t("stat_exp"), val: 17, suffix: `+ ${t("years")}`, icon: FaHourglassHalf },
+    { id: 2, label: t("stat_participants"), val: 25000, suffix: "+", icon: FaUsers },
+    { id: 3, label: t("stat_global"), val: 50, suffix: "+", icon: FaGlobeEurope },
+    { id: 4, label: t("stat_reliable"), val: 100, suffix: "%", icon: FaCheckCircle },
+  ];
+
+  if (isAppView) {
+    return (
+      <div ref={containerRef} className="space-y-6">
+        <div className="relative aspect-[16/9] rounded-[2rem] overflow-hidden shadow-lg">
+          <Image 
+            src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&q=80" 
+            alt="About VCM"
+            fill
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
+            <p className="text-white text-sm font-medium leading-relaxed">
+              {t("hero_desc")}
+            </p>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-3">
+          {stats.slice(0, 4).map((stat) => (
+            <div key={stat.id} className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+              <div className="w-10 h-10 bg-sky-50 rounded-2xl flex items-center justify-center mb-3">
+                <stat.icon className="text-sky-500 w-5 h-5" />
+              </div>
+              <div className="text-xl font-black text-slate-900">
+                <CountUp end={stat.val} duration={2.5} separator="," />
+                <span className="text-sky-500 ml-0.5">{stat.suffix}</span>
+              </div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{stat.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <section ref={containerRef} className="relative w-full py-16 sm:py-24 lg:py-32 overflow-hidden bg-slate-50 selection:bg-red-100 selection:text-red-900">
@@ -96,7 +138,7 @@ const UsSection = () => {
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40 mix-blend-soft-light" />
 
         {/* Parallax Background - Only Desktop */}
-        {!isMobile && <ParallaxBackground containerRef={containerRef} />}
+        {!isMobile && <ParallaxBackground containerRef={containerRef} isAppView={isAppView} />}
 
         {/* Static Orb for Mobile */}
         {isMobile && (
@@ -248,25 +290,7 @@ const UsSection = () => {
                 </p>
               </motion.div>
 
-              {/* Floating Decorative Stamp (Spinning Text) */}
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: isMobile ? 60 : 25, repeat: Infinity, ease: "linear" }}
-                className="absolute -top-6 -left-6 sm:-top-10 sm:-left-10 w-20 h-20 sm:w-32 sm:h-32 bg-sky-500 rounded-full flex items-center justify-center shadow-xl shadow-sky-500/30 border-2 sm:border-4 border-white z-20"
-              >
-                {/* SVG Curve Text */}
-                <div className="absolute w-full h-full p-1 animate-spin-slow">
-                  <svg viewBox="0 0 100 100" width="100%" height="100%" className="fill-white font-bold tracking-widest uppercase text-[11px]">
-                    <path id="curve" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" fill="transparent" />
-                    <text>
-                      <textPath xlinkHref="#curve">
-                        Since 2005 • Trusted Agency •
-                      </textPath>
-                    </text>
-                  </svg>
-                </div>
-                <div className="font-black text-xl sm:text-3xl text-white">20</div>
-              </motion.div>
+
 
             </motion.div>
           </div>

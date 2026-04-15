@@ -116,136 +116,52 @@ export default function AboutPageSky() {
   const introD = introductionData[locale] || introductionData.en;
 
   return (
-    <section
-      ref={containerRef}
-      className="relative w-full min-h-[100dvh] bg-white overflow-hidden py-32 font-sans selection:bg-sky-200 selection:text-sky-900"
-    >
-      {/* ─── 1. SKY BLUE ATMOSPHERE ─── */}
-      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-        {/* Dominant Sky Blob Top Right */}
+    <div className="page">
+      <div className="page-inner space-y-8">
+        
+        {/* HERO SECTION */}
         <motion.div
-          animate={{
-            x: [0, 50, -50, 0],
-            y: [0, -30, 30, 0],
-            scale: [1, 1.1, 0.9, 1]
-          }}
-          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[-15%] right-[-10%] w-[900px] h-[900px] bg-gradient-to-br from-sky-100 via-sky-300/20 to-transparent rounded-full blur-[100px] opacity-80"
-        />
-        {/* Secondary Blue/Cyan Mix Bottom Left */}
-        <motion.div
-          animate={{
-            x: [0, -70, 30, 0],
-            y: [0, 60, -40, 0],
-            scale: [1, 1.2, 0.8, 1]
-          }}
-          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-[-10%] left-[-15%] w-[800px] h-[800px] bg-gradient-to-tr from-sky-400/20 via-sky-100 to-blue-50 rounded-full blur-[100px]"
-        />
-        {/* Grain Texture */}
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.25] mix-blend-overlay" />
-      </div>
-
-      <div className="container relative z-10 px-6 mx-auto max-w-7xl">
-
-        {/* ─── 2. HERO SECTION ─── */}
-        <div className="grid lg:grid-cols-2 gap-16 md:gap-24 items-center mb-32">
-
-          {/* Text Content */}
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={containerVar}
-            style={{ y: textY }}
-            className="space-y-10 relative -mt-[160px]"
-          >
-            {/* Tagline */}
-            <motion.div variants={itemVar} className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/90 border border-sky-100 shadow-[0_4px_20px_-10px_rgba(14,165,233,0.3)] backdrop-blur-md">
-              <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
-              </span>
-              <span className="text-xs font-black uppercase tracking-[0.25em] text-sky-500">
-                {locale === 'mn' ? 'Монголын Сайн Дурынхны Төв' : 'Volunteer Center Mongolia'}
-              </span>
-            </motion.div>
-
-            {/* Title with Sky Dominance */}
-            <motion.h1 variants={itemVar} className="text-5xl md:text-7xl font-black tracking-tighter leading-[1.05] text-slate-900 drop-shadow-sm">
-              <span className="block text-slate-800 relative z-10">
-                {aboutD.sectionTitle.split(' ')[0]} 
-              </span>
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-500 to-sky-600 filter drop-shadow-sm">
-                {aboutD.sectionTitle.split(' ').slice(1).join(' ')}
-              </span>
-            </motion.h1>
-
-            <motion.p variants={itemVar} className="text-lg font-medium text-slate-600 leading-relaxed border-l-[6px] border-sky-300 pl-8 max-w-lg">
-              {aboutD.content}
-            </motion.p>
-          </motion.div>
-
-          {/* Hero Image */}
-          <div className="relative">
-            {/* Curtain Reveal Image */}
-            <motion.div
-              style={{ y: yHero }}
-              initial={{ clipPath: "polygon(0 0, 100% 0, 100% 0, 0 0)" }}
-              whileInView={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)" }}
-              viewport={{ once: true }}
-              transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
-              className="relative z-10 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-sky-900/20 border-[8px] border-white bg-white aspect-[4/5] w-full"
-            >
-              <div className="relative w-full h-full group">
-                {/* Fallback image representing volunteering/mission */}
-                <Image
-                  src="https://res.cloudinary.com/dc127wztz/image/upload/q_auto/f_auto/v1775390121/tsevlee_mnzwhq.jpg"
-                  alt="VCM Mission"
-                  fill
-                  className="object-cover transition-transform duration-[2s] group-hover:scale-110"
-                />
-                {/* Sky Tint Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-sky-900/40 via-transparent to-transparent opacity-60 mix-blend-multiply" />
-              </div>
-            </motion.div>
-
-            {/* Rotating Badge - "Established 2007" */}
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-              className="absolute -top-12 -right-6 md:-right-12 z-20 w-40 h-40 flex items-center justify-center bg-white rounded-full shadow-2xl border-[6px] border-sky-50"
-            >
-              <svg viewBox="0 0 100 100" width="150" height="150" className="animate-spin-slow absolute">
-                <path id="curve" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" fill="transparent" />
-                <text className="text-[11px] font-bold uppercase tracking-[0.2em] fill-sky-500">
-                  <textPath href="#curve">
-                    Volunteer Center Mongolia • 2007 • 
-                  </textPath>
-                </text>
-              </svg>
-              <div className="relative z-10 flex flex-col items-center leading-none">
-                <span className="text-4xl font-black text-slate-900">15+</span>
-                <span className="text-[10px] font-bold uppercase text-sky-400 tracking-wider">
-                  {locale === 'mn' ? 'Жил' : 'Years'}
-                </span>
-              </div>
-            </motion.div>
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={containerVar}
+          className="space-y-6"
+        >
+          <div className="pt-2">
+            <div className="badge mb-3" style={{ background: 'var(--blue-dim)', color: 'var(--blue)' }}>
+              {locale === 'mn' ? 'Монголын Сайн Дурынхны Төв' : 'Volunteer Center Mongolia'}
+            </div>
+            <h1 className="t-large-title">
+              {aboutD.sectionTitle}
+            </h1>
           </div>
-        </div>
 
-        {/* ─── 3. FOUNDER SECTION ─── */}
-        <div className="grid lg:grid-cols-12 gap-16 mb-32 items-center">
+          <div className="card overflow-hidden">
+            <div className="relative aspect-video">
+              <Image
+                src="https://res.cloudinary.com/dc127wztz/image/upload/q_auto/f_auto/v1775390121/tsevlee_mnzwhq.jpg"
+                alt="VCM Mission"
+                fill
+                className="object-cover"
+              />
+            </div>
+            <div className="p-6">
+              <p className="t-body" style={{ color: 'var(--label2)' }}>
+                {aboutD.content}
+              </p>
+            </div>
+          </div>
+        </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className="lg:col-span-4 relative aspect-[3/4] w-full max-w-sm mx-auto"
-          >
-            {/* Founder Image */}
-            <div className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-tr from-sky-400 to-blue-300 translate-x-4 translate-y-4 -z-10" />
-            <div className="relative w-full h-full rounded-[2.5rem] border-4 border-white shadow-xl overflow-hidden bg-slate-100">
+        {/* FOUNDER SECTION */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="card p-6 space-y-6"
+        >
+          <div className="flex items-center gap-4">
+            <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-white shadow-lg">
               <Image
                 src={introD.image}
                 alt={introD.founderName}
@@ -253,78 +169,59 @@ export default function AboutPageSky() {
                 className="object-cover"
               />
             </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="lg:col-span-8 bg-white/60 backdrop-blur-xl rounded-[2.5rem] p-8 md:p-12 border border-sky-50 shadow-[0_20px_60px_-15px_rgba(14,165,233,0.1)] space-y-8"
-          >
             <div>
-              <div className="inline-flex gap-2 items-center mb-2">
-                <FaQuoteLeft className="text-sky-300 text-xl" />
-                <h4 className="text-sky-500 font-bold uppercase tracking-widest text-xs">
-                  {introD.title}
-                </h4>
-              </div>
-              <h2 className="text-3xl md:text-5xl font-black text-slate-900">
-                {introD.founderName}
-              </h2>
-              <p className="text-sm font-semibold text-sky-600 mt-2">
-                {introD.founderTitle}
-              </p>
+              <h2 className="t-title2">{introD.founderName}</h2>
+              <p className="t-footnote" style={{ color: 'var(--blue)' }}>{introD.founderTitle}</p>
             </div>
-
-            <div className="space-y-4">
-              {introD.text.map((para, i) => (
-                <p key={i} className="text-lg text-slate-600 leading-relaxed font-medium">
-                  {para}
-                </p>
-              ))}
-            </div>
-
-            <div className="pt-6 border-t border-slate-100">
-              <h4 className="font-bold text-slate-900 mb-4">{introD.highlightsTitle}</h4>
-              <ul className="space-y-3">
-                {introD.highlights.map((hlt, i) => (
-                  <li key={i} className="flex items-center gap-3">
-                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-sky-100 text-sky-500 shrink-0">
-                      <FaStar size={10} />
-                    </span>
-                    <span className="text-slate-600 font-medium text-sm">{hlt}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* ─── 4. VALUES (Sky-Themed 3D Grid) ─── */}
-        <div>
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">
-              {aboutD.valuesTitle}
-            </h2>
-            {/* Gradient Divider */}
-            <div className="w-32 h-1.5 bg-gradient-to-r from-sky-400 via-blue-400 to-sky-300 mx-auto rounded-full" />
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="space-y-4">
+            {introD.text.map((para, i) => (
+              <p key={i} className="t-subhead" style={{ color: 'var(--label2)', lineHeight: 1.6 }}>
+                {para}
+              </p>
+            ))}
+          </div>
+
+          <div className="pt-4 border-t border-slate-100">
+            <h4 className="t-headline mb-4">{introD.highlightsTitle}</h4>
+            <ul className="space-y-3">
+              {introD.highlights.map((hlt, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <div className="icon-box-sm" style={{ background: 'var(--blue-dim)', color: 'var(--blue)', marginTop: 2 }}>
+                    <FaStar size={10} />
+                  </div>
+                  <span className="t-footnote" style={{ color: 'var(--label2)' }}>{hlt}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </motion.div>
+
+        {/* VALUES */}
+        <div className="space-y-4">
+          <div className="px-1">
+            <h2 className="t-title2">{aboutD.valuesTitle}</h2>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
             {aboutD.values.map((val, i) => (
-              <SkyTiltCard
-                key={i}
-                icon={val.icon}
-                title={val.title}
-                text={val.description}
-                index={i}
-              />
+              <div key={i} className="card p-5 flex items-start gap-4">
+                <div className="icon-box" style={{ background: 'var(--blue-dim)', color: 'var(--blue)' }}>
+                  <val.icon size={20} />
+                </div>
+                <div>
+                  <h3 className="t-headline">{val.title}</h3>
+                  <p className="t-footnote" style={{ color: 'var(--label2)' }}>{val.description}</p>
+                </div>
+              </div>
             ))}
           </div>
         </div>
 
+        <div className="pb-8" />
       </div>
-    </section>
+    </div>
   );
 }
 

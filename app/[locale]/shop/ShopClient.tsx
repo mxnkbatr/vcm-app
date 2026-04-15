@@ -48,12 +48,8 @@ const ProductCard = ({ item, locale = 'en', isDark }: any) => {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      whileHover={{ y: -4 }}
-      className={`relative group rounded-2xl overflow-hidden cursor-pointer h-full border transition-all duration-400 flex flex-col
-        ${isDark
-          ? "bg-slate-900 border-white/5 hover:border-sky-500/30 hover:bg-slate-800"
-          : "bg-white border-slate-100 shadow-sm hover:shadow-lg hover:shadow-sky-50 hover:border-sky-200"
-        }`}
+      whileTap={{ scale: 0.96 }}
+      className="card overflow-hidden press active:scale-95 transition-transform"
     >
       {/* Image */}
       <div className="relative w-full h-56 overflow-hidden bg-slate-50">
@@ -104,7 +100,7 @@ const ProductCard = ({ item, locale = 'en', isDark }: any) => {
   );
 };
 
-export default function ShopClient({ items, locale }: { items: any[], locale: string }) {
+export default function ShopClient({ items, locale, isHorizontal = false }: { items: any[], locale: string, isHorizontal?: boolean }) {
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [filter, setFilter] = useState("all");
@@ -115,67 +111,33 @@ export default function ShopClient({ items, locale }: { items: any[], locale: st
   const categories = ["all", ...Array.from(new Set(items.map((item: any) => item.category).filter(Boolean)))];
   const filteredItems = items.filter((item: any) => filter === "all" || item.category === filter);
 
-  if (!mounted) return null;
+  if (!mounted) {
+    return (
+      <div className="min-h-dvh flex items-center justify-center" style={{ background: 'var(--bg)' }}> 
+        <div className="ios-spinner" /> 
+      </div>
+    );
+  }
+
+  if (isHorizontal) {
+    return (
+      <>
+        {items.map((item: any) => (
+          <div key={item._id} className="min-w-[280px] snap-start">
+            <ProductCard item={item} locale={locale} isDark={isDark} />
+          </div>
+        ))}
+      </>
+    );
+  }
 
   return (
-    <div className="relative px-6 overflow-hidden transition-colors duration-500">
-
-      {/* Subtle background */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-sky-50 rounded-full blur-[120px] opacity-40" />
-        <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-blue-50 rounded-full blur-[120px] opacity-30" />
-      </div>
-
-      <div className="max-w-6xl mx-auto relative z-10">
-        
-        {/* Header */}
-        <div className="text-center mb-12">
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-50 border border-sky-100 text-sky-600 shadow-sm mb-5"
-          >
-            <Store size={14} />
-            <span className="text-[10px] font-bold uppercase tracking-widest">
-              {locale === 'mn' ? 'Дэлгүүр' : 'Shop'}
-            </span>
-          </motion.div>
-
-          <motion.h1 
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-            className={`text-3xl sm:text-4xl md:text-[3rem] font-extrabold tracking-tight leading-tight mb-3 ${isDark ? "text-white" : "text-slate-900"}`}
-          >
-            {T.shopTitle[locale as keyof typeof T.shopTitle] || T.shopTitle.en}
-            <span className="text-sky-500">.</span>
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className={`text-base font-medium max-w-lg mx-auto ${isDark ? 'text-slate-400' : 'text-slate-500'}`}
-          >
-            {T.shopDesc[locale as keyof typeof T.shopDesc] || T.shopDesc.en}
-          </motion.p>
-
-          {/* Quick stats */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="flex flex-wrap justify-center gap-5 mt-6"
-          >
-            {[
-              { icon: <Package size={14} />, label: `${items.length} ${locale === 'mn' ? 'Бүтээгдэхүүн' : 'Products'}` },
-              { icon: <Sparkles size={14} />, label: locale === 'mn' ? 'Чанартай' : 'Premium Quality' },
-            ].map((stat, i) => (
-              <div key={i} className="flex items-center gap-1.5 text-sm text-slate-500 font-medium">
-                <span className="text-sky-500">{stat.icon}</span>
-                {stat.label}
-              </div>
-            ))}
-          </motion.div>
+    <div className="page">
+      <div className="page-inner space-y-4"> 
+        {/* Large title */} 
+        <div className="pt-2 pb-1"> 
+          <h1 className="t-large-title">Дэлгүүр</h1> 
+          <p className="t-subhead mt-1" style={{ color: 'var(--label2)' }}>VCM бүтээгдэхүүн</p> 
         </div>
 
         {/* Categories Filter */}
