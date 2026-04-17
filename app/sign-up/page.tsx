@@ -1,8 +1,8 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-function resolveLocale(): string {
-  const c = cookies();
+async function resolveLocale(): Promise<string> {
+  const c = await cookies();
   const fromCookie =
     c.get("NEXT_LOCALE")?.value ||
     c.get("next-intl-locale")?.value ||
@@ -11,8 +11,8 @@ function resolveLocale(): string {
   return (fromCookie || "mn").toLowerCase();
 }
 
-export default function SignUpRedirectPage() {
-  const locale = resolveLocale();
+export default async function SignUpRedirectPage() {
+  const locale = await resolveLocale();
   redirect(`/${locale}/sign-up`);
 }
 
