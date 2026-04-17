@@ -172,7 +172,7 @@ const seedData = async () => {
           en: "Sukhbaatar District", 
           mn: "Сүхбаатар Дүүрэг" 
         },
-        image: "https://images.unsplash.com/photo-1461301214746-1e790926d323?q=80&w=2070&auto=format&fit=crop",
+        image: "https://images.unsplash.com/photo-1559027615-cd4628902d4a?q=80&w=2070&auto=format&fit=crop",
         category: "campaign",
         status: "upcoming",
         featured: true,
@@ -239,7 +239,7 @@ const seedData = async () => {
           en: "National Park", 
           mn: "Үндэсний Цэцэрлэгт Хүрээлэн" 
         },
-        image: "https://images.unsplash.com/photo-1461301214746-1e790926d323?q=80&w=2070&auto=format&fit=crop",
+        image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070&auto=format&fit=crop",
         category: "fundraiser",
         status: "past",
         featured: false,
@@ -366,14 +366,16 @@ const seedData = async () => {
     console.log("Seeding news...");
     const newsToInsert = [
       {
-        title: { en: "UNICEF Launches New Youth Strategy", mn: "ЮНИСЕФ Залуучуудын Шинэ Стратегиа Танилцууллаа" },
+        title: { en: "UNICEF Launches New Youth Strategy", mn: "ЮНИСЕФ Залуучуудын Шинэ Стратегиа Танилцууллаа", de: "UNICEF startet neue Jugendstrategie" },
         summary: { 
           en: "A new framework to empower young people across Mongolia.", 
-          mn: "Монгол даяар залуучуудыг чадавхжуулах шинэ тогтолцоо." 
+          mn: "Монгол даяар залуучуудыг чадавхжуулах шинэ тогтолцоо.",
+          de: "Ein neuer Rahmen zur Stärkung junger Menschen in der ganzen Mongolei."
         },
         content: { 
           en: "Today, UNICEF Mongolia unveiled its comprehensive 5-year strategy focused on adolescent health, climate action, and digital skills. The launch event was attended by government officials and youth representatives.", 
-          mn: "Өнөөдөр ЮНИСЕФ Монгол өсвөр үеийнхний эрүүл мэнд, уур амьсгалын өөрчлөлт, дижитал ур чадварт чиглэсэн 5 жилийн цогц стратегиа танилцууллаа. Нээлтийн үйл ажиллагаанд төрийн албан хаагчид болон залуучуудын төлөөлөл оролцов." 
+          mn: "Өнөөдөр ЮНИСЕФ Монгол өсвөр үеийнхний эрүүл мэнд, уур амьсгалын өөрчлөлт, дижитал ур чадварт чиглэсэн 5 жилийн цогц стратегиа танилцууллаа. Нээлтийн үйл ажиллагаанд төрийн албан хаагчид болон залуучуудын төлөөлөл оролцов.",
+          de: "Heute stellte UNICEF Mongolei seine umfassende 5-Jahres-Strategie vor, die sich auf die Gesundheit von Jugendlichen, Klimaschutz und digitale Fähigkeiten konzentriert. An der Auftaktveranstaltung nahmen Regierungsvertreter und Jugendvertreter teil."
         },
         author: "Admin",
         image: "https://images.unsplash.com/photo-1529070538774-1843cb3265df?q=80&w=2070&auto=format&fit=crop",
@@ -381,14 +383,16 @@ const seedData = async () => {
         featured: true
       },
       {
-        title: { en: "Student Club wins Innovation Award", mn: "Оюутны Клуб Инновацийн Шагнал Хүртлээ" },
+        title: { en: "Student Club wins Innovation Award", mn: "Оюутны Клуб Инновацийн Шагнал Хүртлээ", de: "Studentenclub gewinnt Innovationspreis" },
         summary: { 
           en: "MUST UNICEF Club recognized for their air pollution project.", 
-          mn: "ШУТИС-ийн ЮНИСЕФ Клуб агаарын бохирдлын төслөөрөө шалгарлаа." 
+          mn: "ШУТИС-ийн ЮНИСЕФ Клуб агаарын бохирдлын төслөөрөө шалгарлаа.",
+          de: "MUST UNICEF Club für ihr Luftverschmutzungsprojekt ausgezeichnet."
         },
         content: { 
           en: "The student-led team developed a low-cost air filtration system for ger district kindergartens. They were awarded the 'Green Innovation' prize at the National Youth Tech Fair.", 
-          mn: "Оюутнуудын баг гэр хорооллын цэцэрлэгүүдэд зориулсан хямд өртөгтэй агаар шүүгч системийг хөгжүүлжээ. Тэд Үндэсний Залуучуудын Технологийн Үзэсгэлэнгээс 'Ногоон Инноваци' шагнал хүртлээ." 
+          mn: "Оюутнуудын баг гэр хорооллын цэцэрлэгүүдэд зориулсан хямд өртөгтэй агаар шүүгч системийг хөгжүүлжээ. Тэд Үндэсний Залуучуудын Технологийн Үзэсгэлэнгээс 'Ногоон Инноваци' шагнал хүртлээ.",
+          de: "Das von Studenten geleitete Team entwickelte ein kostengünstiges Luftfiltersystem für Kindergärten im Ger-Bezirk. Sie wurden auf der National Youth Tech Fair mit dem Preis 'Grüne Innovation' ausgezeichnet."
         },
         author: "Admin",
         image: "https://images.unsplash.com/photo-1531545514256-b1400bc00f31?q=80&w=1974&auto=format&fit=crop",
@@ -396,14 +400,16 @@ const seedData = async () => {
         featured: false
       },
       {
-        title: { en: "Volunteer Highlights: October", mn: "Сайн Дурынхны Амжилт: 10-р сар" },
+        title: { en: "Volunteer Highlights: October", mn: "Сайн Дурынхны Амжилт: 10-р сар", de: "Freiwilligen-Highlights: Oktober" },
         summary: { 
           en: "Celebrating the contributions of our dedicated members.", 
-          mn: "Манай идэвхтэй гишүүдийн хувь нэмрийг тэмдэглэж байна." 
+          mn: "Манай идэвхтэй гишүүдийн хувь нэмрийг тэмдэглэж байна.",
+          de: "Wir feiern die Beiträge unserer engagierten Mitglieder."
         },
         content: { 
           en: "This month, over 500 volunteers participated in our 'Clean Streets' campaign. We collected 2 tons of recyclable waste and planted 50 trees in the city center.", 
-          mn: "Энэ сард манай 'Цэвэр Гудамж' аянд 500 гаруй сайн дурынхан оролцлоо. Бид 2 тонн дахин боловсруулах хог хаягдал цуглуулж, хотын төвд 50 мод тарьсан." 
+          mn: "Энэ сард манай 'Цэвэр Гудамж' аянд 500 гаруй сайн дурынхан оролцлоо. Бид 2 тонн дахин боловсруулах хог хаягдал цуглуулж, хотын төвд 50 мод тарьсан.",
+          de: "In diesem Monat nahmen über 500 Freiwillige an unserer Kampagne 'Saubere Straßen' teil. Wir sammelten 2 Tonnen recycelbaren Abfall und pflanzten 50 Bäume im Stadtzentrum."
         },
         author: "Admin",
         image: "https://images.unsplash.com/photo-1559027615-cd4628902d4a?q=80&w=2074&auto=format&fit=crop",

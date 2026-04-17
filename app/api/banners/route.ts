@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { Banner } from '@/models/Banner';
 
+export const revalidate = 300;
+
 export async function GET() {
   // Mock data for banners
   const banners: Banner[] = [
@@ -20,5 +22,7 @@ export async function GET() {
       },
     ];
 
-  return NextResponse.json({ banners });
+  return NextResponse.json({ banners }, {
+    headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=60' }
+  });
 }

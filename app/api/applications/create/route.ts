@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectToDB from "@/lib/db";
 import Application from "@/lib/models/Application";
 import { getAuthUserId } from "@/lib/authHelpers";
+import { invalidate } from "@/lib/server-cache";
 
 export async function POST(req: Request) {
   try {
@@ -39,9 +40,11 @@ export async function POST(req: Request) {
       level,
       message,
       generalId,
-      userId: userId, // Store the db id directly
+      userId: userId || undefined,
       status: 'pending_general'
     });
+
+    if (userId) invalidate(`user-dash:${userId}`);
 
     return NextResponse.json(application, { status: 201 });
   } catch (error: any) {

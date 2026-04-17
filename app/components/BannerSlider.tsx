@@ -104,16 +104,25 @@
  
    if (isLoading || banners.length === 0) { 
      return ( 
-       <div className="w-full px-4 pt-2">
-         <div className="w-full max-w-[1400px] mx-auto rounded-[2.5rem] bg-gray-100 animate-pulse aspect-[1.6/1] sm:aspect-[2.4/1] lg:aspect-[3/1]" /> 
+       <div className="w-full px-5 pt-3">
+         <div className="w-full animate-pulse" style={{ 
+           borderRadius: 'var(--r-2xl)', 
+           background: 'var(--fill2)', 
+           aspectRatio: '16/9', 
+         }} /> 
        </div>
      ); 
    } 
  
    return ( 
-     <section className="w-full px-4 pt-2">
+     <section className="w-full px-5 pt-3">
        <div 
-         className="relative w-full max-w-[1400px] mx-auto overflow-hidden rounded-[2.5rem] shadow-sm bg-gray-100 aspect-[1.6/1] sm:aspect-[2.4/1] lg:aspect-[3/1] group" 
+         className="relative w-full overflow-hidden group" 
+         style={{ 
+           borderRadius: 'var(--r-2xl)', 
+           boxShadow: '0 2px 20px rgba(0,0,0,0.10)', 
+           aspectRatio: '16/9',  /* mobile дээр 16:9 */ 
+         }} 
          onMouseEnter={() => setIsHovered(true)} 
          onMouseLeave={() => setIsHovered(false)} 
        > 
@@ -162,18 +171,14 @@
          </div> 
  
          {/* Indicators */} 
-         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2"> 
-           {banners.map((_: Banner, index: number) => ( 
-             <button 
-               key={index} 
-               onClick={() => { 
-                 setDirection(index > currentIndex ? 1 : -1); 
-                 setCurrentIndex(index); 
-               }} 
-               className="p-1" 
-             > 
-               <div className={`h-1.5 rounded-full transition-all duration-300 ${index === currentIndex ? 'w-6 bg-white' : 'w-1.5 bg-white/40 hover:bg-white/60' 
-                 }`} /> 
+         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex gap-1.5"> 
+           {banners.map((_: any, i: number) => ( 
+             <button key={i} onClick={() => { setDirection(i > currentIndex ? 1 : -1); setCurrentIndex(i); }} className="press p-1"> 
+               <div className={`rounded-full transition-all duration-300 ${ 
+                 i === currentIndex 
+                   ? 'w-5 h-1.5 bg-white' 
+                   : 'w-1.5 h-1.5 bg-white/50' 
+               }`} /> 
              </button> 
            ))} 
          </div> 

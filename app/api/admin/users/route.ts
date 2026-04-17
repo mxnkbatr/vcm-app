@@ -4,6 +4,7 @@ import { connectToDB } from "@/lib/db";
 import User from "@/lib/models/User";
 import { withAdminAuth } from "@/lib/adminAuth";
 import { getAuthUser } from "@/lib/authHelpers";
+import { logAdminAction } from "@/lib/audit";
 
 // 1. GET: Fetch all users for the table (or specific user with documents)
 export const GET = withAdminAuth(async (req: Request) => {
@@ -69,6 +70,13 @@ export const PUT = withAdminAuth(async (req: Request) => {
         { new: true, upsert: true }
       );
 
+      await logAdminAction({
+        action: "admin.user.update",
+        targetType: "User",
+        targetId: String(userId),
+        meta: { role: data.role, country: data.country, program: data.program, step: data.step, status: data.status },
+      });
+
       return NextResponse.json({ success: true, user: updatedUser });
     }
 
@@ -84,6 +92,12 @@ export const PUT = withAdminAuth(async (req: Request) => {
         { $set: updateData },
         { new: true, upsert: true }
       );
+
+      await logAdminAction({
+        action: "admin.user.master_update",
+        targetType: "User",
+        targetId: String(userId),
+      });
 
       return NextResponse.json({ success: true, user: updatedUser });
     }
@@ -104,6 +118,12 @@ export const PUT = withAdminAuth(async (req: Request) => {
         { new: true, upsert: true }
       );
 
+      await logAdminAction({
+        action: "admin.user.approve_documents",
+        targetType: "User",
+        targetId: String(userId),
+      });
+
       return NextResponse.json({ success: true, user: updatedUser });
     }
 
@@ -119,6 +139,12 @@ export const PUT = withAdminAuth(async (req: Request) => {
         { $set: { password: hashedPassword } },
         { new: true }
       );
+
+      await logAdminAction({
+        action: "admin.user.reset_password",
+        targetType: "User",
+        targetId: String(userId),
+      });
 
       return NextResponse.json({ success: true, user: updatedUser });
     }
@@ -144,6 +170,11 @@ export const DELETE = withAdminAuth(async (req: Request) => {
     const query = isMongoId ? { _id: id } : { clerkId: id };
 
     await User.findOneAndDelete(query);
+    await logAdminAction({
+      action: "admin.user.delete",
+      targetType: "User",
+      targetId: String(id),
+    });
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: "Delete failed" }, { status: 500 });

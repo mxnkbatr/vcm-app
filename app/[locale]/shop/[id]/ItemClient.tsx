@@ -6,7 +6,8 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { ArrowLeft, ShoppingCart, Check, AlertCircle, Package, Smartphone, X, QrCode, CheckCircle2, Loader2 } from "lucide-react";
-import { IOSAlert, IOSSheet } from "@/components/iOSAlert";
+import { IOSAlert, IOSSheet } from "@/app/components/iOSAlert";
+import { useCart } from "@/app/context/CartContext";
 
 const T = {
   back: { en: "Back to Shop", mn: "Буцах", de: "Zurück zum Shop" },
@@ -78,6 +79,9 @@ export default function ItemClient({ item, locale = 'en' }: { item: any; locale:
   const [error, setError] = useState("");
   const [qpayResponse, setQpayResponse] = useState<any>(null);
   const [activePurchaseId, setActivePurchaseId] = useState<string | null>(null);
+
+  const { addToCart } = useCart();
+  const [addedToCart, setAddedToCart] = useState(false);
 
   useEffect(() => setMounted(true), []);
   const isDark = mounted && theme === "dark";
@@ -160,15 +164,36 @@ export default function ItemClient({ item, locale = 'en' }: { item: any; locale:
 
             {/* Order Button or Checkout Flow */}
             {!showCheckout ? (
-              <button
-                onClick={() => setShowCheckout(true)}
-                disabled={item.stock <= 0}
-                className="btn btn-primary btn-full"
-                style={{ opacity: item.stock <= 0 ? 0.5 : 1 }}
-              >
-                <ShoppingCart size={18} className="mr-2" />
-                {T.order[locale as keyof typeof T.order] || T.order.en}
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    addToCart({
+                      _id: item._id,
+                      name: item.name,
+                      price: item.price,
+                      image: item.image,
+                      quantity: 1
+                    });
+                    setAddedToCart(true);
+                    setTimeout(() => setAddedToCart(false), 2000);
+                  }}
+                  disabled={item.stock <= 0}
+                  className="flex-1 btn btn-secondary"
+                  style={{ opacity: item.stock <= 0 ? 0.5 : 1 }}
+                >
+                  <Package size={18} className="mr-2" />
+                  {addedToCart ? "Сагсанд орлоо!" : "Сагсанд нэмэх"}
+                </button>
+                <button
+                  onClick={() => setShowCheckout(true)}
+                  disabled={item.stock <= 0}
+                  className="flex-1 btn btn-primary"
+                  style={{ opacity: item.stock <= 0 ? 0.5 : 1 }}
+                >
+                  <ShoppingCart size={18} className="mr-2" />
+                  {T.order[locale as keyof typeof T.order] || T.order.en}
+                </button>
+              </div>
             ) : (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}

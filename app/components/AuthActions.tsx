@@ -2,7 +2,9 @@
 
 import React, { useState } from "react";
 import { Link } from "@/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { useLocale } from "next-intl";
+import { signOutToSignIn } from "@/lib/auth-signout";
 import { Motion as motion } from "./MotionProxy";
 import { useTranslations } from "next-intl";
 import { LogOut, User as UserIcon } from "lucide-react";
@@ -13,6 +15,7 @@ interface AuthActionsProps {
 }
 
 const AuthActions = ({ BRAND, isMobile }: AuthActionsProps) => {
+  const locale = useLocale();
   const t = useTranslations("Auth");
   const { data: session, status } = useSession();
   const isSignedIn = status === "authenticated";
@@ -54,7 +57,8 @@ const AuthActions = ({ BRAND, isMobile }: AuthActionsProps) => {
                   {t('dashboard')}
                 </Link>
                 <button
-                  onClick={() => signOut()}
+                  type="button"
+                  onClick={() => void signOutToSignIn(locale)}
                   className="w-full text-left px-4 py-3 text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-2"
                 >
                   <LogOut size={14} /> Sign Out
@@ -100,7 +104,8 @@ const AuthActions = ({ BRAND, isMobile }: AuthActionsProps) => {
                   {t('dashboard')}
                 </Link>
                 <button
-                  onClick={() => signOut({ callbackUrl: '/' })}
+                  type="button"
+                  onClick={() => void signOutToSignIn(locale)}
                   className="w-full text-left px-4 py-3 text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-2"
                 >
                   <LogOut size={14} /> Sign Out

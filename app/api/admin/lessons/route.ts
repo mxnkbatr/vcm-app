@@ -3,6 +3,7 @@ import { connectToDB } from "@/lib/db";
 import Lesson from "@/lib/models/Lesson";
 import User from "@/lib/models/User"; // Ensure User model is registered
 import { withAdminAuth } from "@/lib/adminAuth";
+import { logAdminAction } from "@/lib/audit";
 
 export const GET = withAdminAuth(async () => {
     try {
@@ -20,6 +21,12 @@ export const POST = withAdminAuth(async (req: Request) => {
         await connectToDB();
         const body = await req.json();
         const newLesson = await Lesson.create(body);
+        await logAdminAction({
+          action: "admin.lesson.create",
+          targetType: "Lesson",
+          targetId: newLesson._id.toString(),
+          meta: { category: newLesson.category, status: newLesson.status },
+        });
         return NextResponse.json(newLesson, { status: 201 });
     } catch (error) {
         return NextResponse.json({ error: "Failed to create lesson" }, { status: 500 });
@@ -42,6 +49,12 @@ export const PUT = withAdminAuth(async (req: Request) => {
             return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
         }
 
+        await logAdminAction({
+          action: "admin.lesson.update",
+          targetType: "Lesson",
+          targetId: String(id),
+        });
+
         return NextResponse.json(updatedLesson);
     } catch (error) {
         return NextResponse.json({ error: "Failed to update lesson" }, { status: 500 });
@@ -59,6 +72,11 @@ export const DELETE = withAdminAuth(async (req: Request) => {
         }
 
         await Lesson.findByIdAndDelete(id);
+        await logAdminAction({
+          action: "admin.lesson.delete",
+          targetType: "Lesson",
+          targetId: String(id),
+        });
         return NextResponse.json({ message: "Lesson deleted successfully" });
     } catch (error) {
         return NextResponse.json({ error: "Failed to delete lesson" }, { status: 500 });

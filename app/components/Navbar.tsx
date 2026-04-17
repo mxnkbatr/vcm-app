@@ -20,7 +20,6 @@ import { useTranslations, useLocale } from "next-intl";
 import dynamic from "next/dynamic";
 import { useIsMobile } from "./MotionProxy";
 import LanguageToggle from "./LanguageToggle";
-import MobileNavigationBar from "./MobileNavigationBar"; // This import was added in the previous step
 
 // Dynamically import Clerk components to reduce initial JS bundle
 const AuthActions = dynamic(() => import("./AuthActions"), {
@@ -42,7 +41,6 @@ export default function Navbar() {
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
   const pathname = usePathname();
   const { scrollY } = useScroll();
-  const isMobile = useIsMobile();
 
 
 
@@ -170,64 +168,6 @@ export default function Navbar() {
           </div>
         </nav>
       </motion.header>
-
-      {/* Mobile Navigation Bar */}
-      <MobileNavigationBar />
-
-      {/* ══════════════════════════════════════ 
-          MOBILE BOTTOM TAB BAR — iOS Style 
-      ══════════════════════════════════════ */} 
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[100]"> 
-        <nav 
-          className="frosted" 
-          style={{ 
-            borderTop: '0.5px solid var(--sep)', 
-            paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)', 
-          }} 
-        > 
-          <div className="grid grid-cols-5 w-full px-1"> 
-            {[ 
-              { id: 'home',      Icon: Home,           href: '/',          label: 'Нүүр' }, 
-              { id: 'programs',  Icon: Plane,           href: '/programs',  label: 'Хөтөлбөр' }, 
-              { id: 'dashboard', Icon: LayoutDashboard, href: '/dashboard', label: 'Миний' }, 
-              { id: 'events',    Icon: Ticket,          href: '/events',    label: 'Арга хэмжээ' }, 
-              { id: 'lessons',   Icon: BookOpen,        href: '/lessons',   label: 'Сургалт' }, 
-            ].map(({ id, Icon, href, label }) => { 
-              const active = pathname === href || (href !== '/' && pathname.startsWith(href)); 
-              return ( 
-                <Link 
-                  key={id} 
-                  href={href} 
-                  className="press flex flex-col items-center justify-center py-2 relative group active:scale-95 transition-transform" 
-                > 
-                  {active && ( 
-                    <motion.div 
-                      layoutId="tabDot" 
-                      className="absolute top-1 w-1 h-1 bg-sky-500 rounded-full" 
-                      transition={{ type: 'spring', stiffness: 500, damping: 35 }} 
-                    /> 
-                  )} 
-                  <motion.div 
-                    animate={active ? { scale: 1.05, y: -1 } : { scale: 1, y: 0 }} 
-                    transition={{ type: 'spring', stiffness: 500, damping: 30 }} 
-                  > 
-                    <Icon 
-                      size={24} 
-                      strokeWidth={active ? 2.5 : 2} 
-                      className={active ? "text-sky-500" : "text-slate-400"}
-                    /> 
-                  </motion.div> 
-                  <span 
-                    className={`text-[10px] font-bold mt-1 ${active ? "text-sky-500" : "text-slate-400"}`}
-                  > 
-                    {label} 
-                  </span> 
-                </Link> 
-              ); 
-            })} 
-          </div> 
-        </nav> 
-      </div>
     </>
   );
 }

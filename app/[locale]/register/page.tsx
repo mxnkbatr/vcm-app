@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
+import { Link } from "@/navigation";
 import { motion } from "framer-motion";
 import {
   UserPlus,
@@ -35,7 +35,7 @@ export default function RegisterPage() {
 
   return (
     <div className="page">
-      <div className="page-inner space-y-8">
+      <div className="page-inner relative z-[120] space-y-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -98,10 +98,11 @@ export default function RegisterPage() {
 
           {/* CTA Button */}
           <div className="mt-8">
-            <Link href={selected === "new" ? "/sign-up" : "/sign-in"}>
-              <button className="btn btn-primary btn-full">
-                {selected === "new" ? "Бүртгэл Үүсгэх" : "Нэвтрэх"}
-              </button>
+            <Link
+              href={selected === "new" ? "/sign-up" : "/sign-in"}
+              className="btn btn-primary btn-full"
+            >
+              {selected === "new" ? "Бүртгэл Үүсгэх" : "Нэвтрэх"}
             </Link>
           </div>
 

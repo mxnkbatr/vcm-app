@@ -85,6 +85,22 @@ const UserSchema = new mongoose.Schema(
       householdTasks: { type: [String], default: [] },
       motivation: { type: String },
     },
+
+    // --- USER SETTINGS ---
+    settings: {
+      notificationsEnabled: { type: Boolean, default: true },
+      marketingEmailsEnabled: { type: Boolean, default: false },
+    },
+
+    // --- PUSH NOTIFICATION TOKENS (Capacitor) ---
+    deviceTokens: [
+      {
+        token: { type: String, required: true },
+        platform: { type: String, enum: ["ios", "android", "web"], required: true },
+        createdAt: { type: Date, default: Date.now },
+        lastSeenAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );

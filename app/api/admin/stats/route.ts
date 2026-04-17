@@ -1,18 +1,13 @@
 import { NextResponse } from "next/server";
-import { getAuthUser } from "@/lib/authHelpers";
 import { connectToDB } from "@/lib/db";
 import User from "@/lib/models/User";
 import News from "@/lib/models/News";
 import Event from "@/lib/models/Events";
 import Application from "@/lib/models/Application";
+import { withAdminAuth } from "@/lib/adminAuth";
 
-export async function GET() {
+export const GET = withAdminAuth(async () => {
   await connectToDB();
-  const user = await getAuthUser();
-  if (user?.role !== 'admin') {
-     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
   try {
     const [totalUsers, blogsPublished, pendingApplications, studentsCount, adminsCount, guestsCount] = await Promise.all([
       User.countDocuments({}),
@@ -36,4 +31,4 @@ export async function GET() {
     console.error("Stats Error:", error);
     return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 });
   }
-}
+});

@@ -1,28 +1,26 @@
 import { NextResponse } from "next/server";
 import { connectToDB } from "@/lib/db";
 import ShoppingItem from "@/lib/models/ShoppingItem";
+import { withCache } from "@/lib/server-cache";
 
-export const revalidate = 60;
+export const revalidate = 0;
 
-// Public GET — only active items
 export async function GET() {
   try {
-    await connectToDB();
-    // Added .lean() to drastically reduce memory usage and speed up data fetching
-    const items = await ShoppingItem.find({ isActive: true }).sort({
-      createdAt: -1,
-    }).lean();
-    
-    return NextResponse.json(items, { 
-      status: 200,
-      headers: {
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30'
-      }
+    const items = await withCache("shopping:all", 90_000, async () => {
+      await connectToDB();
+      return ShoppingItem.find({ isActive: true })
+        .select("_id name price image category stock isActive createdAt")
+        .sort({ createdAt: -1 })
+        .limit(60)
+        .lean();
     });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to fetch shopping items" },
-      { status: 500 }
-    );
+
+    return NextResponse.json(items, {
+      status: 200,
+      headers: { "Cache-Control": "public, s-maxage=90, stale-while-revalidate=60" },
+    });
+  } catch {
+    return NextResponse.json({ error: "Failed to fetch shopping items" }, { status: 500 });
   }
 }

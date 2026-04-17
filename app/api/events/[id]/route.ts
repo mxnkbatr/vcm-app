@@ -43,7 +43,10 @@ export async function POST(
     }
 
     // 3. Check if already registered
-    if (event.attendees.includes(user._id)) {
+    const alreadyRegistered = event.attendees.some(
+      (id: { toString: () => string }) => id.toString() === user._id.toString()
+    );
+    if (alreadyRegistered) {
       return NextResponse.json({ error: "Already registered for this event" }, { status: 400 });
     }
 
@@ -90,7 +93,10 @@ export async function DELETE(
     }
 
     // Check if registered
-    if (!event.attendees.includes(user._id)) {
+    const isRegistered = event.attendees.some(
+      (id: { toString: () => string }) => id.toString() === user._id.toString()
+    );
+    if (!isRegistered) {
       return NextResponse.json({ error: "Not registered for this event" }, { status: 400 });
     }
 

@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import { ArrowRight, Loader2, Phone, Lock, School, CheckSquare } from "lucide-react";
+import { useLocale } from "next-intl";
 
 export default function CompleteProfilePage() {
   const router = useRouter();
   const { update } = useSession(); // useNextAuth update
+  const locale = useLocale();
 
   // Form State
   const [phone, setPhone] = useState("");
@@ -63,7 +65,7 @@ export default function CompleteProfilePage() {
       await update();
       
       // Redirect to dashboard
-      window.location.href = "/dashboard";
+      window.location.href = `/${locale}/dashboard`;
     } catch (err: any) {
       setError(err.message || "Something went wrong.");
     } finally {

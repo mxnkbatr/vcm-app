@@ -1,21 +1,26 @@
 import { NextResponse } from "next/server";
-import { connectToDB} from "@/lib/db";
+import { connectToDB } from "@/lib/db";
 import News from "@/lib/models/News";
+import { withCache } from "@/lib/server-cache";
 
-export const revalidate = 60;
+export const revalidate = 0;
 
 export async function GET() {
   try {
-    await connectToDB();
-    const news = await News.find({}).sort({ publishedDate: -1 }).lean();
-    return NextResponse.json(news, { 
-      status: 200,
-      headers: {
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30'
-      }
+    const news = await withCache("news:all", 120_000, async () => {
+      await connectToDB();
+      return News.find({})
+        .select("_id title summary image author publishedDate tags featured views")
+        .sort({ publishedDate: -1 })
+        .limit(30)
+        .lean();
     });
-  } catch (error) {
-    console.error("Failed to fetch news", error);
+
+    return NextResponse.json(news, {
+      status: 200,
+      headers: { "Cache-Control": "public, s-maxage=120, stale-while-revalidate=60" },
+    });
+  } catch {
     return NextResponse.json({ error: "Failed to fetch news" }, { status: 500 });
   }
 }

@@ -5,6 +5,7 @@ import {
   Plus, Edit, Trash2, CheckCircle2, XCircle, Search, Package, Image as ImageIcon, Loader2
 } from "lucide-react";
 import Image from "next/image";
+import { signedCloudinaryUpload } from "@/app/components/admin/upload";
 
 export default function ShoppingManager() {
   const [items, setItems] = useState<any[]>([]);
@@ -172,11 +173,12 @@ function ShoppingItemModal({ item, onClose, onSaved }: { item: any, onClose: () 
       };
 
       if (imageFile) {
-        // Here we ideally upload via multipart or convert to base64
-        // Since api/admin/shopping currently expects JSON if we look at our created API, we'll convert image to base64
-        const buffer = await imageFile.arrayBuffer();
-        const base64 = Buffer.from(buffer).toString('base64');
-        payLoad.image = `data:${imageFile.type};base64,${base64}`;
+        const uploaded = await signedCloudinaryUpload({
+          file: imageFile,
+          folder: "vcm/admin/shop",
+          resourceType: "image",
+        });
+        payLoad.image = uploaded.secureUrl;
       }
 
       const method = item ? "PUT" : "POST";

@@ -21,6 +21,8 @@ const ShoppingItemSchema = new Schema(
   { timestamps: true }
 );
 
+ShoppingItemSchema.index({ isActive: 1, createdAt: -1 });
+
 const ShoppingItem =
   models.ShoppingItem || model("ShoppingItem", ShoppingItemSchema);
 export default ShoppingItem;

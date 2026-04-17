@@ -20,6 +20,8 @@ const BookingSchema = new Schema(
       default: 'pending'
     },
 
+    // LiveKit room name tied to this booking/session
+    livekitRoom: { type: String, default: "" },
 
   },
   { timestamps: true }

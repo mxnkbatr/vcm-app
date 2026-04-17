@@ -7,83 +7,142 @@
  /* ───────────────────────────────────────────── 
     iOS DESIGN TOKENS 
  ───────────────────────────────────────────── */ 
- :root { 
-   /* Brand */ 
-   --blue:          #0A84FF; 
-   --blue-light:    #E8F4FF; 
-   --blue-dim:      rgba(10,132,255,0.14); 
-   --green:         #30D158; 
-   --orange:        #FF9F0A; 
-   --red:           #FF3B30; 
-   --yellow:        #FFD60A; 
- 
-   /* System backgrounds */ 
-   --bg:            #F2F2F7; 
-   --bg2:           #FFFFFF; 
-   --bg3:           #F9F9FB; 
-   --bg-dark:       #1C1C1E; 
-   --bg-dark2:      #2C2C2E; 
- 
-   /* Labels */ 
-   --label:         #000000; 
-   --label2:        rgba(60,60,67,0.60); 
-   --label3:        rgba(60,60,67,0.30); 
-   --label4:        rgba(60,60,67,0.18); 
- 
-   /* Fills */ 
-   --fill:          rgba(120,120,128,0.20); 
-   --fill2:         rgba(120,120,128,0.16); 
-   --fill3:         rgba(120,120,128,0.12); 
- 
-   /* Separators */ 
-   --sep:           rgba(60,60,67,0.12); 
-   --sep-opaque:    #C6C6C8; 
- 
-   /* Frosted glass */ 
-   --glass:         rgba(255,255,255,0.80); 
-   --glass-border:  rgba(255,255,255,0.50); 
- 
-   /* Tab bar */ 
-   --tabbar-bg:     rgba(249,249,249,0.94); 
- 
-   /* Radius */ 
-   --r-xs:  8px; 
-   --r-sm:  12px; 
-   --r-md:  16px; 
-   --r-lg:  20px; 
-   --r-xl:  24px; 
-   --r-2xl: 28px; 
-   --r-3xl: 32px; 
- 
-   /* Shadows */ 
-   --s-card:  0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06); 
-   --s-float: 0 4px 24px rgba(10,132,255,0.22); 
-   --s-sheet: 0 -2px 20px rgba(0,0,0,0.10); 
+ :root {
+   /* ── Brand ── */
+   --blue:          #0EA5E9; /* Sky Blue 500 */
+   --blue-light:    #E0F2FE; /* Sky Blue 100 */
+   --blue-dim:      rgba(14,165,233,0.12);
+   
+   --green:         #10B981; /* Emerald 500 */
+   --emerald:       #10B981;
+   --emerald-dim:   rgba(16,185,129,0.14);
+   
+   --orange:        #F59E0B; /* Amber 500 */
+   --orange-dim:    rgba(245,158,11,0.14);
+   
+   --red:           #EF4444; /* Rose 500 */
+   --red-dim:       rgba(239,68,68,0.12);
+   
+   --yellow:        #FBBF24;
+   --purple:        #8B5CF6;
+   --purple-dim:    rgba(139,92,246,0.12);
+   --teal:          #14B8A6;
+   --teal-dim:      rgba(20,184,166,0.12);
+
+   /* ── System backgrounds (iOS grouped) ── */
+   --bg:            #F8FAFC; /* Slate 50 */
+   --bg2:           #FFFFFF;
+   --bg3:           #F1F5F9; /* Slate 100 */
+   --bg-dark:       #0F172A; /* Slate 900 */
+   --bg-dark2:      #1E293B; /* Slate 800 */
+   --card:          #FFFFFF;
+
+   /* ── Labels ── */
+   --label:         #0F172A; /* Slate 900 */
+   --label2:        #64748B; /* Slate 500 */
+   --label3:        #94A3B8; /* Slate 400 */
+   --label4:        #CBD5E1; /* Slate 300 */
+
+   /* ── Fills ── */
+   --fill:          rgba(148,163,184,0.20);
+   --fill2:         rgba(148,163,184,0.12);
+   --fill3:         rgba(148,163,184,0.08);
+
+   /* ── Separators ── */
+   --sep:           rgba(148,163,184,0.15);
+   --sep-opaque:    #E2E8F0; /* Slate 200 */
+
+   /* ── Frosted glass ── */
+   --glass:         rgba(255,255,255,0.85);
+   --glass-border:  rgba(255,255,255,0.5);
+
+   /* ── Radius scale ── */
+   --r-xs:  8px;
+   --r-sm:  12px;
+   --r-md:  16px;
+   --r-lg:  20px;
+   --r-xl:  24px;
+   --r-2xl: 28px;
+   --r-3xl: 32px;
+
+   /* ── Shadows ── */
+   --s-card:  0 8px 30px rgba(0,0,0,0.04);
+   --s-float: 0 12px 32px rgba(14,165,233,0.25);
+   --s-sheet: 0 -4px 24px rgba(0,0,0,0.08);
+   --s-modal: 0 24px 60px rgba(0,0,0,0.15);
  } 
  
- /* ───────────────────────────────────────────── 
-    BASE 
- ───────────────────────────────────────────── */ 
- html {
+/* ─────────────────────────────────────────────
+   DARK MODE TOKENS  (.dark class — next-themes)
+───────────────────────────────────────────── */
+.dark {
+  --bg:            #0F172A;
+  --bg2:           #1E293B;
+  --bg3:           #0F172A;
+  --card:          #1E293B;
+
+  --label:         #F1F5F9;
+  --label2:        #94A3B8;
+  --label3:        #64748B;
+  --label4:        #334155;
+
+  --fill:          rgba(148,163,184,0.14);
+  --fill2:         rgba(148,163,184,0.08);
+  --fill3:         rgba(148,163,184,0.05);
+
+  --sep:           rgba(148,163,184,0.10);
+  --sep-opaque:    #1E293B;
+
+  --glass:         rgba(15,23,42,0.85);
+  --glass-border:  rgba(255,255,255,0.08);
+
+  --s-card:        0 8px 30px rgba(0,0,0,0.25);
+  --s-sheet:       0 -4px 24px rgba(0,0,0,0.35);
+}
+
+/* ───────────────────────────────────────────── 
+   BASE 
+───────────────────────────────────────────── */ 
+html {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif; 
-   -webkit-font-smoothing: antialiased; 
-   -moz-osx-font-smoothing: grayscale; 
-   text-rendering: optimizeLegibility; 
- } 
- 
- body { 
-   background: var(--bg); 
-   color: var(--label); 
-   overscroll-behavior: none; 
-   -webkit-overflow-scrolling: touch; 
- } 
- 
- @media (max-width: 768px) { 
-   html { 
-     -webkit-tap-highlight-color: transparent; 
-     -webkit-text-size-adjust: 100%; 
-   } 
- } 
+  -webkit-font-smoothing: antialiased; 
+  -moz-osx-font-smoothing: grayscale; 
+  text-rendering: optimizeLegibility;
+  /* Native-like scroll behavior */
+  scroll-behavior: smooth;
+} 
+
+/* Main scroll region — native-like rubber band containment */
+.native-app-main {
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+body { 
+  background: var(--bg); 
+  color: var(--label); 
+  overscroll-behavior: none; 
+  -webkit-overflow-scrolling: touch;
+  /* Prevent text selection on tap (native feel) */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Allow text selection in inputs and content areas */
+input, textarea, [contenteditable], p, h1, h2, h3, h4, h5, h6, span, a {
+  -webkit-user-select: auto;
+  user-select: auto;
+}
+
+/* Instant tap response — no 300ms delay */
+* { touch-action: manipulation; }
+
+@media (max-width: 768px) { 
+  html { 
+    -webkit-tap-highlight-color: transparent; 
+    -webkit-text-size-adjust: 100%; 
+  } 
+}
  
  /* ───────────────────────────────────────────── 
     SAFE AREA (Capacitor iOS) 
@@ -114,17 +173,21 @@
     COMPONENTS 
  ───────────────────────────────────────────── */ 
  
- /* Card */ 
- .card { 
-   background: var(--bg2); 
-   border-radius: var(--r-xl); 
-   box-shadow: var(--s-card); 
- } 
- .card-sm { 
-   background: var(--bg2); 
-   border-radius: var(--r-lg); 
-   box-shadow: var(--s-card); 
- } 
+/* Card */ 
+.card { 
+  background: var(--bg2); 
+  border-radius: var(--r-xl); 
+  box-shadow: var(--s-card);
+  contain: layout style;
+  transform: translateZ(0);
+} 
+.card-sm { 
+  background: var(--bg2); 
+  border-radius: var(--r-lg); 
+  box-shadow: var(--s-card);
+  contain: layout style;
+  transform: translateZ(0);
+}
  
  /* Frosted glass surface */ 
  .frosted { 
@@ -310,14 +373,15 @@
  /* ───────────────────────────────────────────── 
     PAGE SHELL 
  ───────────────────────────────────────────── */ 
- .page { 
-   min-height: 100dvh; 
-   background: var(--bg); 
-   padding-top: calc(env(safe-area-inset-top, 44px) + 72px); 
-   padding-bottom: calc(env(safe-area-inset-bottom, 34px) + 80px); 
-   padding-left: 16px; 
-   padding-right: 16px; 
- } 
+.page {
+  min-height: 100dvh;
+  background: var(--bg);
+  padding-top: calc(env(safe-area-inset-top, 44px) + 64px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 34px) + 74px);
+  padding-left: 16px;
+  padding-right: 16px;
+  contain: layout;
+}
  .page-inner { 
    max-width: 520px; 
    margin: 0 auto; 
@@ -347,6 +411,11 @@
  @keyframes spin { 
    to { transform: rotate(360deg); } 
  } 
+
+@keyframes shimmer {
+  0% { background-position: 0% 0%; }
+  100% { background-position: -200% 0%; }
+}
  
  .anim-in     { animation: ios-in   0.40s cubic-bezier(0.34,1.56,0.64,1) both; } 
  .anim-up     { animation: slide-up 0.45s cubic-bezier(0.34,1.56,0.64,1) both; } 
@@ -361,13 +430,19 @@
  .stagger > *:nth-child(5) { animation-delay: 0.28s; } 
  .stagger > *:nth-child(6) { animation-delay: 0.35s; } 
  
- /* Press state */ 
- .press { 
-   cursor: pointer; 
-   -webkit-tap-highlight-color: transparent; 
-   transition: transform 0.12s ease, opacity 0.12s ease; 
- } 
- .press:active { transform: scale(0.96); opacity: 0.85; } 
+/* Press state */ 
+.press { 
+  cursor: pointer; 
+  -webkit-tap-highlight-color: transparent; 
+  will-change: transform;
+  transition: transform 0.10s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              opacity 0.10s ease;
+} 
+.press:active {
+  transform: scale(0.94);
+  opacity: 0.80;
+  transition-duration: 0.05s; /* instant feedback on press */
+}
  
  /* ───────────────────────────────────────────── 
     UTILITY 
@@ -385,6 +460,21 @@
    border-top-color: var(--blue); 
    animation: spin 0.75s linear infinite; 
  } 
+
+/* ─────────────────────────────────────────────
+   SKELETON / SHIMMER
+───────────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--fill3) 0%,
+    rgba(120,120,128,0.18) 20%,
+    var(--fill3) 40%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.1s ease-in-out infinite;
+  border-radius: 12px;
+}
  
  /* ───────────────────────────────────────────── 
     REDUCED MOTION 

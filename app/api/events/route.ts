@@ -1,34 +1,32 @@
 import { NextResponse } from "next/server";
 import { connectToDB } from "@/lib/db";
 import Event from "@/lib/models/Events";
-import { getAuthUserId } from "@/lib/authHelpers";
+import { requireNonGuest } from "@/lib/rbac";
+import { CreateEventSchema } from "@/lib/modules/events/events.schemas";
+import { withCache } from "@/lib/server-cache";
 
-export const revalidate = 60;
+export const revalidate = 0;
 
-// GET: Fetch all events (with optional filtering)
 export async function GET(req: Request) {
   try {
-    await connectToDB();
-    
     const { searchParams } = new URL(req.url);
-    const category = searchParams.get('category');
-    
-    let query = {};
-    if (category && category !== 'all') {
-      query = { category };
-    }
+    const category = searchParams.get("category") || "all";
+    const cacheKey = `events:${category}`;
 
-    // Sort by date (newest first) with a 10-second max execution time
-    // Added .lean() for significant performance improvement (returns plain JS objects)
-    const events = await Event.find(query).sort({ date: 1 }).maxTimeMS(10000).lean();
-
-    return NextResponse.json(events, { 
-      status: 200,
-      headers: {
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30'
-      }
+    const events = await withCache(cacheKey, 45_000, async () => {
+      await connectToDB();
+      const query = category !== "all" ? { category } : {};
+      return Event.find(query)
+        .select("_id title description date timeString location image category status featured attendees university")
+        .sort({ date: 1 })
+        .lean();
     });
-  } catch (error) {
+
+    return NextResponse.json(events, {
+      status: 200,
+      headers: { "Cache-Control": "public, s-maxage=45, stale-while-revalidate=30" },
+    });
+  } catch {
     return NextResponse.json({ error: "Failed to fetch events" }, { status: 500 });
   }
 }
@@ -36,78 +34,32 @@ export async function GET(req: Request) {
 // POST: Create a new event (Protected: Members/Admins only)
 export async function POST(req: Request) {
   try {
-    // 1. Check Auth
-    const userId = await getAuthUserId();
-    if (!userId) {
+    const session = await requireNonGuest();
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     await connectToDB();
-    
-    const body = await req.json();
-    
-    // 1. Trim and format string/object fields
-    let title = body.title;
-    if (typeof title === 'string') {
-      title = { en: title.trim(), mn: title.trim() };
-    } else if (title && typeof title === 'object') {
-      title = {
-        en: typeof title.en === 'string' ? title.en.trim() : '',
-        mn: typeof title.mn === 'string' ? title.mn.trim() : ''
-      };
+
+    const json = await req.json();
+    const parsed = CreateEventSchema.safeParse(json);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid payload", details: parsed.error.flatten() },
+        { status: 400 }
+      );
     }
 
-    let location = body.location;
-    if (typeof location === 'string') {
-      location = { en: location.trim(), mn: location.trim() };
-    } else if (location && typeof location === 'object') {
-      location = {
-        en: typeof location.en === 'string' ? location.en.trim() : '',
-        mn: typeof location.mn === 'string' ? location.mn.trim() : ''
-      };
+    const dto = parsed.data;
+    if (isNaN(dto.date.getTime())) {
+      return NextResponse.json({ error: "Invalid date" }, { status: 400 });
     }
 
-    const category = typeof body.category === 'string' ? body.category.trim() : '';
-    const dateInput = typeof body.date === 'string' ? body.date.trim() : body.date;
-
-    // 2. Check required fields
-    if (!title || !title.en || !title.mn) {
-      return NextResponse.json({ error: "Title is required (both EN and MN)" }, { status: 400 });
-    }
-    if (!location || !location.en || !location.mn) {
-      return NextResponse.json({ error: "Location is required (both EN and MN)" }, { status: 400 });
-    }
-    if (!dateInput) {
-      return NextResponse.json({ error: "Date is required" }, { status: 400 });
-    }
-    if (!category) {
-      return NextResponse.json({ error: "Category is required" }, { status: 400 });
-    }
-
-    // 3. Validate Date (хүчинтэй огноо мөн эсэх)
-    const eventDate = new Date(dateInput);
-    if (isNaN(eventDate.getTime())) {
-      return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
-    }
-
-    // 4. Validate Category (зөвшөөрөгдсөн утгууд)
-    const allowedCategories = ['campaign', 'workshop', 'fundraiser'];
-    if (!allowedCategories.includes(category)) {
-      return NextResponse.json({ 
-        error: `Invalid category. Allowed values: ${allowedCategories.join(', ')}` 
-      }, { status: 400 });
-    }
-
-    // Overwrite the body properties with cleaned and validated data
-    const cleanedBody = {
-      ...body,
-      title,
-      location,
-      category,
-      date: eventDate,
-    };
-    
-    const newEvent = await Event.create(cleanedBody);
+    const newEvent = await Event.create({
+      ...dto,
+      link: dto.link || undefined,
+      university: dto.university || "MNUMS",
+    });
 
     return NextResponse.json(newEvent, { status: 201 });
   } catch (error) {

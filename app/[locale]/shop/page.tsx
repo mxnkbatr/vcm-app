@@ -8,16 +8,23 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   const t = await getTranslations({ locale });
   return {
-    title: "Shop - VISA",
+    title: "Shop - VCM",
     description: "Discover our premium items and exclusive offers.",
   };
 }
 
+export const revalidate = 60;
+
 export default async function ShopPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  
+
   await connectToDB();
-  const res = await ShoppingItem.find({ isActive: true }).sort({ createdAt: -1 }).lean();
+  const res = await ShoppingItem.find({ isActive: true })
+    .select("_id name price image category isActive createdAt updatedAt")
+    .sort({ createdAt: -1 })
+    .limit(50)
+    .lean();
+
   const items = res.map((item: any) => ({
     ...item,
     _id: item._id.toString(),
@@ -26,8 +33,6 @@ export default async function ShopPage({ params }: { params: Promise<{ locale: s
   }));
 
   return (
-    <main className="min-h-screen pt-24 pb-12">
-      <ShopClient items={items} locale={locale} />
-    </main>
+    <ShopClient items={items} locale={locale} />
   );
 }

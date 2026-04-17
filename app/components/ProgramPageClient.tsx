@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Clock, MapPin, ChevronRight, CheckCircle2,
   Star, Users, Globe, Heart, Zap, GraduationCap,

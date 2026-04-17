@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/navigation";
 import { useSession } from "next-auth/react";
+import { signOutToSignIn } from "@/lib/auth-signout";
 import {
    Clock, Calendar, MapPin, Activity,
    CheckCircle2, Shield, Settings, BookOpen,
@@ -71,6 +71,30 @@ interface LessonData {
     imageUrl?: string;
     difficulty: string;
 }
+
+type LmsI18n = { en: string; mn: string; de?: string };
+type LmsCourse = {
+  _id: string;
+  slug: string;
+  title: LmsI18n;
+  description: LmsI18n;
+  thumbnailUrl?: string;
+  isFree?: boolean;
+  price?: number;
+  currency?: string;
+};
+
+type StudentCourseSummary = {
+  course: LmsCourse;
+  progressPct: number;
+  completedLessons: number;
+  totalLessons: number;
+};
+
+type StudentDashboard = {
+  courses: StudentCourseSummary[];
+  certificates: { _id: string; courseId: string; certNumber: string; pdfUrl?: string; issuedAt: string }[];
+};
 
 // --- COMPONENTS ---
 const DashboardCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
@@ -220,13 +244,18 @@ export default function MemberDashboard() {
    const [attendedEvents, setAttendedEvents] = useState<EventData[]>([]);
    const [availableEvents, setAvailableEvents] = useState<EventData[]>([]);
    const [lessons, setLessons] = useState<LessonData[]>([]);
+   const [studentDash, setStudentDash] = useState<StudentDashboard | null>(null);
    const [loading, setLoading] = useState(true);
    const [alert, setAlert] = useState<{ title: string; message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
    useEffect(() => {
       const fetchData = async () => {
          try {
-            const dashRes = await fetch('/api/user/dashboard');
+            const [dashRes, lmsRes] = await Promise.all([
+               fetch('/api/user/dashboard'),
+               fetch("/api/student/dashboard"),
+            ]);
+
             if (dashRes.ok) {
                const data = await dashRes.json();
                if (data.user?.role === 'admin') {
@@ -240,6 +269,11 @@ export default function MemberDashboard() {
                setLessons(data.lessons || []);
             } else {
                setUserData({ _id: "new", fullName: user?.name || "Guest User", email: user?.email || "", role: "guest" });
+            }
+
+            if (lmsRes.ok) {
+               const lms = await lmsRes.json();
+               setStudentDash(lms);
             }
          } catch (e) {
             console.error("Dashboard Error:", e);
@@ -336,41 +370,180 @@ export default function MemberDashboard() {
                </h1>
             </div>
 
+            {/* LEARNING HUB (LMS) */}
+            {studentDash && (
+              <section className="mt-8">
+                <SectionHeader
+                  icon={GraduationCap}
+                  title={locale === "mn" ? "Миний сургалт" : "My Learning"}
+                  subtitle={
+                    locale === "mn"
+                      ? "Үзэж буй хичээлүүд, явц, сертификат"
+                      : "Courses, progress, and certificates"
+                  }
+                  action={
+                    <Link href="/lessons" className="t-caption font-bold" style={{ color: "var(--blue)" }}>
+                      {locale === "mn" ? "Бүгд →" : "All →"}
+                    </Link>
+                  }
+                />
+
+                <div className="space-y-4">
+                  <div className="flex gap-4 overflow-x-auto no-scroll -mx-4 px-4 pb-1">
+                    {(studentDash.courses || []).slice(0, 6).map((c) => {
+                      const title =
+                        (c.course.title as any)[locale] ||
+                        c.course.title.en ||
+                        "Course";
+                      const desc =
+                        (c.course.description as any)[locale] ||
+                        c.course.description.en ||
+                        "";
+                      return (
+                        <Link
+                          key={c.course._id}
+                          href="/lessons"
+                          className="card-sm press w-[280px] flex-shrink-0 overflow-hidden"
+                        >
+                          <div className="p-4 space-y-3">
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div
+                                  className="icon-box-sm"
+                                  style={{ background: "var(--blue-dim)", color: "var(--blue)" }}
+                                >
+                                  <BookOpen size={16} />
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="t-headline truncate" style={{ fontSize: 14 }}>
+                                    {title}
+                                  </div>
+                                  <div className="t-caption truncate">{desc}</div>
+                                </div>
+                              </div>
+                              <span
+                                className="badge"
+                                style={{
+                                  background: "var(--fill2)",
+                                  color: "var(--label2)",
+                                  fontSize: 10,
+                                }}
+                              >
+                                {c.progressPct}%
+                              </span>
+                            </div>
+
+                            <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: "var(--fill3)" }}>
+                              <div className="h-full" style={{ width: `${c.progressPct}%`, background: "var(--blue)" }} />
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <span className="t-caption2 uppercase tracking-widest" style={{ color: "var(--label3)" }}>
+                                {c.completedLessons}/{c.totalLessons} {locale === "mn" ? "хичээл" : "lessons"}
+                              </span>
+                              <span className="t-caption font-bold flex items-center gap-1" style={{ color: "var(--blue)" }}>
+                                {locale === "mn" ? "Үргэлжлүүлэх" : "Continue"} <ChevronRight size={14} />
+                              </span>
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+
+                  {(studentDash.certificates?.length ?? 0) > 0 && (
+                    <DashboardCard className="!p-5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="icon-box-sm" style={{ background: "var(--emerald-dim)", color: "var(--emerald)" }}>
+                            <CheckCircle2 size={16} />
+                          </div>
+                          <div>
+                            <div className="t-headline" style={{ fontSize: 15 }}>
+                              {locale === "mn" ? "Сертификатууд" : "Certificates"}
+                            </div>
+                            <div className="t-caption">
+                              {(studentDash.certificates?.length ?? 0)}{" "}
+                              {locale === "mn" ? "ширхэг" : "total"}
+                            </div>
+                          </div>
+                        </div>
+                        <Link href="/dashboard" className="btn btn-secondary btn-sm">
+                          {locale === "mn" ? "Харах" : "View"}
+                        </Link>
+                      </div>
+                    </DashboardCard>
+                  )}
+                </div>
+              </section>
+            )}
+
             {/* STATUS & JOURNEY */}
-            <div className="grid grid-cols-2 gap-4">
-               <DashboardCard className="!p-5 space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+               <div className="card-sm p-4 space-y-3">
                   <div className="icon-box-sm" style={{ background: 'var(--blue-dim)', color: 'var(--blue)' }}>
                      <Shield size={16} />
                   </div>
                   <div>
-                     <p className="t-caption2 uppercase tracking-widest mb-0.5" style={{ color: 'var(--label3)' }}>Status</p>
-                     <p className="t-headline capitalize">{userData.role}</p>
+                     <p className="t-caption2 uppercase tracking-widest mb-0.5" style={{ color: 'var(--label3)' }}>Төлөв</p>
+                     <p className="t-headline capitalize" style={{ fontSize: 16 }}>{userData.role === 'guest' ? 'Зочин' : userData.role}</p>
                   </div>
-               </DashboardCard>
-               <DashboardCard className="!p-5 space-y-3">
+               </div>
+               <div className="card-sm p-4 space-y-3">
                   <div className="icon-box-sm" style={{ background: 'var(--emerald-dim)', color: 'var(--emerald)' }}>
                      <CheckCircle2 size={16} />
                   </div>
                   <div>
-                     <p className="t-caption2 uppercase tracking-widest mb-0.5" style={{ color: 'var(--label3)' }}>Journey</p>
-                     <p className="t-headline">{userData.step || "Discovery"}</p>
+                     <p className="t-caption2 uppercase tracking-widest mb-0.5" style={{ color: 'var(--label3)' }}>Явц</p>
+                     <p className="t-headline" style={{ fontSize: 16 }}>{userData.step && userData.step !== "-" ? userData.step : "Бүртгэл"}</p>
                   </div>
-               </DashboardCard>
+               </div>
             </div>
 
             {/* QUICK ACTIONS */}
-            <div className="flex gap-4 overflow-x-auto no-scroll -mx-4 px-4">
-               <Link href="/profile" className="btn btn-secondary btn-sm flex-shrink-0">
-                  <User size={14} /> Profile
+            <div className="grid grid-cols-2 gap-3">
+               <Link href="/profile" className="card-sm p-4 press flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                     <div className="icon-box-sm" style={{ background: 'var(--blue-dim)', color: 'var(--blue)' }}>
+                        <User size={16} />
+                     </div>
+                     <span className="t-headline" style={{ fontSize: 15 }}>Профайл</span>
+                  </div>
+                  <ChevronRight size={16} style={{ color: 'var(--label3)' }} />
                </Link>
-               <Link href="/shop" className="btn btn-secondary btn-sm flex-shrink-0">
-                  <ShoppingBag size={14} /> Shop
+
+               <Link href="/shop" className="card-sm p-4 press flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                     <div className="icon-box-sm" style={{ background: 'var(--orange-dim)', color: 'var(--orange)' }}>
+                        <ShoppingBag size={16} />
+                     </div>
+                     <span className="t-headline" style={{ fontSize: 15 }}>Дэлгүүр</span>
+                  </div>
+                  <ChevronRight size={16} style={{ color: 'var(--label3)' }} />
                </Link>
-               <button onClick={() => {}} className="btn btn-secondary btn-sm flex-shrink-0">
-                  <Settings size={14} /> Settings
+
+               <button onClick={() => {}} className="card-sm p-4 press flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                     <div className="icon-box-sm" style={{ background: 'var(--fill2)', color: 'var(--label2)' }}>
+                        <Settings size={16} />
+                     </div>
+                     <span className="t-headline" style={{ fontSize: 15 }}>Тохиргоо</span>
+                  </div>
+                  <ChevronRight size={16} style={{ color: 'var(--label3)' }} />
                </button>
-               <button onClick={() => router.push('/api/auth/signout')} className="btn btn-secondary btn-sm flex-shrink-0" style={{ color: 'var(--red)' }}>
-                  <LogOut size={14} /> Logout
+
+               <button
+                  type="button"
+                  onClick={() => void signOutToSignIn(locale)}
+                  className="card-sm p-4 press flex items-center justify-between"
+               >
+                  <div className="flex items-center gap-3">
+                     <div className="icon-box-sm" style={{ background: 'var(--red-dim)', color: 'var(--red)' }}>
+                        <LogOut size={16} />
+                     </div>
+                     <span className="t-headline" style={{ fontSize: 15, color: 'var(--red)' }}>Гарах</span>
+                  </div>
+                  <ChevronRight size={16} style={{ color: 'var(--label3)' }} />
                </button>
             </div>
 
@@ -414,23 +587,26 @@ export default function MemberDashboard() {
                      </Link>
                   }
                />
-               <div className="space-y-4">
+               <div className="space-y-3">
                   {userApps.length === 0 ? (
-                     <div className="card p-8 text-center" style={{ background: 'var(--bg)' }}>
+                     <div className="card-sm p-8 flex flex-col items-center justify-center text-center border border-dashed" style={{ borderColor: 'var(--sep)', background: 'var(--bg)' }}>
+                        <div className="icon-box mb-3" style={{ background: 'var(--fill2)', color: 'var(--label3)' }}>
+                           <ClipboardList size={20} />
+                        </div>
                         <p className="t-footnote" style={{ color: 'var(--label3)' }}>Одоогоор өргөдөл байхгүй байна.</p>
                      </div>
                   ) : (
                      userApps.map(app => (
-                        <div key={app._id} className="card p-4 flex items-center gap-4">
+                        <div key={app._id} className="card-sm p-4 flex items-center gap-4 press">
                            <div className="icon-box-sm" style={{ background: 'var(--blue-dim)', color: 'var(--blue)' }}>
                               <Plus size={16} />
                            </div>
-                           <div className="flex-1">
-                              <h4 className="t-headline" style={{ fontSize: 14 }}>{app.programId}</h4>
+                           <div className="flex-1 min-w-0">
+                              <h4 className="t-headline truncate" style={{ fontSize: 15 }}>{app.programId}</h4>
                               <p className="t-caption" style={{ color: 'var(--label3)' }}>{new Date(app.createdAt).toLocaleDateString()}</p>
                            </div>
                            <div className="badge text-[10px]" style={{ background: 'var(--orange-dim)', color: 'var(--orange)' }}>
-                              {app.status || 'Pending'}
+                              {app.status || 'Хүлээгдэж буй'}
                            </div>
                         </div>
                      ))

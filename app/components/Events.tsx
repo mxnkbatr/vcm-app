@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/navigation";
 import {
   ArrowUpRight,
   Clock,
@@ -99,7 +99,6 @@ const ContentCard = ({ item, lang, isDark, isMobile, type }: any) => {
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
       whileTap={{ scale: 0.96 }}
-      className="press active:scale-95 transition-transform"
       style={{
         rotateX: isMobile ? 0 : rotateX,
         rotateY: isMobile ? 0 : rotateY,
@@ -108,6 +107,7 @@ const ContentCard = ({ item, lang, isDark, isMobile, type }: any) => {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       className={`
+        press active:scale-95 transition-transform
         relative group rounded-[1.5rem] sm:rounded-[2.5rem] overflow-hidden cursor-pointer h-full min-h-[320px] sm:min-h-[400px] border transition-all duration-500
         ${isDark
           ? "bg-slate-900/50 border-white/5 shadow-none hover:bg-slate-800"
@@ -121,7 +121,7 @@ const ContentCard = ({ item, lang, isDark, isMobile, type }: any) => {
           src={item.image || "/logo.jpg"}
           alt={item.title[lang] || "Content"}
           fill
-          priority={false}
+          priority={true}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="object-cover transition-transform duration-700 sm:group-hover:scale-110 opacity-100"
           quality={75}
@@ -206,12 +206,20 @@ const ContentCard = ({ item, lang, isDark, isMobile, type }: any) => {
 };
 
 // --- MAIN SECTION ---
-export default function LatestUpdatesSection({ isHorizontal = false }: { isHorizontal?: boolean }) {
+export default function LatestUpdatesSection({
+  isHorizontal = false,
+  compact = false,
+  defaultTab = 'blogs',
+}: {
+  isHorizontal?: boolean;
+  compact?: boolean;
+  defaultTab?: 'events' | 'blogs';
+}) {
   const lang = useLocale() as any;
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'events' | 'blogs'>('blogs');
+  const [activeTab, setActiveTab] = useState<'events' | 'blogs'>(defaultTab);
   const [filter, setFilter] = useState("all");
 
   const [events, setEvents] = useState<any[]>([]);
@@ -225,6 +233,8 @@ export default function LatestUpdatesSection({ isHorizontal = false }: { isHoriz
 
   // Theme check
   const isDark = mounted && (theme === 'dark');
+
+  const categories = activeTab === "events" ? EVENT_CATEGORIES : BLOG_CATEGORIES;
 
   // Fetch Events & Blogs
   useEffect(() => {
@@ -264,47 +274,90 @@ export default function LatestUpdatesSection({ isHorizontal = false }: { isHoriz
   if (!mounted) return null;
 
   if (isHorizontal) {
+    if (loading) {
+      return (
+        <>
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="flex-shrink-0 animate-pulse rounded-3xl"
+              style={{ width: 190, height: 250, background: "var(--fill2)" }}
+            />
+          ))}
+        </>
+      );
+    }
     return (
       <>
-        {loading ? (
-          <div className="w-full h-40 flex items-center justify-center">
-            <div className="ios-spinner" />
-          </div>
-        ) : displayedItems.slice(0, 6).map((item) => {
+        {displayedItems.slice(0, 6).map((item) => {
           const title = item.title?.[lang] || item.title?.en || "No Title";
-          const isBlog = activeTab === 'blogs';
+          const isBlog = activeTab === "blogs";
+          const dateStr = item.date
+            ? new Date(item.date)
+                .toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                .toUpperCase()
+            : "";
           return (
-            <div key={item._id} className="min-w-[300px] snap-start">
-              <Link href={`/${lang}/${isBlog ? 'news' : 'events'}/${item._id}`} className="block">
-                <motion.div
-                  className="card overflow-hidden press active:scale-95 transition-transform"
-                  whileTap={{ scale: 0.96 }}
-                >
-                  <div className="relative h-44 bg-slate-100">
-                    <Image
-                      src={item.image || "/placeholder.jpg"}
-                      alt={title}
-                      fill
-                      className="object-cover"
-                    />
-                    <div className="absolute top-3 left-3 px-2 py-1 bg-white/90 backdrop-blur-md rounded-lg shadow-sm border border-white/50">
-                      <span className="text-[10px] font-black uppercase text-sky-600">
-                        {item.category || "General"}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="text-sm font-bold line-clamp-2 text-slate-900 leading-snug h-10 mb-2">
-                      {title}
-                    </h3>
-                    <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                       <Clock size={12} strokeWidth={2.5} />
-                       <span>{new Date(item.date).toLocaleDateString(lang === 'mn' ? 'mn-MN' : 'en-US', { month: 'short', day: 'numeric' })}</span>
-                    </div>
-                  </div>
-                </motion.div>
-              </Link>
-            </div>
+            <Link
+              key={item._id}
+              href={`/${isBlog ? "news" : "events"}/${item._id}`}
+              className="flex-shrink-0 press relative overflow-hidden block"
+              style={{ width: 190, height: 250, borderRadius: "var(--r-2xl)" }}
+            >
+              {/* Image */}
+              <div className="absolute inset-0 bg-slate-200">
+                <Image
+                  src={item.image || "/logo.jpg"}
+                  alt={title}
+                  fill
+                  className="object-cover"
+                  sizes="190px"
+                  priority={true}
+                />
+              </div>
+              {/* Gradient */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.25) 50%, transparent 100%)",
+                }}
+              />
+              {/* Date badge */}
+              <div
+                className="absolute top-3 left-3 px-2 py-1 rounded-xl"
+                style={{
+                  background: "rgba(255,255,255,0.18)",
+                  backdropFilter: "blur(14px)",
+                  WebkitBackdropFilter: "blur(14px)",
+                  border: "0.5px solid rgba(255,255,255,0.3)",
+                }}
+              >
+                <span className="text-[10px] font-black text-white uppercase tracking-widest">
+                  {dateStr}
+                </span>
+              </div>
+              {/* Category */}
+              <div
+                className="absolute top-3 right-3 px-2 py-1 rounded-xl"
+                style={{ background: "var(--blue)" }}
+              >
+                <span className="text-[10px] font-bold text-white uppercase tracking-wide">
+                  {item.category || "General"}
+                </span>
+              </div>
+              {/* Title */}
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                <h3 className="text-white font-bold text-[14px] leading-snug line-clamp-2">
+                  {title}
+                </h3>
+                {item.timeString && (
+                  <p className="text-white/60 text-[11px] font-medium mt-1 flex items-center gap-1">
+                    <Clock size={10} /> {item.timeString}
+                  </p>
+                )}
+              </div>
+            </Link>
           );
         })}
       </>

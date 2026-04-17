@@ -1,7 +1,7 @@
 "use client"; 
  import React, { useState } from "react"; 
- import Link from "next/link"; 
- import { useRouter } from "next/navigation"; 
+ import { Link } from "@/navigation"; 
+ import { useRouter } from "@/navigation";
  import { signIn } from "next-auth/react"; 
  import { motion } from "framer-motion"; 
  import { useTranslations } from "next-intl"; 
@@ -32,8 +32,8 @@
    }; 
  
    return ( 
-     <div className="min-h-dvh flex flex-col" style={{ background: 'var(--bg)', paddingTop: 'env(safe-area-inset-top, 44px)' }}> 
-       <div className="max-w-sm mx-auto w-full px-6 flex flex-col justify-center min-h-dvh py-12"> 
+    <div className="min-h-dvh flex flex-col" style={{ background: 'var(--bg)', paddingTop: 'env(safe-area-inset-top, 44px)' }}> 
+      <div className="relative z-[120] max-w-sm mx-auto w-full px-6 flex flex-col justify-center min-h-dvh py-12 pb-32"> 
  
          {/* Logo */} 
          <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10"> 
@@ -89,9 +89,16 @@
            </button> 
          </motion.div> 
  
-         <p className="t-footnote text-center mt-8"> 
-           Бүртгэлгүй юу?{' '} 
-           <Link href="/register" style={{ color: 'var(--blue)', fontWeight: 600 }}>Бүртгүүлэх</Link> 
+         <p className="t-footnote text-center mt-8 relative z-[140]"> 
+           Бүртгэлгүй юу?{" "}
+           <button
+             type="button"
+             onClick={() => router.push("/register")}
+             className="press"
+             style={{ color: "var(--blue)", fontWeight: 600 }}
+           >
+             Бүртгүүлэх
+           </button>
          </p> 
        </div> 
      </div> 

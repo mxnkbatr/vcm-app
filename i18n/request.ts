@@ -10,10 +10,10 @@ const isValidLocale = (locale: string): locale is Locale => {
 
 export default getRequestConfig(async ({ requestLocale }) => {
   let locale = await requestLocale;
-  console.log('[i18n/request] resolved locale:', locale);
+  // console.log('[i18n/request] resolved locale:', locale);
 
   if (!locale || !isValidLocale(locale)) {
-    console.log('[i18n/request] Invalid or missing locale, calling notFound()');
+    // console.log('[i18n/request] Invalid or missing locale, calling notFound()');
     notFound();
   }
 

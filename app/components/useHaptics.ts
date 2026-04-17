@@ -1,5 +1,6 @@
 "use client";
 
+import { Capacitor } from "@capacitor/core";
 import { Haptics, ImpactStyle, NotificationType } from "@capacitor/haptics";
 import { useEffect, useState } from "react";
 
@@ -10,15 +11,9 @@ export function useHaptics() {
 
   useEffect(() => {
     async function checkHapticsAvailability() {
-      if (typeof window !== "undefined" && Haptics) {
-        try {
-          const { available } = await Haptics.isSupported();
-          setIsAvailable(available);
-        } catch (error) {
-          // Ignore error on web platforms where Haptics is not supported
-          setIsAvailable(false);
-        }
-      }
+      if (typeof window === "undefined") return;
+      // Capacitor Haptics is intended for native platforms.
+      setIsAvailable(Capacitor.isNativePlatform());
     }
     checkHapticsAvailability();
   }, []);
