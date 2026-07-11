@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Link, usePathname } from "@/navigation";
-import Image from "next/image";
-import { BRAND as VCM_BRAND } from "@/lib/branding";
+import BrandLogo from "./BrandLogo";
 import {
   Home,
   BookOpen,
@@ -84,17 +83,7 @@ export default function Navbar() {
               : "bg-white/60 border-white/50 shadow-xl"}
         `}>
           <Link href="/" className="flex items-center gap-3 group shrink-0">
-            <div className="relative w-10 h-10 overflow-hidden rounded-full border-2 border-white/50 shadow-md bg-white">
-              <Image
-                src={VCM_BRAND.logo}
-                alt="VCM Logo"
-                fill
-                priority
-                sizes="40px"
-                className="object-contain transition-transform duration-500 group-hover:scale-110"
-                quality={75}
-              />
-            </div>
+            <BrandLogo size={40} priority className="transition-transform duration-500 group-hover:scale-105" />
             <span className="font-sans font-black text-lg tracking-tight uppercase" style={{ color: BRAND.RED }}>
               {t("logo")}
             </span>

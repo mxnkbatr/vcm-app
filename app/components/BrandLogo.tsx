@@ -7,17 +7,37 @@ type BrandLogoProps = {
   size?: number;
   className?: string;
   priority?: boolean;
+  /** iOS app-icon corner radius (default true) */
+  rounded?: boolean;
 };
 
-export default function BrandLogo({ size = 40, className = "object-contain", priority }: BrandLogoProps) {
+/** VCM app icon — header, splash, auth дээр ижил logo */
+export default function BrandLogo({
+  size = 40,
+  className = "",
+  priority,
+  rounded = true,
+}: BrandLogoProps) {
+  const radius = rounded ? Math.round(size * 0.223) : 0;
+
   return (
-    <Image
-      src={BRAND.logo}
-      alt={BRAND.name}
-      width={size}
-      height={size}
-      className={className}
-      priority={priority}
-    />
+    <div
+      className={`brand-app-icon shrink-0 overflow-hidden ${className}`}
+      style={{
+        width: size,
+        height: size,
+        borderRadius: radius,
+        boxShadow: "0 2px 10px rgba(8, 120, 212, 0.18), 0 0 0 0.5px rgba(0,0,0,0.06)",
+      }}
+    >
+      <Image
+        src={BRAND.appIcon}
+        alt={BRAND.name}
+        width={size}
+        height={size}
+        className="object-cover w-full h-full"
+        priority={priority}
+      />
+    </div>
   );
 }

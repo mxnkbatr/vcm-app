@@ -1,14 +1,15 @@
 import Program from "@/lib/models/Program";
 import { defaultQuestionsForCode } from "@/lib/programQuestions";
+import { PROGRAM_COLORS } from "@/lib/color-system";
 
 export const DEFAULT_PROGRAMS = [
   {
     code: "EDU",
     slug: "edu",
     emoji: "🎓",
-    color: "#0EA5E9",
-    gradFrom: "#0ea5e9",
-    gradTo: "#3b82f6",
+    color: PROGRAM_COLORS.edu.main,
+    gradFrom: PROGRAM_COLORS.edu.gradFrom,
+    gradTo: PROGRAM_COLORS.edu.gradTo,
     name: { mn: "EDU Хөтөлбөр", en: "EDU Program", de: "EDU Programm" },
     description: {
       mn: "Сургуульд заалт, хэл заалт",
@@ -37,9 +38,9 @@ export const DEFAULT_PROGRAMS = [
     code: "AND",
     slug: "and",
     emoji: "🤝",
-    color: "#10B981",
-    gradFrom: "#10b981",
-    gradTo: "#0d9488",
+    color: PROGRAM_COLORS.and.main,
+    gradFrom: PROGRAM_COLORS.and.gradFrom,
+    gradTo: PROGRAM_COLORS.and.gradTo,
     name: { mn: "АНД Хөтөлбөр", en: "AND Program", de: "AND Programm" },
     description: {
       mn: "Тусгай хэрэгцээт хүүхдүүдэд туслалцаа",
@@ -67,9 +68,9 @@ export const DEFAULT_PROGRAMS = [
     code: "VCLUB",
     slug: "vclub",
     emoji: "🌍",
-    color: "#F59E0B",
-    gradFrom: "#f59e0b",
-    gradTo: "#f97316",
+    color: PROGRAM_COLORS.vclub.main,
+    gradFrom: PROGRAM_COLORS.vclub.gradFrom,
+    gradTo: PROGRAM_COLORS.vclub.gradTo,
     name: { mn: "V-Club", en: "V-Club", de: "V-Club" },
     description: {
       mn: "Олон улсын сүлжээ, арга хэмжээ",

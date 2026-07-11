@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import { BRAND } from "@/lib/branding";
+import BrandLogo from "@/app/components/BrandLogo";
 import { Link, usePathname, useRouter } from "@/navigation";
 import { useLocale } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
@@ -25,18 +25,18 @@ const TABS: Tab[] = [
   { id: "home",      href: "/",          label: { en: "Home",     mn: "Нүүр"    }, Icon: Home },
   { id: "programs",  href: "/programs",  label: { en: "Programs", mn: "Хөтөлбөр" }, Icon: Plane },
   { id: "shop",      href: "/shop",      label: { en: "Shop",     mn: "Дэлгүүр" }, Icon: ShoppingBag },
-  { id: "events",    href: "/events",    label: { en: "Events",   mn: "Арга"    }, Icon: Ticket },
   { id: "lessons",   href: "/lessons",   label: { en: "Learn",    mn: "Сургалт" }, Icon: BookOpen },
+  { id: "profile",   href: "/profile",   label: { en: "Profile",  mn: "Профайл" }, Icon: User },
 ];
 
 const AUTH_PATHS = ["/sign-in", "/sign-up", "/register", "/admin"];
 
 const MENU_ITEMS = [
   {
-    label: "Профайл",
-    sub: "Түүх · захиалга · хичээл",
-    href: "/profile",
-    icon: User,
+    label: "Арга хэмжээ",
+    sub: "Ойрын эвент, бүртгэл",
+    href: "/events",
+    icon: Ticket,
   },
   {
     label: "Миний өргөдөл",
@@ -173,153 +173,127 @@ export default function MobileChrome() {
 
   const user = session?.user as any;
   const overlayOpen = showMenu || showSearch || showNotif;
+  const headerTop = "var(--native-header-offset)";
 
   return (
     <>
-      {/* ══════════════ TOP BAR ══════════════ */}
-      <div className="fixed top-0 left-0 right-0 z-[100] lg:hidden px-3 pt-safe">
-        <motion.div
-          initial={{ opacity: 0, y: -12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: "spring", stiffness: 420, damping: 32, delay: 0.05 }}
-          className="liquid-chrome mt-2 h-14 px-4 flex items-center justify-between"
-          style={{ borderRadius: 22 }}
-        >
-          {/* Logo */}
-          <Link href="/" prefetch className="flex items-center gap-2.5 press">
-            <div
-              className="relative w-8 h-8 overflow-hidden flex-shrink-0"
-              style={{ borderRadius: 10, boxShadow: "0 1px 4px rgba(0,0,0,0.15)" }}
-            >
-              <Image
-                src={BRAND.logo}
-                alt="VCM" fill priority sizes="32px" className="object-contain"
-              />
-            </div>
-            <div className="leading-none">
-              <div className="text-[13px] font-black tracking-tight" style={{ color: "var(--label)" }}>
-                VCM
+      {/* ══════════════ FLOATING HEADER PILL ══════════════ */}
+      <div className="fixed top-0 left-0 right-0 z-[100] lg:hidden px-3 pt-safe native-chrome-top">
+        <div className="liquid-chrome mt-2 px-4 flex items-center justify-between native-chrome-panel">
+          <Link href="/" prefetch className="flex items-center gap-2.5 press min-w-0">
+            <BrandLogo size={32} priority />
+            <div className="leading-none min-w-0">
+              <div className="text-[13px] font-black tracking-tight premium-brand-title truncate">
+                {BRAND.shortName}
               </div>
-              <div className="text-[10px] font-semibold" style={{ color: "var(--label3)" }}>
+              <div
+                className="text-[10px] font-semibold truncate"
+                style={{ color: "var(--blue)" }}
+              >
                 Volunteer Center
               </div>
             </div>
           </Link>
 
-          {/* Actions */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 flex-shrink-0">
             <Link
               href="/cart"
               prefetch
-              className="press w-9 h-9 flex items-center justify-center rounded-full relative liquid-glass"
+              className="native-chrome-action native-chrome-action--glass press"
+              aria-label="Сагс"
             >
-              <ShoppingBag size={17} strokeWidth={2.2} style={{ color: "var(--label)" }} />
-              {cartCount > 0 && (
-                <span
-                  className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full border-2"
-                  style={{ background: "var(--red)", borderColor: "rgba(255,255,255,0.85)" }}
-                />
-              )}
+              <ShoppingBag size={17} strokeWidth={2.2} />
+              {cartCount > 0 && <span className="native-chrome-action__dot" aria-hidden />}
             </Link>
             <button
+              type="button"
               onClick={() => { setShowSearch(true); setShowMenu(false); setShowNotif(false); }}
-              className="press w-9 h-9 flex items-center justify-center rounded-full liquid-glass"
+              className="native-chrome-action native-chrome-action--glass press"
+              aria-label="Хайх"
             >
-              <Search size={17} strokeWidth={2.2} style={{ color: "var(--label)" }} />
+              <Search size={17} strokeWidth={2.2} />
             </button>
             <button
+              type="button"
               onClick={() => { setShowNotif(v => !v); setShowMenu(false); setShowSearch(false); }}
-              className="press w-9 h-9 flex items-center justify-center rounded-full relative"
-              style={{ background: showNotif ? "var(--blue)" : "var(--fill2)" }}
+              className={`native-chrome-action press ${showNotif ? "native-chrome-action--on" : "native-chrome-action--fill"}`}
+              aria-label="Мэдэгдэл"
             >
-              <Bell size={17} strokeWidth={2.2} style={{ color: showNotif ? "white" : "var(--label)" }} />
+              <Bell size={17} strokeWidth={2.2} />
               {unreadCount > 0 && !showNotif && (
-                <span
-                  className="absolute top-1.5 right-1.5 min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center text-white"
-                  style={{ background: "var(--red)" }}
-                >
+                <span className="native-chrome-action__badge">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
             </button>
             <button
+              type="button"
               onClick={() => { setShowMenu(v => !v); setShowNotif(false); setShowSearch(false); }}
-              className="press w-9 h-9 flex items-center justify-center rounded-full"
-              style={{ background: showMenu ? "var(--blue)" : "var(--fill2)" }}
+              className={`native-chrome-action press ${showMenu ? "native-chrome-action--on" : "native-chrome-action--fill"}`}
+              aria-label="Цэс"
             >
               {showMenu
                 ? <X size={17} strokeWidth={2.5} color="white" />
-                : <Menu size={17} strokeWidth={2.2} style={{ color: "var(--label)" }} />
+                : <Menu size={17} strokeWidth={2.2} />
               }
             </button>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* ══════════════ BOTTOM TAB BAR (floating liquid) ══════════════ */}
-      <AnimatePresence>
-        {!overlayOpen && (
-          <motion.div
-            key="tab-dock"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ type: "spring", stiffness: 480, damping: 34 }}
-            className="fixed bottom-0 left-0 right-0 z-[100] lg:hidden liquid-tab-dock pointer-events-none"
-          >
-            <div className="liquid-chrome liquid-tab-bar pointer-events-auto">
-              <div className="grid grid-cols-5 w-full">
-                {TABS.map(({ id, Icon, href, label }) => {
-                  const active = pathname === href || (href !== "/" && pathname.startsWith(href));
-                  const text = locale === "mn" ? label.mn : label.en;
+      {!overlayOpen && (
+        <div
+          className="fixed bottom-0 left-0 right-0 z-[100] lg:hidden liquid-tab-dock pointer-events-none native-chrome-bottom"
+        >
+          <div className="liquid-chrome liquid-tab-bar pointer-events-auto">
+            <div className="grid grid-cols-5 w-full">
+              {TABS.map(({ id, Icon, href, label }) => {
+                const active =
+                  id === "profile"
+                    ? pathname === "/profile" || pathname.startsWith("/profile/")
+                    : pathname === href || (href !== "/" && pathname.startsWith(href));
+                const text = locale === "mn" ? label.mn : label.en;
 
-                  return (
-                    <Link
-                      key={id}
-                      href={href}
-                      prefetch
-                      onClick={() => hapticImpact(ImpactStyle.Light)}
-                      className="press flex flex-col items-center justify-center pt-2 pb-1 relative"
+                return (
+                  <Link
+                    key={id}
+                    href={href}
+                    prefetch
+                    onTouchStart={() => {
+                      try {
+                        router.prefetch(href);
+                      } catch {
+                        /* noop */
+                      }
+                    }}
+                    onClick={() => hapticImpact(ImpactStyle.Light)}
+                    className={`press flex flex-col items-center justify-center pt-2 pb-1 relative native-tab-item ${active ? "on" : ""}`}
+                  >
+                    {active && <span className="native-tab-pill" aria-hidden />}
+                    <span className="relative z-10">
+                      <Icon
+                        size={23}
+                        strokeWidth={active ? 2.4 : 1.8}
+                        style={{ color: active ? "var(--blue)" : "var(--label3)" }}
+                      />
+                    </span>
+                    <span
+                      className="text-[10px] font-bold mt-0.5 relative z-10"
+                      style={{
+                        color: active ? "var(--blue)" : "var(--label3)",
+                        letterSpacing: "-0.2px",
+                      }}
                     >
-                      {active && (
-                        <motion.div
-                          layoutId="tabPill"
-                          className="absolute inset-x-1.5 top-1 bottom-0.5 rounded-full"
-                          style={{
-                            background: "linear-gradient(180deg, var(--blue-light), var(--blue-dim))",
-                            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.5)",
-                          }}
-                          transition={{ type: "spring", stiffness: 520, damping: 36 }}
-                        />
-                      )}
-                      <motion.div
-                        animate={active ? { scale: 1.08, y: -1 } : { scale: 1, y: 0 }}
-                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                        className="relative z-10"
-                      >
-                        <Icon
-                          size={23}
-                          strokeWidth={active ? 2.4 : 1.8}
-                          style={{ color: active ? "var(--blue)" : "var(--label3)" }}
-                        />
-                      </motion.div>
-                      <span
-                        className="text-[10px] font-bold mt-0.5 relative z-10"
-                        style={{
-                          color: active ? "var(--blue)" : "var(--label3)",
-                          letterSpacing: "-0.2px",
-                        }}
-                      >
-                        {text}
-                      </span>
-                    </Link>
-                  );
-                })}
-              </div>
+                      {text}
+                    </span>
+                  </Link>
+                );
+              })}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </div>
+      )}
 
       {/* ══════════════ SEARCH OVERLAY ══════════════ */}
       <AnimatePresence>
@@ -332,7 +306,7 @@ export default function MobileChrome() {
             transition={{ duration: 0.2 }}
             className="fixed left-3 right-3 z-[99] lg:hidden px-4 pb-4 liquid-glass"
             style={{
-              top: "calc(68px + env(safe-area-inset-top))",
+              top: `calc(${headerTop} + 6px)`,
               borderRadius: 22,
             }}
           >
@@ -401,7 +375,7 @@ export default function MobileChrome() {
             transition={{ type: "spring", stiffness: 380, damping: 32 }}
             className="fixed right-4 z-[99] lg:hidden overflow-hidden liquid-card"
             style={{
-              top: "calc(72px + env(safe-area-inset-top))",
+              top: `calc(${headerTop} + 8px)`,
               width: 288,
             }}
           >
@@ -490,7 +464,7 @@ export default function MobileChrome() {
               transition={{ type: "spring", stiffness: 380, damping: 32 }}
               className="fixed left-3 right-3 z-[106] lg:hidden flex flex-col liquid-chrome overflow-hidden"
               style={{
-                top: "calc(72px + env(safe-area-inset-top))",
+                top: `calc(${headerTop} + 8px)`,
                 bottom: "calc(max(env(safe-area-inset-bottom, 0px), 12px) + 12px)",
                 borderRadius: 28,
                 boxShadow: "0 24px 64px rgba(0,0,0,0.18)",

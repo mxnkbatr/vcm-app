@@ -12,6 +12,8 @@ import {
   CheckCircle2, Camera, History
 } from "lucide-react";
 import { Link } from "@/navigation";
+import PremiumPageShell from "@/app/components/PremiumPageShell";
+import PremiumSectionHeader from "@/app/components/PremiumSectionHeader";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
@@ -88,8 +90,8 @@ export default function ProfilePage() {
   const initials = (userData.fullName || "U").split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase();
 
   return (
-    <div className="page">
-      <div className="page-inner space-y-5 pb-10">
+    <PremiumPageShell>
+      <div className="space-y-5 pb-6 pt-2">
 
         {/* Toast */}
         <AnimatePresence>
@@ -106,13 +108,7 @@ export default function ProfilePage() {
           )}
         </AnimatePresence>
 
-        {/* Header */}
-        <div className="pt-2">
-          <p className="text-[11px] font-bold uppercase tracking-widest mb-1" style={{ color: "var(--label3)" }}>
-            Volunteer Center Mongolia
-          </p>
-          <h1 className="t-large-title">Профайл</h1>
-        </div>
+        <PremiumSectionHeader title="Профайл" subtitle={userData.fullName || "Миний бүртгэл"} />
 
         {/* Avatar + Name card */}
         <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="card p-6">
@@ -312,6 +308,6 @@ export default function ProfilePage() {
           </>
         )}
       </AnimatePresence>
-    </div>
+    </PremiumPageShell>
   );
 }

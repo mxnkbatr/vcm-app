@@ -6,6 +6,9 @@ import { Link } from "@/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock, MapPin, Calendar, ChevronRight } from "lucide-react";
 import { useLocale } from "next-intl";
+import PremiumPageShell from "@/app/components/PremiumPageShell";
+import PremiumSectionHeader from "@/app/components/PremiumSectionHeader";
+import EventCompactRow, { pickI18n } from "@/app/components/EventCompactRow";
 
 interface EventItem {
   _id: string;
@@ -154,14 +157,14 @@ function EventCard({ ev, locale, index }: { ev: EventItem; locale: string; index
 }
 
 /* skeleton */
-function Skeleton() {
+function EventsSkeleton() {
   return (
     <div className="space-y-4">
-      {[1, 2, 3].map(i => (
+      {[1, 2, 3].map((i) => (
         <div
           key={i}
-          className="overflow-hidden animate-pulse"
-          style={{ borderRadius: "var(--r-2xl)", background: "var(--fill2)", height: 256 }}
+          className="skeleton"
+          style={{ borderRadius: "var(--r-2xl)", height: 256 }}
         />
       ))}
     </div>
@@ -179,21 +182,16 @@ export default function EventsClient({ initialEvents }: { initialEvents?: EventI
   const filtered = filter === "all" ? events : events.filter(e => e.category === filter);
 
   return (
-    <div className="page">
-      <div className="page-inner space-y-5">
+    <PremiumPageShell>
+      <div className="space-y-5 pt-2">
 
-        {/* Header */}
-        <div className="pt-2">
-          <h1 className="text-[28px] font-bold tracking-tight" style={{ color: "var(--label)" }}>
-            Арга хэмжээ
-          </h1>
-          <p className="text-[14px] mt-1" style={{ color: "var(--label2)" }}>
-            Ойрын үйл явдлуудыг хар
-          </p>
-        </div>
+        <PremiumSectionHeader
+          title="Арга хэмжээ"
+          subtitle="Ойрын үйл явдлуудыг хар"
+        />
 
         {/* Filter pills */}
-        <div className="flex gap-2 overflow-x-auto no-scroll pb-0.5">
+        <div className="premium-filter-row">
           {FILTERS.map(f => {
             const isOn = filter === f.id;
             const meta = getCat(f.id);
@@ -201,17 +199,12 @@ export default function EventsClient({ initialEvents }: { initialEvents?: EventI
               <button
                 key={f.id}
                 onClick={() => setFilter(f.id)}
-                className="flex-shrink-0 px-4 py-2 rounded-full text-[13px] font-semibold transition-all press"
-                style={{
-                  background: isOn ? "var(--blue)" : "var(--fill2)",
-                  color: isOn ? "white" : "var(--label)",
-                  border: isOn ? "none" : "0.5px solid var(--sep)",
-                }}
+                className={`premium-filter-pill press ${isOn ? "on" : ""}`}
               >
                 {f.id !== "all" && (
                   <span
-                    className="inline-block w-2.5 h-2.5 rounded-full mr-1.5"
-                    style={{ background: isOn ? "white" : meta.dot, verticalAlign: "middle" }}
+                    className="premium-filter-pill__dot"
+                    style={{ background: meta.dot }}
                   />
                 )}
                 {f.label}
@@ -223,24 +216,19 @@ export default function EventsClient({ initialEvents }: { initialEvents?: EventI
         {/* Content */}
         <AnimatePresence mode="wait">
           {loading ? (
-            <Skeleton />
+            <EventsSkeleton />
           ) : filtered.length === 0 ? (
             <motion.div
               key="empty"
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex flex-col items-center justify-center py-16 text-center"
+              className="premium-empty-state"
             >
-              <div
-                className="w-16 h-16 rounded-3xl flex items-center justify-center mb-4 text-3xl"
-                style={{ background: "var(--fill2)" }}
-              >
-                📅
-              </div>
-              <p className="font-semibold text-[16px]" style={{ color: "var(--label)" }}>
+              <div className="premium-empty-state__icon">📅</div>
+              <p className="premium-empty-state__title">
                 Арга хэмжээ байхгүй
               </p>
-              <p className="text-[13px] mt-1.5" style={{ color: "var(--label3)" }}>
+              <p className="premium-empty-state__sub">
                 Удахгүй шинэ арга хэмжээ нэмэгдэнэ
               </p>
             </motion.div>
@@ -249,16 +237,24 @@ export default function EventsClient({ initialEvents }: { initialEvents?: EventI
               key={filter}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="space-y-4"
+              className="home-events-list"
             >
-              {filtered.map((ev, i) => (
-                <EventCard key={ev._id} ev={ev} locale={locale} index={i} />
+              {filtered.map((ev) => (
+                <EventCompactRow
+                  key={ev._id}
+                  id={ev._id}
+                  title={pickI18n(ev.title, locale)}
+                  date={ev.date}
+                  timeString={ev.timeString}
+                  location={pickI18n(ev.location, locale)}
+                  locale={locale}
+                />
               ))}
             </motion.div>
           )}
         </AnimatePresence>
 
       </div>
-    </div>
+    </PremiumPageShell>
   );
 }

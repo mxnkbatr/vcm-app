@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import { Link, useRouter } from "@/navigation";
 import {
   UserPlus,
@@ -11,7 +10,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { BRAND } from "@/lib/branding";
+import BrandLogo from "@/app/components/BrandLogo";
 
 export default function JoinPage() {
   const t = useTranslations("Auth");
@@ -23,23 +22,15 @@ export default function JoinPage() {
   };
 
   return (
-    <div className="page !pt-safe flex flex-col justify-center min-h-[100dvh]">
+    <div className="page !pt-safe flex flex-col justify-center min-h-[100dvh] auth-screen relative overflow-hidden">
       <div className="page-inner space-y-10 py-8">
         <div className="text-center space-y-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.92 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="mx-auto w-[88px] h-[88px] rounded-[22px] overflow-hidden liquid-card p-2"
-            style={{ boxShadow: "var(--liquid-shadow-float)" }}
+            className="mx-auto flex justify-center"
           >
-            <Image
-              src={BRAND.logo}
-              alt={BRAND.shortName}
-              width={88}
-              height={88}
-              className="w-full h-full object-contain"
-              priority
-            />
+            <BrandLogo size={88} priority />
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 12 }}

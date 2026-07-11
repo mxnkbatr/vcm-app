@@ -16,6 +16,8 @@ import {
 import { Link, useRouter } from "@/navigation";
 import type { ProgramQuestion } from "@/lib/programQuestions";
 import { sortQuestions } from "@/lib/programQuestions";
+import PremiumPageShell from "@/app/components/PremiumPageShell";
+import PremiumSectionHeader from "@/app/components/PremiumSectionHeader";
 
 type Program = {
   _id: string;
@@ -225,12 +227,12 @@ function ProgramsApplyInner({ initialPrograms }: { initialPrograms?: Program[] }
 
   if (!programs.length) {
     return (
-      <div className="page">
-        <div className="page-inner text-center py-20">
+      <PremiumPageShell>
+        <div className="text-center py-20">
           <p className="t-subhead" style={{ color: "var(--label2)" }}>Идэвхтэй хөтөлбөр байхгүй байна.</p>
           <Link href="/programs" className="btn btn-primary mt-4 inline-flex">Буцах</Link>
         </div>
-      </div>
+      </PremiumPageShell>
     );
   }
 
@@ -238,8 +240,8 @@ function ProgramsApplyInner({ initialPrograms }: { initialPrograms?: Program[] }
 
   if (done) {
     return (
-      <div className="page">
-        <div className="page-inner flex flex-col items-center justify-center min-h-[70dvh] text-center space-y-5 px-4">
+      <PremiumPageShell>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-5 px-4">
           <motion.div
             initial={{ scale: 0.85, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -261,24 +263,19 @@ function ProgramsApplyInner({ initialPrograms }: { initialPrograms?: Program[] }
             </Link>
           </div>
         </div>
-      </div>
+      </PremiumPageShell>
     );
   }
 
   return (
-    <div className="page">
-      <div className="page-inner space-y-5 pb-28">
-        <div className="pt-2 flex items-start justify-between gap-3">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-widest mb-1" style={{ color: "var(--label3)" }}>
-              VCM · Хөтөлбөр
-            </p>
-            <h1 className="t-large-title">Бүртгэлийн хүсэлт</h1>
-            <p className="t-subhead mt-1" style={{ color: "var(--label2)" }}>
-              Хөтөлбөр сонгоод асуултуудад хариулна уу
-            </p>
-          </div>
-          <Link href="/programs" className="icon-box-sm press shrink-0" style={{ background: "var(--fill2)" }}>
+    <PremiumPageShell bottomPad={false} className="pb-28">
+      <div className="space-y-5 pt-2">
+        <div className="flex items-start justify-between gap-3">
+          <PremiumSectionHeader
+            title="Бүртгэлийн хүсэлт"
+            subtitle="Хөтөлбөр сонгоод асуултуудад хариулна уу"
+          />
+          <Link href="/programs" className="icon-box-sm press shrink-0 mt-1" style={{ background: "var(--fill2)" }}>
             <ChevronLeft size={20} style={{ color: "var(--label2)" }} />
           </Link>
         </div>
@@ -397,7 +394,7 @@ function ProgramsApplyInner({ initialPrograms }: { initialPrograms?: Program[] }
           </button>
         </form>
       </div>
-    </div>
+    </PremiumPageShell>
   );
 }
 

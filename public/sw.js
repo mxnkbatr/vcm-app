@@ -14,9 +14,8 @@ const SWR_APIS = [
 const PRECACHE_URLS = [
   "/offline.html",
   "/manifest.webmanifest",
-  "/branding/vcm-logo.png",
-  "/branding/icon-192.png",
   "/branding/icon-512.png",
+  "/branding/icon-192.png",
 ];
 
 // ── Install: precache only, no skipWaiting to prevent forced reloads ──

@@ -2,10 +2,13 @@
 
 import React, { useMemo, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
+import { Link } from "@/navigation";
 import {
-  LayoutDashboard, Users, BookOpen, ShoppingBag, GraduationCap,
-  Calendar, Newspaper, ClipboardList, Plane, Tag, ImageIcon,
-} from "lucide-react";
+  ADMIN_TABS,
+  adminTabById,
+  adminTabHref,
+  type AdminTabId,
+} from "@/lib/admin-nav";
 import UsersTab from "./users";
 import LessonsManager from "@/app/components/admin/LessonsManager";
 import ShoppingManager from "@/app/components/admin/ShoppingManager";
@@ -17,24 +20,6 @@ import ApplicationsManager from "@/app/components/admin/ApplicationsManager";
 import PromoCodesManager from "@/app/components/admin/PromoCodesManager";
 import BannersManager from "@/app/components/admin/BannersManager";
 import LmsAdmin from "./lms";
-
-type TabId =
-  | "dashboard" | "users" | "programs" | "events" | "news" | "applications"
-  | "lessons" | "lms" | "shop" | "promos" | "banners";
-
-const TABS: Array<{ id: TabId; label: string; Icon: React.ComponentType<{ size?: number }> }> = [
-  { id: "dashboard", label: "Dashboard", Icon: LayoutDashboard },
-  { id: "users", label: "Users", Icon: Users },
-  { id: "programs", label: "Programs", Icon: Plane },
-  { id: "applications", label: "Apps", Icon: ClipboardList },
-  { id: "events", label: "Events", Icon: Calendar },
-  { id: "news", label: "News", Icon: Newspaper },
-  { id: "banners", label: "Banner", Icon: ImageIcon },
-  { id: "lessons", label: "Lessons", Icon: BookOpen },
-  { id: "lms", label: "LMS", Icon: GraduationCap },
-  { id: "shop", label: "Shop", Icon: ShoppingBag },
-  { id: "promos", label: "Promo", Icon: Tag },
-];
 
 function useAdminResource<T>(url: string, active: boolean) {
   const [data, setData] = React.useState<T[]>([]);
@@ -56,12 +41,14 @@ function useAdminResource<T>(url: string, active: boolean) {
 
 export default function AdminClient() {
   const sp = useSearchParams();
-  const tab = (sp.get("tab") as TabId) || "dashboard";
+  const tab = (sp.get("tab") as AdminTabId) || "dashboard";
 
-  const active: TabId = useMemo(() => {
-    if (TABS.some((t) => t.id === tab)) return tab;
+  const active: AdminTabId = useMemo(() => {
+    if (ADMIN_TABS.some((t) => t.id === tab)) return tab;
     return "dashboard";
   }, [tab]);
+
+  const current = adminTabById(active);
 
   const programs = useAdminResource<any>("/api/admin/programs", active === "programs" || active === "applications");
   const events = useAdminResource<any>("/api/admin/events", active === "events");
@@ -72,53 +59,57 @@ export default function AdminClient() {
   const lessons = useAdminResource<any>("/api/admin/lessons", active === "lessons");
 
   return (
-    <div className="space-y-5 pb-8">
-      <div className="card p-4">
-        <div className="flex flex-col gap-4">
-          <div>
-            <div className="t-title2">Admin</div>
-            <div className="t-caption">Бүх контент, хэрэглэгч, өргөдөл удирдах</div>
+    <div className="space-y-4 lg:space-y-5 admin-content">
+      {/* Tablet/desktop tab strip — mobile uses bottom nav + menu sheet */}
+      <div className="hidden md:block card p-3 lg:p-4">
+        <div className="flex flex-col gap-3">
+          <div className="hidden lg:block">
+            <div className="t-title2">{current.label}</div>
+            <div className="t-caption">{current.description}</div>
           </div>
-          <div className="seg flex flex-wrap gap-1">
-            {TABS.map(({ id, label, Icon }) => {
+          <div className="admin-scroll-tabs">
+            {ADMIN_TABS.map(({ id, shortLabel, Icon }) => {
               const on = id === active;
               return (
-                <a
+                <Link
                   key={id}
-                  href={id === "dashboard" ? "/admin" : `/admin?tab=${id}`}
-                  className={`seg-item ${on ? "on" : ""}`}
+                  href={adminTabHref(id)}
+                  className={`admin-scroll-tabs__item ${on ? "on" : ""}`}
                 >
-                  <span className="inline-flex items-center gap-1.5">
-                    <Icon size={14} />
-                    {label}
-                  </span>
-                </a>
+                  <Icon size={15} />
+                  <span>{shortLabel}</span>
+                </Link>
               );
             })}
           </div>
         </div>
       </div>
 
+      {/* Mobile section hint */}
+      <div className="md:hidden card p-4">
+        <div className="t-caption">{current.description}</div>
+      </div>
+
       {active === "dashboard" && <DashboardTab />}
       {active === "users" && <UsersTab />}
       {active === "programs" && (
-        programs.loading ? <LoadingCard label="programs" /> :
+        programs.loading ? <LoadingCard label="хөтөлбөр" /> :
         <ProgramsManager programs={programs.data} onRefresh={programs.refresh} />
       )}
       {active === "events" && (
-        events.loading ? <LoadingCard label="events" /> :
+        events.loading ? <LoadingCard label="арга хэмжээ" /> :
         <EventsManager events={events.data} onRefresh={events.refresh} />
       )}
       {active === "news" && (
-        news.loading ? <LoadingCard label="news" /> :
+        news.loading ? <LoadingCard label="мэдээ" /> :
         <NewsManager news={news.data} onRefresh={news.refresh} />
       )}
       {active === "banners" && (
-        banners.loading ? <LoadingCard label="banners" /> :
+        banners.loading ? <LoadingCard label="баннер" /> :
         <BannersManager banners={banners.data} onRefresh={banners.refresh} />
       )}
       {active === "applications" && (
-        applications.loading ? <LoadingCard label="applications" /> :
+        applications.loading ? <LoadingCard label="өргөдөл" /> :
         <ApplicationsManager
           applications={applications.data}
           programs={programs.data}
@@ -126,7 +117,7 @@ export default function AdminClient() {
         />
       )}
       {active === "lessons" && (
-        lessons.loading ? <LoadingCard label="lessons" /> :
+        lessons.loading ? <LoadingCard label="хичээл" /> :
         <LessonsManager lessons={lessons.data} onRefresh={lessons.refresh} />
       )}
       {active === "lms" && <LmsAdmin />}
@@ -137,7 +128,7 @@ export default function AdminClient() {
         </div>
       )}
       {active === "promos" && (
-        promos.loading ? <LoadingCard label="promos" /> :
+        promos.loading ? <LoadingCard label="промо код" /> :
         <PromoCodesManager promos={promos.data} onRefresh={promos.refresh} />
       )}
     </div>
@@ -147,7 +138,7 @@ export default function AdminClient() {
 function LoadingCard({ label }: { label: string }) {
   return (
     <div className="card p-6">
-      <div className="t-headline">Loading {label}…</div>
+      <div className="t-headline">{label} ачаалж байна…</div>
     </div>
   );
 }
@@ -163,26 +154,54 @@ function DashboardTab() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <LoadingCard label="stats" />;
-  if (!stats) return <div className="card p-6"><div className="t-headline">Failed to load stats</div></div>;
+  if (loading) return <LoadingCard label="статистик" />;
+  if (!stats) {
+    return (
+      <div className="card p-6">
+        <div className="t-headline">Статистик ачаалахад алдаа гарлаа</div>
+      </div>
+    );
+  }
 
   const items = [
-    { label: "Хэрэглэгч", value: stats.totalUsers },
-    { label: "Мэдээ", value: stats.blogsPublished },
-    { label: "Өргөдөл хүлээгдэж буй", value: stats.pendingApplications },
-    { label: "Сурагч", value: stats.studentsCount },
-    { label: "Admin", value: stats.adminsCount },
-    { label: "Зочин", value: stats.guestsCount },
+    { label: "Нийт хэрэглэгч", value: stats.totalUsers, accent: "var(--blue)" },
+    { label: "Нийтлэгдсэн мэдээ", value: stats.blogsPublished, accent: "var(--teal, #2dd4bf)" },
+    { label: "Хүлээгдэж буй өргөдөл", value: stats.pendingApplications, accent: "var(--gold, #fbbf24)" },
+    { label: "Сурагч", value: stats.studentsCount, accent: "var(--label)" },
+    { label: "Админ", value: stats.adminsCount, accent: "var(--emerald)" },
+    { label: "Зочин", value: stats.guestsCount, accent: "var(--label2)" },
   ];
 
+  const quickLinks = ADMIN_TABS.filter((t) =>
+    ["applications", "users", "programs", "events", "news"].includes(t.id)
+  );
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-      {items.map((x) => (
-        <div key={x.label} className="card p-5">
-          <div className="t-caption2 uppercase tracking-widest">{x.label}</div>
-          <div className="t-title1 mt-2">{x.value}</div>
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        {items.map((x) => (
+          <div key={x.label} className="card p-4 md:p-5 admin-stat-card">
+            <div className="t-caption2 uppercase tracking-widest">{x.label}</div>
+            <div className="t-title1 mt-2" style={{ color: x.accent }}>
+              {x.value ?? 0}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="card p-4">
+        <div className="t-headline mb-3">Хурдан шилжих</div>
+        <div className="admin-quick-grid">
+          {quickLinks.map(({ id, label, Icon }) => (
+            <Link key={id} href={adminTabHref(id)} className="admin-quick-tile press">
+              <div className="icon-box-sm" style={{ background: "var(--blue-dim)", color: "var(--blue)" }}>
+                <Icon size={18} />
+              </div>
+              <span className="font-bold text-sm">{label}</span>
+            </Link>
+          ))}
         </div>
-      ))}
+      </div>
     </div>
   );
 }

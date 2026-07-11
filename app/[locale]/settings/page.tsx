@@ -6,6 +6,8 @@ import { useTheme } from "next-themes";
 import { useRouter } from "@/navigation";
 import { signOutToSignIn } from "@/lib/auth-signout";
 import { motion } from "framer-motion";
+import PremiumPageShell from "@/app/components/PremiumPageShell";
+import PremiumSectionHeader from "@/app/components/PremiumSectionHeader";
 import {
   Moon, Sun, Globe, Bell, BellOff, Shield,
   Info, ChevronRight, LogOut, Trash2, Volume2
@@ -76,23 +78,13 @@ export default function SettingsPage() {
   const isDark = mounted && resolvedTheme === "dark";
 
   return (
-    <div className="page">
-      <div className="page-inner space-y-6 pb-10">
+    <PremiumPageShell>
+      <div className="space-y-6 pb-6 pt-2">
 
-        {/* Header */}
-        <div className="pt-2">
-          <p className="text-[11px] font-bold uppercase tracking-widest mb-1" style={{ color: "var(--label3)" }}>
-            Volunteer Center Mongolia
-          </p>
-          <h1 className="t-large-title">
-            {locale === "mn" ? "Тохиргоо" : "Settings"}
-          </h1>
-          {saving && (
-            <p className="text-[12px] mt-1" style={{ color: "var(--blue)" }}>
-              {locale === "mn" ? "Хадгалж байна…" : "Saving…"}
-            </p>
-          )}
-        </div>
+        <PremiumSectionHeader
+          title={locale === "mn" ? "Тохиргоо" : "Settings"}
+          subtitle={saving ? (locale === "mn" ? "Хадгалж байна…" : "Saving…") : "VCM app"}
+        />
 
         {/* Appearance */}
         <section className="space-y-2">
@@ -249,6 +241,6 @@ export default function SettingsPage() {
         </p>
 
       </div>
-    </div>
+    </PremiumPageShell>
   );
 }

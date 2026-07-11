@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 import { useLocale } from "next-intl";
 import { Heart, Globe, Users, Sparkles, Mail, Phone, MapPin, Star } from "lucide-react";
 import { Link } from "@/navigation";
+import PremiumPageShell from "@/app/components/PremiumPageShell";
+import PremiumSectionHeader from "@/app/components/PremiumSectionHeader";
 
 const STATS = [
   { value: "50+", label: { mn: "Үндэсний төсөл", en: "National projects" } },
@@ -54,20 +56,14 @@ export default function AboutClient() {
   const t = (f: { mn: string; en: string }) => f[locale] || f.mn;
 
   return (
-    <div className="page">
-      <div className="page-inner space-y-8 pb-12">
+    <PremiumPageShell>
+      <div className="space-y-8 pb-8 pt-2">
 
-        {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="pt-2 space-y-1">
-          <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--label3)" }}>
-            Volunteer Center Mongolia
-          </p>
-          <h1 className="t-large-title">
-            {locale === "mn" ? "Бидний тухай" : "About Us"}
-          </h1>
-          <p className="t-subhead" style={{ color: "var(--label2)" }}>
-            {locale === "mn" ? "2007 оноос хойш хүмүүнлэг нийгмийг байгуулж байна" : "Building a humane society since 2007"}
-          </p>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+          <PremiumSectionHeader
+            title={locale === "mn" ? "Бидний тухай" : "About Us"}
+            subtitle={locale === "mn" ? "2007 оноос хойш хүмүүнлэг нийгмийг байгуулж байна" : "Building a humane society since 2007"}
+          />
         </motion.div>
 
         {/* Stats */}
@@ -234,6 +230,6 @@ export default function AboutClient() {
         </div>
 
       </div>
-    </div>
+    </PremiumPageShell>
   );
 }

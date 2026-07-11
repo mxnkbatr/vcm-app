@@ -18,7 +18,7 @@ import { BRAND } from "@/lib/branding";
 
 export const metadata: Metadata = {
   title: BRAND.name,
-  description: BRAND.tagline,
+  description: BRAND.descriptorMn,
   manifest: "/manifest.webmanifest",
   applicationName: BRAND.shortName,
   appleWebApp: {

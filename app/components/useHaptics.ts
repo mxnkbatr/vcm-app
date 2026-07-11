@@ -1,8 +1,9 @@
 "use client";
 
 import { Capacitor } from "@capacitor/core";
-import { Haptics, ImpactStyle, NotificationType } from "@capacitor/haptics";
+import { ImpactStyle, NotificationType } from "@capacitor/haptics";
 import { useEffect, useState } from "react";
+import { hapticImpact, hapticNotification, hapticSelection } from "@/lib/haptics";
 
 type HapticFeedbackType = "impactLight" | "impactMedium" | "impactHeavy" | "notificationSuccess" | "notificationWarning" | "notificationError" | "selectionStart" | "selectionChanged" | "selectionEnd";
 
@@ -12,8 +13,12 @@ export function useHaptics() {
   useEffect(() => {
     async function checkHapticsAvailability() {
       if (typeof window === "undefined") return;
-      // Capacitor Haptics is intended for native platforms.
-      setIsAvailable(Capacitor.isNativePlatform());
+      const native = Capacitor.isNativePlatform();
+      const webMobile =
+        !native &&
+        window.matchMedia("(max-width: 1023px)").matches &&
+        "vibrate" in navigator;
+      setIsAvailable(native || webMobile);
     }
     checkHapticsAvailability();
   }, []);
@@ -24,31 +29,27 @@ export function useHaptics() {
     try {
       switch (type) {
         case "impactLight":
-          await Haptics.impact({ style: ImpactStyle.Light });
+          await hapticImpact(ImpactStyle.Light);
           break;
         case "impactMedium":
-          await Haptics.impact({ style: ImpactStyle.Medium });
+          await hapticImpact(ImpactStyle.Medium);
           break;
         case "impactHeavy":
-          await Haptics.impact({ style: ImpactStyle.Heavy });
+          await hapticImpact(ImpactStyle.Heavy);
           break;
         case "notificationSuccess":
-          await Haptics.notification({ type: NotificationType.Success });
+          await hapticNotification(NotificationType.Success);
           break;
         case "notificationWarning":
-          await Haptics.notification({ type: NotificationType.Warning });
+          await hapticNotification(NotificationType.Warning);
           break;
         case "notificationError":
-          await Haptics.notification({ type: NotificationType.Error });
+          await hapticNotification(NotificationType.Error);
           break;
         case "selectionStart":
-          await Haptics.selectionStart();
-          break;
         case "selectionChanged":
-          await Haptics.selectionChanged();
-          break;
         case "selectionEnd":
-          await Haptics.selectionEnd();
+          await hapticSelection();
           break;
         default:
           console.warn("Unknown haptic feedback type:", type);

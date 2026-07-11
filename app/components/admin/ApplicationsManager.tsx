@@ -88,8 +88,9 @@ export default function ApplicationsManager({
     {
       key: "name",
       header: "Өргөдөл гаргагч",
+      mobile: "primary",
       render: (a) => (
-        <button type="button" className="text-left press" onClick={() => setSelected(a)}>
+        <button type="button" className="text-left press w-full" onClick={() => setSelected(a)}>
           <div className="font-bold">
             {a.firstName} {a.lastName}
           </div>
@@ -103,6 +104,7 @@ export default function ApplicationsManager({
     {
       key: "program",
       header: "Хөтөлбөр",
+      mobile: true,
       render: (a) => (
         <span className="badge" style={{ background: "var(--blue-dim)", color: "var(--blue)" }}>
           {a.programLabel || programLabelMn(a.programId)}
@@ -113,12 +115,14 @@ export default function ApplicationsManager({
     {
       key: "created",
       header: "Огноо",
+      mobile: true,
       render: (a) => <span className="text-xs">{formatDate(a.createdAt)}</span>,
       sortValue: (a) => a.createdAt || "",
     },
     {
       key: "status",
       header: "Төлөв",
+      mobile: true,
       render: (a) => {
         const st = statusMeta(a.status);
         return (
@@ -201,14 +205,22 @@ export default function ApplicationsManager({
       <DataTable
         rows={filtered}
         columns={columns}
+        onRowClick={setSelected}
+        searchPlaceholder="Нэр, имэйл, утас хайх…"
         getSearchText={(a) =>
           `${a.firstName} ${a.lastName} ${a.email} ${a.phone} ${a.programId} ${a.message}`
         }
       />
 
       {selected && (
-        <div className="fixed inset-0 z-[200] flex items-end md:items-center justify-center p-4 bg-black/40">
-          <div className="card w-full max-w-lg max-h-[85dvh] overflow-y-auto p-5 space-y-4">
+        <div
+          className="fixed inset-0 z-[200] flex items-end md:items-center justify-center bg-black/40"
+          style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+        >
+          <div
+            className="card w-full max-w-lg max-h-[92dvh] overflow-y-auto p-5 space-y-4 rounded-t-[24px] md:rounded-[var(--r-xl)] mx-0 md:mx-4"
+            style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 20px)" }}
+          >
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="t-title3">

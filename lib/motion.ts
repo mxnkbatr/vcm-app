@@ -27,10 +27,16 @@ export const fadeScale = {
   exit: { opacity: 0, scale: 0.98 },
 };
 
-export const slidePage = {
-  initial: { opacity: 0, y: 14, filter: "blur(4px)" },
-  animate: { opacity: 1, y: 0, filter: "blur(0px)" },
-  exit: { opacity: 0, y: -6 },
+export const slideFromRight = {
+  initial: { x: "100%", opacity: 0.92 },
+  animate: { x: 0, opacity: 1 },
+  exit: { x: "28%", opacity: 0.88 },
+};
+
+export const slideFromBottom = {
+  initial: { y: "100%" },
+  animate: { y: 0 },
+  exit: { y: "100%" },
 };
 
 export const staggerContainer = {

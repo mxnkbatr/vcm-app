@@ -5,6 +5,9 @@
  * while a fresh fetch runs in the background.
  */
 
+import { useState, useEffect, useRef } from "react";
+import { cachePersist } from "./client-cache-persist";
+
 interface Entry<T> {
   data: T;
   fetchedAt: number;
@@ -20,6 +23,13 @@ export const clientCache = {
 
   set<T>(key: string, data: T): void {
     store.set(key, { data, fetchedAt: Date.now() });
+    void cachePersist.save(key, data);
+  },
+
+  restore<T>(key: string, data: T, fetchedAt: number): void {
+    const existing = store.get(key) as Entry<T> | undefined;
+    if (existing && existing.fetchedAt >= fetchedAt) return;
+    store.set(key, { data, fetchedAt });
   },
 
   /** Returns stale age in ms, or Infinity if not cached */
@@ -43,7 +53,6 @@ export const clientCache = {
  * Shows cached data IMMEDIATELY, then re-fetches in background if stale.
  * React hook — import and use inside components.
  */
-import { useState, useEffect, useRef } from "react";
 
 export function useCachedFetch<T>(
   url: string,
@@ -79,14 +88,27 @@ export function useCachedFetch<T>(
 
   useEffect(() => {
     if (skip) return;
+
+    let cancelled = false;
+
+    void cachePersist.hydrate<T>(key).then((persisted) => {
+      if (cancelled || !persisted) return;
+      clientCache.restore(key, persisted.data, persisted.fetchedAt);
+      setData(persisted.data);
+      setLoading(false);
+    });
+
     const stale = clientCache.age(key) > staleMsMs;
     if (!clientCache.has(key)) {
       setLoading(true);
       doFetch();
     } else if (stale) {
-      // Show cached immediately, refresh silently
       doFetch();
     }
+
+    return () => {
+      cancelled = true;
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url, skip]);
 

@@ -7,6 +7,8 @@ import { Link } from "@/navigation";
 import { useLocale } from "next-intl";
 import { Calendar, Eye, Tag, ChevronRight, Newspaper } from "lucide-react";
 import Image from "next/image";
+import PremiumPageShell from "@/app/components/PremiumPageShell";
+import PremiumSectionHeader from "@/app/components/PremiumSectionHeader";
 
 type NewsItem = {
   _id: string;
@@ -29,19 +31,10 @@ export default function NewsPage() {
     field[locale] || field.mn || field.en;
 
   return (
-    <div className="page">
-      <div className="page-inner space-y-6">
+    <PremiumPageShell>
+      <div className="space-y-6 pt-2">
 
-        {/* Header */}
-        <div className="pt-2">
-          <p className="text-[11px] font-bold uppercase tracking-widest mb-1" style={{ color: "var(--label3)" }}>
-            Volunteer Center Mongolia
-          </p>
-          <h1 className="t-large-title">Мэдээ</h1>
-          <p className="t-subhead mt-1" style={{ color: "var(--label2)" }}>
-            Сүүлийн үеийн мэдээ, мэдээлэл
-          </p>
-        </div>
+        <PremiumSectionHeader title="Мэдээ" subtitle="Сүүлийн үеийн мэдээ, мэдээлэл" />
 
         {loading ? (
           <div className="space-y-4">
@@ -141,6 +134,6 @@ export default function NewsPage() {
         )}
 
       </div>
-    </div>
+    </PremiumPageShell>
   );
 }

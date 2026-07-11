@@ -6,6 +6,8 @@ import { Link } from "@/navigation";
 import { Trash2, Plus, Minus, ArrowRight, Tag, X } from "lucide-react";
 import Image from "next/image";
 import { IOSAlert } from "@/app/components/iOSAlert";
+import PremiumPageShell from "@/app/components/PremiumPageShell";
+import PremiumSectionHeader from "@/app/components/PremiumSectionHeader";
 
 type AppliedPromo = {
   code: string;
@@ -104,30 +106,32 @@ export default function CartClient({ locale }: { locale: string }) {
 
   if (items.length === 0) {
     return (
-      <div className="page flex flex-col items-center justify-center min-h-[60vh]">
-        <div className="icon-box mx-auto mb-4" style={{ background: "var(--fill2)", color: "var(--label3)" }}>
-          <Trash2 size={24} />
+      <PremiumPageShell>
+        <div className="flex flex-col items-center justify-center min-h-[50vh] pt-8 text-center">
+          <div className="icon-box mx-auto mb-4" style={{ background: "var(--fill2)", color: "var(--label3)" }}>
+            <Trash2 size={24} />
+          </div>
+          <h2 className="t-headline">Сагс хоосон байна</h2>
+          <Link href="/shop" className="mt-4 text-blue-500 font-semibold press">
+            Дэлгүүр рүү буцах
+          </Link>
+          <IOSAlert
+            isOpen={!!alert}
+            onClose={() => setAlert(null)}
+            title={alert?.title || ""}
+            message={alert?.message || ""}
+            type="error"
+            confirmText="Ойлголоо"
+          />
         </div>
-        <h2 className="t-headline">Сагс хоосон байна</h2>
-        <Link href="/shop" className="mt-4 text-blue-500 font-semibold press">
-          Дэлгүүр рүү буцах
-        </Link>
-        <IOSAlert
-          isOpen={!!alert}
-          onClose={() => setAlert(null)}
-          title={alert?.title || ""}
-          message={alert?.message || ""}
-          type="error"
-          confirmText="Ойлголоо"
-        />
-      </div>
+      </PremiumPageShell>
     );
   }
 
   return (
-    <div className="page pb-48">
-      <div className="page-inner space-y-4">
-        <h1 className="t-large-title pt-4">Миний сагс</h1>
+    <PremiumPageShell bottomPad={false} className="pb-48">
+      <div className="space-y-4 pt-2">
+        <PremiumSectionHeader title="Миний сагс" subtitle={`${items.length} бүтээгдэхүүн`} />
 
         <div className="space-y-3">
           {items.map((item) => (
@@ -238,6 +242,6 @@ export default function CartClient({ locale }: { locale: string }) {
         type="error"
         confirmText="Ойлголоо"
       />
-    </div>
+    </PremiumPageShell>
   );
 }

@@ -8,20 +8,24 @@ export type Column<T> = {
   header: string;
   render: (row: T) => React.ReactNode;
   sortValue?: (row: T) => string | number | null | undefined;
+  /** Shown in mobile card layout */
+  mobile?: boolean | "primary" | "secondary";
 };
 
 export default function DataTable<T>({
   rows,
   columns,
   pageSize = 20,
-  searchPlaceholder = "Search…",
+  searchPlaceholder = "Хайх…",
   getSearchText,
+  onRowClick,
 }: {
   rows: T[];
   columns: Array<Column<T>>;
   pageSize?: number;
   searchPlaceholder?: string;
   getSearchText: (row: T) => string;
+  onRowClick?: (row: T) => void;
 }) {
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
@@ -56,6 +60,12 @@ export default function DataTable<T>({
   const start = (safePage - 1) * pageSize;
   const pageRows = sorted.slice(start, start + pageSize);
 
+  const mobileColumns = useMemo(() => {
+    const tagged = columns.filter((c) => c.mobile && c.key !== "actions");
+    if (tagged.length > 0) return tagged;
+    return columns.filter((c) => c.key !== "actions").slice(0, 3);
+  }, [columns]);
+
   const toggleSort = (key: string) => {
     if (sortKey !== key) {
       setSortKey(key);
@@ -81,13 +91,62 @@ export default function DataTable<T>({
               setPage(1);
             }}
           />
-          <div className="badge" style={{ background: "var(--fill2)", color: "var(--label2)" }}>
+          <div className="badge shrink-0" style={{ background: "var(--fill2)", color: "var(--label2)" }}>
             {sorted.length}
           </div>
         </div>
       </div>
 
-      <div className="card overflow-hidden">
+      {/* Mobile card list */}
+      <div className="md:hidden space-y-2">
+        {pageRows.map((r, idx) => (
+          <div
+            key={idx}
+            className={`card p-4 admin-data-card ${onRowClick ? "press cursor-pointer" : ""}`}
+            onClick={onRowClick ? () => onRowClick(r) : undefined}
+            onKeyDown={
+              onRowClick
+                ? (e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      onRowClick(r);
+                    }
+                  }
+                : undefined
+            }
+            role={onRowClick ? "button" : undefined}
+            tabIndex={onRowClick ? 0 : undefined}
+          >
+            {mobileColumns.map((c, ci) => (
+              <div
+                key={c.key}
+                className={ci > 0 ? "mt-2 pt-2 border-t" : ""}
+                style={ci > 0 ? { borderColor: "var(--sep)" } : undefined}
+              >
+                {c.mobile !== "primary" && c.mobile !== true && (
+                  <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: "var(--label3)" }}>
+                    {c.header}
+                  </div>
+                )}
+                {c.render(r)}
+              </div>
+            ))}
+            {columns.some((c) => c.key === "actions") && (
+              <div className="mt-3 pt-3 border-t flex justify-end" style={{ borderColor: "var(--sep)" }}>
+                {columns.find((c) => c.key === "actions")?.render(r)}
+              </div>
+            )}
+          </div>
+        ))}
+        {pageRows.length === 0 && (
+          <div className="card p-10 text-center t-caption" style={{ color: "var(--label2)" }}>
+            Илэрц олдсонгүй
+          </div>
+        )}
+      </div>
+
+      {/* Desktop table */}
+      <div className="card overflow-hidden hidden md:block">
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead>
@@ -109,7 +168,12 @@ export default function DataTable<T>({
             </thead>
             <tbody>
               {pageRows.map((r, idx) => (
-                <tr key={idx} style={{ borderTop: "0.5px solid var(--sep)" }}>
+                <tr
+                  key={idx}
+                  style={{ borderTop: "0.5px solid var(--sep)" }}
+                  className={onRowClick ? "cursor-pointer hover:bg-[var(--fill3)]" : undefined}
+                  onClick={onRowClick ? () => onRowClick(r) : undefined}
+                >
                   {columns.map((c) => (
                     <td key={c.key} className="px-4 py-3 align-top">
                       {c.render(r)}
@@ -120,7 +184,7 @@ export default function DataTable<T>({
               {pageRows.length === 0 && (
                 <tr>
                   <td colSpan={columns.length} className="px-4 py-10 text-center" style={{ color: "var(--label2)" }}>
-                    No results
+                    Илэрц олдсонгүй
                   </td>
                 </tr>
               )}
@@ -129,22 +193,26 @@ export default function DataTable<T>({
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <div className="t-caption">
-          Page {safePage} / {totalPages}
+          {safePage} / {totalPages} хуудас
         </div>
         <div className="flex gap-2">
           <button
-            className="btn btn-secondary btn-sm"
+            type="button"
+            className="btn btn-secondary btn-sm press"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={safePage <= 1}
+            aria-label="Өмнөх хуудас"
           >
             <ChevronLeft size={16} />
           </button>
           <button
-            className="btn btn-secondary btn-sm"
+            type="button"
+            className="btn btn-secondary btn-sm press"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={safePage >= totalPages}
+            aria-label="Дараагийн хуудас"
           >
             <ChevronRight size={16} />
           </button>
@@ -153,4 +221,3 @@ export default function DataTable<T>({
     </div>
   );
 }
-

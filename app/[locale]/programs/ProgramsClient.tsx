@@ -10,11 +10,18 @@ import {
 } from "lucide-react";
 import { useSession } from "@/lib/hooks/useSession";
 
+import PremiumPageShell from "@/app/components/PremiumPageShell";
+import PremiumSectionHeader from "@/app/components/PremiumSectionHeader";
+import { programColorsByCode, PROGRAM_COLORS } from "@/lib/color-system";
+
 const FALLBACK_PROGRAMS = [
   {
     id: "EDU", emoji: "🎓",
-    color: "#0EA5E9", gradFrom: "#0ea5e9", gradTo: "#3b82f6",
-    iconBg: "var(--blue-dim)", iconColor: "var(--blue)",
+    color: PROGRAM_COLORS.edu.main,
+    gradFrom: PROGRAM_COLORS.edu.gradFrom,
+    gradTo: PROGRAM_COLORS.edu.gradTo,
+    iconBg: PROGRAM_COLORS.edu.soft,
+    iconColor: PROGRAM_COLORS.edu.main,
     nameKey: "prog_edu", descKey: "prog_edu_desc",
     href: "/programs/edu", duration: "3–12 сар",
     location: "Монгол улс", slots: 8,
@@ -30,8 +37,11 @@ const FALLBACK_PROGRAMS = [
   },
   {
     id: "AND", emoji: "🤝",
-    color: "#10B981", gradFrom: "#10b981", gradTo: "#0d9488",
-    iconBg: "var(--emerald-dim)", iconColor: "var(--emerald)",
+    color: PROGRAM_COLORS.and.main,
+    gradFrom: PROGRAM_COLORS.and.gradFrom,
+    gradTo: PROGRAM_COLORS.and.gradTo,
+    iconBg: PROGRAM_COLORS.and.soft,
+    iconColor: PROGRAM_COLORS.and.main,
     nameKey: "prog_and", descKey: "prog_and_desc",
     href: "/programs/and", duration: "Уян хатан",
     location: "Улаанбаатар", slots: 12,
@@ -47,8 +57,11 @@ const FALLBACK_PROGRAMS = [
   },
   {
     id: "VCLUB", emoji: "🌍",
-    color: "#F59E0B", gradFrom: "#f59e0b", gradTo: "#f97316",
-    iconBg: "var(--orange-dim)", iconColor: "var(--orange)",
+    color: PROGRAM_COLORS.vclub.main,
+    gradFrom: PROGRAM_COLORS.vclub.gradFrom,
+    gradTo: PROGRAM_COLORS.vclub.gradTo,
+    iconBg: PROGRAM_COLORS.vclub.soft,
+    iconColor: PROGRAM_COLORS.vclub.main,
     nameKey: "prog_vclub", descKey: "prog_vclub_desc",
     href: "/programs/vclub", duration: "Арга хэмжээгээр",
     location: "Монгол улс", slots: 20,
@@ -66,14 +79,15 @@ const FALLBACK_PROGRAMS = [
 
 function mapApiToProg(p: any): Prog {
   const icons = [GraduationCap, BookOpen, Users, Star, Globe];
+  const colors = programColorsByCode(p.code || p.slug);
   return {
     id: p.code,
     emoji: p.emoji || "🌍",
-    color: p.color || "#0EA5E9",
-    gradFrom: p.gradFrom || p.color || "#0ea5e9",
-    gradTo: p.gradTo || "#3b82f6",
-    iconBg: "var(--blue-dim)",
-    iconColor: p.color || "var(--blue)",
+    color: p.color || colors.main,
+    gradFrom: p.gradFrom || colors.gradFrom,
+    gradTo: p.gradTo || colors.gradTo,
+    iconBg: colors.soft,
+    iconColor: p.color || colors.main,
     nameKey: p.name?.mn || p.code,
     descKey: p.description?.mn || "",
     href: p.href || `/programs/${p.slug}`,
@@ -357,8 +371,7 @@ export default function ProgramsClient({ initialPrograms }: { initialPrograms?: 
   ];
 
   return (
-    <div className="page">
-      <div className="page-inner">
+    <PremiumPageShell>
         <AnimatePresence mode="wait">
           {!sel ? (
             <motion.div
@@ -366,31 +379,32 @@ export default function ProgramsClient({ initialPrograms }: { initialPrograms?: 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0, x: -20 }}
-              className="space-y-5"
+              className="space-y-5 pt-2"
             >
-              {/* Header */}
-              <div className="pt-2">
-                <h1 className="t-large-title">VCM Хөтөлбөрүүд</h1>
-                <p className="t-subhead mt-1" style={{ color: "var(--label2)" }}>
-                  Танд тохирохоо сонгоорой
-                </p>
-              </div>
+              <PremiumSectionHeader
+                title="VCM Хөтөлбөрүүд"
+                subtitle="Танд тохирохоо сонгоорой"
+              />
 
               {/* Segmented filter */}
-              <div className="flex gap-2 overflow-x-auto no-scroll pb-0.5">
+              <div className="premium-filter-row">
                 {FILTERS.map(f => {
                   const isActive = filter === f.id;
                   return (
                     <button
                       key={f.id}
                       onClick={() => setFilter(f.id)}
-                      className="flex-shrink-0 px-4 py-2 rounded-2xl text-[13px] font-semibold transition-all duration-300 press"
-                      style={{
-                        background: isActive ? f.color : "var(--card)",
-                        color: isActive ? "white" : "var(--label2)",
-                        border: `0.5px solid ${isActive ? f.color : "var(--sep)"}`,
-                        boxShadow: isActive ? `0 4px 12px ${f.color}40` : "none"
-                      }}
+                      className={`premium-filter-pill press ${isActive ? "on" : ""}`}
+                      style={
+                        isActive
+                          ? {
+                              background: `linear-gradient(180deg, ${f.color}ee, ${f.color})`,
+                              borderColor: "rgba(255,255,255,0.22)",
+                              boxShadow: `0 4px 14px ${f.color}44, inset 0 1px 0 rgba(255,255,255,0.25)`,
+                              color: "white",
+                            }
+                          : undefined
+                      }
                     >
                       {f.label}
                     </button>
@@ -411,27 +425,17 @@ export default function ProgramsClient({ initialPrograms }: { initialPrograms?: 
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="card overflow-hidden p-5 relative"
-                  style={{ background: "linear-gradient(135deg, #0f172a, #1e293b)" }}
                 >
-                  <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full opacity-10 bg-blue-500 pointer-events-none" />
-                  <div className="relative z-10 text-center space-y-3">
-                    <div className="text-3xl">✨</div>
-                    <h3 className="text-white font-bold text-[17px]">Нэгдэхэд бэлэн үү?</h3>
-                    <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.5)", lineHeight: 1.6 }}>
-                      Бүртгүүлж хөтөлбөрт өргөдлөө гаргаарай.
-                    </p>
-                    <div className="flex gap-3 justify-center">
-                      <Link href="/register" className="bg-sky-500 hover:bg-sky-600 text-white px-5 py-2.5 rounded-full text-[13px] font-bold transition-colors">
-                        Бүртгүүлэх
-                      </Link>
-                      <Link
-                        href="/sign-in"
-                        className="bg-white/10 hover:bg-white/20 text-white/90 px-5 py-2.5 rounded-full text-[13px] font-bold transition-colors"
-                      >
-                        Нэвтрэх
-                      </Link>
+                  <div className="premium-cta press">
+                    <div className="premium-cta__content">
+                      <p className="premium-cta__eyebrow">Гишүүнчлэл</p>
+                      <p className="premium-cta__title">Нэгдэхэд бэлэн үү?</p>
+                      <p className="premium-cta__sub">Бүртгүүлж хөтөлбөрт өргөдлөө гаргаарай</p>
                     </div>
+                    <Link href="/register" className="premium-cta__btn press">
+                      Эхлэх
+                      <ArrowRight size={16} />
+                    </Link>
                   </div>
                 </motion.div>
               )}
@@ -440,7 +444,6 @@ export default function ProgramsClient({ initialPrograms }: { initialPrograms?: 
             <ProgDetail key="detail" p={sel} onBack={() => setSel(null)} nt={nt} signed={signed} />
           )}
         </AnimatePresence>
-      </div>
-    </div>
+    </PremiumPageShell>
   );
 }

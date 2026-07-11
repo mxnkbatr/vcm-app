@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { BRAND } from "@/lib/branding";
+import BrandLogo from "./BrandLogo";
 
 const STORAGE_KEY = "vcm-splash-dismissed";
-const MIN_VISIBLE_MS = 900;
-const FADE_OUT_MS = 380;
+const MIN_VISIBLE_MS = 450;
+const FADE_OUT_MS = 220;
 
 export default function AppSplash() {
   const [phase, setPhase] = useState<"hidden" | "visible" | "exiting">("hidden");
@@ -60,9 +60,6 @@ export default function AppSplash() {
           className="app-splash"
         >
           <div className="app-splash__cream-wash" aria-hidden />
-          <div className="app-splash__blob app-splash__blob--1" aria-hidden />
-          <div className="app-splash__blob app-splash__blob--2" aria-hidden />
-          <div className="app-splash__blob app-splash__blob--3" aria-hidden />
 
           <motion.div
             className="app-splash__card"
@@ -70,16 +67,7 @@ export default function AppSplash() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="app-splash__logo-frame">
-              <Image
-                src={BRAND.logo}
-                alt={BRAND.name}
-                width={112}
-                height={112}
-                priority
-                className="app-splash__logo"
-              />
-            </div>
+            <BrandLogo size={112} priority className="app-splash__logo-icon" />
 
             <motion.div
               className="app-splash__brand"
@@ -101,7 +89,7 @@ export default function AppSplash() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.28, duration: 0.4 }}
             >
-              {BRAND.tagline}
+              {BRAND.taglineMn}
             </motion.p>
 
             <div className="app-splash__progress" aria-hidden>
@@ -123,7 +111,7 @@ export default function AppSplash() {
             animate={{ opacity: 0.6 }}
             transition={{ delay: 0.5 }}
           >
-            VCM
+            {BRAND.descriptorMn}
           </motion.p>
         </motion.div>
       )}

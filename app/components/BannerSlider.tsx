@@ -156,18 +156,6 @@ export default function BannerSlider({ locale = 'mn', initialBanners }: BannerSl
         />
       </div>
 
-      <div className="banner-slider-overlay" />
-
-      {(current?.title || current?.subtitle) && (
-        <div className="banner-slider-caption">
-          {current?.title && (
-            <h2 className="banner-slider-title">{current.title}</h2>
-          )}
-          {current?.subtitle && (
-            <p className="banner-slider-subtitle">{current.subtitle}</p>
-          )}
-        </div>
-      )}
     </>
   );
 
@@ -187,7 +175,7 @@ export default function BannerSlider({ locale = 'mn', initialBanners }: BannerSl
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: TRANSITION_SEC, ease: [0.4, 0, 0.2, 1] }}
+            transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
             className="absolute inset-0 w-full h-full"
           >
             {current?.link ? (

@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 import { Clock, Sparkles, TrendingUp, ChevronRight, PlayCircle } from "lucide-react"; 
 import { useLocale } from "next-intl"; 
 import Skeleton from "@/app/components/Skeleton";
+import PremiumPageShell from "@/app/components/PremiumPageShell";
+import PremiumSectionHeader from "@/app/components/PremiumSectionHeader";
 
 type LmsI18n = { en: string; mn: string; de?: string };
 type Course = {
@@ -107,16 +109,11 @@ export default function LessonsClient({ initialCourses }: { initialCourses?: Cou
         ? courses.filter((c) => !!c.isFree || (c.price ?? 0) === 0)
         : courses.filter((c) => !c.isFree && (c.price ?? 0) > 0);
 
-  if (loading) return ( 
-    <div className="page">
-      <div className="page-inner space-y-4">
-        <div className="pt-2 pb-1 space-y-2">
-          <Skeleton className="h-10 w-44" />
-          <Skeleton className="h-5 w-40" />
-        </div>
-        <div className="overflow-x-auto no-scroll -mx-4 px-4">
-          <Skeleton className="h-10 w-72" />
-        </div>
+  if (loading) return (
+    <PremiumPageShell>
+      <div className="space-y-4 pt-2">
+        <Skeleton className="h-10 w-44" />
+        <Skeleton className="h-5 w-40" />
         <div className="space-y-4">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="card overflow-hidden">
@@ -124,28 +121,21 @@ export default function LessonsClient({ initialCourses }: { initialCourses?: Cou
               <div className="p-4 space-y-3">
                 <Skeleton className="h-5 w-2/3" />
                 <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-5/6" />
-                <div className="flex justify-between">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-4 w-20" />
-                </div>
               </div>
             </div>
           ))}
         </div>
       </div>
-    </div>
-  ); 
+    </PremiumPageShell>
+  );
 
-  return ( 
-    <div className="page"> 
-      <div className="page-inner space-y-4"> 
-        <div className="pt-2 pb-1"> 
-          <h1 className="t-large-title">{locale === "mn" ? "Сургалтууд" : "Courses"}</h1>
-          <p className="t-subhead mt-1" style={{ color: 'var(--label2)' }}>
-            {courses.length} {locale === "mn" ? "курс байна" : "courses"}
-          </p> 
-        </div> 
+  return (
+    <PremiumPageShell>
+      <div className="space-y-4 pt-2">
+        <PremiumSectionHeader
+          title={locale === "mn" ? "Сургалтууд" : "Courses"}
+          subtitle={`${courses.length} ${locale === "mn" ? "курс байна" : "courses"}`}
+        />
 
         <div className="overflow-x-auto no-scroll -mx-4 px-4"> 
           <div className="seg inline-flex"> 
@@ -166,14 +156,14 @@ export default function LessonsClient({ initialCourses }: { initialCourses?: Cou
             <CourseCard key={c._id} c={c} locale={locale} />
           ))}
           {filtered.length === 0 && ( 
-            <div className="card p-10 text-center"> 
-              <div className="text-4xl mb-3">📚</div> 
-              <p className="t-headline mb-1">{locale === "mn" ? "Сургалт байхгүй" : "No courses yet"}</p> 
-              <p className="t-footnote">{locale === "mn" ? "Удахгүй шинэ сургалт нэмэгдэнэ" : "New courses coming soon"}</p> 
+            <div className="premium-empty-state"> 
+              <div className="premium-empty-state__icon">📚</div>
+              <p className="premium-empty-state__title">{locale === "mn" ? "Сургалт байхгүй" : "No courses yet"}</p> 
+              <p className="premium-empty-state__sub">{locale === "mn" ? "Удахгүй шинэ сургалт нэмэгдэнэ" : "New courses coming soon"}</p> 
             </div> 
           )} 
         </div> 
-      </div> 
-    </div> 
+      </div>
+    </PremiumPageShell>
   ); 
 }

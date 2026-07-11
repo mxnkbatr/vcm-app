@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { FaFacebookF, FaInstagram, FaTwitter } from "react-icons/fa";
 import { useTranslations } from "next-intl";
+import PremiumPageShell from "@/app/components/PremiumPageShell";
+import PremiumSectionHeader from "@/app/components/PremiumSectionHeader";
 
 export default function ContactClient() {
   const t = useTranslations("ContactPage");
@@ -67,21 +69,13 @@ export default function ContactClient() {
   };
 
   return (
-    <div className="page">
-      <div className="page-inner space-y-8">
+    <PremiumPageShell>
+      <div className="space-y-8 pt-2">
 
-        {/* HEADER */}
-        <div className="pt-2">
-          <div className="badge mb-3" style={{ background: 'var(--blue-dim)', color: 'var(--blue)' }}>
-            {t("badge")}
-          </div>
-          <h1 className="t-large-title">
-            {t("heroTitle")} <span style={{ color: 'var(--blue)' }}>{t("heroTitleHighlight")}</span>
-          </h1>
-          <p className="t-subhead mt-2" style={{ color: 'var(--label2)' }}>
-            {t("heroDesc")}
-          </p>
-        </div>
+        <PremiumSectionHeader
+          title={`${t("heroTitle")} ${t("heroTitleHighlight")}`}
+          subtitle={t("heroDesc")}
+        />
 
         {/* INFO CARDS */}
         <div className="space-y-4">
@@ -207,6 +201,6 @@ export default function ContactClient() {
 
         <div className="pb-8" />
       </div>
-    </div>
+    </PremiumPageShell>
   );
 }

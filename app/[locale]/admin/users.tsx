@@ -176,8 +176,9 @@ export default function UsersTab() {
     {
       key: "name",
       header: "Хэрэглэгч",
+      mobile: "primary",
       render: (u) => (
-        <div className="min-w-[200px]">
+        <div>
           <div className="font-bold">{u.fullName || "—"}</div>
           <div className="text-xs" style={{ color: "var(--label2)" }}>
             {u.email || u.phone || "—"}
@@ -189,6 +190,7 @@ export default function UsersTab() {
     {
       key: "role",
       header: "Эрх",
+      mobile: true,
       render: (u) => (
         <span className="badge" style={{ background: "var(--fill2)", color: "var(--label2)" }}>
           {u.role || "guest"}
@@ -199,6 +201,7 @@ export default function UsersTab() {
     {
       key: "program",
       header: "Хөтөлбөр",
+      mobile: true,
       render: (u) => <span>{u.program || "—"}</span>,
       sortValue: (u) => u.program || "",
     },
@@ -243,7 +246,19 @@ export default function UsersTab() {
       </div>
 
       {selected && (
-        <div className="card p-5 space-y-4">
+        <div
+          className="fixed inset-0 z-[200] flex items-end md:items-start md:relative md:inset-auto md:z-auto md:bg-transparent md:p-0"
+          style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+        >
+          <div
+            className="absolute inset-0 bg-black/40 md:hidden"
+            onClick={() => setSelected(null)}
+            aria-hidden
+          />
+          <div
+            className="relative card w-full md:max-w-none p-5 space-y-4 rounded-t-[24px] md:rounded-[var(--r-xl)] max-h-[92dvh] md:max-h-none overflow-y-auto"
+            style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)" }}
+          >
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="t-headline">Хэрэглэгч засах</div>
@@ -371,6 +386,7 @@ export default function UsersTab() {
               Хэрэглэгч устгах
             </button>
           </div>
+          </div>
         </div>
       )}
 
@@ -379,6 +395,7 @@ export default function UsersTab() {
         columns={columns}
         pageSize={25}
         searchPlaceholder="Нэр / имэйл / утас хайх…"
+        onRowClick={openEdit}
         getSearchText={(u) =>
           `${u.fullName || ""} ${u.email || ""} ${u.phone || ""} ${u.role || ""} ${u.program || ""}`
         }

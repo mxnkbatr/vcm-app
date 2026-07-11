@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import { BRAND } from "@/lib/branding";
+import BrandLogo from "@/app/components/BrandLogo";
 import { Link } from "@/navigation";
 import { motion } from "framer-motion";
 import { ChevronLeft } from "lucide-react";
@@ -24,7 +24,7 @@ export default function AuthScreen({
 }: AuthScreenProps) {
   return (
     <div
-      className="min-h-dvh flex flex-col relative overflow-hidden"
+      className="min-h-dvh flex flex-col relative overflow-hidden auth-screen"
       style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
     >
       {showBack && (
@@ -47,19 +47,7 @@ export default function AuthScreen({
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
           className="text-center mb-8"
         >
-          <div
-            className="inline-flex items-center justify-center w-[88px] h-[88px] rounded-[28px] mb-5 liquid-chrome overflow-hidden"
-            style={{ boxShadow: "var(--liquid-shadow-float)" }}
-          >
-            <Image
-              src={BRAND.logo}
-              alt="VCM"
-              width={56}
-              height={56}
-              className="object-contain"
-              priority
-            />
-          </div>
+          <BrandLogo size={88} priority className="mb-5 mx-auto" />
           <p
             className="text-[11px] font-bold uppercase tracking-[0.2em] mb-2"
             style={{ color: "var(--blue)" }}

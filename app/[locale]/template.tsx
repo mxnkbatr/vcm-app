@@ -1,14 +1,8 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import PageTransition from "../components/PageTransition";
 
-/** Native tab apps: instant screen cuts — no web-style page transitions. */
+/** Route-aware iOS-style push / modal / tab transitions. */
 export default function Template({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-
-  return (
-    <div key={pathname} className="min-h-dvh w-full">
-      {children}
-    </div>
-  );
+  return <PageTransition>{children}</PageTransition>;
 }
