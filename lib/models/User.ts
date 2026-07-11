@@ -19,8 +19,9 @@ const UserSchema = new mongoose.Schema(
     // Roles: guest, volunteer, general_and, general_edu, general_vclub, admin
     role: { type: String, default: "guest", index: true },
 
-    // Legacy: keep for data migration compatibility
-    clerkId: { type: String, sparse: true },
+    // Legacy: keep for data migration compatibility (Clerk-era users only)
+    clerkId: { type: String },
+    supabaseId: { type: String, unique: true, sparse: true, index: true },
 
     // --- TRACKING ---
     country: { type: String, default: "-" },
@@ -104,6 +105,8 @@ const UserSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+UserSchema.index({ clerkId: 1 }, { unique: true, sparse: true });
 
 const User = mongoose.models.User || mongoose.model("User", UserSchema);
 

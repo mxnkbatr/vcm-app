@@ -8,14 +8,32 @@ export default function NetworkBanner() {
 
   useEffect(() => {
     setMounted(true);
-    const update = () => setOnline(navigator.onLine);
-    update();
-    window.addEventListener("online", update);
-    window.addEventListener("offline", update);
-    return () => {
-      window.removeEventListener("online", update);
-      window.removeEventListener("offline", update);
-    };
+
+    const setFromNavigator = () => setOnline(navigator.onLine);
+
+    let removeNative: (() => void) | undefined;
+
+    void import("@capacitor/core").then(({ Capacitor }) => {
+      if (!Capacitor.isNativePlatform()) {
+        setFromNavigator();
+        window.addEventListener("online", setFromNavigator);
+        window.addEventListener("offline", setFromNavigator);
+        removeNative = () => {
+          window.removeEventListener("online", setFromNavigator);
+          window.removeEventListener("offline", setFromNavigator);
+        };
+        return;
+      }
+
+      void import("@capacitor/network").then(({ Network }) => {
+        void Network.getStatus().then((s) => setOnline(s.connected));
+        void Network.addListener("networkStatusChange", (s) => setOnline(s.connected)).then((h) => {
+          removeNative = () => void h.remove();
+        });
+      });
+    });
+
+    return () => removeNative?.();
   }, []);
 
   if (!mounted) return null;
@@ -30,9 +48,8 @@ export default function NetworkBanner() {
         className="frosted px-4 py-2 rounded-full text-[12px] font-bold"
         style={{ color: "var(--label2)", border: "0.5px solid var(--sep)" }}
       >
-        Offline — хамгийн сүүлд хадгалсан өгөгдлөөр ажиллаж байна
+        Интернэтгүй — хадгалсан өгөгдлөөр ажиллаж байна
       </div>
     </div>
   );
 }
-

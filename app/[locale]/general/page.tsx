@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/hooks/useSession";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Loader2, Check, X, User, MessageCircle, AlertCircle, ShieldCheck, Mail, LogOut } from "lucide-react";

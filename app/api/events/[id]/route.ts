@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectToDB } from "@/lib/db";
 import Event from "@/lib/models/Events";
 import { getAuthUser } from "@/lib/authHelpers";
+import { createUserNotification } from "@/lib/notifications";
 
 export async function GET(
   request: Request,
@@ -66,6 +67,15 @@ export async function POST(
     // Increment events count
     user.eventsAttendedCount += 1;
     await user.save();
+
+    const eventTitle = event.title?.mn || event.title?.en || "Арга хэмжээ";
+    void createUserNotification({
+      userId: user._id.toString(),
+      type: "event_joined",
+      title: "Арга хэмжээнд бүртгэгдлээ",
+      body: eventTitle,
+      payload: { eventId: event._id.toString() },
+    });
 
     return NextResponse.json({ success: true, message: "Successfully joined event" }, { status: 200 });
   } catch (error) {

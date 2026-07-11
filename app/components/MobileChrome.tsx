@@ -2,16 +2,19 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import { BRAND } from "@/lib/branding";
 import { Link, usePathname, useRouter } from "@/navigation";
 import { useLocale } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Home, Plane, LayoutDashboard, Ticket, BookOpen,
+  Home, Plane, Ticket, BookOpen,
   Search, Bell, Menu, X, ChevronRight, ArrowRight,
   User, Settings, LogOut, Info, ShoppingBag,
+  ClipboardList, History,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/hooks/useSession";
 import { signOutToSignIn } from "@/lib/auth-signout";
+import { formatRelativeTime } from "@/lib/format-time";
 
 import { hapticImpact } from "@/lib/haptics";
 import { ImpactStyle } from "@capacitor/haptics";
@@ -21,56 +24,53 @@ type Tab = { id: string; href: string; label: { en: string; mn: string }; Icon: 
 const TABS: Tab[] = [
   { id: "home",      href: "/",          label: { en: "Home",     mn: "Нүүр"    }, Icon: Home },
   { id: "programs",  href: "/programs",  label: { en: "Programs", mn: "Хөтөлбөр" }, Icon: Plane },
-  { id: "dashboard", href: "/dashboard", label: { en: "Me",       mn: "Миний"   }, Icon: LayoutDashboard },
+  { id: "shop",      href: "/shop",      label: { en: "Shop",     mn: "Дэлгүүр" }, Icon: ShoppingBag },
   { id: "events",    href: "/events",    label: { en: "Events",   mn: "Арга"    }, Icon: Ticket },
   { id: "lessons",   href: "/lessons",   label: { en: "Learn",    mn: "Сургалт" }, Icon: BookOpen },
 ];
 
-const AUTH_PATHS = ["/sign-in", "/sign-up", "/register"];
+const AUTH_PATHS = ["/sign-in", "/sign-up", "/register", "/admin"];
 
-const MENU_SECTIONS = [
+const MENU_ITEMS = [
   {
-    title: "Үндсэн",
-    items: [
-      { label: "Нүүр",       href: "/",          icon: Home },
-      { label: "Хөтөлбөр",   href: "/programs",  icon: Plane },
-      { label: "Арга хэмжээ",href: "/events",     icon: Ticket },
-      { label: "Сургалт",    href: "/lessons",    icon: BookOpen },
-      { label: "Дэлгүүр",    href: "/shop",       icon: ShoppingBag },
-    ],
+    label: "Профайл",
+    sub: "Түүх · захиалга · хичээл",
+    href: "/profile",
+    icon: User,
   },
   {
-    title: "Миний",
-    items: [
-      { label: "Профайл",    href: "/dashboard",  icon: User },
-      { label: "Тохиргоо",   href: "/settings",   icon: Settings },
-      { label: "Тухай",      href: "/about",      icon: Info },
-    ],
+    label: "Миний өргөдөл",
+    sub: "Хөтөлбөрт нэгдэх",
+    href: "/programs/apply",
+    icon: ClipboardList,
+  },
+  {
+    label: "Сагс",
+    sub: "Захиалга баталгаажуулах",
+    href: "/cart",
+    icon: ShoppingBag,
+  },
+  {
+    label: "Тохиргоо",
+    href: "/settings",
+    icon: Settings,
+  },
+  {
+    label: "Тухай",
+    href: "/about",
+    icon: Info,
   },
 ];
 
 import { useCart } from "@/app/context/CartContext";
 
-const PREFETCH_ROUTES = [
-  "/",
-  "/programs",
-  "/programs/apply",
-  "/events",
-  "/lessons",
-  "/dashboard",
-  "/shop",
-  "/cart",
-  "/about",
-  "/settings",
-  "/profile",
-  "/news",
-];
+const PREFETCH_ROUTES = ["/", "/programs", "/shop", "/events", "/lessons", "/profile"];
 
 export default function MobileChrome() {
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const { items } = useCart();
   const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -79,6 +79,10 @@ export default function MobileChrome() {
   const [showNotif, setShowNotif] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQ, setSearchQ] = useState("");
+  const [notifications, setNotifications] = useState<
+    Array<{ _id: string; type: string; title: string; body: string; createdAt: string; readAt?: string | null }>
+  >([]);
+  const [notifLoading, setNotifLoading] = useState(false);
 
   const [isMounted, setIsMounted] = useState(false);
 
@@ -100,9 +104,9 @@ export default function MobileChrome() {
     let idleId: number | undefined;
     let timerId: ReturnType<typeof setTimeout> | undefined;
     if (typeof window.requestIdleCallback === "function") {
-      idleId = window.requestIdleCallback(run, { timeout: 1200 });
+      idleId = window.requestIdleCallback(run, { timeout: 5000 });
     } else {
-      timerId = setTimeout(run, 350);
+      timerId = setTimeout(run, 5000);
     }
     return () => {
       if (idleId != null) window.cancelIdleCallback?.(idleId);
@@ -110,7 +114,50 @@ export default function MobileChrome() {
     };
   }, [router]);
 
-  /* Hide on auth pages */
+  useEffect(() => {
+    if (status !== "authenticated") {
+      setNotifications([]);
+      return;
+    }
+    fetch("/api/user/notifications", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : { notifications: [] }))
+      .then((d) => setNotifications(d.notifications || []))
+      .catch(() => {});
+  }, [status]);
+
+  useEffect(() => {
+    const onRefresh = () => {
+      if (status !== "authenticated") return;
+      fetch("/api/user/notifications", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : { notifications: [] }))
+        .then((d) => setNotifications(d.notifications || []))
+        .catch(() => {});
+    };
+    window.addEventListener("vcm:notifications-changed", onRefresh);
+    return () => window.removeEventListener("vcm:notifications-changed", onRefresh);
+  }, [status]);
+
+  useEffect(() => {
+    if (!showNotif || status !== "authenticated") return;
+    setNotifLoading(true);
+    fetch("/api/user/notifications", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : { notifications: [] }))
+      .then((d) => setNotifications(d.notifications || []))
+      .catch(() => setNotifications([]))
+      .finally(() => setNotifLoading(false));
+  }, [showNotif, status]);
+
+  const unreadCount = notifications.filter((n) => !n.readAt).length;
+
+  function notifEmoji(type: string) {
+    if (type.includes("event")) return "🎉";
+    if (type.includes("course") || type.includes("lesson")) return "📚";
+    if (type.includes("order") || type.includes("shop")) return "🛍";
+    if (type.includes("application")) return "📋";
+    return "🔔";
+  }
+
+  /* Hide on auth + admin pages */
   useEffect(() => {
     setVisible(!AUTH_PATHS.some(p => pathname.includes(p)));
   }, [pathname]);
@@ -125,22 +172,19 @@ export default function MobileChrome() {
   if (!isMounted || !visible) return null;
 
   const user = session?.user as any;
+  const overlayOpen = showMenu || showSearch || showNotif;
 
   return (
     <>
       {/* ══════════════ TOP BAR ══════════════ */}
-      <div
-        className="fixed top-0 left-0 right-0 z-[100] lg:hidden"
-        style={{
-          backdropFilter: "blur(24px) saturate(180%)",
-          WebkitBackdropFilter: "blur(24px) saturate(180%)",
-          backgroundColor: "var(--glass)",
-          borderBottom: "0.5px solid var(--sep)",
-          height: "calc(56px + env(safe-area-inset-top))",
-          paddingTop: "env(safe-area-inset-top)",
-        }}
-      >
-        <div className="h-14 px-4 flex items-center justify-between">
+      <div className="fixed top-0 left-0 right-0 z-[100] lg:hidden px-3 pt-safe">
+        <motion.div
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 420, damping: 32, delay: 0.05 }}
+          className="liquid-chrome mt-2 h-14 px-4 flex items-center justify-between"
+          style={{ borderRadius: 22 }}
+        >
           {/* Logo */}
           <Link href="/" prefetch className="flex items-center gap-2.5 press">
             <div
@@ -148,7 +192,7 @@ export default function MobileChrome() {
               style={{ borderRadius: 10, boxShadow: "0 1px 4px rgba(0,0,0,0.15)" }}
             >
               <Image
-                src="https://res.cloudinary.com/dc127wztz/image/upload/q_auto/f_auto/v1775390339/logos_xs3a5r.png"
+                src={BRAND.logo}
                 alt="VCM" fill priority sizes="32px" className="object-contain"
               />
             </div>
@@ -167,8 +211,7 @@ export default function MobileChrome() {
             <Link
               href="/cart"
               prefetch
-              className="press w-9 h-9 flex items-center justify-center rounded-full relative"
-              style={{ background: "var(--fill2)" }}
+              className="press w-9 h-9 flex items-center justify-center rounded-full relative liquid-glass"
             >
               <ShoppingBag size={17} strokeWidth={2.2} style={{ color: "var(--label)" }} />
               {cartCount > 0 && (
@@ -180,8 +223,7 @@ export default function MobileChrome() {
             </Link>
             <button
               onClick={() => { setShowSearch(true); setShowMenu(false); setShowNotif(false); }}
-              className="press w-9 h-9 flex items-center justify-center rounded-full"
-              style={{ background: "var(--fill2)" }}
+              className="press w-9 h-9 flex items-center justify-center rounded-full liquid-glass"
             >
               <Search size={17} strokeWidth={2.2} style={{ color: "var(--label)" }} />
             </button>
@@ -191,6 +233,14 @@ export default function MobileChrome() {
               style={{ background: showNotif ? "var(--blue)" : "var(--fill2)" }}
             >
               <Bell size={17} strokeWidth={2.2} style={{ color: showNotif ? "white" : "var(--label)" }} />
+              {unreadCount > 0 && !showNotif && (
+                <span
+                  className="absolute top-1.5 right-1.5 min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center text-white"
+                  style={{ background: "var(--red)" }}
+                >
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
             </button>
             <button
               onClick={() => { setShowMenu(v => !v); setShowNotif(false); setShowSearch(false); }}
@@ -203,68 +253,73 @@ export default function MobileChrome() {
               }
             </button>
           </div>
-        </div>
+        </motion.div>
       </div>
 
-      {/* ══════════════ BOTTOM TAB BAR ══════════════ */}
-      <div className="fixed bottom-0 left-0 right-0 z-[100] lg:hidden">
-        <div
-          style={{
-            backdropFilter: "blur(24px) saturate(180%)",
-            WebkitBackdropFilter: "blur(24px) saturate(180%)",
-            backgroundColor: "var(--glass)",
-            borderTop: "0.5px solid var(--sep)",
-            paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
-          }}
-        >
-          <div className="grid grid-cols-5 w-full">
-            {TABS.map(({ id, Icon, href, label }) => {
-              const active = pathname === href || (href !== "/" && pathname.startsWith(href));
-              const text = locale === "mn" ? label.mn : label.en;
+      {/* ══════════════ BOTTOM TAB BAR (floating liquid) ══════════════ */}
+      <AnimatePresence>
+        {!overlayOpen && (
+          <motion.div
+            key="tab-dock"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ type: "spring", stiffness: 480, damping: 34 }}
+            className="fixed bottom-0 left-0 right-0 z-[100] lg:hidden liquid-tab-dock pointer-events-none"
+          >
+            <div className="liquid-chrome liquid-tab-bar pointer-events-auto">
+              <div className="grid grid-cols-5 w-full">
+                {TABS.map(({ id, Icon, href, label }) => {
+                  const active = pathname === href || (href !== "/" && pathname.startsWith(href));
+                  const text = locale === "mn" ? label.mn : label.en;
 
-              return (
-                <Link
-                  key={id}
-                  href={href}
-                  prefetch
-                  onClick={() => hapticImpact(ImpactStyle.Light)}
-                  className="press flex flex-col items-center justify-center pt-2 pb-1 relative"
-                >
-                  {/* Pill background */}
-                  {active && (
-                    <motion.div
-                      layoutId="tabPill"
-                      className="absolute inset-x-2 top-1.5 bottom-0.5 rounded-full"
-                      style={{ background: "var(--blue-light)" }}
-                      transition={{ type: "spring", stiffness: 500, damping: 38 }}
-                    />
-                  )}
-                  <motion.div
-                    animate={active ? { scale: 1.08, y: -1 } : { scale: 1, y: 0 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                    className="relative z-10"
-                  >
-                    <Icon
-                      size={23}
-                      strokeWidth={active ? 2.4 : 1.8}
-                      style={{ color: active ? "var(--blue)" : "var(--label3)" }}
-                    />
-                  </motion.div>
-                  <span
-                    className="text-[10px] font-bold mt-0.5 relative z-10"
-                    style={{
-                      color: active ? "var(--blue)" : "var(--label3)",
-                      letterSpacing: "-0.2px",
-                    }}
-                  >
-                    {text}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+                  return (
+                    <Link
+                      key={id}
+                      href={href}
+                      prefetch
+                      onClick={() => hapticImpact(ImpactStyle.Light)}
+                      className="press flex flex-col items-center justify-center pt-2 pb-1 relative"
+                    >
+                      {active && (
+                        <motion.div
+                          layoutId="tabPill"
+                          className="absolute inset-x-1.5 top-1 bottom-0.5 rounded-full"
+                          style={{
+                            background: "linear-gradient(180deg, var(--blue-light), var(--blue-dim))",
+                            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.5)",
+                          }}
+                          transition={{ type: "spring", stiffness: 520, damping: 36 }}
+                        />
+                      )}
+                      <motion.div
+                        animate={active ? { scale: 1.08, y: -1 } : { scale: 1, y: 0 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        className="relative z-10"
+                      >
+                        <Icon
+                          size={23}
+                          strokeWidth={active ? 2.4 : 1.8}
+                          style={{ color: active ? "var(--blue)" : "var(--label3)" }}
+                        />
+                      </motion.div>
+                      <span
+                        className="text-[10px] font-bold mt-0.5 relative z-10"
+                        style={{
+                          color: active ? "var(--blue)" : "var(--label3)",
+                          letterSpacing: "-0.2px",
+                        }}
+                      >
+                        {text}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ══════════════ SEARCH OVERLAY ══════════════ */}
       <AnimatePresence>
@@ -275,13 +330,10 @@ export default function MobileChrome() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="fixed left-0 right-0 z-[99] lg:hidden px-4 pb-4"
+            className="fixed left-3 right-3 z-[99] lg:hidden px-4 pb-4 liquid-glass"
             style={{
-              top: "calc(56px + env(safe-area-inset-top))",
-              backdropFilter: "blur(28px) saturate(200%)",
-              WebkitBackdropFilter: "blur(28px) saturate(200%)",
-              backgroundColor: "var(--glass)",
-              borderBottom: "0.5px solid var(--sep)",
+              top: "calc(68px + env(safe-area-inset-top))",
+              borderRadius: 22,
             }}
           >
             <div className="pt-3">
@@ -347,14 +399,10 @@ export default function MobileChrome() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
             transition={{ type: "spring", stiffness: 380, damping: 32 }}
-            className="fixed right-4 z-[99] lg:hidden overflow-hidden"
+            className="fixed right-4 z-[99] lg:hidden overflow-hidden liquid-card"
             style={{
-              top: "calc(60px + env(safe-area-inset-top))",
-              width: 280,
-              borderRadius: "var(--r-2xl)",
-              background: "var(--card)",
-              boxShadow: "0 8px 40px rgba(0,0,0,0.15)",
-              border: "0.5px solid var(--sep)",
+              top: "calc(72px + env(safe-area-inset-top))",
+              width: 288,
             }}
           >
             <div className="px-4 py-3 flex items-center justify-between border-b" style={{ borderColor: "var(--sep)" }}>
@@ -363,144 +411,191 @@ export default function MobileChrome() {
                 <X size={16} style={{ color: "var(--label3)" }} />
               </button>
             </div>
-            {[
-              { emoji: "🎉", title: "Шинэ арга хэмжээ", sub: "Workshop 2025 — 2 цагийн өмнө" },
-              { emoji: "📚", title: "Сургалт нэмэгдлээ", sub: "VCM EDU — өчигдөр" },
-              { emoji: "🛍", title: "Захиалга баталгаажлаа", sub: "Дэлгүүрийн захиалга — 2 өдрийн өмнө" },
-            ].map((n, i) => (
-              <div key={i}>
-                <div className="flex items-start gap-3 px-4 py-3 press active:bg-black/5">
-                  <div
-                    className="w-9 h-9 rounded-2xl flex items-center justify-center text-lg flex-shrink-0"
-                    style={{ background: "var(--fill2)" }}
-                  >
-                    {n.emoji}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold" style={{ color: "var(--label)" }}>{n.title}</p>
-                    <p className="text-[11px] mt-0.5" style={{ color: "var(--label3)" }}>{n.sub}</p>
-                  </div>
-                </div>
-                {i < 2 && <div className="h-px ml-16" style={{ background: "var(--sep)" }} />}
+            {status !== "authenticated" ? (
+              <div className="px-4 py-6 text-center">
+                <p className="text-[13px]" style={{ color: "var(--label2)" }}>Мэдэгдэл харахын тулд нэвтэрнэ үү</p>
+                <Link
+                  href="/sign-in"
+                  onClick={() => setShowNotif(false)}
+                  className="inline-block mt-3 text-[13px] font-semibold press"
+                  style={{ color: "var(--blue)" }}
+                >
+                  Нэвтрэх
+                </Link>
               </div>
-            ))}
+            ) : notifLoading ? (
+              <div className="px-4 py-6 space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-12 rounded-xl animate-pulse" style={{ background: "var(--fill2)" }} />
+                ))}
+              </div>
+            ) : notifications.length === 0 ? (
+              <div className="px-4 py-8 text-center">
+                <p className="text-[13px] font-medium" style={{ color: "var(--label)" }}>Мэдэгдэл байхгүй</p>
+                <p className="text-[11px] mt-1" style={{ color: "var(--label3)" }}>Шинэ мэдээлэл энд харагдана</p>
+              </div>
+            ) : (
+              notifications.slice(0, 8).map((n, i) => (
+                <div key={n._id}>
+                  <div className="flex items-start gap-3 px-4 py-3 press active:bg-black/5">
+                    <div
+                      className="w-9 h-9 rounded-2xl flex items-center justify-center text-lg flex-shrink-0"
+                      style={{ background: "var(--fill2)" }}
+                    >
+                      {notifEmoji(n.type)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-semibold" style={{ color: "var(--label)" }}>
+                        {n.title || "VCM"}
+                      </p>
+                      <p className="text-[11px] mt-0.5 line-clamp-2" style={{ color: "var(--label3)" }}>
+                        {n.body}
+                      </p>
+                      <p className="text-[10px] mt-1" style={{ color: "var(--label4)" }}>
+                        {formatRelativeTime(n.createdAt, locale)}
+                      </p>
+                    </div>
+                    {!n.readAt && (
+                      <span className="w-2 h-2 rounded-full flex-shrink-0 mt-1.5" style={{ background: "var(--blue)" }} />
+                    )}
+                  </div>
+                  {i < Math.min(notifications.length, 8) - 1 && (
+                    <div className="h-px ml-16" style={{ background: "var(--sep)" }} />
+                  )}
+                </div>
+              ))
+            )}
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* ══════════════ SLIDE-IN MENU ══════════════ */}
+      {/* ══════════════ MENU OVERLAY ══════════════ */}
       <AnimatePresence>
         {showMenu && (
           <>
-            {/* Backdrop */}
             <motion.div
               key="backdrop"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowMenu(false)}
-              className="fixed inset-0 z-[98] lg:hidden"
-              style={{ background: "rgba(0,0,0,0.3)", backdropFilter: "blur(2px)" }}
+              className="fixed inset-0 z-[105] lg:hidden"
+              style={{ background: "rgba(0,0,0,0.35)", backdropFilter: "blur(4px)" }}
             />
-            {/* Sheet */}
             <motion.div
               key="menu"
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", stiffness: 320, damping: 34 }}
-              className="fixed top-0 right-0 bottom-0 z-[99] lg:hidden flex flex-col"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 12 }}
+              transition={{ type: "spring", stiffness: 380, damping: 32 }}
+              className="fixed left-3 right-3 z-[106] lg:hidden flex flex-col liquid-chrome overflow-hidden"
               style={{
-                width: "80%",
-                maxWidth: 320,
-                background: "var(--bg)",
-                boxShadow: "-8px 0 40px rgba(0,0,0,0.18)",
+                top: "calc(72px + env(safe-area-inset-top))",
+                bottom: "calc(max(env(safe-area-inset-bottom, 0px), 12px) + 12px)",
+                borderRadius: 28,
+                boxShadow: "0 24px 64px rgba(0,0,0,0.18)",
               }}
             >
-              {/* Header */}
-              <div
-                className="flex items-center justify-between px-5 py-4 flex-shrink-0"
-                style={{
-                  paddingTop: "calc(env(safe-area-inset-top, 16px) + 16px)",
-                  borderBottom: "0.5px solid var(--sep)",
-                }}
-              >
-                <div>
-                  <p className="font-bold text-[16px]" style={{ color: "var(--label)" }}>VCM</p>
-                  <p className="text-[11px]" style={{ color: "var(--label3)" }}>Volunteer Center Mongolia</p>
-                </div>
-                <button
+              {user ? (
+                <Link
+                  href="/profile"
+                  prefetch
                   onClick={() => setShowMenu(false)}
-                  className="press w-8 h-8 flex items-center justify-center rounded-full"
-                  style={{ background: "var(--fill2)" }}
+                  className="mx-4 mt-4 flex items-center gap-3 p-3.5 press liquid-card"
                 >
-                  <X size={15} style={{ color: "var(--label)" }} />
-                </button>
-              </div>
-
-              {/* User card */}
-              {user && (
-                <div className="mx-4 mt-4 flex items-center gap-3 p-3.5 rounded-2xl" style={{ background: "var(--card)", border: "0.5px solid var(--sep)" }}>
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-[15px]"
-                    style={{ background: "var(--blue)" }}>
+                  <div
+                    className="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-[16px]"
+                    style={{ background: "var(--blue)" }}
+                  >
                     {user.name?.charAt(0) || "U"}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-[14px] truncate" style={{ color: "var(--label)" }}>{user.name}</p>
-                    <p className="text-[11px] truncate" style={{ color: "var(--label3)" }}>{user.email || user.phone || ""}</p>
+                    <p className="font-bold text-[15px] truncate" style={{ color: "var(--label)" }}>
+                      {user.name}
+                    </p>
+                    <p className="text-[12px] truncate mt-0.5" style={{ color: "var(--label3)" }}>
+                      {user.email || user.phone || "Профайл харах"}
+                    </p>
                   </div>
-                  <ChevronRight size={16} style={{ color: "var(--label3)" }} />
+                  <div className="flex items-center gap-1 text-[12px] font-semibold" style={{ color: "var(--blue)" }}>
+                    <History size={14} />
+                    <ChevronRight size={16} style={{ color: "var(--label3)" }} />
+                  </div>
+                </Link>
+              ) : (
+                <div className="mx-4 mt-4 p-4 liquid-card">
+                  <p className="font-bold text-[15px]" style={{ color: "var(--label)" }}>Сайн уу!</p>
+                  <p className="text-[12px] mt-1" style={{ color: "var(--label3)" }}>
+                    Нэвтэрч профайл, түүхээ хараарай
+                  </p>
                 </div>
               )}
 
-              {/* Nav sections */}
-              <div className="flex-1 overflow-y-auto px-4 pt-4 space-y-4 pb-8">
-                {MENU_SECTIONS.map(sec => (
-                  <div key={sec.title}>
-                    <p className="text-[11px] font-semibold uppercase tracking-widest mb-2 px-1"
-                      style={{ color: "var(--label3)" }}>
-                      {sec.title}
-                    </p>
-                    <div className="overflow-hidden rounded-2xl" style={{ background: "var(--card)", border: "0.5px solid var(--sep)" }}>
-                      {sec.items.map((item, i) => {
-                        const Icon = item.icon;
-                        const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
-                        return (
-                          <div key={item.href}>
-                            <Link
-                              href={item.href}
-                              prefetch
-                              className="press flex items-center gap-3 px-4 py-3.5"
-                              style={{ background: isActive ? "var(--blue-dim)" : "transparent" }}
+              <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4">
+                <p
+                  className="text-[11px] font-bold uppercase tracking-widest mb-2 px-1"
+                  style={{ color: "var(--label3)" }}
+                >
+                  Цэс
+                </p>
+                <div className="overflow-hidden liquid-card" style={{ borderRadius: 20 }}>
+                  {MENU_ITEMS.map((item, i) => {
+                    const Icon = item.icon;
+                    const isActive =
+                      pathname === item.href ||
+                      (item.href !== "/" && pathname.startsWith(item.href));
+                    return (
+                      <div key={item.href}>
+                        <Link
+                          href={item.href}
+                          prefetch
+                          onClick={() => setShowMenu(false)}
+                          className="press flex items-center gap-3 px-4 py-3.5"
+                          style={{ background: isActive ? "var(--blue-dim)" : "transparent" }}
+                        >
+                          <div
+                            className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                            style={{ background: isActive ? "var(--blue)" : "var(--fill2)" }}
+                          >
+                            <Icon size={16} color={isActive ? "white" : "var(--label2)"} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p
+                              className="text-[14px] font-semibold"
+                              style={{ color: isActive ? "var(--blue)" : "var(--label)" }}
                             >
-                              <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-                                style={{ background: isActive ? "var(--blue)" : "var(--fill2)" }}>
-                                <Icon size={15} color={isActive ? "white" : "var(--label2)"} />
-                              </div>
-                              <span className="flex-1 text-[14px] font-medium"
-                                style={{ color: isActive ? "var(--blue)" : "var(--label)" }}>
-                                {item.label}
-                              </span>
-                              <ChevronRight size={14} style={{ color: "var(--label3)" }} />
-                            </Link>
-                            {i < sec.items.length - 1 && (
-                              <div className="h-px ml-[52px]" style={{ background: "var(--sep)" }} />
+                              {item.label}
+                            </p>
+                            {item.sub && (
+                              <p className="text-[11px] mt-0.5 truncate" style={{ color: "var(--label3)" }}>
+                                {item.sub}
+                              </p>
                             )}
                           </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
+                          <ChevronRight size={14} style={{ color: "var(--label3)" }} />
+                        </Link>
+                        {i < MENU_ITEMS.length - 1 && (
+                          <div className="h-px ml-[60px]" style={{ background: "var(--sep)" }} />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <p className="text-[11px] text-center mt-4 px-2" style={{ color: "var(--label3)" }}>
+                  Үндсэн хэсгүүд доод tab-аар шилжинэ
+                </p>
               </div>
 
-              {/* Bottom: sign out */}
-              <div className="px-4 flex-shrink-0" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 24px) + 76px)" }}>
+              <div
+                className="px-4 flex-shrink-0 pt-2"
+                style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 16px) + 16px)" }}
+              >
                 {user ? (
                   <button
                     type="button"
                     onClick={() => void signOutToSignIn(locale)}
-                    className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-[14px] font-semibold press"
+                    className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl text-[14px] font-semibold press"
                     style={{ background: "var(--red-dim)", color: "var(--red)", border: "0.5px solid rgba(239,68,68,0.2)" }}
                   >
                     <LogOut size={16} />
@@ -510,7 +605,8 @@ export default function MobileChrome() {
                   <Link
                     href="/sign-in"
                     prefetch
-                    className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-[14px] font-semibold text-white press"
+                    onClick={() => setShowMenu(false)}
+                    className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl text-[14px] font-bold text-white press"
                     style={{ background: "var(--blue)" }}
                   >
                     Нэвтрэх <ArrowRight size={15} />

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "@/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
@@ -8,9 +8,9 @@ import {
   Star, Users, BookOpen, Heart, Zap, GraduationCap,
   CalendarDays, MapPin, Sparkles, ChevronLeft, ChevronRight
 } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/hooks/useSession";
 
-const PROGRAMS = [
+const FALLBACK_PROGRAMS = [
   {
     id: "EDU", emoji: "🎓",
     color: "#0EA5E9", gradFrom: "#0ea5e9", gradTo: "#3b82f6",
@@ -64,7 +64,39 @@ const PROGRAMS = [
   },
 ];
 
-type Prog = typeof PROGRAMS[0];
+function mapApiToProg(p: any): Prog {
+  const icons = [GraduationCap, BookOpen, Users, Star, Globe];
+  return {
+    id: p.code,
+    emoji: p.emoji || "🌍",
+    color: p.color || "#0EA5E9",
+    gradFrom: p.gradFrom || p.color || "#0ea5e9",
+    gradTo: p.gradTo || "#3b82f6",
+    iconBg: "var(--blue-dim)",
+    iconColor: p.color || "var(--blue)",
+    nameKey: p.name?.mn || p.code,
+    descKey: p.description?.mn || "",
+    href: p.href || `/programs/${p.slug}`,
+    duration: p.duration || "",
+    location: p.location || "",
+    slots: p.slots || 0,
+    tags: p.tags || [],
+    features: (p.features || []).map((f: any, i: number) => ({
+      I: icons[i % icons.length],
+      t: f.mn || f.en || "",
+    })),
+    why: p.why?.mn || p.why?.en || "",
+  };
+}
+
+type Prog = typeof FALLBACK_PROGRAMS[0];
+
+function programTitle(p: Prog, nt: (k: string) => string) {
+  return p.nameKey.startsWith("prog_") ? nt(p.nameKey) : p.nameKey;
+}
+function programDesc(p: Prog, nt: (k: string) => string) {
+  return p.descKey.startsWith("prog_") ? nt(p.descKey) : p.descKey;
+}
 
 /* ── Card ── */
 function ProgCard({ p, onTap, nt }: { p: Prog; onTap: () => void; nt: any }) {
@@ -111,7 +143,7 @@ function ProgCard({ p, onTap, nt }: { p: Prog; onTap: () => void; nt: any }) {
 
         {/* Title */}
         <h3 className="text-[20px] font-black leading-tight tracking-tight mb-3" style={{ color: "var(--label)" }}>
-          {nt(p.nameKey)}
+          {programTitle(p, nt)}
         </h3>
 
         {/* Meta info */}
@@ -195,7 +227,7 @@ function ProgDetail({ p, onBack, nt, signed }: { p: Prog; onBack: () => void; nt
               <span className="t-caption2 text-white/80 uppercase">{p.id} хөтөлбөр</span>
             </div>
             <h2 className="text-white font-bold text-[22px] leading-tight mb-3">
-              {nt(p.nameKey)}
+              {programTitle(p, nt)}
             </h2>
             <div className="flex flex-wrap gap-2">
               {[
@@ -228,7 +260,7 @@ function ProgDetail({ p, onBack, nt, signed }: { p: Prog; onBack: () => void; nt
             </div>
             <span className="t-headline">Хөтөлбөрийн тухай</span>
           </div>
-          <p className="t-body" style={{ color: "var(--label2)" }}>{nt(p.descKey)}</p>
+          <p className="t-body" style={{ color: "var(--label2)" }}>{programDesc(p, nt)}</p>
         </div>
 
         <div className="divider mx-4" />
@@ -295,19 +327,33 @@ function ProgDetail({ p, onBack, nt, signed }: { p: Prog; onBack: () => void; nt
 }
 
 /* ── Main ── */
-export default function ProgramsClient() {
+export default function ProgramsClient({ initialPrograms }: { initialPrograms?: any[] }) {
   const nt = useTranslations("navbar");
   const { status } = useSession();
   const signed = status === "authenticated";
   const [sel, setSel] = useState<Prog | null>(null);
   const [filter, setFilter] = useState("all");
-  const list = filter === "all" ? PROGRAMS : PROGRAMS.filter(p => p.id === filter);
+  const [programs, setPrograms] = useState<Prog[]>(() =>
+    initialPrograms?.length ? initialPrograms.map(mapApiToProg) : FALLBACK_PROGRAMS
+  );
+
+  useEffect(() => {
+    if (initialPrograms?.length) return;
+    fetch("/api/programs")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setPrograms(data.map(mapApiToProg));
+        }
+      })
+      .catch(() => {});
+  }, [initialPrograms]);
+
+  const list = filter === "all" ? programs : programs.filter(p => p.id === filter);
 
   const FILTERS = [
-    { id: "all",   label: "Бүгд", color: "var(--label)" },
-    { id: "EDU",   label: "🎓 EDU", color: "#0EA5E9" },
-    { id: "AND",   label: "🤝 AND", color: "#10B981" },
-    { id: "VCLUB", label: "🌍 VClub", color: "#F59E0B" },
+    { id: "all", label: "Бүгд", color: "var(--label)" },
+    ...programs.map((p) => ({ id: p.id, label: `${p.emoji} ${p.id}`, color: p.color })),
   ];
 
   return (

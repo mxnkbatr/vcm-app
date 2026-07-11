@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Link } from "@/navigation";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/hooks/useSession";
 import { useLocale } from "next-intl";
 import { signOutToSignIn } from "@/lib/auth-signout";
 import { Motion as motion } from "./MotionProxy";

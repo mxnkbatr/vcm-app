@@ -35,7 +35,8 @@ const EventSchema = new Schema(
       index: true
     },
     featured: { type: Boolean, default: false },
-    attendees: [{ type: Schema.Types.ObjectId, ref: "User", index: true }]
+    attendees: [{ type: Schema.Types.ObjectId, ref: "User", index: true }],
+    ticketPrice: { type: Number, default: 0, min: 0 },
   },
   { timestamps: true }
 );

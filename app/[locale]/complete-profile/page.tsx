@@ -2,14 +2,14 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/hooks/useSession";
 import { motion } from "framer-motion";
 import { ArrowRight, Loader2, Phone, Lock, School, CheckSquare } from "lucide-react";
 import { useLocale } from "next-intl";
 
 export default function CompleteProfilePage() {
   const router = useRouter();
-  const { update } = useSession(); // useNextAuth update
+  const { update } = useSession();
   const locale = useLocale();
 
   // Form State

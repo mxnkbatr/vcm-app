@@ -1,5 +1,6 @@
 import HomePageContent from "@/app/components/HomePageContent";
-import { getAuthSession } from "@/lib/authHelpers";
+import { getSupabaseUser } from "@/lib/authHelpers";
+import { getHomePageData } from "@/lib/home-data";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Metadata } from "next";
@@ -13,14 +14,26 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   };
 }
 
+export const revalidate = 60;
+
 export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
 
-  // Use lightweight session (no DB call) — role is already in JWT
-  const session = await getAuthSession();
-  if (session?.role === "admin") {
+  const [supabaseUser, homeData] = await Promise.all([
+    getSupabaseUser(),
+    getHomePageData(locale),
+  ]);
+
+  if (supabaseUser?.user_metadata?.role === "admin") {
     redirect(`/${locale}/admin`);
   }
 
-  return <HomePageContent locale={locale} />;
+  return (
+    <HomePageContent
+      locale={locale}
+      initialBanners={homeData.banners}
+      shopItems={homeData.shopItems}
+      initialPrograms={homeData.programs}
+    />
+  );
 }

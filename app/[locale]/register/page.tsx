@@ -3,118 +3,102 @@
 import React, { useState } from "react";
 import { Link } from "@/navigation";
 import { motion } from "framer-motion";
-import {
-  UserPlus,
-  LogIn,
-  ArrowRight,
-  CheckCircle2,
-  ChevronLeft
-} from "lucide-react";
-import BeforeLoginNews from "@/app/components/BeforeLoginNews";
+import { UserPlus, LogIn, ArrowRight } from "lucide-react";
+import AuthScreen from "@/app/components/auth/AuthScreen";
 
-// --- OPTIONS ---
 const OPTIONS = [
   {
     id: "new",
-    title: "Би шинэ гишүүн",
-    desc: "Анкет бөглөх, хөтөлбөрт бүртгүүлэх.",
+    title: "Шинэ гишүүн",
+    desc: "Gmail-ээр бүртгүүлж, хөтөлбөрт нэгдэнэ.",
     icon: UserPlus,
-    badge: "Санал болгож буй",
+    href: "/sign-up",
+    accent: "var(--blue)",
+    accentBg: "var(--blue-dim)",
   },
   {
     id: "existing",
-    title: "Би гишүүн болсон",
-    desc: "Профайл руу нэвтрэх, төлөв шалгах.",
+    title: "Гишүүн болсон",
+    desc: "Gmail болон нууц үгээр нэвтэрнэ.",
     icon: LogIn,
-    badge: null,
-  }
-];
+    href: "/sign-in",
+    accent: "var(--emerald)",
+    accentBg: "var(--emerald-dim)",
+  },
+] as const;
 
 export default function RegisterPage() {
-  const [selected, setSelected] = useState<string>("new");
+  const [selected, setSelected] = useState<(typeof OPTIONS)[number]["id"]>("new");
+  const active = OPTIONS.find((o) => o.id === selected) ?? OPTIONS[0];
 
   return (
-    <div className="page">
-      <div className="page-inner relative z-[120] space-y-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          {/* Header */}
-          <div className="pt-2">
-            <h1 className="t-large-title">
-              Та хэрхэн <br />
-              <span style={{ color: 'var(--blue)' }}>Нэгдэхийг</span> хүсч байна вэ?
-            </h1>
-            <p className="t-subhead mt-2" style={{ color: 'var(--label2)' }}>
-              Бид таны бүртгэлийн үйл явцыг танд тохируулан бэлдэх болно.
-            </p>
-          </div>
-
-          {/* Selection Cards */}
-          <div className="space-y-4 mt-8">
-            {OPTIONS.map((option) => {
-              const isActive = selected === option.id;
-
-              return (
-                <div key={option.id} className="relative group">
-                  {/* Badge */}
-                  {option.badge && (
-                    <div className="absolute -top-2 right-4 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full z-20">
-                      {option.badge}
-                    </div>
-                  )}
-
-                  {/* Card Area */}
-                  <div
-                    onClick={() => setSelected(option.id)}
-                    className={`card press p-5 flex items-center gap-4 border-2 transition-all
-                      ${isActive ? "border-[#0A84FF]" : "border-transparent"}
-                    `}
-                  >
-                    {/* Icon Box */}
-                    <div className="icon-box" style={{ background: isActive ? 'var(--blue)' : 'var(--fill2)', color: isActive ? 'white' : 'var(--label3)' }}>
-                      <option.icon size={22} />
-                    </div>
-
-                    {/* Text Content */}
-                    <div className="flex-1">
-                      <h3 className="t-headline">{option.title}</h3>
-                      <p className="t-footnote">{option.desc}</p>
-                    </div>
-
-                    {/* Radio Checkmark */}
-                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all
-                      ${isActive ? "border-[#0A84FF] bg-[#0A84FF] text-white" : "border-slate-200 bg-transparent text-transparent"}
-                    `}>
-                      <CheckCircle2 size={14} strokeWidth={3} />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* CTA Button */}
-          <div className="mt-8">
-            <Link
-              href={selected === "new" ? "/sign-up" : "/sign-in"}
-              className="btn btn-primary btn-full"
+    <AuthScreen
+      title="VCM-д нэгдэх"
+      subtitle="Та аль хувилбарыг сонгох вэ?"
+      showBack
+      footer={
+        <Link href="/" className="text-[13px] font-medium press" style={{ color: "var(--label3)" }}>
+          Нүүр хуудас руу буцах
+        </Link>
+      }
+    >
+      <div className="space-y-3">
+        {OPTIONS.map((option) => {
+          const isActive = selected === option.id;
+          const Icon = option.icon;
+          return (
+            <button
+              key={option.id}
+              type="button"
+              onClick={() => setSelected(option.id)}
+              className="w-full text-left press rounded-2xl p-4 transition-all"
+              style={{
+                background: isActive ? option.accentBg : "var(--fill3)",
+                border: isActive ? `2px solid ${option.accent}` : "2px solid transparent",
+              }}
             >
-              {selected === "new" ? "Бүртгэл Үүсгэх" : "Нэвтрэх"}
-            </Link>
-          </div>
-
-          {/* Back Link */}
-          <div className="mt-6 text-center">
-            <Link href="/" className="inline-flex items-center gap-1 t-caption font-semibold press">
-              <ChevronLeft size={14} /> Нүүр хуудас руу буцах
-            </Link>
-          </div>
-
-        </motion.div>
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
+                  style={{
+                    background: isActive ? option.accent : "var(--fill2)",
+                    color: isActive ? "white" : "var(--label2)",
+                  }}
+                >
+                  <Icon size={20} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[15px] font-bold" style={{ color: "var(--label)" }}>
+                    {option.title}
+                  </p>
+                  <p className="text-[12px] mt-0.5" style={{ color: "var(--label2)" }}>
+                    {option.desc}
+                  </p>
+                </div>
+                <div
+                  className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0"
+                  style={{
+                    borderColor: isActive ? option.accent : "var(--sep-opaque)",
+                    background: isActive ? option.accent : "transparent",
+                  }}
+                >
+                  {isActive && <div className="w-2 h-2 rounded-full bg-white" />}
+                </div>
+              </div>
+            </button>
+          );
+        })}
       </div>
-    </div>
+
+      <motion.div layout className="mt-5">
+        <Link
+          href={active.href}
+          className="btn btn-primary btn-full flex items-center justify-center gap-2"
+        >
+          {selected === "new" ? "Бүртгүүлэх" : "Нэвтрэх"}
+          <ArrowRight size={16} />
+        </Link>
+      </motion.div>
+    </AuthScreen>
   );
 }

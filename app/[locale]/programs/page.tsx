@@ -1,13 +1,17 @@
 import ProgramsClient from "./ProgramsClient";
+import { getTabPrograms } from "@/lib/tab-data";
 import { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
-    return {
-        title: "Our Programs | Volunteer Center Mongolia",
-        description: "Explore our diverse volunteering programs: EDU-Volunteer, AND, and V-Club.",
-    };
+  return {
+    title: "Our Programs | Volunteer Center Mongolia",
+    description: "Explore our diverse volunteering programs: EDU-Volunteer, AND, and V-Club.",
+  };
 }
 
-export default function ProgramsPage() {
-    return <ProgramsClient />;
+export const revalidate = 120;
+
+export default async function ProgramsPage() {
+  const programs = await getTabPrograms();
+  return <ProgramsClient initialPrograms={programs} />;
 }

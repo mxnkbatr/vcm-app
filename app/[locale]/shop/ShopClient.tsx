@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "@/navigation";
 import { ArrowUpRight, ShoppingBag } from "lucide-react";
+import { staggerContainer, staggerItem, springSnappy } from "@/lib/motion";
 
 const T = {
   inStock: { en: "In Stock", mn: "Агуулахад байгаа", de: "Auf Lager" },
@@ -32,32 +33,40 @@ const formatCategory = (cat: string, locale: string) => {
   return cat.charAt(0).toUpperCase() + cat.slice(1);
 };
 
-const ProductCard = ({ item, locale = "en" }: any) => {
+const ProductCard = ({ item, locale = "en", index = 0 }: any) => {
   const name = item.name?.[locale] || item.name?.en || "Unknown Item";
   const desc = item.description?.[locale] || item.description?.en || "";
-  
+
   return (
-    <motion.div layout initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+    <motion.div
+      layout
+      variants={staggerItem}
+      initial="initial"
+      animate="animate"
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ delay: index * 0.04 }}
+      whileTap={{ scale: 0.97 }}
+    >
       <Link
         href={`/shop/${item._id}`}
-        className="press block overflow-hidden"
-        style={{ borderRadius: "var(--r-xl)", background: "var(--bg2)", boxShadow: "var(--s-card)" }}
+        className="press block overflow-hidden native-product-card"
       >
-        <div className="relative overflow-hidden" style={{ aspectRatio: "1 / 1", background: "var(--fill2)" }}>
+        <div className="relative overflow-hidden native-product-card__image">
           <Image
             src={item.image || "/placeholder.jpg"}
             alt={name}
             fill
-            className="object-cover"
+            className="object-cover native-product-card__img"
             sizes="(max-width: 520px) 50vw, 260px"
           />
+          <div className="native-product-card__shine" aria-hidden />
           <div className="absolute top-2 left-2">
-            <span className="badge" style={{ background: "rgba(255,255,255,0.82)", color: "var(--label)" }}>
+            <span className="badge" style={{ background: "rgba(255,255,255,0.88)", color: "var(--label)" }}>
               {formatCategory(item.category || "general", locale)}
             </span>
           </div>
           <div className="absolute top-2 right-2">
-            <span className="badge" style={{ background: "rgba(10,132,255,0.14)", color: "var(--blue)" }}>
+            <span className="badge" style={{ background: "rgba(11,125,214,0.14)", color: "var(--blue)" }}>
               ₮{item.price}
             </span>
           </div>
@@ -191,16 +200,19 @@ export default function ShopClient({ items = [], locale = 'en', isHorizontal = f
 
   return (
     <div className="page">
-      <div className="page-inner space-y-4"> 
-        {/* Large title */} 
-        <div className="pt-2 pb-1"> 
-          <h1 className="t-large-title">{T.shopTitle[locale as keyof typeof T.shopTitle] || T.shopTitle.en}</h1> 
-          <p className="t-subhead mt-1" style={{ color: 'var(--label2)' }}>VCM merchandise</p> 
-        </div>
+      <motion.div
+        className="page-inner space-y-4"
+        variants={staggerContainer}
+        initial="initial"
+        animate="animate"
+      >
+        <motion.div variants={staggerItem} className="pt-2 pb-1">
+          <h1 className="t-large-title">{T.shopTitle[locale as keyof typeof T.shopTitle] || T.shopTitle.en}</h1>
+          <p className="t-subhead mt-1" style={{ color: "var(--label2)" }}>VCM merchandise</p>
+        </motion.div>
 
-        {/* Categories Filter */}
-        <div className="flex justify-center mb-2">
-          <div className="seg">
+        <motion.div variants={staggerItem} className="flex justify-center mb-2">
+          <div className="seg seg--animated">
             {categories.slice(0, 5).map((cat: any) => {
               const on = filter === cat;
               return (
@@ -209,34 +221,44 @@ export default function ShopClient({ items = [], locale = 'en', isHorizontal = f
                   onClick={() => setFilter(cat)}
                   className={`seg-item ${on ? "on" : ""}`}
                 >
-                  {formatCategory(cat, locale)}
+                  {on && (
+                    <motion.span
+                      layoutId="shopSegPill"
+                      className="seg-item__pill"
+                      transition={springSnappy}
+                    />
+                  )}
+                  <span className="relative z-10">{formatCategory(cat, locale)}</span>
                 </button>
               );
             })}
           </div>
-        </div>
+        </motion.div>
 
-        {/* Product Grid */}
         <div className="min-h-[400px]">
           {filteredItems.length > 0 ? (
             <motion.div layout className="grid grid-cols-2 gap-3">
               <AnimatePresence mode="popLayout">
-                {filteredItems.map((item: any) => (
-                  <ProductCard key={item._id} item={item} locale={locale} />
+                {filteredItems.map((item: any, i: number) => (
+                  <ProductCard key={item._id} item={item} locale={locale} index={i} />
                 ))}
               </AnimatePresence>
             </motion.div>
           ) : (
-            <div className="card p-6 text-center" style={{ background: "var(--bg2)" }}>
+            <motion.div
+              variants={staggerItem}
+              className="card p-6 text-center"
+              style={{ background: "var(--bg2)" }}
+            >
               <div className="icon-box mx-auto" style={{ background: "var(--blue-dim)", color: "var(--blue)" }}>
                 <ShoppingBag size={20} />
               </div>
               <p className="t-headline mt-3">{T.notFound[locale as keyof typeof T.notFound] || T.notFound.en}</p>
               <p className="t-footnote mt-1">{T.notFoundSub[locale as keyof typeof T.notFoundSub] || T.notFoundSub.en}</p>
-            </div>
+            </motion.div>
           )}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

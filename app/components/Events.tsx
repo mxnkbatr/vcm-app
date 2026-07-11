@@ -20,6 +20,7 @@ import {
   AnimatePresence
 } from "framer-motion";
 import { useIsMobile, Motion as motion } from "./MotionProxy";
+import { clientCache } from "@/lib/client-cache";
 import { useTheme } from "next-themes";
 import { useLocale } from "next-intl";
 
@@ -236,9 +237,25 @@ export default function LatestUpdatesSection({
 
   const categories = activeTab === "events" ? EVENT_CATEGORIES : BLOG_CATEGORIES;
 
-  // Fetch Events & Blogs
+  // Fetch Events & Blogs (use shared client cache when available)
   useEffect(() => {
     async function fetchData() {
+      const cachedEvents = clientCache.get<any[]>('/api/events');
+      const cachedNews = clientCache.get<any[]>('/api/news');
+      if (cachedEvents) setEvents(cachedEvents);
+      if (cachedNews) {
+        setBlogs(cachedNews.map((blog: any) => ({
+          ...blog,
+          date: blog.publishedDate,
+          category: blog.tags?.[0] || 'General',
+          readTime: "3 min read"
+        })));
+      }
+      if (cachedEvents && cachedNews) {
+        setLoading(false);
+        if (clientCache.age('/api/events') < 60_000 && clientCache.age('/api/news') < 60_000) return;
+      }
+
       try {
         const results = await Promise.allSettled([
           fetch('/api/events').then(r => r.ok ? r.json() : Promise.reject('Failed to fetch events')),
@@ -246,10 +263,12 @@ export default function LatestUpdatesSection({
         ]);
 
         if (results[0].status === 'fulfilled') {
+          clientCache.set('/api/events', results[0].value);
           setEvents(results[0].value);
         }
 
         if (results[1].status === 'fulfilled') {
+          clientCache.set('/api/news', results[1].value);
           const data = results[1].value;
           const mappedBlogs = data.map((blog: any) => ({
             ...blog,

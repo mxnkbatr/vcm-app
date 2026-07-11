@@ -3,47 +3,122 @@
 import React, { useState } from "react";
 import { Link, useRouter } from "@/navigation";
 import { motion } from "framer-motion";
-import { Phone, Lock, Eye, EyeOff, User, ChevronLeft, CheckCircle2 } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, User, CheckCircle2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import AuthScreen, { AuthDivider, AuthError } from "@/app/components/auth/AuthScreen";
+import GoogleButton from "@/app/components/auth/GoogleButton";
+
+function validatePassword(pw: string): string | null {
+  if (pw.length < 8) return "Нууц үг 8-аас дээш тэмдэгт байх ёстой.";
+  const hasLower = /[a-z]/.test(pw);
+  const hasUpper = /[A-Z]/.test(pw);
+  const hasNumber = /\d/.test(pw);
+  const score = [hasLower, hasUpper, hasNumber].filter(Boolean).length;
+  if (score < 2) {
+    return "Нууц үг том үсэг, жижиг үсэг, тоо гэсэн 2-оос доошгүй ангиллыг агуулсан байх ёстой.";
+  }
+  return null;
+}
 
 export default function SignUpPage() {
   const router = useRouter();
   const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [pw, setPw] = useState("");
-  const [pw2, setPw2] = useState("");
-  const [show, setShow] = useState(false);
-  const [err, setErr] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const submit = async (e: React.FormEvent) => {
+  const signUpWithGoogle = async () => {
+    if (busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      const supabase = createClient();
+      const origin = window.location.origin;
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${origin}/api/auth/callback?next=/profile`,
+          queryParams: { prompt: "select_account" },
+        },
+      });
+      if (oauthError) throw oauthError;
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Google бүртгэл амжилтгүй.");
+      setBusy(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (busy) return;
-    setErr("");
 
-    if (!phone.trim()) { setErr("Утасны дугаар оруулна уу."); return; }
-    if (!pw) { setErr("Нууц үг оруулна уу."); return; }
-    if (pw !== pw2) { setErr("Нууц үг таарахгүй байна."); return; }
-    if (pw.length < 8) { setErr("Нууц үг 8-аас дээш тэмдэгт байх ёстой."); return; }
-    const hasLower = /[a-z]/.test(pw);
-    const hasUpper = /[A-Z]/.test(pw);
-    const hasNumber = /\d/.test(pw);
-    const score = [hasLower, hasUpper, hasNumber].filter(Boolean).length;
-    if (score < 2) { setErr("Нууц үг том үсэг, жижиг үсэг, тоо гэсэн 2-оос доошгүй ангиллыг агуулсан байх ёстой."); return; }
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedName = fullName.trim();
+
+    if (!trimmedName) {
+      setError("Нэрээ оруулна уу.");
+      return;
+    }
+    if (!trimmedEmail) {
+      setError("Gmail хаягаа оруулна уу.");
+      return;
+    }
+    if (!trimmedEmail.includes("@")) {
+      setError("Зөв Gmail хаяг оруулна уу.");
+      return;
+    }
+
+    const pwError = validatePassword(password);
+    if (pwError) {
+      setError(pwError);
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Нууц үг таарахгүй байна.");
+      return;
+    }
 
     setBusy(true);
+    setError("");
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fullName: fullName.trim() || "Гишүүн", phone: phone.trim(), password: pw }),
+        body: JSON.stringify({
+          fullName: trimmedName,
+          email: trimmedEmail,
+          password,
+        }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Бүртгэл амжилтгүй болсон.");
-      setSuccess(true);
-      setTimeout(() => router.push("/sign-in"), 1800);
-    } catch (e: any) {
-      setErr(e.message);
+      if (!res.ok) {
+        const msg =
+          data.error === "An account with this email already exists"
+            ? "Энэ Gmail хаягтай бүртгэл байна."
+            : data.error || "Бүртгэл амжилтгүй болсон.";
+        throw new Error(msg);
+      }
+
+      const supabase = createClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: trimmedEmail,
+        password,
+      });
+      if (signInError) {
+        setSuccess(true);
+        setTimeout(() => router.push("/sign-in"), 1800);
+        return;
+      }
+
+      await fetch("/api/auth/session", { method: "POST" });
+      router.push("/profile");
+      router.refresh();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Бүртгэл амжилтгүй.");
     } finally {
       setBusy(false);
     }
@@ -51,150 +126,129 @@ export default function SignUpPage() {
 
   if (success) {
     return (
-      <div className="min-h-dvh flex flex-col items-center justify-center px-6" style={{ background: "var(--bg)" }}>
+      <div className="min-h-dvh flex items-center justify-center px-6">
         <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
+          initial={{ scale: 0.92, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="text-center space-y-4"
+          className="liquid-chrome p-8 text-center max-w-sm w-full"
+          style={{ borderRadius: 28 }}
         >
-          <div className="w-20 h-20 rounded-full mx-auto flex items-center justify-center" style={{ background: "var(--emerald-dim)" }}>
+          <div
+            className="w-20 h-20 rounded-full mx-auto flex items-center justify-center mb-4"
+            style={{ background: "var(--emerald-dim)" }}
+          >
             <CheckCircle2 size={40} style={{ color: "var(--emerald)" }} />
           </div>
-          <h2 className="t-title2">Бүртгэл амжилттай!</h2>
-          <p className="t-footnote" style={{ color: "var(--label2)" }}>Нэвтрэх хуудас руу шилжиж байна...</p>
+          <h2 className="text-[22px] font-black" style={{ color: "var(--label)" }}>
+            Бүртгэл амжилттай!
+          </h2>
+          <p className="text-[14px] mt-2" style={{ color: "var(--label2)" }}>
+            Нэвтрэх хуудас руу шилжиж байна...
+          </p>
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div
-      className="min-h-dvh flex flex-col"
-      style={{ background: "var(--bg)", paddingTop: "env(safe-area-inset-top, 44px)" }}
-    >
-      <div className="relative z-[120] max-w-sm mx-auto w-full px-6 flex flex-col justify-center min-h-dvh py-12 pb-32">
-
-        {/* Logo */}
-        <motion.div
-          initial={{ opacity: 0, y: -16 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
-        >
-          <div
-            className="inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-4 shadow-xl"
-            style={{ background: "var(--blue)" }}
-          >
-            <span className="text-4xl">🌍</span>
-          </div>
-          <h1 className="t-title2">Бүртгэл үүсгэх</h1>
-          <p className="t-footnote mt-1" style={{ color: "var(--label2)" }}>
-            Volunteer Center Mongolia-д нэгдэнэ үү
-          </p>
-        </motion.div>
-
-        {/* Form */}
-        <motion.form
-          onSubmit={submit}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="space-y-4"
-        >
-          <div className="input-group">
-            {/* Full Name */}
-            <div className="input-row">
-              <User size={18} style={{ color: "var(--label3)", flexShrink: 0 }} />
-              <input
-                type="text"
-                value={fullName}
-                onChange={e => setFullName(e.target.value)}
-                placeholder="Нэр (заавал биш)"
-                autoComplete="name"
-              />
-            </div>
-
-            {/* Phone */}
-            <div className="input-row">
-              <Phone size={18} style={{ color: "var(--label3)", flexShrink: 0 }} />
-              <input
-                type="tel"
-                value={phone}
-                onChange={e => setPhone(e.target.value)}
-                placeholder="Утасны дугаар"
-                autoComplete="tel"
-                required
-              />
-            </div>
-
-            {/* Password */}
-            <div className="input-row">
-              <Lock size={18} style={{ color: "var(--label3)", flexShrink: 0 }} />
-              <input
-                type={show ? "text" : "password"}
-                value={pw}
-                onChange={e => setPw(e.target.value)}
-                placeholder="Нууц үг (8+ тэмдэгт)"
-                autoComplete="new-password"
-                required
-              />
-              <button type="button" onClick={() => setShow(!show)} className="press flex-shrink-0">
-                {show
-                  ? <EyeOff size={18} style={{ color: "var(--label3)" }} />
-                  : <Eye size={18} style={{ color: "var(--label3)" }} />
-                }
-              </button>
-            </div>
-
-            {/* Confirm Password */}
-            <div className="input-row">
-              <Lock size={18} style={{ color: "var(--label3)", flexShrink: 0 }} />
-              <input
-                type={show ? "text" : "password"}
-                value={pw2}
-                onChange={e => setPw2(e.target.value)}
-                placeholder="Нууц үг давтах"
-                autoComplete="new-password"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Password hint */}
-          <p className="t-caption2" style={{ color: "var(--label3)" }}>
-            Нууц үг: 8+ тэмдэгт, том болон жижиг үсэг, тоо агуулсан байх.
-          </p>
-
-          {err && (
-            <p
-              className="t-footnote text-center py-3 px-4 rounded-xl"
-              style={{ background: "#FFE8E8", color: "var(--red)" }}
-            >
-              {err}
-            </p>
-          )}
-
-          <button type="submit" disabled={busy} className="btn btn-primary btn-full mt-2">
-            {busy
-              ? <span className="ios-spinner" style={{ width: 22, height: 22, borderWidth: 2 }} />
-              : "Бүртгүүлэх"
-            }
-          </button>
-        </motion.form>
-
-        <p className="t-footnote text-center mt-6">
-          Аль хэдийн гишүүн үү?{" "}
-          <Link href="/sign-in" className="press font-semibold" style={{ color: "var(--blue)" }}>
+    <AuthScreen
+      title="Бүртгүүлэх"
+      subtitle="Gmail болон нууц үгээр шинэ бүртгэл үүсгэнэ үү"
+      footer={
+        <p className="text-[14px]" style={{ color: "var(--label2)" }}>
+          Аль хэдийн бүртгэлтэй юу?{" "}
+          <Link href="/sign-in" className="font-bold press" style={{ color: "var(--blue)" }}>
             Нэвтрэх
           </Link>
         </p>
-
-        <div className="mt-4 text-center">
-          <Link href="/" className="inline-flex items-center gap-1 t-caption press" style={{ color: "var(--label3)" }}>
-            <ChevronLeft size={14} /> Нүүр хуудас руу буцах
-          </Link>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-1">
+        <div className="input-group">
+          <div className="input-row">
+            <User size={18} style={{ color: "var(--label3)", flexShrink: 0 }} />
+            <input
+              type="text"
+              autoComplete="name"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Бүтэн нэр"
+              disabled={busy}
+              required
+            />
+          </div>
+          <div className="input-row">
+            <Mail size={18} style={{ color: "var(--label3)", flexShrink: 0 }} />
+            <input
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Gmail хаяг"
+              disabled={busy}
+              required
+            />
+          </div>
+          <div className="input-row">
+            <Lock size={18} style={{ color: "var(--label3)", flexShrink: 0 }} />
+            <input
+              type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Нууц үг (8+ тэмдэгт)"
+              disabled={busy}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="press flex-shrink-0"
+            >
+              {showPassword ? (
+                <EyeOff size={18} style={{ color: "var(--label3)" }} />
+              ) : (
+                <Eye size={18} style={{ color: "var(--label3)" }} />
+              )}
+            </button>
+          </div>
+          <div className="input-row">
+            <Lock size={18} style={{ color: "var(--label3)", flexShrink: 0 }} />
+            <input
+              type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Нууц үг давтах"
+              disabled={busy}
+              required
+            />
+          </div>
         </div>
 
-      </div>
-    </div>
+        <p className="text-[11px] px-1 pt-2" style={{ color: "var(--label3)" }}>
+          Нууц үг: 8+ тэмдэгт, том/жижиг үсэг, тоо агуулсан байх.
+        </p>
+
+        <AuthError message={error} />
+
+        <button type="submit" disabled={busy} className="btn btn-primary btn-full mt-3">
+          {busy ? (
+            <span className="ios-spinner" style={{ width: 22, height: 22, borderWidth: 2 }} />
+          ) : (
+            "Бүртгүүлэх"
+          )}
+        </button>
+      </form>
+
+      <AuthDivider />
+
+      <GoogleButton
+        label="Gmail-ээр бүртгүүлэх"
+        onClick={signUpWithGoogle}
+        disabled={busy}
+      />
+    </AuthScreen>
   );
 }

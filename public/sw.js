@@ -1,4 +1,4 @@
-const CACHE_VERSION = "vcm-pwa-v5";
+const CACHE_VERSION = "vcm-pwa-v8";
 const CACHE_STATIC  = `${CACHE_VERSION}:static`;
 const CACHE_PAGES   = `${CACHE_VERSION}:pages`;
 const CACHE_API     = `${CACHE_VERSION}:api`;
@@ -9,11 +9,15 @@ const SWR_APIS = [
   "/api/news",
   "/api/banners",
   "/api/shopping",
-  "/api/lms/courses",
-  "/api/student/dashboard",
 ];
 
-const PRECACHE_URLS = ["/offline.html", "/manifest.webmanifest", "/globe.svg"];
+const PRECACHE_URLS = [
+  "/offline.html",
+  "/manifest.webmanifest",
+  "/branding/vcm-logo.png",
+  "/branding/icon-192.png",
+  "/branding/icon-512.png",
+];
 
 // ── Install: precache only, no skipWaiting to prevent forced reloads ──
 self.addEventListener("install", (event) => {

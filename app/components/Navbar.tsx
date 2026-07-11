@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, usePathname } from "@/navigation";
 import Image from "next/image";
+import { BRAND as VCM_BRAND } from "@/lib/branding";
 import {
   Home,
   BookOpen,
@@ -17,15 +18,9 @@ import { useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion";
 import { Motion as motion } from "./MotionProxy";
 import { useTheme } from "next-themes";
 import { useTranslations, useLocale } from "next-intl";
-import dynamic from "next/dynamic";
 import { useIsMobile } from "./MotionProxy";
 import LanguageToggle from "./LanguageToggle";
-
-// Dynamically import Clerk components to reduce initial JS bundle
-const AuthActions = dynamic(() => import("./AuthActions"), {
-  ssr: false,
-  loading: () => <div className="w-[120px] h-9" />
-});
+import AuthActions from "./AuthActions";
 
 // --- COLOR PALETTE CONFIGURATION ---
 const BRAND = {
@@ -91,12 +86,12 @@ export default function Navbar() {
           <Link href="/" className="flex items-center gap-3 group shrink-0">
             <div className="relative w-10 h-10 overflow-hidden rounded-full border-2 border-white/50 shadow-md bg-white">
               <Image
-                src="https://res.cloudinary.com/dc127wztz/image/upload/q_auto/f_auto/v1775390339/logos_xs3a5r.png"
-                alt="AuPair Logo"
+                src={VCM_BRAND.logo}
+                alt="VCM Logo"
                 fill
                 priority
                 sizes="40px"
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                className="object-contain transition-transform duration-500 group-hover:scale-110"
                 quality={75}
               />
             </div>

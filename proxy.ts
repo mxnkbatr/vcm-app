@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
-import { getToken } from 'next-auth/jwt';
-import { requireNextAuthSecret } from "@/lib/env";
+import { updateSession } from '@/lib/supabase/middleware';
 
 const intlMiddleware = createMiddleware({
     locales: ['en', 'mn', 'de'],
@@ -21,7 +20,6 @@ const publicPaths = [
     '/lessons',
     '/events',
     '/contact',
-    '/booking',
     '/shop',
     '/programs',
     '/complete-profile',
@@ -29,79 +27,68 @@ const publicPaths = [
 ];
 
 function isPublicRoute(pathname: string): boolean {
-    // API auth routes are always public
     if (pathname.startsWith('/api/auth')) return true;
 
-    // Public API routes
-    const publicApis = ['/api/events', '/api/news', '/api/livekit', '/api/shopping', '/api/lessons', '/api/posts', '/api/purchases', '/api/banners'];
+    const publicApis = ['/api/events', '/api/news', '/api/livekit', '/api/shopping', '/api/lessons', '/api/posts', '/api/purchases', '/api/banners', '/api/programs'];
     if (publicApis.some(api => pathname.startsWith(api))) return true;
 
-    // Remove locale prefix for path matching
     const pathWithoutLocale = pathname.replace(/^\/(en|mn|de)/, '') || '/';
 
-    // Өргөдлийн маягт — нэвтэрсэн хэрэглэгчид л (programs/* бусад нь public хэвээр)
     if (pathWithoutLocale === '/programs/apply' || pathWithoutLocale.startsWith('/programs/apply/')) {
         return false;
     }
 
-    // Check public paths
     return publicPaths.some(p => {
         if (p === '/') return pathWithoutLocale === '/';
         return pathWithoutLocale === p || pathWithoutLocale.startsWith(p + '/');
     });
 }
 
-export default async function middleware(req: NextRequest) {
+export default async function proxy(req: NextRequest) {
     const { pathname } = req.nextUrl;
-    // console.log('[Middleware] Processing URL:', req.url);
 
-    // Skip static files
     if (pathname.startsWith('/_next') || pathname.includes('.')) {
         return NextResponse.next();
     }
 
-    // API routes — check auth but skip intl
+    const { supabaseResponse, user } = await updateSession(req);
+
     if (pathname.startsWith('/api')) {
         if (isPublicRoute(pathname)) {
-            return NextResponse.next();
+            return supabaseResponse;
         }
 
-        // Check NextAuth token for protected API routes
-        const token = await getToken({ req, secret: requireNextAuthSecret() });
-        if (!token) {
+        if (!user) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
-        
-        return NextResponse.next();
+
+        return supabaseResponse;
     }
 
-    // Non-API routes — check auth for protected pages, then run intl
     const localeMatch = pathname.match(/^\/(en|mn|de)/);
     const locale = localeMatch ? localeMatch[1] : 'mn';
 
     if (!isPublicRoute(pathname)) {
-        const token = await getToken({ req, secret: requireNextAuthSecret() });
-        if (!token) {
+        if (!user) {
             const signInUrl = new URL(`/${locale}/sign-in`, req.url);
             signInUrl.searchParams.set('callbackUrl', req.url);
             return NextResponse.redirect(signInUrl);
         }
 
-        // Onboarding guard: if authenticated but profile is incomplete, redirect to complete-profile
-        const profileComplete = (token as any)?.profileComplete;
+        const profileComplete = user.user_metadata?.profile_complete;
         const pathWithoutLocale = pathname.replace(/^\/(en|mn|de)/, '') || '/';
-        const allowed = [
-          '/complete-profile',
-          '/sign-out',
-        ];
+        const allowed = ['/complete-profile', '/sign-out'];
         const isAllowed = allowed.some(p => pathWithoutLocale === p || pathWithoutLocale.startsWith(p + '/'));
         if (profileComplete === false && !isAllowed) {
-          return NextResponse.redirect(new URL(`/${locale}/complete-profile`, req.url));
+            return NextResponse.redirect(new URL(`/${locale}/complete-profile`, req.url));
         }
     }
 
-    // Run i18n middleware
-    return intlMiddleware(req);
+    const intlResponse = intlMiddleware(req);
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+        intlResponse.cookies.set(cookie.name, cookie.value);
+    });
+    return intlResponse;
 }
 
 export const config = {

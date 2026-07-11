@@ -85,19 +85,20 @@ function CourseCard({ c, locale }: { c: Course; locale: string }) {
   ); 
 } 
 
-export default function LessonsClient() { 
-  const locale = useLocale(); 
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(true); 
+export default function LessonsClient({ initialCourses }: { initialCourses?: Course[] }) {
+  const locale = useLocale();
+  const [courses, setCourses] = useState<Course[]>(initialCourses ?? []);
+  const [loading, setLoading] = useState(!initialCourses?.length);
   const [filter, setFilter] = useState<"all" | "free" | "paid">("all");
 
-  useEffect(() => { 
-    fetch('/api/lms/courses')
+  useEffect(() => {
+    if (initialCourses?.length) return;
+    fetch("/api/lms/courses")
       .then(r => r.json())
       .then(d => { if (Array.isArray(d)) setCourses(d); })
       .catch(console.error)
-      .finally(() => setLoading(false)); 
-  }, []); 
+      .finally(() => setLoading(false));
+  }, [initialCourses]);
 
   const filtered =
     filter === "all"

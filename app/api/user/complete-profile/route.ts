@@ -5,6 +5,8 @@ import { getAuthUserId } from "@/lib/authHelpers";
 import bcrypt from "bcryptjs";
 import { validatePassword } from "@/lib/security/passwordPolicy";
 import { rateLimit } from "@/lib/security/rateLimit";
+import { syncAuthMetadata } from "@/lib/syncUser";
+import { metadataFromDbUser } from "@/lib/authMetadata";
 
 export async function POST(req: Request) {
   try {
@@ -63,6 +65,11 @@ export async function POST(req: Request) {
 
     // Update user profile
     await User.findByIdAndUpdate(userId, { $set: updateData });
+
+    const updated = await User.findById(userId);
+    if (updated?.supabaseId) {
+      await syncAuthMetadata(updated.supabaseId, metadataFromDbUser(updated));
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

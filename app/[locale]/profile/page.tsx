@@ -1,23 +1,23 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/hooks/useSession";
+import { useDashboard } from "@/lib/hooks/useDashboard";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import ProfileActivityHistory from "@/app/components/ProfileActivityHistory";
 import {
   User, Mail, Phone, MapPin, Edit3, Save, X,
-  Lock, Eye, EyeOff, ChevronRight, ShieldCheck,
-  ClipboardList, CheckCircle2, Camera
+  Lock, Eye, EyeOff, ShieldCheck,
+  CheckCircle2, Camera, History
 } from "lucide-react";
 import { Link } from "@/navigation";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { data: dash, loading } = useDashboard({ enabled: status === "authenticated" });
 
-  const [userData, setUserData] = useState<any>(null);
-  const [userApps, setUserApps] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ fullName: "", email: "", city: "", password: "" });
   const [showPw, setShowPw] = useState(false);
@@ -26,18 +26,26 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (status === "loading") return;
-    if (!session) { router.replace("/sign-in"); return; }
-    fetch("/api/user/dashboard")
-      .then(r => r.ok ? r.json() : null)
-      .then(d => {
-        if (!d) return;
-        setUserData(d.user);
-        setUserApps(d.applications || []);
-        setEditForm({ fullName: d.user.fullName || "", email: d.user.email || "", city: d.user.profile?.address?.city || "", password: "" });
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    if (!session) router.replace("/sign-in");
   }, [status, session, router]);
+
+  useEffect(() => {
+    if (!dash?.user) return;
+    setEditForm({
+      fullName: dash.user.fullName || "",
+      email: dash.user.email || "",
+      city: (dash.user.profile as any)?.address?.city || "",
+      password: "",
+    });
+  }, [dash?.user]);
+
+  const userData = dash?.user;
+  const activity = {
+    applications: dash?.applications || [],
+    purchases: dash?.purchases || [],
+    lmsEnrollments: dash?.lmsEnrollments || [],
+    enrolledLessons: dash?.enrolledLessons || [],
+  };
 
   const showToast = (ok: boolean, msg: string) => {
     setToast({ ok, msg });
@@ -55,7 +63,6 @@ export default function ProfilePage() {
       });
       const data = await res.json();
       if (res.ok) {
-        setUserData((prev: any) => ({ ...prev, fullName: editForm.fullName, email: editForm.email }));
         setIsEditing(false);
         showToast(true, "Мэдээлэл амжилттай хадгалагдлаа");
       } else {
@@ -194,43 +201,26 @@ export default function ProfilePage() {
           </div>
         </motion.div>
 
-        {/* Applications */}
+        {/* Activity history */}
         <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
-          <p className="sec-label mb-2">Миний өргөдлүүд</p>
-          {userApps.length === 0 ? (
-            <div
-              className="card-sm p-6 flex flex-col items-center text-center gap-2 border border-dashed"
-              style={{ borderColor: "var(--sep)", background: "transparent" }}
-            >
-              <div className="icon-box" style={{ background: "var(--fill2)", color: "var(--label3)" }}>
-                <ClipboardList size={18} />
-              </div>
-              <p className="text-[13px]" style={{ color: "var(--label3)" }}>Одоогоор өргөдөл байхгүй</p>
+          <div className="flex items-center gap-2 mb-3">
+            <div className="icon-box-sm" style={{ background: "var(--blue-dim)", color: "var(--blue)" }}>
+              <History size={16} />
             </div>
-          ) : (
-            <div className="card p-2 space-y-0">
-              {userApps.map((app: any, i: number) => (
-                <React.Fragment key={app._id || i}>
-                  <div className="flex items-center gap-3 px-3 py-3">
-                    <div className="icon-box-sm" style={{ background: "var(--blue-dim)", color: "var(--blue)" }}>
-                      <ClipboardList size={14} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[14px] font-semibold truncate" style={{ color: "var(--label)" }}>{app.programId}</p>
-                      <p className="text-[11px]" style={{ color: "var(--label3)" }}>{new Date(app.createdAt).toLocaleDateString()}</p>
-                    </div>
-                    <span
-                      className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase"
-                      style={{ background: "var(--orange-dim)", color: "var(--orange)" }}
-                    >
-                      {app.status || "Хүлээгдэж буй"}
-                    </span>
-                  </div>
-                  {i < userApps.length - 1 && <div className="h-px mx-3" style={{ background: "var(--sep)" }} />}
-                </React.Fragment>
-              ))}
+            <div>
+              <p className="sec-label mb-0">Миний түүх</p>
+              <p className="text-[12px]" style={{ color: "var(--label3)" }}>
+                Хөтөлбөр, захиалга, хичээлийн бүртгэл
+              </p>
             </div>
-          )}
+          </div>
+          <ProfileActivityHistory
+            applications={activity.applications}
+            purchases={activity.purchases}
+            lmsEnrollments={activity.lmsEnrollments}
+            enrolledLessons={activity.enrolledLessons}
+            activeProgram={userData.program}
+          />
         </motion.div>
 
       </div>

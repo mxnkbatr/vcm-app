@@ -1,10 +1,14 @@
-// app/api/admin/users/route.ts
 import { NextResponse } from "next/server";
 import { connectToDB } from "@/lib/db";
 import User from "@/lib/models/User";
 import { withAdminAuth } from "@/lib/adminAuth";
 import { getAuthUser } from "@/lib/authHelpers";
 import { logAdminAction } from "@/lib/audit";
+import { validatePassword } from "@/lib/security/passwordPolicy";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { syncAuthMetadata } from "@/lib/syncUser";
+import { metadataFromDbUser } from "@/lib/authMetadata";
+import bcrypt from "bcryptjs";
 
 // 1. GET: Fetch all users for the table (or specific user with documents)
 export const GET = withAdminAuth(async (req: Request) => {
@@ -13,6 +17,7 @@ export const GET = withAdminAuth(async (req: Request) => {
   const { searchParams } = new URL(req.url);
   const userId = searchParams.get("id");
   const includeDocuments = searchParams.get("includeDocuments") === "true";
+  const roleFilter = searchParams.get("role");
 
   // If fetching specific user with documents
   if (userId && includeDocuments) {
@@ -21,8 +26,12 @@ export const GET = withAdminAuth(async (req: Request) => {
     return NextResponse.json(user);
   }
 
-  // Fetch all users sorted by update date
-  const mongoUsers = await User.find({}).lean();
+  const query: Record<string, unknown> = {};
+  if (roleFilter && roleFilter !== "all") {
+    query.role = roleFilter;
+  }
+
+  const mongoUsers = await User.find(query).lean();
 
   // Sort: Admins first, then Students, then Guests
   const roleOrder: Record<string, number> = { admin: 3, student: 2, guest: 1 };
@@ -55,26 +64,50 @@ export const PUT = withAdminAuth(async (req: Request) => {
     if (action === 'update_user') {
       if (!userId) return NextResponse.json({ error: "Missing User ID" }, { status: 400 });
 
+      const existing = await User.findOne(query);
+      if (!existing) return NextResponse.json({ error: "User not found" }, { status: 404 });
+
+      const updateFields: Record<string, unknown> = {};
+      if (data.role !== undefined) updateFields.role = data.role;
+      if (data.country !== undefined) updateFields.country = data.country;
+      if (data.program !== undefined) updateFields.program = data.program;
+      if (data.step !== undefined) updateFields.step = data.step;
+      if (data.status !== undefined) updateFields.status = data.status;
+      if (data.fullName !== undefined) updateFields.fullName = String(data.fullName).trim();
+      if (data.email !== undefined) updateFields.email = String(data.email).trim().toLowerCase() || undefined;
+      if (data.phone !== undefined) updateFields.phone = String(data.phone).trim() || undefined;
+
       const updatedUser = await User.findOneAndUpdate(
         query,
-        {
-          $set: {
-            role: data.role,
-            country: data.country,
-            program: data.program,
-            step: data.step,
-            status: data.status,
-            fullName: data.fullName,
-          }
-        },
-        { new: true, upsert: true }
+        { $set: updateFields },
+        { new: true }
       );
+
+      if (updatedUser?.supabaseId) {
+        try {
+          const admin = createAdminClient();
+          const authPatch: Record<string, unknown> = {};
+          if (data.email) authPatch.email = String(data.email).trim().toLowerCase();
+          if (data.fullName) {
+            authPatch.user_metadata = {
+              full_name: updatedUser.fullName,
+              phone: updatedUser.phone,
+            };
+          }
+          if (Object.keys(authPatch).length > 0) {
+            await admin.auth.admin.updateUserById(updatedUser.supabaseId, authPatch);
+          }
+          await syncAuthMetadata(updatedUser.supabaseId, metadataFromDbUser(updatedUser));
+        } catch (syncErr) {
+          console.warn("Supabase user sync skipped:", syncErr);
+        }
+      }
 
       await logAdminAction({
         action: "admin.user.update",
         targetType: "User",
         targetId: String(userId),
-        meta: { role: data.role, country: data.country, program: data.program, step: data.step, status: data.status },
+        meta: updateFields,
       });
 
       return NextResponse.json({ success: true, user: updatedUser });
@@ -92,6 +125,10 @@ export const PUT = withAdminAuth(async (req: Request) => {
         { $set: updateData },
         { new: true, upsert: true }
       );
+
+      if (updatedUser?.supabaseId) {
+        void syncAuthMetadata(updatedUser.supabaseId, metadataFromDbUser(updatedUser));
+      }
 
       await logAdminAction({
         action: "admin.user.master_update",
@@ -129,16 +166,38 @@ export const PUT = withAdminAuth(async (req: Request) => {
 
     // --- CASE C: ADMIN PASSWORD RESET ---
     if (action === 'reset_password') {
-      if (!userId || !data.password) return NextResponse.json({ error: "Missing User ID or password" }, { status: 400 });
+      if (!userId || !data.password) {
+        return NextResponse.json({ error: "Missing User ID or password" }, { status: 400 });
+      }
 
-      const bcrypt = require("bcryptjs");
-      const hashedPassword = await bcrypt.hash(data.password, 10);
+      const pw = validatePassword(String(data.password));
+      if (!pw.ok) return NextResponse.json({ error: pw.error }, { status: 400 });
+
+      const existing = await User.findOne(query);
+      if (!existing) return NextResponse.json({ error: "User not found" }, { status: 404 });
+
+      const hashedPassword = await bcrypt.hash(String(data.password), 12);
 
       const updatedUser = await User.findOneAndUpdate(
         query,
         { $set: { password: hashedPassword } },
         { new: true }
       );
+
+      if (existing.supabaseId) {
+        try {
+          const admin = createAdminClient();
+          await admin.auth.admin.updateUserById(existing.supabaseId, {
+            password: String(data.password),
+          });
+        } catch (syncErr) {
+          console.warn("Supabase password sync failed:", syncErr);
+          return NextResponse.json(
+            { error: "MongoDB шинэчлэгдсэн ч Supabase нууц үг шинэчлэхэд алдаа гарлаа." },
+            { status: 500 }
+          );
+        }
+      }
 
       await logAdminAction({
         action: "admin.user.reset_password",

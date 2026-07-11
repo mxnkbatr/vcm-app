@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/hooks/useSession";
 import { Upload, FileText, CheckCircle, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";

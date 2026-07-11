@@ -5,9 +5,6 @@ import { getAuthUser } from "@/lib/authHelpers";
 export async function POST(req: Request) {
   console.log("--------------- STARTING USER SYNC ---------------");
   try {
-    // With NextAuth, the user is already created via credentials register or Google sign-in.
-    // This API route handles any additional sync logic needed, though mostly it is vestigial.
-    // We just return the current user.
     await connectToDB();
     const user = await getAuthUser();
     

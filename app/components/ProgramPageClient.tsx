@@ -10,7 +10,7 @@ import {
   ArrowLeft, Send, Loader2, User, Mail, Phone,
   ChevronDown, X
 } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/hooks/useSession";
 import { IOSAlert, IOSSheet } from "./iOSAlert";
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────

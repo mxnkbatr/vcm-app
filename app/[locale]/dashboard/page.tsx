@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Link, useRouter } from "@/navigation";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/hooks/useSession";
+import { useDashboard } from "@/lib/hooks/useDashboard";
 import { signOutToSignIn } from "@/lib/auth-signout";
 import {
    Clock, Calendar, MapPin, Activity,
@@ -71,6 +72,24 @@ interface LessonData {
     imageUrl?: string;
     difficulty: string;
 }
+
+type PurchaseItem = {
+  _id: string;
+  name: { en: string; mn: string; de?: string };
+  price: number;
+  image?: string;
+  category?: string;
+};
+
+type PurchaseData = {
+  _id: string;
+  itemId?: PurchaseItem | string;
+  phoneNumber: string;
+  amount: number;
+  status: "pending" | "completed" | "failed" | string;
+  paymentMethod?: string;
+  createdAt: string;
+};
 
 type LmsI18n = { en: string; mn: string; de?: string };
 type LmsCourse = {
@@ -244,56 +263,44 @@ export default function MemberDashboard() {
    const [attendedEvents, setAttendedEvents] = useState<EventData[]>([]);
    const [availableEvents, setAvailableEvents] = useState<EventData[]>([]);
    const [lessons, setLessons] = useState<LessonData[]>([]);
+   const [purchases, setPurchases] = useState<PurchaseData[]>([]);
    const [studentDash, setStudentDash] = useState<StudentDashboard | null>(null);
-   const [loading, setLoading] = useState(true);
+   const { data: dashData, loading: dashLoading } = useDashboard({
+      enabled: isLoaded && !!user,
+   });
    const [alert, setAlert] = useState<{ title: string; message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
    useEffect(() => {
-      const fetchData = async () => {
-         try {
-            const [dashRes, lmsRes] = await Promise.all([
-               fetch('/api/user/dashboard'),
-               fetch("/api/student/dashboard"),
-            ]);
-
-            if (dashRes.ok) {
-               const data = await dashRes.json();
-               if (data.user?.role === 'admin') {
-                  router.replace('/admin');
-                  return;
-               }
-               setUserData(data.user);
-               setUserApps(data.applications || []);
-               setAttendedEvents(data.attendedEvents || []);
-               setAvailableEvents(data.availableEvents || []);
-               setLessons(data.lessons || []);
-            } else {
-               setUserData({ _id: "new", fullName: user?.name || "Guest User", email: user?.email || "", role: "guest" });
-            }
-
-            if (lmsRes.ok) {
-               const lms = await lmsRes.json();
-               setStudentDash(lms);
-            }
-         } catch (e) {
-            console.error("Dashboard Error:", e);
-         } finally {
-            setLoading(false);
-         }
-      };
-
-      if (isLoaded && (user as any)?.role === 'admin') {
+      if (!isLoaded) return;
+      if ((user as any)?.role === 'admin') {
          router.replace('/admin');
          return;
       }
-      if (isLoaded && (user as any)?.role?.startsWith('general_')) {
+      if ((user as any)?.role?.startsWith('general_')) {
          router.replace('/general');
          return;
       }
-
-      if (isLoaded && user) fetchData();
-      else if (isLoaded && !user) router.replace('/sign-in');
+      if (isLoaded && !user) router.replace('/sign-in');
    }, [isLoaded, user, router]);
+
+   useEffect(() => {
+      if (!dashData) return;
+      if (dashData.user?.role === 'admin') {
+         router.replace('/admin');
+         return;
+      }
+      setUserData(dashData.user as UserData);
+      setUserApps(dashData.applications || []);
+      setAttendedEvents((dashData.attendedEvents || []) as EventData[]);
+      setAvailableEvents((dashData.availableEvents || []) as EventData[]);
+      setPurchases((dashData.purchases || []) as PurchaseData[]);
+      setLessons((dashData.lessons || []) as LessonData[]);
+      if (dashData.studentLms) {
+         setStudentDash(dashData.studentLms as StudentDashboard);
+      }
+   }, [dashData, router]);
+
+   const loading = dashLoading;
 
    const handleRegisterEvent = async (eventId: string) => {
        try {
@@ -522,7 +529,7 @@ export default function MemberDashboard() {
                   <ChevronRight size={16} style={{ color: 'var(--label3)' }} />
                </Link>
 
-               <button onClick={() => {}} className="card-sm p-4 press flex items-center justify-between">
+               <Link href="/settings" className="card-sm p-4 press flex items-center justify-between">
                   <div className="flex items-center gap-3">
                      <div className="icon-box-sm" style={{ background: 'var(--fill2)', color: 'var(--label2)' }}>
                         <Settings size={16} />
@@ -530,7 +537,7 @@ export default function MemberDashboard() {
                      <span className="t-headline" style={{ fontSize: 15 }}>Тохиргоо</span>
                   </div>
                   <ChevronRight size={16} style={{ color: 'var(--label3)' }} />
-               </button>
+               </Link>
 
                <button
                   type="button"
@@ -546,6 +553,85 @@ export default function MemberDashboard() {
                   <ChevronRight size={16} style={{ color: 'var(--label3)' }} />
                </button>
             </div>
+
+            {/* PURCHASES */}
+            <section>
+              <SectionHeader
+                icon={CreditCard}
+                title={locale === "mn" ? "Миний худалдан авалт" : "My purchases"}
+                subtitle={
+                  locale === "mn"
+                    ? "Таны худалдан авсан бараа, төлбөрийн төлөв"
+                    : "Purchased items and payment status"
+                }
+                action={
+                  <Link href="/shop" className="t-caption font-bold" style={{ color: "var(--blue)" }}>
+                    {locale === "mn" ? "Дэлгүүр →" : "Shop →"}
+                  </Link>
+                }
+              />
+
+              {purchases.length === 0 ? (
+                <div
+                  className="card-sm p-8 flex flex-col items-center justify-center text-center border border-dashed"
+                  style={{ borderColor: "var(--sep)", background: "var(--bg)" }}
+                >
+                  <div className="icon-box mb-3" style={{ background: "var(--fill2)", color: "var(--label3)" }}>
+                    <CreditCard size={20} />
+                  </div>
+                  <p className="t-footnote" style={{ color: "var(--label3)" }}>
+                    {locale === "mn" ? "Одоогоор худалдан авалт байхгүй байна." : "No purchases yet."}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {purchases.slice(0, 6).map((p) => {
+                    const item = typeof p.itemId === "object" && p.itemId ? (p.itemId as PurchaseItem) : null;
+                    const title =
+                      item?.name?.[locale as "en" | "mn"] ||
+                      item?.name?.en ||
+                      (locale === "mn" ? "Бараа" : "Item");
+                    const statusLabel =
+                      p.status === "completed"
+                        ? (locale === "mn" ? "Төлөгдсөн" : "Paid")
+                        : p.status === "pending"
+                          ? (locale === "mn" ? "Хүлээгдэж байна" : "Pending")
+                          : (locale === "mn" ? "Алдаа" : "Failed");
+                    const statusColor =
+                      p.status === "completed" ? "var(--emerald)" : p.status === "pending" ? "var(--orange)" : "var(--red)";
+
+                    return (
+                      <Link
+                        key={p._id}
+                        href="/shop"
+                        className="card-sm p-4 press flex items-center justify-between gap-3"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="icon-box-sm" style={{ background: "var(--bg)", color: "var(--label2)" }}>
+                            <ShoppingBag size={16} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="t-headline line-clamp-1" style={{ fontSize: 15 }}>
+                              {title}
+                            </p>
+                            <p className="t-caption line-clamp-1" style={{ color: "var(--label3)" }}>
+                              {new Date(p.createdAt).toLocaleDateString(locale === "mn" ? "mn-MN" : "en-US")} •{" "}
+                              {p.amount.toLocaleString()}₮
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <span className="badge" style={{ background: "var(--bg)", color: statusColor }}>
+                            {statusLabel}
+                          </span>
+                          <ChevronRight size={16} style={{ color: "var(--label3)" }} />
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
 
             {/* PROGRESS BAR (Volunteers only) */}
             {isVolunteer && (

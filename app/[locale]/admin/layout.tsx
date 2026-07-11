@@ -1,6 +1,7 @@
 import { redirect } from "@/navigation";
 import { requireAdmin } from "@/lib/rbac";
 import AdminShell from "./shell";
+import { Suspense } from "react";
 
 export default async function AdminLayout({
   children,
@@ -15,6 +16,10 @@ export default async function AdminLayout({
     redirect({ href: "/sign-in", locale });
   }
 
-  return <AdminShell>{children}</AdminShell>;
+  return (
+    <Suspense fallback={<div className="p-6 t-headline">Admin…</div>}>
+      <AdminShell>{children}</AdminShell>
+    </Suspense>
+  );
 }
 

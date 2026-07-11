@@ -1,24 +1,53 @@
 import { NextResponse } from "next/server";
 import { connectToDB } from "@/lib/db";
 import Purchase from "@/lib/models/Purchase";
+import PromoCode from "@/lib/models/PromoCode";
+import ShoppingItem from "@/lib/models/ShoppingItem";
+import { validatePromoForShop, incrementPromoUsage } from "@/lib/promo";
 
 export async function POST(req: Request) {
   try {
     await connectToDB();
     const data = await req.json();
 
-    const { itemId, phoneNumber, amount } = data;
+    const { itemId, phoneNumber, amount, promoCode } = data;
 
     if (!itemId || !phoneNumber || amount === undefined) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // 1. Create a pending purchase locally
+    let finalAmount = Number(amount);
+    let originalAmount = finalAmount;
+    let discountAmount = 0;
+    let promoId: string | undefined;
+
+    if (promoCode) {
+      const promo = await PromoCode.findOne({ code: String(promoCode).trim().toUpperCase() }).lean();
+      const item = await ShoppingItem.findById(itemId).lean();
+      if (!promo || !item) {
+        return NextResponse.json({ error: "Промо код буруу байна." }, { status: 400 });
+      }
+      const result = validatePromoForShop(promo as any, [
+        { id: String(item._id), price: item.price, quantity: 1 },
+      ]);
+      if (!result.valid) {
+        return NextResponse.json({ error: result.error }, { status: 400 });
+      }
+      originalAmount = item.price;
+      discountAmount = result.discountAmount;
+      finalAmount = result.finalAmount;
+      promoId = result.promoId;
+    }
+
     const newPurchase = new Purchase({
       itemId,
       phoneNumber,
-      amount,
-      status: "pending", 
+      amount: finalAmount,
+      originalAmount,
+      discountAmount,
+      promoCode: promoCode ? String(promoCode).trim().toUpperCase() : undefined,
+      promoId,
+      status: "pending",
       paymentMethod: "QPay",
     });
 
@@ -54,7 +83,7 @@ export async function POST(req: Request) {
         sender_invoice_no: newPurchase._id.toString(),
         invoice_receiver_code: phoneNumber,
         invoice_description: "VCM Shop Purchase",
-        amount: amount
+        amount: finalAmount
       })
     });
 
@@ -65,7 +94,11 @@ export async function POST(req: Request) {
 
     const invoiceData = await invoiceRes.json();
 
-    return NextResponse.json({ 
+    if (promoId) {
+      await incrementPromoUsage(promoId);
+    }
+
+    return NextResponse.json({
       message: "Invoice created successfully", 
       purchase: newPurchase,
       qpay: invoiceData

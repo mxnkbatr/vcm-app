@@ -4,10 +4,21 @@ import User from "@/lib/models/User";
 import Application from "@/lib/models/Application";
 import Event from "@/lib/models/Events";
 import Lesson from "@/lib/models/Lesson";
+import Purchase from "@/lib/models/Purchase";
+import LmsEnrollment from "@/lib/models/LmsEnrollment";
+import LmsCourse from "@/lib/models/LmsCourse";
+import LmsLesson from "@/lib/models/LmsLesson";
+import LmsProgress from "@/lib/models/LmsProgress";
+import LmsCertificate from "@/lib/models/LmsCertificate";
 import { getAuthUserId } from "@/lib/authHelpers";
 import { withCache } from "@/lib/server-cache";
 
 export const revalidate = 0;
+
+function normalizePhone(input: unknown): string {
+  const raw = String(input ?? "").trim();
+  return raw.replace(/[^\d+]/g, "");
+}
 
 export async function GET() {
   try {
@@ -49,6 +60,77 @@ export async function GET() {
       if (!user) return null;
 
       const u = user as any;
+      const phoneCandidates = [
+        u.phone,
+        u?.profile?.phone,
+        u?.profile?.mobile,
+      ]
+        .map(normalizePhone)
+        .filter(Boolean);
+
+      const purchases = phoneCandidates.length
+        ? await Purchase.find({ phoneNumber: { $in: phoneCandidates } })
+            .populate("itemId", "name price image category")
+            .sort({ createdAt: -1 })
+            .limit(20)
+            .lean()
+        : [];
+
+      const enrolledLessons = await Lesson.find({ attendees: userId })
+        .select("_id title description category difficulty imageUrl createdAt")
+        .sort({ createdAt: -1 })
+        .limit(20)
+        .lean();
+
+      const enrollments = await LmsEnrollment.find({ userId, status: "active" })
+        .sort({ createdAt: -1 })
+        .lean();
+      const courseIds = enrollments.map((e) => e.courseId);
+      const [lmsCourses, lmsLessons] = await Promise.all([
+        LmsCourse.find({ _id: { $in: courseIds } })
+          .select("slug title description thumbnailUrl")
+          .lean(),
+        LmsLesson.find({ courseId: { $in: courseIds }, status: "published" })
+          .select("_id courseId")
+          .lean(),
+      ]);
+      const lessonIds = lmsLessons.map((l) => l._id);
+      const progresses = await LmsProgress.find({
+        userId,
+        lessonId: { $in: lessonIds },
+        completedAt: { $exists: true },
+      })
+        .select("courseId completedAt")
+        .lean();
+
+      const totalByCourse = new Map<string, number>();
+      const completedByCourse = new Map<string, number>();
+      for (const l of lmsLessons) {
+        const cid = l.courseId.toString();
+        totalByCourse.set(cid, (totalByCourse.get(cid) ?? 0) + 1);
+      }
+      for (const p of progresses) {
+        const cid = p.courseId.toString();
+        completedByCourse.set(cid, (completedByCourse.get(cid) ?? 0) + 1);
+      }
+
+      const lmsEnrollments = lmsCourses.map((c) => {
+        const cid = c._id.toString();
+        const total = totalByCourse.get(cid) ?? 0;
+        const completed = completedByCourse.get(cid) ?? 0;
+        const enrollment = enrollments.find((e) => e.courseId.toString() === cid);
+        return {
+          courseId: cid,
+          slug: c.slug,
+          title: c.title,
+          thumbnailUrl: c.thumbnailUrl,
+          enrolledAt: enrollment?.createdAt,
+          progressPct: total === 0 ? 0 : Math.round((completed / total) * 100),
+          completedLessons: completed,
+          totalLessons: total,
+        };
+      });
+
       return {
         user: {
           _id: u._id,
@@ -67,10 +149,55 @@ export async function GET() {
         applications: applications || [],
         attendedEvents: attendedEvents || [],
         availableEvents: availableEvents || [],
+        purchases: purchases || [],
+        enrolledLessons: enrolledLessons || [],
+        lmsEnrollments: lmsEnrollments || [],
         lessons: (allLessons as any[]).map((lesson) => ({
           ...lesson,
           isUnlocked: lesson.attendees?.some((id: any) => id.toString() === userId),
         })),
+        studentLms: await (async () => {
+          const enrollments = await LmsEnrollment.find({ userId, status: "active" })
+            .sort({ createdAt: -1 })
+            .lean();
+          const courseIds = enrollments.map((e) => e.courseId);
+          const [courses, certificates, lessonsForStudent] = await Promise.all([
+            LmsCourse.find({ _id: { $in: courseIds } }).lean(),
+            LmsCertificate.find({ userId })
+              .select("_id courseId certNumber pdfUrl issuedAt")
+              .lean(),
+            LmsLesson.find({ courseId: { $in: courseIds }, status: "published" })
+              .select({ _id: 1, courseId: 1 })
+              .lean(),
+          ]);
+          const lessonIds = lessonsForStudent.map((l) => l._id);
+          const progresses = await LmsProgress.find({ userId, lessonId: { $in: lessonIds } })
+            .select({ lessonId: 1, courseId: 1, completedAt: 1 })
+            .lean();
+          const completedByCourse = new Map<string, number>();
+          const totalByCourse = new Map<string, number>();
+          for (const l of lessonsForStudent) {
+            const cid = l.courseId.toString();
+            totalByCourse.set(cid, (totalByCourse.get(cid) ?? 0) + 1);
+          }
+          for (const p of progresses) {
+            if (!p.completedAt) continue;
+            const cid = p.courseId.toString();
+            completedByCourse.set(cid, (completedByCourse.get(cid) ?? 0) + 1);
+          }
+          const courseSummaries = courses.map((c) => {
+            const cid = c._id.toString();
+            const total = totalByCourse.get(cid) ?? 0;
+            const completed = completedByCourse.get(cid) ?? 0;
+            return {
+              course: c,
+              progressPct: total === 0 ? 0 : Math.round((completed / total) * 100),
+              completedLessons: completed,
+              totalLessons: total,
+            };
+          });
+          return { enrollments, courses: courseSummaries, certificates };
+        })(),
       };
     });
 

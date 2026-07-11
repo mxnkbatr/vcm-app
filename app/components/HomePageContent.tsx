@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/hooks/useSession";
 import { Link } from "@/navigation";
 import {
   ChevronRight,
@@ -23,29 +23,43 @@ import BannerSlider from "./BannerSlider";
 const EventsSection = dynamic(() => import("./Events"), { ssr: false });
 const ShopClient = dynamic(() => import("@/app/[locale]/shop/ShopClient"), { ssr: false });
 
-const QUICK_ACTIONS = [
+const QUICK_ACTIONS_FALLBACK = [
   { id: "edu", emoji: "🎓", label: "EDU Хөтөлбөр", sub: "Сургуульд заалт", href: "/programs/edu", from: "#0ea5e9", to: "#3b82f6" },
   { id: "and", emoji: "🤝", label: "АНД Хөтөлбөр", sub: "Нийгмийн халамж", href: "/programs/and", from: "#10b981", to: "#0d9488" },
   { id: "vclub", emoji: "🌍", label: "V-Club", sub: "Олон улсын сүлжээ", href: "/programs/vclub", from: "#f59e0b", to: "#f97316" },
 ];
 
-export default function HomePageContent({ shopItems, locale }: { shopItems?: any[]; locale?: string }) {
-  const [items, setItems] = useState<any[]>(shopItems || []);
+export default function HomePageContent({
+  shopItems,
+  initialBanners,
+  initialPrograms,
+  locale,
+}: {
+  shopItems?: any[];
+  initialBanners?: any[];
+  initialPrograms?: any[];
+  locale?: string;
+}) {
+  const mapPrograms = (data: any[]) =>
+    data.map((p: any) => ({
+      id: p.slug || p.code?.toLowerCase(),
+      emoji: p.emoji || "🌍",
+      label: p.name?.mn || p.code,
+      sub: p.description?.mn || "",
+      href: p.href || `/programs/${p.slug || p.code?.toLowerCase()}`,
+      from: p.gradFrom || p.color,
+      to: p.gradTo || p.color,
+    }));
+
+  const [items] = useState<any[]>(shopItems || []);
+  const [quickActions] = useState(() =>
+    initialPrograms?.length ? mapPrograms(initialPrograms) : QUICK_ACTIONS_FALLBACK
+  );
   const [mounted, setMounted] = useState(false);
-  const { status, data: session } = useSession();
+  const { status } = useSession();
   const isSignedIn = mounted && status === "authenticated";
-  const firstName = (session?.user as any)?.name?.split(" ")?.[0];
 
   useEffect(() => { setMounted(true); }, []);
-
-  useEffect(() => {
-    if (!shopItems || shopItems.length === 0) {
-      fetch("/api/shopping")
-        .then((res) => res.json())
-        .then((data) => { if (Array.isArray(data)) setItems(data.slice(0, 8)); })
-        .catch(() => {});
-    }
-  }, [shopItems]);
 
   const categories = useMemo(() => ([
     {
@@ -53,45 +67,44 @@ export default function HomePageContent({ shopItems, locale }: { shopItems?: any
       icon: Users,
       title: "Community & Clubs",
       sub: "ADU · V Club · гишүүнчлэл",
-      tone: "var(--blue)",
-      bg: "var(--blue-dim)",
+      tone: "#0B7DD6",
+      bg: "linear-gradient(145deg, #E8F4FC, #D6EBFA)",
     },
     {
       href: "/shop",
       icon: ShoppingBag,
       title: "E-commerce (Shop)",
       sub: "Мерч бүтээгдэхүүн",
-      tone: "var(--orange)",
-      bg: "var(--orange-dim)",
+      tone: "#C8842A",
+      bg: "linear-gradient(145deg, #FBF0E0, #F5E6D0)",
     },
     {
       href: "/lessons",
       icon: BookOpen,
       title: "LMS (Education)",
       sub: "Курс · видео хичээл",
-      tone: "var(--emerald)",
-      bg: "var(--emerald-dim)",
+      tone: "#2A9D6E",
+      bg: "linear-gradient(145deg, #E5F7EF, #D4F0E4)",
     },
     {
       href: "/events",
       icon: Ticket,
       title: "Events & Registration",
       sub: "Бүртгэл · тасалбар",
-      tone: "var(--red)",
-      bg: "var(--red-dim)",
+      tone: "#C45C7A",
+      bg: "linear-gradient(145deg, #FBE8EE, #F5D8E2)",
     },
   ]), []);
 
   return (
     <div
-      className="min-h-dvh"
+      className="min-h-dvh relative"
       style={{
-        background: "var(--bg)",
-        paddingBottom: "calc(env(safe-area-inset-bottom, 34px) + 80px)",
+        paddingBottom: "calc(env(safe-area-inset-bottom, 34px) + 100px)",
       }}
     >
-      {/* top nav spacer (MobileChrome 56px) */}
-      <div style={{ height: "calc(56px + env(safe-area-inset-top))" }} />
+      {/* top nav spacer (floating liquid chrome) */}
+      <div style={{ height: "calc(72px + env(safe-area-inset-top))" }} />
 
       {/* Banner */}
       <motion.div
@@ -99,33 +112,8 @@ export default function HomePageContent({ shopItems, locale }: { shopItems?: any
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.06, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       >
-        <BannerSlider />
+        <BannerSlider locale={locale || "mn"} initialBanners={initialBanners} />
       </motion.div>
-
-      {/* Home header */}
-      <div className="px-5 mt-6">
-        <div className="flex items-end justify-between gap-4">
-          <div className="min-w-0">
-            <p className="text-[11px] font-bold uppercase tracking-widest mb-1" style={{ color: "var(--label3)" }}>
-              Volunteer Center Mongolia
-            </p>
-            <h1
-              className="text-[32px] font-bold tracking-tight leading-none"
-              style={{ color: "var(--label)" }}
-              suppressHydrationWarning
-            >
-              {mounted ? (isSignedIn ? `Сайн уу, ${firstName || "найз"}` : "Нүүр") : "Нүүр"}
-            </h1>
-          </div>
-
-          <Link
-            href="/dashboard"
-            className="btn btn-ghost btn-sm shrink-0 press"
-          >
-            Миний <ChevronRight size={14} strokeWidth={3} />
-          </Link>
-        </div>
-      </div>
 
       {/* Categories (Community/Shop/LMS/Events) */}
       <motion.section
@@ -135,27 +123,27 @@ export default function HomePageContent({ shopItems, locale }: { shopItems?: any
         transition={{ delay: 0.10, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
       >
         <div className="mb-4">
-          <h2 className="text-[22px] font-bold text-slate-900 tracking-tight">Үндсэн хэсгүүд</h2>
-          <p className="text-[13px] font-medium text-slate-500 mt-0.5">Системийн 4 том модуль</p>
+          <h2 className="t-title3" style={{ color: "var(--label)" }}>Үндсэн хэсгүүд</h2>
+          <p className="t-footnote mt-0.5">Системийн 4 том модуль</p>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          {categories.map((c, idx) => (
+          {categories.map((c) => (
             <Link
               key={c.href}
               href={c.href}
-              className="press flex flex-col items-center text-center p-5 relative overflow-hidden bg-white rounded-[24px] shadow-sm border border-slate-100"
+              className="press liquid-card flex flex-col items-center text-center p-5 relative overflow-hidden"
             >
               <div
                 className="w-14 h-14 rounded-2xl flex items-center justify-center mb-3 relative z-10"
-                style={{ background: c.bg, color: c.tone }}
+                style={{ background: c.bg, color: c.tone, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.4)" }}
               >
                 <c.icon size={26} strokeWidth={2} />
               </div>
               <div className="relative z-10">
-                <p className="text-[14px] font-bold leading-tight mb-1 text-slate-900">
+                <p className="text-[14px] font-bold leading-tight mb-1" style={{ color: "var(--label)" }}>
                   {c.title}
                 </p>
-                <p className="text-[11px] font-medium text-slate-500">
+                <p className="text-[11px] font-medium" style={{ color: "var(--label2)" }}>
                   {c.sub}
                 </p>
               </div>
@@ -172,11 +160,11 @@ export default function HomePageContent({ shopItems, locale }: { shopItems?: any
         className="mt-8"
       >
         <div className="px-5 mb-4">
-          <h2 className="text-[22px] font-bold text-slate-900 tracking-tight">Санал болгож буй</h2>
-          <p className="text-[13px] font-medium text-slate-500 mt-0.5">Онцлох хөтөлбөрүүд</p>
+          <h2 className="t-title3" style={{ color: "var(--label)" }}>Санал болгож буй</h2>
+          <p className="t-footnote mt-0.5">Онцлох хөтөлбөрүүд</p>
         </div>
         <div className="flex gap-3 overflow-x-auto no-scroll px-5 pb-2">
-          {QUICK_ACTIONS.map((a, i) => (
+          {quickActions.map((a, i) => (
             <motion.div
               key={a.id}
               initial={{ opacity: 0, x: 20 }}
@@ -185,14 +173,14 @@ export default function HomePageContent({ shopItems, locale }: { shopItems?: any
             >
               <Link
                 href={a.href}
-                className="flex-shrink-0 press block overflow-hidden bg-white rounded-[24px] shadow-sm border border-slate-100"
-                style={{ width: 140 }}
+                className="flex-shrink-0 press block overflow-hidden liquid-card"
+                style={{ width: 148 }}
               >
                 <div className="p-4 h-[130px] flex flex-col items-center justify-center text-center relative">
                   <span className="text-[40px] mb-2">{a.emoji}</span>
                   <div>
-                    <p className="text-slate-900 font-bold text-[13px] leading-tight">{a.label}</p>
-                    <p className="text-slate-500 text-[11px] font-medium mt-1">{a.sub}</p>
+                    <p className="font-bold text-[13px] leading-tight" style={{ color: "var(--label)" }}>{a.label}</p>
+                    <p className="text-[11px] font-medium mt-1" style={{ color: "var(--label2)" }}>{a.sub}</p>
                   </div>
                 </div>
               </Link>
@@ -201,22 +189,25 @@ export default function HomePageContent({ shopItems, locale }: { shopItems?: any
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.39 }}>
             <Link
               href="/apply"
-              className="flex-shrink-0 press block bg-slate-900 rounded-[24px] shadow-sm"
+              className="flex-shrink-0 press block liquid-card overflow-hidden"
               style={{
-                width: 140,
+                width: 148,
                 height: 130,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 8,
+                background: "linear-gradient(145deg, #4DA8E8, #0B7DD6)",
+                border: "0.5px solid rgba(255,255,255,0.35)",
               }}
             >
-              <div className="w-12 h-12 rounded-2xl bg-sky-500 flex items-center justify-center shadow-lg shadow-sky-500/30">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                style={{ background: "rgba(255,255,255,0.2)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.35)" }}>
                 <Sparkles size={22} color="white" />
               </div>
               <p className="text-white font-bold text-[13px] mt-1">Өргөдөл</p>
-              <p className="text-slate-400 text-[11px] font-medium">Нэгд →</p>
+              <p className="text-white/70 text-[11px] font-medium">Нэгд →</p>
             </Link>
           </motion.div>
         </div>
@@ -226,12 +217,12 @@ export default function HomePageContent({ shopItems, locale }: { shopItems?: any
       {(!mounted || !isSignedIn) && (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }} className="mx-5 mt-6">
           <div
-            className="overflow-hidden press"
+            className="overflow-hidden press liquid-card"
             style={{
-              borderRadius: "var(--r-3xl)",
-              background: "linear-gradient(135deg, #0EA5E9, #3b82f6)",
               padding: "24px 20px",
               position: "relative",
+              background: "linear-gradient(135deg, #4DA8E8 0%, #0B7DD6 55%, #1A4B8C 100%)",
+              border: "0.5px solid rgba(255,255,255,0.35)",
             }}
           >
             <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-white/10 pointer-events-none" />
@@ -307,39 +298,6 @@ export default function HomePageContent({ shopItems, locale }: { shopItems?: any
           </section>
         </LazySection>
       )}
-
-      {/* Mission */}
-      <LazySection placeholder={null}>
-        <section className="mt-8 mx-5 pb-2">
-          <div
-            className="press overflow-hidden relative bg-white rounded-[32px] shadow-sm border border-slate-100 px-6 py-8"
-          >
-            <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full bg-sky-50 pointer-events-none" />
-            <div className="absolute -bottom-4 -left-4 w-24 h-24 rounded-full bg-emerald-50 pointer-events-none" />
-            <div className="relative z-10 flex flex-col items-center text-center gap-4">
-              <div className="min-w-0">
-                <p className="text-[11px] font-bold uppercase tracking-widest mb-2 text-sky-500">
-                  Volunteer Center Mongolia
-                </p>
-                <p className="text-[26px] font-black leading-tight text-slate-900 tracking-tight">
-                  Small Actions,<br />Big Differences
-                </p>
-                <p className="text-[14px] font-medium mt-3 text-slate-500 max-w-[250px] mx-auto">
-                  Сайн дурын хөтөлбөр, сургалт, арга хэмжээг нэг дороос.
-                </p>
-              </div>
-              <div className="shrink-0 flex items-center justify-center gap-3 mt-2">
-                <Link href="/about" className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-3 rounded-full text-[14px] font-bold transition-colors">
-                  Бидний тухай
-                </Link>
-                <Link href="/apply" className="bg-sky-500 hover:bg-sky-600 text-white px-5 py-3 rounded-full text-[14px] font-bold transition-colors shadow-lg shadow-sky-500/25">
-                  Нэгдэх
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-      </LazySection>
     </div>
   );
 }

@@ -168,10 +168,13 @@ function Skeleton() {
   );
 }
 
-export default function EventsClient() {
+export default function EventsClient({ initialEvents }: { initialEvents?: EventItem[] }) {
   const locale = useLocale();
   const [filter, setFilter] = useState("all");
-  const { data, loading } = useCachedFetch<EventItem[]>("/api/events", { staleMsMs: 45_000 });
+  const { data, loading } = useCachedFetch<EventItem[]>("/api/events", {
+    staleMsMs: 45_000,
+    initialData: initialEvents,
+  });
   const events = data ?? [];
   const filtered = filter === "all" ? events : events.filter(e => e.category === filter);
 

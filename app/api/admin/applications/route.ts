@@ -4,30 +4,46 @@ import { connectToDB } from "@/lib/db";
 import Application from "@/lib/models/Application";
 import User from "@/lib/models/User";
 import { withAdminAuth } from "@/lib/adminAuth";
+import { programLabelMn, statusMeta } from "@/lib/applicationLabels";
+import { createUserNotification } from "@/lib/notifications";
 
-const PROGRAM_MAP: Record<string, string> = {
-  "EDU": "Education Program",
-  "AND": "And Program",
-  "V": "VClub Program",
-  "VCLUB": "VClub Program"
-};
-
-export const GET = withAdminAuth(async () => {
+export const GET = withAdminAuth(async (req: Request) => {
   try {
     await connectToDB();
-    
-    // We want to fetch applications strictly awaiting Final Admin Approval
-    const applications = await Application.find({ status: 'pending_admin' }).sort({ createdAt: -1 }).lean();
-    
-    const enrichedApplications = await Promise.all(applications.map(async (app: any) => {
-      if (app.userId) {
-        const isMongoId = /^[0-9a-fA-F]{24}$/.test(app.userId);
-        const query = isMongoId ? { _id: app.userId } : { clerkId: app.userId };
-        const user = await User.findOne(query).select('profile').lean();
-        return { ...app, userProfile: user?.profile || null };
-      }
-      return { ...app, userProfile: null };
-    }));
+
+    const { searchParams } = new URL(req.url);
+    const status = searchParams.get("status");
+    const programId = searchParams.get("programId");
+
+    const filter: Record<string, unknown> = {};
+    if (status && status !== "all") filter.status = status;
+    if (programId && programId !== "all") filter.programId = programId.toUpperCase();
+
+    const applications = await Application.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(200)
+      .lean();
+
+    const enrichedApplications = await Promise.all(
+      applications.map(async (app: any) => {
+        let userProfile = null;
+        if (app.userId) {
+          const isMongoId = /^[0-9a-fA-F]{24}$/.test(app.userId);
+          const query = isMongoId ? { _id: app.userId } : { clerkId: app.userId };
+          const user = await User.findOne(query).select("profile fullName email phone").lean();
+          userProfile = user || null;
+        }
+
+        const st = statusMeta(app.status);
+        return {
+          ...app,
+          userProfile,
+          programLabel: programLabelMn(app.programId),
+          statusLabel: st.mn,
+          statusColor: st.color,
+        };
+      })
+    );
 
     return NextResponse.json(enrichedApplications);
   } catch (error) {
@@ -50,29 +66,38 @@ export const PUT = withAdminAuth(async (req: Request) => {
     application.status = status;
     await application.save();
 
-    // If approved and user exists, upgrade user to volunteer and sync latest info
-    if (status === 'approved_volunteer' && application.userId) {
-       const country = PROGRAM_MAP[application.programId] || "Volunteer Program";
-       const isMongoId = /^[0-9a-fA-F]{24}$/.test(application.userId);
-       const query = isMongoId ? { _id: application.userId } : { clerkId: application.userId };
-       
-       await User.findOneAndUpdate(
-         query,
-         { 
-            $set: {
-                role: 'volunteer', 
-                country: country,
-                program: application.programId,
-                step: "Documents",
-                fullName: `${application.firstName} ${application.lastName}`,
-                email: application.email,
-                "profile.phone": application.phone,
-                "profile.languages": `Level: ${application.level}`,
-                "profile.motivation": application.message
-            }
-         },
-         { new: true, upsert: true }
-       );
+    if (status === "approved_volunteer" && application.userId) {
+      const isMongoId = /^[0-9a-fA-F]{24}$/.test(application.userId);
+      const query = isMongoId ? { _id: application.userId } : { clerkId: application.userId };
+
+      await User.findOneAndUpdate(
+        query,
+        {
+          $set: {
+            role: "volunteer",
+            country: programLabelMn(application.programId),
+            program: application.programId,
+            step: "Documents",
+            fullName: `${application.firstName} ${application.lastName}`,
+            email: application.email,
+            "profile.phone": application.phone,
+            "profile.languages": application.level ? `Level: ${application.level}` : "",
+            "profile.motivation": application.message,
+          },
+        },
+        { new: true }
+      );
+    }
+
+    if (application.userId) {
+      const st = statusMeta(status);
+      void createUserNotification({
+        userId: String(application.userId),
+        type: "application_status",
+        title: "Өргөдлийн төлөв шинэчлэгдлээ",
+        body: `${programLabelMn(application.programId)} — ${st.mn}`,
+        payload: { applicationId: application._id.toString(), status },
+      });
     }
 
     return NextResponse.json(application);

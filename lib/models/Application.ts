@@ -11,6 +11,16 @@ const ApplicationSchema = new Schema(
     age: { type: String, required: true },
     level: { type: String, required: true },
     message: { type: String },
+    answers: {
+      type: [
+        {
+          questionId: { type: String, required: true },
+          label: { type: String, default: "" },
+          value: { type: String, default: "" },
+        },
+      ],
+      default: [],
+    },
     generalId: { type: String, required: true },
     status: { 
       type: String, 

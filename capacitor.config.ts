@@ -1,21 +1,34 @@
 import type { CapacitorConfig } from "@capacitor/cli";
+import { config as loadEnv } from "dotenv";
+import { resolve } from "path";
+
+loadEnv({ path: resolve(process.cwd(), ".env.local") });
+loadEnv({ path: resolve(process.cwd(), ".env") });
+
+const serverUrl =
+  process.env.CAPACITOR_SERVER_URL ||
+  process.env.NEXT_PUBLIC_APP_URL ||
+  (process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://vcm-app.vercel.app");
 
 const config: CapacitorConfig = {
   appId: "com.vcm.app",
-  appName: "VCM",
-
-  /*
-    This project is a Next.js app (SSR + API routes).
-    For Capacitor, the most reliable approach is to load the deployed web app via `server.url`.
-
-    - During development: point to your LAN URL (e.g. http://192.168.1.10:3000)
-    - For release builds: set to your HTTPS production domain
-  */
+  appName: "Volunteer Center Mongolia",
+  webDir: "public",
   server: {
-    url: "http://localhost:3000",
-    cleartext: true,
+    url: serverUrl,
+    cleartext: serverUrl.startsWith("http://"),
+    androidScheme: serverUrl.startsWith("https") ? "https" : "http",
+  },
+  plugins: {
+    PushNotifications: {
+      presentationOptions: ["badge", "sound", "alert"],
+    },
+    SplashScreen: {
+      launchAutoHide: true,
+      backgroundColor: "#FAF7F2",
+      showSpinner: false,
+    },
   },
 };
 
 export default config;
-

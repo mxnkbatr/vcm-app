@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { env } from "@/lib/env";
+import { ensureClerkIdIndex } from "@/lib/migrations/fixClerkIdIndex";
 
 const MONGODB_URI = env.MONGODB_URI;
 
@@ -32,6 +33,7 @@ export async function connectToDB() {
 
   try {
     cached.conn = await cached.promise;
+    await ensureClerkIdIndex();
   } catch (e) {
     cached.promise = null;
     throw e;

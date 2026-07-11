@@ -12,7 +12,7 @@ export const GET = withAdminAuth(async () => {
     const [totalUsers, blogsPublished, pendingApplications, studentsCount, adminsCount, guestsCount] = await Promise.all([
       User.countDocuments({}),
       News.countDocuments({ status: 'published' }),
-      Application.countDocuments({ status: 'pending' }),
+      Application.countDocuments({ status: { $in: ['pending_admin', 'pending'] } }),
       User.countDocuments({ role: 'student' }),
       User.countDocuments({ role: 'admin' }),
       User.countDocuments({ role: 'guest' })

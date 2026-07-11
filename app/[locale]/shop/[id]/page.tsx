@@ -50,9 +50,5 @@ export default async function ShopItemPage({ params }: { params: Promise<{ local
     updatedAt: itemResponse.updatedAt?.toISOString(),
   };
 
-  return (
-    <main className="min-h-screen pt-24 pb-12">
-      <ItemClient item={item} locale={locale} />
-    </main>
-  );
+  return <ItemClient item={item} locale={locale} />;
 }

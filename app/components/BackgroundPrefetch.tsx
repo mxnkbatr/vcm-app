@@ -1,28 +1,18 @@
 "use client";
 
 /**
- * BackgroundPrefetch: silently warms the client cache for the most-visited pages.
- * Runs after homepage is idle (requestIdleCallback) so it never blocks the UI.
- * 
- * When user taps Events/News/Shop, data is already in clientCache → instant render.
+ * Warms client cache after the app is idle — never competes with SSR home data.
  */
-
 import { useEffect } from "react";
 import { clientCache } from "@/lib/client-cache";
 
-const PREFETCH_URLS = [
-  "/api/events",
-  "/api/news",
-  "/api/shopping",
-  "/api/banners",
-];
+const PREFETCH_URLS = ["/api/events", "/api/news"];
 
 function prefetchOne(url: string) {
-  // Skip if already fresh (less than 60s old)
-  if (clientCache.age(url) < 60_000) return;
+  if (clientCache.age(url) < 90_000) return;
   fetch(url)
-    .then(r => r.ok ? r.json() : null)
-    .then(data => { if (data) clientCache.set(url, data); })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((data) => { if (data) clientCache.set(url, data); })
     .catch(() => {});
 }
 
@@ -30,11 +20,15 @@ export default function BackgroundPrefetch() {
   useEffect(() => {
     const run = () => PREFETCH_URLS.forEach(prefetchOne);
 
-    if ("requestIdleCallback" in window) {
-      (window as any).requestIdleCallback(run, { timeout: 2000 });
-    } else {
-      setTimeout(run, 1200);
-    }
+    const timer = setTimeout(() => {
+      if ("requestIdleCallback" in window) {
+        (window as any).requestIdleCallback(run, { timeout: 3000 });
+      } else {
+        run();
+      }
+    }, 5000);
+
+    return () => clearTimeout(timer);
   }, []);
 
   return null;

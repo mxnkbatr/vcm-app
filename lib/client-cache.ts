@@ -31,6 +31,10 @@ export const clientCache = {
   has(key: string): boolean {
     return store.has(key);
   },
+
+  remove(key: string): void {
+    store.delete(key);
+  },
 };
 
 /**
@@ -43,13 +47,21 @@ import { useState, useEffect, useRef } from "react";
 
 export function useCachedFetch<T>(
   url: string,
-  options?: { staleMsMs?: number; skip?: boolean }
+  options?: { staleMsMs?: number; skip?: boolean; initialData?: T }
 ): { data: T | null; loading: boolean; refresh: () => void } {
-  const { staleMsMs = 60_000, skip = false } = options ?? {};
+  const { staleMsMs = 60_000, skip = false, initialData } = options ?? {};
   const key = url;
 
-  const [data, setData] = useState<T | null>(() => clientCache.get<T>(key));
-  const [loading, setLoading] = useState(!clientCache.has(key));
+  const [data, setData] = useState<T | null>(() => {
+    if (initialData !== undefined) {
+      clientCache.set(key, initialData);
+      return initialData;
+    }
+    return clientCache.get<T>(key);
+  });
+  const [loading, setLoading] = useState(
+    initialData === undefined && !clientCache.has(key)
+  );
   const fetchRef = useRef(0);
 
   const doFetch = () => {

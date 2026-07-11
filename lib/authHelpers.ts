@@ -1,47 +1,78 @@
-// lib/authHelpers.ts
-// Server-side auth helper to replace Clerk's auth() pattern
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { connectToDB } from "@/lib/db";
 import User from "@/lib/models/User";
+import { ensureMongoUser, syncAuthMetadata } from "@/lib/syncUser";
+import { sessionFromJwt } from "@/lib/authJwt";
+import { sessionFromDbUser, metadataFromDbUser } from "@/lib/authMetadata";
+import type { AppSession } from "@/lib/authJwt";
 
-/**
- * Get the authenticated user from the session.
- * Returns null if not authenticated.
- * Use this to replace all `auth()` / `currentUser()` from Clerk.
- */
-export async function getAuthUser() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return null;
+export type { AppSession };
+export { sessionFromJwt, appUserFromJwt } from "@/lib/authJwt";
 
-  const userId = (session.user as any).id;
-  if (!userId) return null;
-
-  await connectToDB();
-  const user = await User.findById(userId);
+export async function getSupabaseUser() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   return user;
 }
 
-/**
- * Get just the session user ID (lightweight, no DB call).
- * Use this to replace `const { userId } = await auth()` from Clerk.
- */
-export async function getAuthUserId(): Promise<string | null> {
-  const session = await getServerSession(authOptions);
-  return (session?.user as any)?.id || null;
+function needsMetadataHydration(meta: Record<string, unknown> | undefined) {
+  return !meta?.mongo_user_id;
 }
 
-/**
- * Get the session with role info (no DB call).
- */
-export async function getAuthSession() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return null;
-  return {
-    userId: (session.user as any).id as string,
-    role: (session.user as any).role as string,
-    phone: (session.user as any).phone as string,
-    name: session.user.name,
-    email: session.user.email,
-  };
+export async function getAuthSession(): Promise<AppSession | null> {
+  const supabaseUser = await getSupabaseUser();
+  if (!supabaseUser) return null;
+
+  const jwtSession = sessionFromJwt(supabaseUser);
+  if (jwtSession) return jwtSession;
+
+  await connectToDB();
+  let dbUser = await User.findOne({ supabaseId: supabaseUser.id });
+  if (!dbUser) {
+    dbUser = await ensureMongoUser(supabaseUser);
+  }
+  if (!dbUser) return null;
+
+  void syncAuthMetadata(supabaseUser.id, metadataFromDbUser(dbUser));
+  return sessionFromDbUser(dbUser);
+}
+
+/** Lightweight: reads mongo_user_id from JWT when available. */
+export async function getAuthUserId(): Promise<string | null> {
+  const supabaseUser = await getSupabaseUser();
+  if (!supabaseUser) return null;
+
+  const mongoId = supabaseUser.user_metadata?.mongo_user_id as string | undefined;
+  if (mongoId) return mongoId;
+
+  const session = await getAuthSession();
+  return session?.userId ?? null;
+}
+
+/** Full Mongo user document for routes that need DB fields. */
+export async function getAuthUser() {
+  const supabaseUser = await getSupabaseUser();
+  if (!supabaseUser) return null;
+
+  const meta = supabaseUser.user_metadata ?? {};
+  await connectToDB();
+
+  if (meta.mongo_user_id) {
+    const user = await User.findById(String(meta.mongo_user_id));
+    if (user) return user;
+  }
+
+  let dbUser = await User.findOne({ supabaseId: supabaseUser.id });
+  if (!dbUser) {
+    dbUser = await ensureMongoUser(supabaseUser);
+  }
+  if (!dbUser) return null;
+
+  if (needsMetadataHydration(meta)) {
+    void syncAuthMetadata(supabaseUser.id, metadataFromDbUser(dbUser));
+  }
+
+  return dbUser;
 }

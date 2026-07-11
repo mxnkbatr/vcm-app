@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import ProgramsApplyClient from "./ProgramsApplyClient";
+import { getTabPrograms } from "@/lib/tab-data";
 
 export async function generateMetadata({
   params,
@@ -13,6 +14,7 @@ export async function generateMetadata({
   };
 }
 
-export default function ProgramsApplyPage() {
-  return <ProgramsApplyClient />;
+export default async function ProgramsApplyPage() {
+  const programs = await getTabPrograms();
+  return <ProgramsApplyClient initialPrograms={programs as any} />;
 }
