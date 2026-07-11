@@ -6,9 +6,9 @@ function isMobileWeb() {
   return window.matchMedia("(max-width: 1023px)").matches;
 }
 
-function webVibrate(ms: number) {
+function webVibrate(pattern: number | number[]) {
   if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-    navigator.vibrate(ms);
+    navigator.vibrate(pattern);
   }
 }
 

@@ -1,0 +1,7 @@
+{
+  "name": "vcm",
+  "type": "custom",
+  "integrations": {
+    "capacitor": {}
+  }
+}

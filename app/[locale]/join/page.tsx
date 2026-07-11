@@ -11,6 +11,7 @@ import {
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import BrandLogo from "@/app/components/BrandLogo";
+import { BRAND } from "@/lib/branding";
 
 export default function JoinPage() {
   const t = useTranslations("Auth");

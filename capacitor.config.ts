@@ -5,20 +5,25 @@ import { resolve } from "path";
 loadEnv({ path: resolve(process.cwd(), ".env.local") });
 loadEnv({ path: resolve(process.cwd(), ".env") });
 
+const isDev = process.env.NODE_ENV === "development";
 const serverUrl =
   process.env.CAPACITOR_SERVER_URL ||
   process.env.NEXT_PUBLIC_APP_URL ||
-  (process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://vcm-app.vercel.app");
+  (isDev ? "http://localhost:3000" : "https://vcm-app.vercel.app");
 
 const config: CapacitorConfig = {
   appId: "com.vcm.app",
   appName: "Volunteer Center Mongolia",
   webDir: "public",
-  server: {
-    url: serverUrl,
-    cleartext: serverUrl.startsWith("http://"),
-    androidScheme: serverUrl.startsWith("https") ? "https" : "http",
-  },
+  ...(serverUrl
+    ? {
+        server: {
+          url: serverUrl,
+          cleartext: serverUrl.startsWith("http://"),
+          androidScheme: serverUrl.startsWith("https") ? "https" : "http",
+        },
+      }
+    : {}),
   plugins: {
     PushNotifications: {
       presentationOptions: ["badge", "sound", "alert"],

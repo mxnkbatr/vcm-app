@@ -1,6 +1,11 @@
 import mongoose from 'mongoose';
 import { requireMongoUri } from "@/lib/env";
 
+type MongooseCache = {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+};
+
 let cached: MongooseCache = (global as any).mongoose;
 
 if (!cached) {
