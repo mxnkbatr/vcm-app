@@ -1,8 +1,6 @@
 import mongoose from 'mongoose';
-import { env } from "@/lib/env";
+import { requireMongoUri } from "@/lib/env";
 import { ensureClerkIdIndex } from "@/lib/migrations/fixClerkIdIndex";
-
-const MONGODB_URI = env.MONGODB_URI;
 
 // Global interface to cache the connection in development
 interface MongooseCache {
@@ -26,7 +24,7 @@ export async function connectToDB() {
       bufferCommands: false,
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+    cached.promise = mongoose.connect(requireMongoUri(), opts).then((mongoose) => {
       return mongoose;
     });
   }

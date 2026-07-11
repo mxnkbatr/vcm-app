@@ -3,10 +3,9 @@ import { z } from "zod";
 const EnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 
-  MONGODB_URI: z.string().min(1, "MONGODB_URI is required"),
-
-  NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
+  MONGODB_URI: z.string().min(1).optional(),
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1).optional(),
   SUPABASE_SECRET_KEY: z.string().min(1).optional(),
 
   GOOGLE_CLIENT_ID: z.string().min(1).optional(),
@@ -41,6 +40,32 @@ if (!parsed.success) {
 }
 
 export const env = parsed.data;
+
+function missing(name: string): never {
+  throw new Error(
+    `${name} is required. Add it in Vercel → Project → Settings → Environment Variables.`
+  );
+}
+
+export function requireMongoUri(): string {
+  return env.MONGODB_URI || process.env.MONGODB_URI || missing("MONGODB_URI");
+}
+
+export function requireSupabaseUrl(): string {
+  return (
+    env.NEXT_PUBLIC_SUPABASE_URL ||
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    missing("NEXT_PUBLIC_SUPABASE_URL")
+  );
+}
+
+export function requireSupabasePublishableKey(): string {
+  return (
+    env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    missing("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY")
+  );
+}
 
 export function requireSupabaseSecret() {
   if (!env.SUPABASE_SECRET_KEY) {
