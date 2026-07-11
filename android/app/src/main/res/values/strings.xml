@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">VCM</string>
     <string name="title_activity_main">VCM</string>
-    <string name="package_name">com.vcm.app</string>
-    <string name="custom_url_scheme">com.vcm.app</string>
+    <string name="package_name">mn.vcm.app</string>
+    <string name="custom_url_scheme">mn.vcm.app</string>
 </resources>

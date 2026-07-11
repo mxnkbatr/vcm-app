@@ -12,7 +12,7 @@ const serverUrl =
   (isDev ? "http://localhost:3000" : "https://vcm-app.vercel.app");
 
 const config: CapacitorConfig = {
-  appId: "com.vcm.app",
+  appId: "mn.vcm.app",
   appName: "Volunteer Center Mongolia",
   webDir: "public",
   ...(serverUrl
