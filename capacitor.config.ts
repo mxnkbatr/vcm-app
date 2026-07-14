@@ -1,12 +1,12 @@
 import type { CapacitorConfig } from "@capacitor/cli";
-import { config as loadEnv } from "dotenv";
-import { resolve } from "path";
 
-loadEnv({ path: resolve(process.cwd(), ".env.local") });
-loadEnv({ path: resolve(process.cwd(), ".env") });
-
-const isDev = process.env.NODE_ENV === "development";
+/**
+ * Do not import dotenv here — Appflow runs `cap config --json` and parses stdout.
+ * dotenv@17 prints a banner that breaks that JSON parse.
+ * Set CAPACITOR_SERVER_URL / NEXT_PUBLIC_APP_URL in Appflow env (or your shell locally).
+ */
 const productionUrl = "https://vcm-app.vercel.app";
+const isDev = process.env.NODE_ENV === "development";
 const serverUrl =
   process.env.CAPACITOR_SERVER_URL ||
   process.env.NEXT_PUBLIC_APP_URL ||
