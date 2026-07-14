@@ -16,6 +16,7 @@ const publicPaths = [
     '/register',
     '/join',
     '/about',
+    '/privacy',
     '/news',
     '/lessons',
     '/events',

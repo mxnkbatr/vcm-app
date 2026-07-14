@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocale } from "next-intl";
 import { useTheme } from "next-themes";
-import { useRouter } from "@/navigation";
+import { Link, useRouter } from "@/navigation";
 import { signOutToSignIn } from "@/lib/auth-signout";
 import { motion } from "framer-motion";
 import PremiumPageShell from "@/app/components/PremiumPageShell";
@@ -201,16 +201,16 @@ export default function SettingsPage() {
           <div className="card p-2">
             {[
               { icon: <Info size={16} />, label: locale === "mn" ? "VCM тухай" : "About VCM", href: "/about", color: "var(--blue)", bg: "var(--blue-dim)" },
-              { icon: <Shield size={16} />, label: locale === "mn" ? "Нууцлалын бодлого" : "Privacy Policy", href: "/about", color: "var(--orange)", bg: "var(--orange-dim)" },
+              { icon: <Shield size={16} />, label: locale === "mn" ? "Нууцлалын бодлого" : "Privacy Policy", href: "/privacy", color: "var(--orange)", bg: "var(--orange-dim)" },
             ].map((item, i, arr) => (
               <React.Fragment key={item.label}>
-                <a href={item.href} className="flex items-center gap-3 px-3 py-3.5 press">
+                <Link href={item.href} className="flex items-center gap-3 px-3 py-3.5 press">
                   <div className="icon-box-sm" style={{ background: item.bg, color: item.color }}>
                     {item.icon}
                   </div>
                   <p className="flex-1 text-[14px] font-semibold" style={{ color: "var(--label)" }}>{item.label}</p>
                   <ChevronRight size={16} style={{ color: "var(--label3)" }} />
-                </a>
+                </Link>
                 {i < arr.length - 1 && <div className="h-px mx-3" style={{ background: "var(--sep)" }} />}
               </React.Fragment>
             ))}
