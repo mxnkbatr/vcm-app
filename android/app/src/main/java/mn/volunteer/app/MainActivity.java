@@ -1,4 +1,4 @@
-package mn.vcm.app;
+package mn.volunteer.app;
 
 import com.getcapacitor.BridgeActivity;
 

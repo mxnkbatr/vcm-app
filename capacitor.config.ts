@@ -6,13 +6,14 @@ loadEnv({ path: resolve(process.cwd(), ".env.local") });
 loadEnv({ path: resolve(process.cwd(), ".env") });
 
 const isDev = process.env.NODE_ENV === "development";
+const productionUrl = "https://vcm-app.vercel.app";
 const serverUrl =
   process.env.CAPACITOR_SERVER_URL ||
   process.env.NEXT_PUBLIC_APP_URL ||
-  (isDev ? "http://localhost:3000" : "https://vcm-app.vercel.app");
+  (isDev ? "http://localhost:3000" : productionUrl);
 
 const config: CapacitorConfig = {
-  appId: "mn.vcm.app",
+  appId: "mn.volunteer.app",
   appName: "Volunteer Center Mongolia",
   webDir: "public",
   ...(serverUrl
