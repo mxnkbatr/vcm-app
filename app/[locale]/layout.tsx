@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: BRAND.shortName,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
   },
   icons: {
     icon: [
@@ -69,9 +69,14 @@ export default async function RootLayout({
           <meta name="apple-mobile-web-app-title" content={BRAND.shortName} />
           <meta name="mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-capable" content="yes" />
-          <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+          <meta name="apple-mobile-web-app-status-bar-style" content="default" />
           <meta name="apple-touch-fullscreen" content="yes" />
           <meta name="format-detection" content="telephone=no" />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `(function(){try{var C=window.Capacitor;if(C&&C.isNativePlatform&&C.isNativePlatform()){document.documentElement.classList.add('native-shell');}}catch(e){}})();`,
+            }}
+          />
         </head>
         <body className="font-sans overscroll-none bg-[var(--bg)] dark:bg-[#0F172A]" suppressHydrationWarning>
           <AppSplash />

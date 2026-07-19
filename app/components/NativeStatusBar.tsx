@@ -12,11 +12,18 @@ export default function NativeStatusBar() {
     void import("@capacitor/core").then(({ Capacitor }) => {
       if (!Capacitor.isNativePlatform()) return;
 
-      void import("@capacitor/status-bar").then(({ StatusBar, Style }) => {
+      void import("@capacitor/status-bar").then(async ({ StatusBar, Style }) => {
         const isDark = resolvedTheme === "dark";
         const color = isDark ? BRAND.colors.backgroundDark : BRAND.colors.creamLight;
 
-        void StatusBar.setOverlaysWebView({ overlay: true });
+        // Keep WebView below the status bar so the floating header never overlaps
+        // the clock / battery on notched iPhones (TestFlight / iPhone 13).
+        try {
+          await StatusBar.setOverlaysWebView({ overlay: false });
+          document.documentElement.classList.add("native-overlay-false");
+        } catch {
+          /* older runtimes */
+        }
         void StatusBar.setBackgroundColor({ color });
         void StatusBar.setStyle({ style: isDark ? Style.Dark : Style.Light });
       });

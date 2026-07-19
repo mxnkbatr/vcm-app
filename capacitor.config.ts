@@ -37,7 +37,7 @@ const config: CapacitorConfig = {
       androidSplashResourceName: "splash",
     },
     StatusBar: {
-      overlaysWebView: true,
+      overlaysWebView: false,
       backgroundColor: "#FBF8F3",
       style: "LIGHT",
     },

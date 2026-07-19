@@ -135,7 +135,9 @@
 
    /* ── Native chrome ── */
    --native-header-bar-h: 56px;
-   --native-header-offset: calc(env(safe-area-inset-top, 0px) + 72px);
+   /* Safe top: env() on web; native-shell bumps minimum until StatusBar insets WebView */
+   --safe-top: env(safe-area-inset-top, 0px);
+   --native-header-offset: calc(var(--safe-top) + 72px);
 
    /* ── Shadows ── */
    --s-card:  0 8px 32px rgba(42, 36, 32, 0.045), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
@@ -265,11 +267,11 @@ button, a, [role="button"], .press, .card, .ios-list-row {
  /* ───────────────────────────────────────────── 
     SAFE AREA (Capacitor iOS) 
  ───────────────────────────────────────────── */ 
- .safe-top     { padding-top:    env(safe-area-inset-top, 44px); } 
+ .safe-top     { padding-top:    var(--safe-top); } 
  .safe-bottom  { padding-bottom: env(safe-area-inset-bottom, 34px); } 
- .pt-safe      { padding-top:    env(safe-area-inset-top, 44px); } 
+ .pt-safe      { padding-top:    var(--safe-top); } 
  .pb-safe      { padding-bottom: env(safe-area-inset-bottom, 34px); } 
- .mt-safe      { margin-top:     env(safe-area-inset-top, 44px); } 
+ .mt-safe      { margin-top:     var(--safe-top); } 
  .page-top     { padding-top:    var(--native-header-offset); } 
  
  /* ───────────────────────────────────────────── 
@@ -2218,6 +2220,16 @@ html.native-perf .home-brand-banner {
 .native-header-spacer {
   height: var(--native-header-offset);
   flex-shrink: 0;
+}
+
+/* Capacitor: until StatusBar moves WebView below the status bar, keep a notch-safe minimum */
+html.native-shell {
+  --safe-top: max(env(safe-area-inset-top, 0px), 47px);
+}
+
+/* After setOverlaysWebView(false) the system already insets the WebView */
+html.native-shell.native-overlay-false {
+  --safe-top: env(safe-area-inset-top, 0px);
 }
 
 /* ═══════════════════════════════════════════
