@@ -16,11 +16,9 @@ export default function NativeStatusBar() {
         const isDark = resolvedTheme === "dark";
         const color = isDark ? BRAND.colors.backgroundDark : BRAND.colors.creamLight;
 
-        // Keep WebView below the status bar so the floating header never overlaps
-        // the clock / battery on notched iPhones (TestFlight / iPhone 13).
+        // Keep WebView below the status bar; CSS keeps a notch-safe minimum regardless.
         try {
           await StatusBar.setOverlaysWebView({ overlay: false });
-          document.documentElement.classList.add("native-overlay-false");
         } catch {
           /* older runtimes */
         }

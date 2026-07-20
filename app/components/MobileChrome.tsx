@@ -178,10 +178,7 @@ export default function MobileChrome() {
   return (
     <>
       {/* ══════════════ FLOATING HEADER PILL ══════════════ */}
-      <div
-        className="fixed top-0 left-0 right-0 z-[100] lg:hidden px-3 native-chrome-top"
-        style={{ paddingTop: "var(--safe-top)" }}
-      >
+      <div className="fixed top-0 left-0 right-0 z-[100] lg:hidden px-3 native-chrome-top">
         <div className="liquid-chrome mt-2 px-4 flex items-center justify-between native-chrome-panel">
           <Link href="/" prefetch className="flex items-center gap-2.5 press min-w-0">
             <BrandLogo size={32} priority />

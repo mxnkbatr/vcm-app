@@ -15,7 +15,15 @@ type EventCompactRowProps = {
 
 function formatEventDate(date?: string, lang?: string) {
   if (!date) return "—";
-  const d = new Date(typeof date === "string" ? date.replace(/-/g, "/") : date);
+  const raw =
+    typeof date === "string"
+      ? date
+      : typeof date === "object" && date !== null && "$date" in date
+        ? String((date as { $date: string }).$date)
+        : String(date);
+  const normalized = raw.includes("T") ? raw : raw.replace(/-/g, "/");
+  const d = new Date(normalized);
+  if (Number.isNaN(d.getTime())) return "—";
   return d.toLocaleDateString(lang === "mn" ? "mn-MN" : "en-US", {
     month: "short",
     day: "numeric",

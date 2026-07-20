@@ -74,7 +74,7 @@ export default async function RootLayout({
           <meta name="format-detection" content="telephone=no" />
           <script
             dangerouslySetInnerHTML={{
-              __html: `(function(){try{var C=window.Capacitor;if(C&&C.isNativePlatform&&C.isNativePlatform()){document.documentElement.classList.add('native-shell');}}catch(e){}})();`,
+              __html: `(function(){try{var C=window.Capacitor;if(C&&C.isNativePlatform&&C.isNativePlatform()){var r=document.documentElement;r.classList.add('native-shell');r.style.setProperty('--safe-top','47px');}}catch(e){}})();`,
             }}
           />
         </head>

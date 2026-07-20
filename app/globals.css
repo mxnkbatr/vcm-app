@@ -2146,6 +2146,16 @@ html.native-perf .home-brand-banner {
 /* ── Floating header pill (premium cream chrome) ── */
 .native-chrome-top {
   pointer-events: none;
+  padding-top: var(--safe-top);
+}
+
+html.native-shell .native-chrome-top {
+  top: max(
+    env(safe-area-inset-top, 0px),
+    constant(safe-area-inset-top, 0px),
+    47px
+  );
+  padding-top: 0;
 }
 
 .native-chrome-top .native-chrome-panel {
@@ -2222,14 +2232,12 @@ html.native-perf .home-brand-banner {
   flex-shrink: 0;
 }
 
-/* Capacitor: until StatusBar moves WebView below the status bar, keep a notch-safe minimum */
 html.native-shell {
-  --safe-top: max(env(safe-area-inset-top, 0px), 47px);
-}
-
-/* After setOverlaysWebView(false) the system already insets the WebView */
-html.native-shell.native-overlay-false {
-  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-top: max(
+    env(safe-area-inset-top, 0px),
+    constant(safe-area-inset-top, 0px),
+    47px
+  );
 }
 
 /* ═══════════════════════════════════════════
