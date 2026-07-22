@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { BookOpen, ChevronRight, Lock, Sparkles, TrendingUp } from "lucide-react";
 import Skeleton from "@/app/components/Skeleton";
 import { IOSAlert, IOSSheet } from "@/app/components/iOSAlert";
+import { isNativeApp } from "@/lib/native-perf";
 
 type LmsI18n = { en: string; mn: string; de?: string };
 type Course = {
@@ -54,6 +55,11 @@ export default function CourseClient() {
   const [qpayResponse, setQpayResponse] = useState<any>(null);
   const [paymentId, setPaymentId] = useState<string | null>(null);
   const [invoiceId, setInvoiceId] = useState<string | null>(null);
+  const [nativeApp, setNativeApp] = useState(false);
+
+  useEffect(() => {
+    setNativeApp(isNativeApp());
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -165,7 +171,7 @@ export default function CourseClient() {
               {isFree ? <Sparkles size={12} /> : <TrendingUp size={12} />}{" "}
               {isFree ? (locale === "mn" ? "Үнэгүй" : "Free") : (locale === "mn" ? "Төлбөртэй" : "Paid")}
             </span>
-            {!isFree && (
+            {!isFree && !nativeApp && (
               <span className="badge" style={{ background: "var(--fill2)", color: "var(--label2)" }}>
                 {data.course.currency || "MNT"} {data.course.price ?? 0}
               </span>
@@ -183,7 +189,30 @@ export default function CourseClient() {
           </button>
         )}
 
-        {!data.enrolled && !isFree && (
+        {!data.enrolled && !isFree && nativeApp && (
+          <div className="card p-5 space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="icon-box-sm" style={{ background: "var(--fill2)", color: "var(--label2)" }}>
+                <Lock size={16} />
+              </div>
+              <div className="min-w-0">
+                <div className="t-headline" style={{ fontSize: 15 }}>
+                  {locale === "mn" ? "Төлбөртэй сургалт" : "Paid course"}
+                </div>
+                <div className="t-footnote">
+                  {locale === "mn"
+                    ? "Төлбөртэй сургалтын худалдан авалт iOS апп дээр байхгүй. Үнэгүй сургалтуудыг үзнэ үү."
+                    : "Paid course purchases are not available in the iOS app. Please browse free courses instead."}
+                </div>
+              </div>
+            </div>
+            <Link href="/lessons" className="btn btn-secondary btn-full">
+              {locale === "mn" ? "Үнэгүй сургалтууд" : "Browse free courses"}
+            </Link>
+          </div>
+        )}
+
+        {!data.enrolled && !isFree && !nativeApp && (
           <div className="card p-5 space-y-3">
             <div className="flex items-start gap-3">
               <div className="icon-box-sm" style={{ background: "var(--orange-dim)", color: "var(--orange)" }}>
@@ -195,8 +224,8 @@ export default function CourseClient() {
                 </div>
                 <div className="t-footnote">
                   {locale === "mn"
-                    ? "Одоохондоо demo байдлаар “Enroll” дарж идэвхжүүлж болно. Дараа нь төлбөрийн баталгаажуулалт холбоно."
-                    : "For now you can tap “Enroll” to activate (demo). We'll wire payments next."}
+                    ? "QPay-р төлж бүртгүүлсний дараа бүх хичээлийг үзэх боломжтой."
+                    : "Pay with QPay to unlock all lessons in this course."}
                 </div>
               </div>
             </div>
@@ -268,8 +297,8 @@ export default function CourseClient() {
         </section>
       </div>
 
-      {/* QPay Sheet */}
-      {checkoutStep === "phone" && (
+      {/* QPay Sheet — web only */}
+      {checkoutStep === "phone" && !nativeApp && (
         <IOSSheet
           isOpen={true}
           onClose={() => setCheckoutStep("closed")}
@@ -326,7 +355,7 @@ export default function CourseClient() {
         </IOSSheet>
       )}
 
-      {checkoutStep === "qpay" && (
+      {checkoutStep === "qpay" && !nativeApp && (
         <IOSSheet
           isOpen={true}
           onClose={() => setCheckoutStep("phone")}

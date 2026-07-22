@@ -15,6 +15,8 @@ import { hapticImpact } from "@/lib/haptics";
 import { ImpactStyle } from "@capacitor/haptics";
 import { staggerContainer, staggerItem } from "@/lib/motion";
 import { formatShopCategory, formatShopPrice } from "@/app/components/ShopProductCard";
+import NativeFeatureUnavailable from "@/app/components/NativeFeatureUnavailable";
+import { isNativeApp } from "@/lib/native-perf";
 
 const T = {
   back: { en: "Back", mn: "Буцах", de: "Zurück" },
@@ -26,7 +28,7 @@ const T = {
   addCart: { en: "Add to cart", mn: "Сагсанд", de: "In den Warenkorb" },
 } as const;
 
-const QPayMockup = ({ amount, onConfirm, onCancel, isProcessing, qpayData }: any) => (
+const QPayCheckoutSheet = ({ amount, onConfirm, onCancel, isProcessing, qpayData }: any) => (
   <IOSSheet isOpen={true} onClose={onCancel} title="QPay Төлбөр">
     <div className="p-8 flex flex-col items-center">
       {qpayData?.qr_image ? (
@@ -57,6 +59,7 @@ const QPayMockup = ({ amount, onConfirm, onCancel, isProcessing, qpayData }: any
 
 export default function ItemClient({ item, locale = "en" }: { item: any; locale: string }) {
   const [mounted, setMounted] = useState(false);
+  const [nativeApp, setNativeApp] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
   const [checkoutStep, setCheckoutStep] = useState<"phone" | "qpay" | "success">("phone");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -75,7 +78,10 @@ export default function ItemClient({ item, locale = "en" }: { item: any; locale:
   const { addToCart } = useCart();
   const [addedToCart, setAddedToCart] = useState(false);
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+    setNativeApp(isNativeApp());
+  }, []);
 
   const name = item.name?.[locale] || item.name?.en || "Unknown Item";
   const desc = item.description?.[locale] || item.description?.en || "";
@@ -87,8 +93,21 @@ export default function ItemClient({ item, locale = "en" }: { item: any; locale:
         ? `${T.inStockPrefix.mn} ${item.stock} ${T.inStockSuffix.mn}`
         : `${item.stock} ${T.inStockPrefix[locale as keyof typeof T.inStockPrefix] || T.inStockPrefix.en}`
       : T.outOfStock[locale as keyof typeof T.outOfStock] || T.outOfStock.en;
+  const hasImage = Boolean(item.image);
 
   if (!mounted) return null;
+
+  if (nativeApp) {
+    return (
+      <NativeFeatureUnavailable
+        locale={locale}
+        titleMn="Дэлгүүр апп дээр байхгүй"
+        titleEn="Shop is not available in the app"
+        subMn="Мерч худалдан авалт одоогоор зөвхөн веб дээр."
+        subEn="Merchandise purchases are not offered in this iOS build."
+      />
+    );
+  }
 
   const handleAddToCart = async () => {
     await hapticImpact(ImpactStyle.Light);
@@ -123,14 +142,24 @@ export default function ItemClient({ item, locale = "en" }: { item: any; locale:
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       >
-        <Image
-          src={item.image || "/placeholder.jpg"}
-          alt={name}
-          fill
-          className="shop-detail__hero-img"
-          priority
-          sizes="100vw"
-        />
+        {hasImage ? (
+          <Image
+            src={item.image}
+            alt={name}
+            fill
+            className="shop-detail__hero-img"
+            priority
+            sizes="100vw"
+          />
+        ) : (
+          <div
+            className="shop-detail__hero-img flex items-center justify-center"
+            style={{ background: "var(--fill2)" }}
+            aria-hidden
+          >
+            <Package size={48} style={{ color: "var(--label3)" }} />
+          </div>
+        )}
         <div className="shop-detail__hero-fade" aria-hidden />
 
         <Link
@@ -358,7 +387,7 @@ export default function ItemClient({ item, locale = "en" }: { item: any; locale:
       </IOSSheet>
 
       {checkoutStep === "qpay" && (
-        <QPayMockup
+        <QPayCheckoutSheet
           amount={payAmount}
           qpayData={qpayResponse}
           isProcessing={isProcessing}

@@ -23,6 +23,7 @@ import PremiumSectionHeader from "./PremiumSectionHeader";
 import PremiumPageShell from "./PremiumPageShell";
 import HomeUpcomingEvents from "./HomeUpcomingEvents";
 import { PROGRAM_COLORS, programColorsBySlug, type ProgramId } from "@/lib/color-system";
+import { isNativeApp } from "@/lib/native-perf";
 
 const ShopClient = dynamic(() => import("@/app/[locale]/shop/ShopClient"), { ssr: false });
 
@@ -71,10 +72,15 @@ export default function HomePageContent({
     initialPrograms?.length ? mapPrograms(initialPrograms) : QUICK_ACTIONS_FALLBACK
   );
   const [mounted, setMounted] = useState(false);
+  const [nativeApp, setNativeApp] = useState(false);
   const { status } = useSession();
   const isSignedIn = mounted && status === "authenticated";
+  const navGrid = nativeApp ? NAV_GRID.filter((n) => n.id !== "shop") : NAV_GRID;
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+    setNativeApp(isNativeApp());
+  }, []);
 
   const featured = useMemo(() => {
     const banner = initialBanners?.[0];
@@ -145,7 +151,7 @@ export default function HomePageContent({
       {/* 2. Compact quick nav */}
       <section className="px-5 mt-5 anim-in anim-in-delay-1">
         <div className="home-quick-grid">
-          {NAV_GRID.map(({ id, href, label, icon: Icon, tone }) => (
+          {navGrid.map(({ id, href, label, icon: Icon, tone }) => (
             <Link key={id} href={href} className={`home-quick-item home-quick-item--${tone} press`}>
               <span className="home-quick-item__icon">
                 <Icon size={20} strokeWidth={2.1} />
@@ -249,8 +255,8 @@ export default function HomePageContent({
         </div>
       </section>
 
-      {/* 7. Shop preview — bottom */}
-      {items.length > 0 && locale && (
+      {/* 7. Shop preview — bottom (web only; no catalog on native App Store build) */}
+      {!nativeApp && items.length > 0 && locale && (
         <LazySection
           placeholder={
             <div className="mt-8 px-5">

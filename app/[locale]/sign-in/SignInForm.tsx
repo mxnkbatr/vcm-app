@@ -5,8 +5,7 @@ import { Link, useRouter } from "@/navigation";
 import { useSearchParams } from "next/navigation";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import AuthScreen, { AuthDivider, AuthError } from "@/app/components/auth/AuthScreen";
-import GoogleButton from "@/app/components/auth/GoogleButton";
+import AuthScreen, { AuthError } from "@/app/components/auth/AuthScreen";
 
 export default function SignInForm() {
   const router = useRouter();
@@ -31,7 +30,7 @@ export default function SignInForm() {
 
     const trimmedEmail = email.trim().toLowerCase();
     if (!trimmedEmail) {
-      setError("Gmail хаягаа оруулна уу.");
+      setError("Имэйл хаягаа оруулна уу.");
       return;
     }
     if (!password) {
@@ -48,7 +47,7 @@ export default function SignInForm() {
         password,
       });
       if (signInError) {
-        throw new Error("Gmail эсвэл нууц үг буруу байна.");
+        throw new Error("Имэйл эсвэл нууц үг буруу байна.");
       }
       await finishLogin();
     } catch (err: unknown) {
@@ -58,32 +57,10 @@ export default function SignInForm() {
     }
   };
 
-  const signInWithGoogle = async () => {
-    if (busy) return;
-    setBusy(true);
-    setError("");
-    try {
-      const supabase = createClient();
-      const origin = window.location.origin;
-      const next = encodeURIComponent(callbackUrl.startsWith("/") ? callbackUrl : "/");
-      const { error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${origin}/api/auth/callback?next=${next}`,
-          queryParams: { prompt: "select_account" },
-        },
-      });
-      if (oauthError) throw oauthError;
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Google нэвтрэлт амжилтгүй.");
-      setBusy(false);
-    }
-  };
-
   return (
     <AuthScreen
       title="Нэвтрэх"
-      subtitle="Gmail болон нууц үгээрээ нэвтэрнэ үү"
+      subtitle="Имэйл болон нууц үгээрээ нэвтэрнэ үү"
       footer={
         <p className="text-[14px]" style={{ color: "var(--label2)" }}>
           Бүртгэлгүй юу?{" "}
@@ -103,7 +80,7 @@ export default function SignInForm() {
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Gmail хаяг"
+              placeholder="Имэйл хаяг"
               disabled={busy}
             />
           </div>
@@ -142,14 +119,6 @@ export default function SignInForm() {
           )}
         </button>
       </form>
-
-      <AuthDivider />
-
-      <GoogleButton
-        label="Gmail-ээр нэвтрэх"
-        onClick={signInWithGoogle}
-        disabled={busy}
-      />
     </AuthScreen>
   );
 }

@@ -58,13 +58,6 @@ export default function EventDetailClient({
   const [loading, setLoading] = useState(!initialEvent);
   const [joining, setJoining] = useState(false);
   const [hasJoined, setHasJoined] = useState(false);
-  const [promoInput, setPromoInput] = useState("");
-  const [promoInfo, setPromoInfo] = useState<{
-    code: string;
-    discountAmount: number;
-    finalAmount: number;
-  } | null>(null);
-  const [promoError, setPromoError] = useState("");
   const [alert, setAlert] = useState<{ title: string; message: string; type?: "error" | "info" } | null>(null);
 
   useEffect(() => setMounted(true), []);
@@ -439,63 +432,6 @@ export default function EventDetailClient({
           zIndex: 50,
         }}
       >
-        {(event.ticketPrice || 0) > 0 && !hasJoined && (
-          <div className="liquid-card p-3 space-y-2">
-            <p className="text-[13px] font-bold">
-              Тасалбар: ₮{(event.ticketPrice || 0).toLocaleString()}
-              {promoInfo && (
-                <span className="ml-2" style={{ color: "var(--emerald)" }}>
-                  → ₮{promoInfo.finalAmount.toLocaleString()}
-                </span>
-              )}
-            </p>
-            {!promoInfo ? (
-              <div className="flex gap-2">
-                <input
-                  className="input flex-1 text-sm"
-                  placeholder="Промо код"
-                  value={promoInput}
-                  onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
-                />
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm press"
-                  onClick={async () => {
-                    setPromoError("");
-                    try {
-                      const res = await fetch("/api/promo/validate", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          code: promoInput.trim(),
-                          context: "event",
-                          eventId: event._id,
-                          ticketPrice: event.ticketPrice,
-                        }),
-                      });
-                      const data = await res.json();
-                      if (!data.valid) throw new Error(data.error);
-                      setPromoInfo({
-                        code: data.code,
-                        discountAmount: data.discountAmount,
-                        finalAmount: data.finalAmount,
-                      });
-                    } catch (e: unknown) {
-                      setPromoError(e instanceof Error ? e.message : "Алдаа");
-                    }
-                  }}
-                >
-                  Хэрэглэх
-                </button>
-              </div>
-            ) : (
-              <p className="text-xs font-bold" style={{ color: "var(--emerald)" }}>
-                {promoInfo.code} (-₮{promoInfo.discountAmount.toLocaleString()})
-              </p>
-            )}
-            {promoError && <p className="text-xs" style={{ color: "var(--red)" }}>{promoError}</p>}
-          </div>
-        )}
         {hasJoined ? (
           <div
             className="w-full py-4 rounded-2xl flex items-center justify-center gap-2 text-[16px] font-bold shadow-lg"

@@ -5,8 +5,7 @@ import { Link, useRouter } from "@/navigation";
 import { motion } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, User, CheckCircle2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import AuthScreen, { AuthDivider, AuthError } from "@/app/components/auth/AuthScreen";
-import GoogleButton from "@/app/components/auth/GoogleButton";
+import AuthScreen, { AuthError } from "@/app/components/auth/AuthScreen";
 
 function validatePassword(pw: string): string | null {
   if (pw.length < 8) return "Нууц үг 8-аас дээш тэмдэгт байх ёстой.";
@@ -31,27 +30,6 @@ export default function SignUpPage() {
   const [success, setSuccess] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const signUpWithGoogle = async () => {
-    if (busy) return;
-    setBusy(true);
-    setError("");
-    try {
-      const supabase = createClient();
-      const origin = window.location.origin;
-      const { error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${origin}/api/auth/callback?next=/profile`,
-          queryParams: { prompt: "select_account" },
-        },
-      });
-      if (oauthError) throw oauthError;
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Google бүртгэл амжилтгүй.");
-      setBusy(false);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (busy) return;
@@ -64,11 +42,11 @@ export default function SignUpPage() {
       return;
     }
     if (!trimmedEmail) {
-      setError("Gmail хаягаа оруулна уу.");
+      setError("Имэйл хаягаа оруулна уу.");
       return;
     }
     if (!trimmedEmail.includes("@")) {
-      setError("Зөв Gmail хаяг оруулна уу.");
+      setError("Зөв имэйл хаяг оруулна уу.");
       return;
     }
 
@@ -98,7 +76,7 @@ export default function SignUpPage() {
       if (!res.ok) {
         const msg =
           data.error === "An account with this email already exists"
-            ? "Энэ Gmail хаягтай бүртгэл байна."
+            ? "Энэ имэйл хаягтай бүртгэл байна."
             : data.error || "Бүртгэл амжилтгүй болсон.";
         throw new Error(msg);
       }
@@ -153,7 +131,7 @@ export default function SignUpPage() {
   return (
     <AuthScreen
       title="Бүртгүүлэх"
-      subtitle="Gmail болон нууц үгээр шинэ бүртгэл үүсгэнэ үү"
+      subtitle="Имэйл болон нууц үгээр шинэ бүртгэл үүсгэнэ үү"
       footer={
         <p className="text-[14px]" style={{ color: "var(--label2)" }}>
           Аль хэдийн бүртгэлтэй юу?{" "}
@@ -185,7 +163,7 @@ export default function SignUpPage() {
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Gmail хаяг"
+              placeholder="Имэйл хаяг"
               disabled={busy}
               required
             />
@@ -241,14 +219,6 @@ export default function SignUpPage() {
           )}
         </button>
       </form>
-
-      <AuthDivider />
-
-      <GoogleButton
-        label="Gmail-ээр бүртгүүлэх"
-        onClick={signUpWithGoogle}
-        disabled={busy}
-      />
     </AuthScreen>
   );
 }

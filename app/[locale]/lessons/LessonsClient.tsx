@@ -8,6 +8,7 @@ import { useLocale } from "next-intl";
 import Skeleton from "@/app/components/Skeleton";
 import PremiumPageShell from "@/app/components/PremiumPageShell";
 import PremiumSectionHeader from "@/app/components/PremiumSectionHeader";
+import { isNativeApp } from "@/lib/native-perf";
 
 type LmsI18n = { en: string; mn: string; de?: string };
 type Course = {
@@ -28,10 +29,14 @@ const LEVELS: Array<{ id: string; label: { en: string; mn: string; de: string } 
   { id: "paid", label: { en: "Paid", mn: "Төлбөртэй", de: "Bezahlt" } },
 ];
 
+function isCourseFree(c: Course) {
+  return !!c.isFree || (c.price ?? 0) === 0;
+}
+
 function CourseCard({ c, locale }: { c: Course; locale: string }) {
   const title = (c.title as any)?.[locale] || c.title?.en || "";
   const desc = (c.description as any)?.[locale] || c.description?.en || "";
-  const isFree = !!c.isFree || (c.price ?? 0) === 0;
+  const isFree = isCourseFree(c);
 
   return ( 
     <motion.div 
@@ -92,6 +97,11 @@ export default function LessonsClient({ initialCourses }: { initialCourses?: Cou
   const [courses, setCourses] = useState<Course[]>(initialCourses ?? []);
   const [loading, setLoading] = useState(!initialCourses?.length);
   const [filter, setFilter] = useState<"all" | "free" | "paid">("all");
+  const [nativeApp, setNativeApp] = useState(false);
+
+  useEffect(() => {
+    setNativeApp(isNativeApp());
+  }, []);
 
   useEffect(() => {
     if (initialCourses?.length) return;
@@ -102,12 +112,15 @@ export default function LessonsClient({ initialCourses }: { initialCourses?: Cou
       .finally(() => setLoading(false));
   }, [initialCourses]);
 
+  const visibleCourses = nativeApp ? courses.filter(isCourseFree) : courses;
+  const filterTabs = nativeApp ? LEVELS.filter((l) => l.id !== "paid") : LEVELS;
+
   const filtered =
     filter === "all"
-      ? courses
+      ? visibleCourses
       : filter === "free"
-        ? courses.filter((c) => !!c.isFree || (c.price ?? 0) === 0)
-        : courses.filter((c) => !c.isFree && (c.price ?? 0) > 0);
+        ? visibleCourses.filter(isCourseFree)
+        : visibleCourses.filter((c) => !isCourseFree(c));
 
   if (loading) return (
     <PremiumPageShell>
@@ -134,12 +147,12 @@ export default function LessonsClient({ initialCourses }: { initialCourses?: Cou
       <div className="space-y-4 pt-2">
         <PremiumSectionHeader
           title={locale === "mn" ? "Сургалтууд" : "Courses"}
-          subtitle={`${courses.length} ${locale === "mn" ? "курс байна" : "courses"}`}
+          subtitle={`${visibleCourses.length} ${locale === "mn" ? "курс байна" : "courses"}`}
         />
 
         <div className="overflow-x-auto no-scroll -mx-4 px-4"> 
           <div className="seg inline-flex"> 
-            {LEVELS.map((c) => (
+            {filterTabs.map((c) => (
               <button
                 key={c.id}
                 onClick={() => setFilter(c.id as any)}
@@ -159,7 +172,11 @@ export default function LessonsClient({ initialCourses }: { initialCourses?: Cou
             <div className="premium-empty-state"> 
               <div className="premium-empty-state__icon">📚</div>
               <p className="premium-empty-state__title">{locale === "mn" ? "Сургалт байхгүй" : "No courses yet"}</p> 
-              <p className="premium-empty-state__sub">{locale === "mn" ? "Удахгүй шинэ сургалт нэмэгдэнэ" : "New courses coming soon"}</p> 
+              <p className="premium-empty-state__sub">
+                {locale === "mn"
+                  ? "Одоогоор үзэх боломжтой сургалт алга."
+                  : "There are no courses available right now."}
+              </p> 
             </div> 
           )} 
         </div> 

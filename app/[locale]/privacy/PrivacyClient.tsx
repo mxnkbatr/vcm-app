@@ -90,7 +90,7 @@ const SECTIONS: Section[] = [
         "• Зураг хадгалалт: Cloudinary",
         "• Push мэдэгдэл: Firebase Cloud Messaging",
         "• Төлбөр: QPay болон бусад төлбөрийн систем",
-        "• Нэвтрэлт: Google (хэрэв ашигласан бол)",
+        "• Нэвтрэлт: имэйл / нууц үг (Supabase)",
         "Эдгээр талууд зөвхөн үйлчилгээ үзүүлэхэд шаардлагатай хэмжээгээр мэдээлэлд хандаж, өөрийн нууцлалын бодлогыг баримтална.",
       ],
       en: [
@@ -99,7 +99,7 @@ const SECTIONS: Section[] = [
         "• Image hosting: Cloudinary",
         "• Push notifications: Firebase Cloud Messaging",
         "• Payments: QPay and similar providers",
-        "• Sign-in: Google (when enabled)",
+        "• Sign-in: email and password (Supabase)",
         "These providers may process data only as needed to deliver their services and under their own privacy terms.",
       ],
     },

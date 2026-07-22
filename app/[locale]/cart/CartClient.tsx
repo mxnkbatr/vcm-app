@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useCart } from "@/app/context/CartContext";
 import { Link } from "@/navigation";
 import { Trash2, Plus, Minus, ArrowRight, Tag, X } from "lucide-react";
@@ -8,6 +8,8 @@ import Image from "next/image";
 import { IOSAlert } from "@/app/components/iOSAlert";
 import PremiumPageShell from "@/app/components/PremiumPageShell";
 import PremiumSectionHeader from "@/app/components/PremiumSectionHeader";
+import NativeFeatureUnavailable from "@/app/components/NativeFeatureUnavailable";
+import { isNativeApp } from "@/lib/native-perf";
 
 type AppliedPromo = {
   code: string;
@@ -24,11 +26,28 @@ export default function CartClient({ locale }: { locale: string }) {
   const [promoError, setPromoError] = useState("");
   const [appliedPromo, setAppliedPromo] = useState<AppliedPromo | null>(null);
   const [alert, setAlert] = useState<{ title: string; message: string } | null>(null);
+  const [nativeApp, setNativeApp] = useState(false);
+
+  useEffect(() => {
+    setNativeApp(isNativeApp());
+  }, []);
 
   const payableTotal = useMemo(
     () => (appliedPromo ? appliedPromo.finalAmount : total),
     [appliedPromo, total]
   );
+
+  if (nativeApp) {
+    return (
+      <NativeFeatureUnavailable
+        locale={locale}
+        titleMn="Сагс апп дээр байхгүй"
+        titleEn="Cart is not available in the app"
+        subMn="Худалдан авалт одоогоор зөвхөн веб дээр."
+        subEn="Purchases are not offered in this iOS build."
+      />
+    );
+  }
 
   const applyPromo = async () => {
     if (!promoInput.trim()) return;

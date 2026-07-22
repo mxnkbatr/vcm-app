@@ -63,8 +63,7 @@ const MENU_ITEMS = [
 ];
 
 import { useCart } from "@/app/context/CartContext";
-
-const PREFETCH_ROUTES = ["/", "/programs", "/shop", "/events", "/lessons", "/profile"];
+import { isNativeApp } from "@/lib/native-perf";
 
 export default function MobileChrome() {
   const locale = useLocale();
@@ -85,15 +84,25 @@ export default function MobileChrome() {
   const [notifLoading, setNotifLoading] = useState(false);
 
   const [isMounted, setIsMounted] = useState(false);
+  const [nativeApp, setNativeApp] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
+    setNativeApp(isNativeApp());
   }, []);
+
+  const tabs = nativeApp ? TABS.filter((t) => t.id !== "shop") : TABS;
+  const menuItems = nativeApp
+    ? MENU_ITEMS.filter((item) => item.href !== "/cart")
+    : MENU_ITEMS;
 
   /* Warm RSC payloads for tab routes — native apps keep screens in memory */
   useEffect(() => {
+    const routes = nativeApp
+      ? ["/", "/programs", "/events", "/lessons", "/profile"]
+      : ["/", "/programs", "/shop", "/events", "/lessons", "/profile"];
     const run = () => {
-      PREFETCH_ROUTES.forEach((href) => {
+      routes.forEach((href) => {
         try {
           router.prefetch(href);
         } catch {
@@ -112,7 +121,7 @@ export default function MobileChrome() {
       if (idleId != null) window.cancelIdleCallback?.(idleId);
       if (timerId != null) clearTimeout(timerId);
     };
-  }, [router]);
+  }, [router, nativeApp]);
 
   useEffect(() => {
     if (status !== "authenticated") {
@@ -196,15 +205,17 @@ export default function MobileChrome() {
           </Link>
 
           <div className="flex items-center gap-1 flex-shrink-0">
-            <Link
-              href="/cart"
-              prefetch
-              className="native-chrome-action native-chrome-action--glass press"
-              aria-label="Сагс"
-            >
-              <ShoppingBag size={17} strokeWidth={2.2} />
-              {cartCount > 0 && <span className="native-chrome-action__dot" aria-hidden />}
-            </Link>
+            {!nativeApp && (
+              <Link
+                href="/cart"
+                prefetch
+                className="native-chrome-action native-chrome-action--glass press"
+                aria-label="Сагс"
+              >
+                <ShoppingBag size={17} strokeWidth={2.2} />
+                {cartCount > 0 && <span className="native-chrome-action__dot" aria-hidden />}
+              </Link>
+            )}
             <button
               type="button"
               onClick={() => { setShowSearch(true); setShowMenu(false); setShowNotif(false); }}
@@ -247,8 +258,8 @@ export default function MobileChrome() {
           className="fixed bottom-0 left-0 right-0 z-[100] lg:hidden liquid-tab-dock pointer-events-none native-chrome-bottom"
         >
           <div className="liquid-chrome liquid-tab-bar pointer-events-auto">
-            <div className="grid grid-cols-5 w-full">
-              {TABS.map(({ id, Icon, href, label }) => {
+            <div className={`grid w-full ${tabs.length === 4 ? "grid-cols-4" : "grid-cols-5"}`}>
+              {tabs.map(({ id, Icon, href, label }) => {
                 const active =
                   id === "profile"
                     ? pathname === "/profile" || pathname.startsWith("/profile/")
@@ -337,7 +348,7 @@ export default function MobileChrome() {
                     { label: "Хөтөлбөр", href: "/programs" },
                     { label: "Арга хэмжээ", href: "/events" },
                     { label: "Сургалт", href: "/lessons" },
-                    { label: "Дэлгүүр", href: "/shop" },
+                    ...(!nativeApp ? [{ label: "Дэлгүүр", href: "/shop" }] : []),
                   ].map(q => (
                     <Link
                       key={q.label}
@@ -513,7 +524,7 @@ export default function MobileChrome() {
                   Цэс
                 </p>
                 <div className="overflow-hidden liquid-card" style={{ borderRadius: 20 }}>
-                  {MENU_ITEMS.map((item, i) => {
+                  {menuItems.map((item, i) => {
                     const Icon = item.icon;
                     const isActive =
                       pathname === item.href ||
@@ -548,7 +559,7 @@ export default function MobileChrome() {
                           </div>
                           <ChevronRight size={14} style={{ color: "var(--label3)" }} />
                         </Link>
-                        {i < MENU_ITEMS.length - 1 && (
+                        {i < menuItems.length - 1 && (
                           <div className="h-px ml-[60px]" style={{ background: "var(--sep)" }} />
                         )}
                       </div>

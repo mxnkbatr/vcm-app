@@ -1,20 +1,22 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingBag } from "lucide-react";
-import { staggerContainer, staggerItem, springSnappy } from "@/lib/motion";
+import { staggerContainer, staggerItem } from "@/lib/motion";
 import PremiumPageShell from "@/app/components/PremiumPageShell";
 import PremiumSectionHeader from "@/app/components/PremiumSectionHeader";
 import ShopProductCard, { formatShopCategory } from "@/app/components/ShopProductCard";
+import NativeFeatureUnavailable from "@/app/components/NativeFeatureUnavailable";
+import { isNativeApp } from "@/lib/native-perf";
 
 const T = {
   shopTitle: { en: "Our Shop", mn: "Дэлгүүр", de: "Unser Shop" },
-  notFound: { en: "No items found", mn: "Бүтээгдэхүүн олдсонгүй", de: "Keine Artikel gefunden" },
+  notFound: { en: "No items available", mn: "Бүтээгдэхүүн байхгүй", de: "Keine Artikel gefunden" },
   notFoundSub: {
-    en: "Check back soon for new arrivals!",
-    mn: "Удахгүй шинэ бүтээгдэхүүн нэмэгдэнэ!",
-    de: "Schauen Sie bald wieder vorbei!",
+    en: "The shop catalog is currently empty.",
+    mn: "Дэлгүүрийн каталог одоогоор хоосон байна.",
+    de: "Der Shop-Katalog ist derzeit leer.",
   },
   catAll: { en: "All", mn: "Бүгд", de: "Alle" },
 } as const;
@@ -29,6 +31,12 @@ export default function ShopClient({
   isHorizontal?: boolean;
 }) {
   const [filter, setFilter] = useState("all");
+  const [nativeApp, setNativeApp] = useState(false);
+
+  useEffect(() => {
+    setNativeApp(isNativeApp());
+  }, []);
+
   const categories = useMemo(
     () => ["all", ...Array.from(new Set(items.map((item: any) => item.category).filter(Boolean)))],
     [items]
@@ -38,7 +46,20 @@ export default function ShopClient({
     [items, filter]
   );
 
+  if (nativeApp && !isHorizontal) {
+    return (
+      <NativeFeatureUnavailable
+        locale={locale}
+        titleMn="Дэлгүүр апп дээр байхгүй"
+        titleEn="Shop is not available in the app"
+        subMn="Мерч худалдан авалт одоогоор зөвхөн веб дээр."
+        subEn="Merchandise purchases are not offered in this iOS build."
+      />
+    );
+  }
+
   if (isHorizontal) {
+    if (nativeApp) return null;
     return (
       <>
         {items.map((item: any, i: number) => (
