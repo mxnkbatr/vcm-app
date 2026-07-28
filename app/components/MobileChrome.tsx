@@ -91,7 +91,15 @@ export default function MobileChrome() {
     setNativeApp(isNativeApp());
   }, []);
 
-  const tabs = nativeApp ? TABS.filter((t) => t.id !== "shop") : TABS;
+  // App Store 3.1.1: no shop purchases and no digital LMS courses on native.
+  const tabs = nativeApp
+    ? [
+        TABS[0], // home
+        TABS[1], // programs
+        { id: "events", href: "/events", label: { en: "Events", mn: "Эвент" }, Icon: Ticket },
+        TABS[4], // profile
+      ]
+    : TABS;
   const menuItems = nativeApp
     ? MENU_ITEMS.filter((item) => item.href !== "/cart")
     : MENU_ITEMS;
@@ -99,7 +107,7 @@ export default function MobileChrome() {
   /* Warm RSC payloads for tab routes — native apps keep screens in memory */
   useEffect(() => {
     const routes = nativeApp
-      ? ["/", "/programs", "/events", "/lessons", "/profile"]
+      ? ["/", "/programs", "/events", "/profile"]
       : ["/", "/programs", "/shop", "/events", "/lessons", "/profile"];
     const run = () => {
       routes.forEach((href) => {
@@ -347,8 +355,12 @@ export default function MobileChrome() {
                   {[
                     { label: "Хөтөлбөр", href: "/programs" },
                     { label: "Арга хэмжээ", href: "/events" },
-                    { label: "Сургалт", href: "/lessons" },
-                    ...(!nativeApp ? [{ label: "Дэлгүүр", href: "/shop" }] : []),
+                    ...(!nativeApp
+                      ? [
+                          { label: "Сургалт", href: "/lessons" },
+                          { label: "Дэлгүүр", href: "/shop" },
+                        ]
+                      : []),
                   ].map(q => (
                     <Link
                       key={q.label}

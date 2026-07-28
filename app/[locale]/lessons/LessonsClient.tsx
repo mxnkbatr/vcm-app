@@ -8,6 +8,7 @@ import { useLocale } from "next-intl";
 import Skeleton from "@/app/components/Skeleton";
 import PremiumPageShell from "@/app/components/PremiumPageShell";
 import PremiumSectionHeader from "@/app/components/PremiumSectionHeader";
+import NativeFeatureUnavailable from "@/app/components/NativeFeatureUnavailable";
 import { isNativeApp } from "@/lib/native-perf";
 
 type LmsI18n = { en: string; mn: string; de?: string };
@@ -104,16 +105,33 @@ export default function LessonsClient({ initialCourses }: { initialCourses?: Cou
   }, []);
 
   useEffect(() => {
+    if (nativeApp) {
+      setLoading(false);
+      return;
+    }
     if (initialCourses?.length) return;
     fetch("/api/lms/courses")
       .then(r => r.json())
       .then(d => { if (Array.isArray(d)) setCourses(d); })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [initialCourses]);
+  }, [initialCourses, nativeApp]);
 
-  const visibleCourses = nativeApp ? courses.filter(isCourseFree) : courses;
-  const filterTabs = nativeApp ? LEVELS.filter((l) => l.id !== "paid") : LEVELS;
+  // App Store 3.1.1: digital courses are not offered or consumed in the iOS app.
+  if (nativeApp) {
+    return (
+      <NativeFeatureUnavailable
+        locale={locale}
+        titleMn="Сургалт апп дээр байхгүй"
+        titleEn="Courses are not available in the app"
+        subMn="Онлайн сургалт зөвхөн веб хувилбар дээр."
+        subEn="Online courses are only available on the website, not in this iOS app."
+      />
+    );
+  }
+
+  const visibleCourses = courses;
+  const filterTabs = LEVELS;
 
   const filtered =
     filter === "all"

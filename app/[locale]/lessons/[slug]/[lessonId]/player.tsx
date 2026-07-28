@@ -5,6 +5,8 @@ import { Link, usePathname } from "@/navigation";
 import { useLocale } from "next-intl";
 import { ChevronLeft, ChevronRight, PlayCircle } from "lucide-react";
 import Skeleton from "@/app/components/Skeleton";
+import NativeFeatureUnavailable from "@/app/components/NativeFeatureUnavailable";
+import { isNativeApp } from "@/lib/native-perf";
 
 type LmsI18n = { en: string; mn: string; de?: string };
 type Lesson = {
@@ -35,10 +37,19 @@ export default function LessonPlayerClient() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [resumeAt, setResumeAt] = useState<number>(0);
+  const [nativeApp, setNativeApp] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
+    setNativeApp(isNativeApp());
+  }, []);
+
+  useEffect(() => {
+    if (nativeApp) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     fetch(`/api/lms/courses/${slug}`)
       .then((r) => r.json())
@@ -50,7 +61,19 @@ export default function LessonPlayerClient() {
         setResumeAt(typeof watched === "number" ? watched : 0);
       })
       .finally(() => setLoading(false));
-  }, [slug, lessonId]);
+  }, [slug, lessonId, nativeApp]);
+
+  if (nativeApp) {
+    return (
+      <NativeFeatureUnavailable
+        locale={locale}
+        titleMn="Сургалт апп дээр байхгүй"
+        titleEn="Courses are not available in the app"
+        subMn="Онлайн сургалт зөвхөн веб хувилбар дээр."
+        subEn="Online courses are only available on the website, not in this iOS app."
+      />
+    );
+  }
 
   const title = lesson?.title ? ((lesson.title as any)[locale] || lesson.title.en) : "";
   const desc = lesson?.description ? ((lesson.description as any)[locale] || lesson.description.en) : "";

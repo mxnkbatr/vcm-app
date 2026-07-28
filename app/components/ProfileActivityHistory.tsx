@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "@/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -12,6 +12,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { programLabelMn, statusMeta } from "@/lib/applicationLabels";
+import { isNativeApp } from "@/lib/native-perf";
 
 type Tab = "all" | "programs" | "shop" | "courses";
 
@@ -72,6 +73,11 @@ export default function ProfileActivityHistory({
   activeProgram?: string | null;
 }) {
   const [tab, setTab] = useState<Tab>("all");
+  const [nativeApp, setNativeApp] = useState(false);
+
+  useEffect(() => {
+    setNativeApp(isNativeApp());
+  }, []);
 
   const items = useMemo(() => {
     const list: ActivityItem[] = [];
@@ -156,35 +162,49 @@ export default function ProfileActivityHistory({
     );
   }, [applications, purchases, lmsEnrollments, enrolledLessons, activeProgram]);
 
+  const visibleItems = useMemo(() => {
+    if (!nativeApp) return items;
+    // App Store: no shop purchases or digital course access in the iOS app.
+    return items.filter((i) => i.type === "program");
+  }, [items, nativeApp]);
+
   const filtered = useMemo(() => {
-    if (tab === "all") return items;
-    if (tab === "programs") return items.filter((i) => i.type === "program");
-    if (tab === "shop") return items.filter((i) => i.type === "shop");
-    return items.filter((i) => i.type === "course" || i.type === "lesson");
-  }, [items, tab]);
+    if (tab === "all") return visibleItems;
+    if (tab === "programs") return visibleItems.filter((i) => i.type === "program");
+    if (tab === "shop") return visibleItems.filter((i) => i.type === "shop");
+    return visibleItems.filter((i) => i.type === "course" || i.type === "lesson");
+  }, [visibleItems, tab]);
 
   const counts = {
-    programs: items.filter((i) => i.type === "program").length,
-    shop: items.filter((i) => i.type === "shop").length,
-    courses: items.filter((i) => i.type === "course" || i.type === "lesson").length,
+    programs: visibleItems.filter((i) => i.type === "program").length,
+    shop: visibleItems.filter((i) => i.type === "shop").length,
+    courses: visibleItems.filter((i) => i.type === "course" || i.type === "lesson").length,
   };
 
-  const TABS: { id: Tab; label: string }[] = [
-    { id: "all", label: "Бүгд" },
-    { id: "programs", label: "Хөтөлбөр" },
-    { id: "shop", label: "Дэлгүүр" },
-    { id: "courses", label: "Хичээл" },
-  ];
+  const TABS: { id: Tab; label: string }[] = nativeApp
+    ? [
+        { id: "all", label: "Бүгд" },
+        { id: "programs", label: "Хөтөлбөр" },
+      ]
+    : [
+        { id: "all", label: "Бүгд" },
+        { id: "programs", label: "Хөтөлбөр" },
+        { id: "shop", label: "Дэлгүүр" },
+        { id: "courses", label: "Хичээл" },
+      ];
 
   return (
     <div className="space-y-4">
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-2">
-        {[
-          { label: "Хөтөлбөр", value: counts.programs, color: "var(--blue)" },
-          { label: "Захиалга", value: counts.shop, color: "var(--orange)" },
-          { label: "Хичээл", value: counts.courses, color: "var(--emerald)" },
-        ].map((s) => (
+      <div className={`grid gap-2 ${nativeApp ? "grid-cols-1" : "grid-cols-3"}`}>
+        {(nativeApp
+          ? [{ label: "Хөтөлбөр", value: counts.programs, color: "var(--blue)" }]
+          : [
+              { label: "Хөтөлбөр", value: counts.programs, color: "var(--blue)" },
+              { label: "Захиалга", value: counts.shop, color: "var(--orange)" },
+              { label: "Хичээл", value: counts.courses, color: "var(--emerald)" },
+            ]
+        ).map((s) => (
           <div key={s.label} className="liquid-card p-3 text-center">
             <p className="text-[22px] font-black" style={{ color: s.color }}>{s.value}</p>
             <p className="text-[10px] font-bold uppercase tracking-wider mt-0.5" style={{ color: "var(--label3)" }}>
@@ -225,7 +245,18 @@ export default function ProfileActivityHistory({
                 {tab === "courses" && "Хичээлд бүртгүүлээгүй байна"}
                 {tab === "all" && "Түүх хоосон байна"}
               </p>
-              <Link href={tab === "shop" ? "/shop" : tab === "courses" ? "/lessons" : "/programs"} className="btn btn-secondary btn-sm mt-4 inline-flex">
+              <Link
+                href={
+                  nativeApp
+                    ? "/programs"
+                    : tab === "shop"
+                      ? "/shop"
+                      : tab === "courses"
+                        ? "/lessons"
+                        : "/programs"
+                }
+                className="btn btn-secondary btn-sm mt-4 inline-flex"
+              >
                 Эхлэх <ChevronRight size={14} />
               </Link>
             </div>

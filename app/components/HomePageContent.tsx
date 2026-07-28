@@ -75,7 +75,9 @@ export default function HomePageContent({
   const [nativeApp, setNativeApp] = useState(false);
   const { status } = useSession();
   const isSignedIn = mounted && status === "authenticated";
-  const navGrid = nativeApp ? NAV_GRID.filter((n) => n.id !== "shop") : NAV_GRID;
+  const navGrid = nativeApp
+    ? NAV_GRID.filter((n) => n.id !== "shop" && n.id !== "lessons")
+    : NAV_GRID;
 
   useEffect(() => {
     setMounted(true);
@@ -177,11 +179,13 @@ export default function HomePageContent({
               <span className="home-you-card__title">Ирэх эвент</span>
               <span className="home-you-card__sub">Бүртгүүлэх</span>
             </Link>
-            <Link href="/lessons" className="home-you-card press">
-              <GraduationCap size={20} strokeWidth={2} />
-              <span className="home-you-card__title">Сургалт</span>
-              <span className="home-you-card__sub">Үргэлжлүүлэх</span>
-            </Link>
+            {!nativeApp && (
+              <Link href="/lessons" className="home-you-card press">
+                <GraduationCap size={20} strokeWidth={2} />
+                <span className="home-you-card__title">Сургалт</span>
+                <span className="home-you-card__sub">Үргэлжлүүлэх</span>
+              </Link>
+            )}
           </div>
         </section>
       )}
