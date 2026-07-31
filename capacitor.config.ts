@@ -16,6 +16,8 @@ const config: CapacitorConfig = {
   appId: "mn.volunteer.app",
   appName: "Volunteer Center Mongolia",
   webDir: "public",
+  // Lets Next.js middleware reliably detect App Store / TestFlight WebView traffic.
+  appendUserAgent: " VCMNativeApp",
   ...(serverUrl
     ? {
         server: {

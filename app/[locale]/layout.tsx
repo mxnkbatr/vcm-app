@@ -74,7 +74,7 @@ export default async function RootLayout({
           <meta name="format-detection" content="telephone=no" />
           <script
             dangerouslySetInnerHTML={{
-              __html: `(function(){try{var C=window.Capacitor;if(C&&C.isNativePlatform&&C.isNativePlatform()){var r=document.documentElement;r.classList.add('native-shell');r.style.setProperty('--safe-top','47px');}}catch(e){}})();`,
+              __html: `(function(){try{var ua=navigator.userAgent||"";var C=window.Capacitor;var native=(C&&C.isNativePlatform&&C.isNativePlatform())||ua.indexOf("VCMNativeApp")!==-1;if(native){var r=document.documentElement;r.classList.add("native-shell");r.style.setProperty("--safe-top","47px");document.cookie="vcm_native=1;path=/;max-age=31536000;SameSite=Lax";}}catch(e){}})();`,
             }}
           />
         </head>

@@ -1,9 +1,12 @@
 import { Capacitor } from "@capacitor/core";
+import { NATIVE_UA_MARKER } from "@/lib/native-constants";
 
 /** True only inside Capacitor iOS/Android shell (not mobile Safari). */
 export function isNativeApp(): boolean {
   if (typeof window === "undefined") return false;
   try {
+    if (document.documentElement.classList.contains("native-shell")) return true;
+    if (navigator.userAgent.includes(NATIVE_UA_MARKER)) return true;
     return Capacitor.isNativePlatform();
   } catch {
     return false;

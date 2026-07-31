@@ -99,25 +99,40 @@ export default function LessonsClient({ initialCourses }: { initialCourses?: Cou
   const [loading, setLoading] = useState(!initialCourses?.length);
   const [filter, setFilter] = useState<"all" | "free" | "paid">("all");
   const [nativeApp, setNativeApp] = useState(false);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setNativeApp(isNativeApp());
+    const native = isNativeApp();
+    setNativeApp(native);
+    setReady(true);
+    if (native) setLoading(false);
   }, []);
 
   useEffect(() => {
-    if (nativeApp) {
+    if (!ready || nativeApp) return;
+    if (initialCourses?.length) {
       setLoading(false);
       return;
     }
-    if (initialCourses?.length) return;
     fetch("/api/lms/courses")
       .then(r => r.json())
       .then(d => { if (Array.isArray(d)) setCourses(d); })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [initialCourses, nativeApp]);
+  }, [initialCourses, nativeApp, ready]);
 
   // App Store 3.1.1: digital courses are not offered or consumed in the iOS app.
+  if (!ready) {
+    return (
+      <PremiumPageShell>
+        <div className="space-y-4 pt-2">
+          <Skeleton className="h-10 w-44" />
+          <Skeleton className="h-5 w-40" />
+        </div>
+      </PremiumPageShell>
+    );
+  }
+
   if (nativeApp) {
     return (
       <NativeFeatureUnavailable

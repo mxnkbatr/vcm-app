@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 import { updateSession } from '@/lib/supabase/middleware';
+import {
+    isNativeBlockedApi,
+    isNativeBlockedPath,
+    isNativeRequest,
+} from '@/lib/native-request';
 
 const intlMiddleware = createMiddleware({
     locales: ['en', 'mn', 'de'],
@@ -52,6 +57,23 @@ export default async function proxy(req: NextRequest) {
         return NextResponse.next();
     }
 
+    const localeMatch = pathname.match(/^\/(en|mn|de)/);
+    const locale = localeMatch ? localeMatch[1] : 'mn';
+    const pathWithoutLocale = pathname.replace(/^\/(en|mn|de)/, '') || '/';
+    const native = isNativeRequest(req);
+
+    // App Store 3.1.1: never serve digital LMS / purchase surfaces inside the native shell.
+    if (native && isNativeBlockedApi(pathname)) {
+        return NextResponse.json(
+            { error: "Not available in the iOS app" },
+            { status: 403 }
+        );
+    }
+
+    if (native && isNativeBlockedPath(pathWithoutLocale)) {
+        return NextResponse.redirect(new URL(`/${locale}`, req.url));
+    }
+
     const { supabaseResponse, user } = await updateSession(req);
 
     if (pathname.startsWith('/api')) {
@@ -66,9 +88,6 @@ export default async function proxy(req: NextRequest) {
         return supabaseResponse;
     }
 
-    const localeMatch = pathname.match(/^\/(en|mn|de)/);
-    const locale = localeMatch ? localeMatch[1] : 'mn';
-
     if (!isPublicRoute(pathname)) {
         if (!user) {
             const signInUrl = new URL(`/${locale}/sign-in`, req.url);
@@ -77,7 +96,6 @@ export default async function proxy(req: NextRequest) {
         }
 
         const profileComplete = user.user_metadata?.profile_complete;
-        const pathWithoutLocale = pathname.replace(/^\/(en|mn|de)/, '') || '/';
         const allowed = ['/complete-profile', '/sign-out'];
         const isAllowed = allowed.some(p => pathWithoutLocale === p || pathWithoutLocale.startsWith(p + '/'));
         if (profileComplete === false && !isAllowed) {
