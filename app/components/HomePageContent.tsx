@@ -21,6 +21,7 @@ import { type ProgramId } from "@/lib/color-system";
 import { isNativeApp } from "@/lib/native-perf";
 import { staggerContainer, staggerItem } from "@/lib/motion";
 import HomeProgramCards from "./HomeProgramCards";
+import HomeNewsCards from "./HomeNewsCards";
 import { isVisibleShopItem } from "./ShopProductCard";
 import {
   normalizeProgramDisplayName,
@@ -131,7 +132,7 @@ export default function HomePageContent({
   const shownPrograms = [
     ...(corePrograms.length ? corePrograms : FALLBACK_PROGRAMS),
     ...extraPrograms,
-  ].slice(0, 12);
+  ].slice(0, 24);
 
   const name =
     (session?.user as { name?: string } | undefined)?.name ||
@@ -276,7 +277,12 @@ export default function HomePageContent({
           <HomeProgramCards programs={shownPrograms} />
         </motion.section>
 
-        {!nativeApp && items.length > 0 && locale && (
+        <motion.section variants={staggerItem}>
+          <PremiumSectionHeader title="Мэдээ" href="/news" />
+          <HomeNewsCards limit={6} />
+        </motion.section>
+
+        {items.length > 0 && locale && (
           <motion.section variants={staggerItem}>
             <PremiumSectionHeader title="Дэлгүүр" href="/shop" />
             <ShopClient items={items} locale={locale} embedded />

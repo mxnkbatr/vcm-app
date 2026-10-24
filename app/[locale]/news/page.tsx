@@ -31,10 +31,10 @@ export default function NewsPage() {
     field[locale] || field.mn || field.en;
 
   return (
-    <PremiumPageShell>
-      <div className="space-y-6 pt-2">
+    <PremiumPageShell className="ios26-page">
+      <div className="home-sections pt-1">
 
-        <PremiumSectionHeader title="Мэдээ" subtitle="Сүүлийн үеийн мэдээ, мэдээлэл" />
+        <PremiumSectionHeader title="Мэдээ" subtitle="volunteer.org.mn болон VCM-ийн шинэ мэдээ" />
 
         {loading ? (
           <div className="space-y-4">
@@ -63,7 +63,7 @@ export default function NewsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.07 }}
               >
-                <div className="card overflow-hidden press">
+                <div className="ios26-card overflow-hidden press">
                   {/* Image */}
                   {item.image && (
                     <div className="relative h-44 w-full overflow-hidden">

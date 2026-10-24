@@ -18,7 +18,7 @@ export default function HomeProgramCards({
   programs: HomeProgram[];
 }) {
   return (
-    <div className="home-prog-rail">
+    <div className="home-prog-stack">
       {programs.map((p) => (
         <Link key={p.id} href={p.href} prefetch className="home-prog-card press glass-press">
           <span className="home-prog-card__icon">

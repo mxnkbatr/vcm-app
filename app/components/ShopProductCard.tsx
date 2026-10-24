@@ -28,9 +28,11 @@ const JUNK_NAMES = new Set(["k", "21312", "test", "asdf", "xxx", "qwe", "asd"]);
 /** Hide empty, test, and About-page rows from the shop catalog. */
 export function isVisibleShopItem(item: any, locale = "en") {
   const name = String(item?.name?.[locale] || item?.name?.en || item?.name?.mn || "").trim();
-  if (!name || name.length < 2) return false;
+  if (!name) return false;
   const norm = name.toLowerCase();
   if (JUNK_NAMES.has(norm) || /^\d+$/.test(norm)) return false;
+  // Tiny placeholder labels (1 char) without image are likely incomplete admin drafts
+  if (name.length < 2 && !item?.image) return false;
   const desc = String(item?.description?.[locale] || item?.description?.en || item?.description?.mn || "");
   const blob = `${name}\n${desc}`.toLowerCase();
   if (/(^|\n)\s*(about|тухай|бидний тухай)\b/.test(blob) && name.length < 12) return false;

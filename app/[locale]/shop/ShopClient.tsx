@@ -1,16 +1,14 @@
 "use client";
 
-import React, { useMemo, useState, useSyncExternalStore } from "react";
+import React, { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingBag, SlidersHorizontal } from "lucide-react";
 import { staggerContainer, staggerItem } from "@/lib/motion";
 import PremiumPageShell from "@/app/components/PremiumPageShell";
 import ShopProductCard, { formatShopCategory, isVisibleShopItem } from "@/app/components/ShopProductCard";
-import NativeFeatureUnavailable from "@/app/components/NativeFeatureUnavailable";
-import { isNativeApp } from "@/lib/native-perf";
 import IOSSheet from "@/app/components/ui/IOSSheet";
 import IOSLargeTitle from "@/app/components/ui/IOSLargeTitle";
-import { Link } from "@/navigation";
+import EmptyState from "@/app/components/ui/EmptyState";
 
 const T = {
   shopTitle: { en: "Our Shop", mn: "Дэлгүүр", de: "Unser Shop" },
@@ -38,12 +36,6 @@ export default function ShopClient({
 }) {
   const [filter, setFilter] = useState("all");
   const [sheet, setSheet] = useState(false);
-  const ready = useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false
-  );
-  const nativeApp = ready && isNativeApp();
 
   const catalog = useMemo(
     () => items.filter((item) => isVisibleShopItem(item, locale)),
@@ -58,20 +50,7 @@ export default function ShopClient({
     [catalog, filter]
   );
 
-  if (nativeApp && !isHorizontal) {
-    return (
-      <NativeFeatureUnavailable
-        locale={locale}
-        titleMn="Дэлгүүр апп дээр байхгүй"
-        titleEn="Shop is not available in the app"
-        subMn="Мерч худалдан авалт одоогоор зөвхөн веб дээр."
-        subEn="Merchandise purchases are not offered in this iOS build."
-      />
-    );
-  }
-
   if (isHorizontal) {
-    if (nativeApp) return null;
     const row = catalog.slice(0, 4);
     if (!row.length) return null;
     return (
@@ -91,7 +70,7 @@ export default function ShopClient({
   }
 
   if (embedded) {
-    if (nativeApp || catalog.length === 0) return null;
+    if (catalog.length === 0) return null;
     return (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {catalog.slice(0, 4).map((item, i) => (
@@ -158,22 +137,13 @@ export default function ShopClient({
               </AnimatePresence>
             </motion.div>
           ) : (
-            <div className="shop-coming glass-surface">
-              <div className="shop-coming__art" aria-hidden>
-                <ShoppingBag size={40} strokeWidth={1.5} />
-              </div>
-              <h3 className="shop-coming__title">
-                {locale === "mn" ? "Тун удахгүй" : "Coming soon"}
-              </h3>
-              <p className="shop-coming__sub">
-                {locale === "mn"
-                  ? "Дэлгүүрийн бараа бэлтгэгдэж байна. Шинэчлэлтийг мэдэгдлээр хүлээн аваарай."
-                  : "Merchandise is on the way. Get notified when it drops."}
-              </p>
-              <Link href="/notifications" prefetch className="btn btn-primary glass-press inline-flex items-center justify-center">
-                {locale === "mn" ? "Мэдэгдэл авах" : "Notify me"}
-              </Link>
-            </div>
+            <EmptyState
+              icon={ShoppingBag}
+              title={T.notFound[locale as keyof typeof T.notFound] || T.notFound.en}
+              description={T.notFoundSub[locale as keyof typeof T.notFoundSub] || T.notFoundSub.en}
+              actionLabel={locale === "mn" ? "Нүүр лүү" : "Home"}
+              href="/"
+            />
           )}
         </div>
       </motion.div>
