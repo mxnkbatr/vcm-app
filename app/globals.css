@@ -90,16 +90,16 @@
    --cream-inset: none;
    --cream-shadow-soft: none;
    --cream-shadow-lift: none;
-   --cream-radius-card: var(--r-xl);
-   --space-section: 1.5rem;
+   --cream-radius-card: 20px;
+   --space-section: 24px;
    --space-block: 0.75rem;
    --r-xs: 8px;
    --r-sm: 12px;
    --r-md: 12px;
-   --r-lg: 24px;
-   --r-xl: 24px;
-   --r-2xl: 28px;
-   --r-3xl: 28px;
+   --r-lg: 20px;
+   --r-xl: 20px;
+   --r-2xl: 20px;
+   --r-3xl: 20px;
    --native-header-bar-h: 44px;
    --safe-top: env(safe-area-inset-top, 0px);
    --native-header-offset: calc(var(--safe-top) + 44px);
@@ -177,7 +177,7 @@ html {
 body { 
   background: var(--bg);
   color: var(--label);
-  font-size: 17px;
+  font-size: 15px;
   line-height: 1.4; 
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
@@ -231,13 +231,13 @@ button, a, [role="button"], .press, .card, .ios-list-row {
  /* ───────────────────────────────────────────── 
     TYPOGRAPHY SCALE 
  ───────────────────────────────────────────── */ 
- .t-large-title  { font-size: 34px; font-weight: 800; letter-spacing: -0.6px; line-height: 1.10; } 
- .t-title1       { font-size: 28px; font-weight: 700; letter-spacing: -0.4px; line-height: 1.15; } 
+ .t-large-title  { font-size: 30px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.10; } 
+ .t-title1       { font-size: 26px; font-weight: 700; letter-spacing: -0.4px; line-height: 1.15; } 
  .t-title2       { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; } 
  .t-title3       { font-size: 20px; font-weight: 600; letter-spacing: -0.2px; } 
- .t-headline     { font-size: 17px; font-weight: 600; } 
- .t-body         { font-size: 17px; font-weight: 400; line-height: 1.55; } 
- .t-callout      { font-size: 16px; font-weight: 500; } 
+ .t-headline     { font-size: 15px; font-weight: 600; } 
+ .t-body         { font-size: 15px; font-weight: 400; line-height: 1.55; } 
+ .t-callout      { font-size: 15px; font-weight: 500; } 
  .t-subhead      { font-size: 15px; font-weight: 500; } 
  .t-footnote     { font-size: 13px; font-weight: 500; color: var(--label2); } 
  .t-caption      { font-size: 12px; font-weight: 500; color: var(--label3); } 
@@ -300,6 +300,7 @@ button, a, [role="button"], .press, .card, .ios-list-row {
    border-radius: var(--r-2xl);
    border: 1px solid var(--cream-border);
    box-shadow: var(--cream-shadow-soft), var(--cream-inset);
+   padding: 14px;
    contain: layout style;
    transform: translateZ(0);
  }
@@ -1069,7 +1070,7 @@ html.native-perf .shop-detail__back {
   min-height: 100dvh;
   background: transparent;
   padding-top: var(--native-header-offset);
-  padding-bottom: calc(env(safe-area-inset-bottom, 34px) + 96px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 84px);
   padding-left: 16px;
   padding-right: 16px;
   contain: layout;
@@ -3084,7 +3085,13 @@ html.native-perf .premium-page-body {
    HOME DASHBOARD LAYOUT
 ═══════════════════════════════════════════ */
 .home-dash {
-  --home-section-gap: 1.75rem;
+  --home-section-gap: 24px;
+}
+
+.home-sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-section-gap, 24px);
 }
 
 .home-dash .premium-page-body,
@@ -3727,10 +3734,11 @@ html.native-perf .vcm-tabbar {
   align-items: center;
   gap: 8px;
   height: 44px;
+  min-height: 44px;
   padding: 0 12px;
   background: #FFFFFF;
   border: 1px solid #E6E9EE;
-  border-radius: 12px;
+  border-radius: 12px !important;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 .vcm-search input {
@@ -4174,9 +4182,9 @@ html.native-perf .vcm-tabbar {
 }
 
 .ios-large-title {
-  font-size: 34px;
+  font-size: 30px;
   font-weight: 700;
-  letter-spacing: 0.37px;
+  letter-spacing: -0.4px;
   line-height: 1.15;
   color: var(--label);
 }
@@ -4189,16 +4197,22 @@ html.native-perf .vcm-tabbar {
 }
 
 .ios-headline {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--label);
 }
 
 .ios-body {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 400;
   line-height: 1.35;
   color: var(--label);
+}
+
+.ios-subhead {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--label2);
 }
 
 .ios-footnote {
@@ -4344,10 +4358,10 @@ html.native-perf .vcm-tabbar {
   position: fixed;
   left: 16px;
   right: 16px;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
   z-index: 100;
-  height: 64px;
-  border-radius: 999px;
+  height: 60px;
+  border-radius: 30px;
   background: rgba(255, 255, 255, 0.62);
   backdrop-filter: blur(30px) saturate(200%);
   -webkit-backdrop-filter: blur(30px) saturate(200%);
@@ -4445,7 +4459,7 @@ html.native-perf.dark .ios-tabbar,
 .ios-page {
   min-height: 100dvh;
   background: var(--bg);
-  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
 }
 .ios-page__pad {
   padding: 0 16px 16px;
@@ -4484,7 +4498,7 @@ html.native-perf.dark .ios-tabbar,
 
 .ios-list {
   background: var(--card);
-  border-radius: 24px;
+  border-radius: 20px;
   overflow: hidden;
 }
 .ios-list-row {
@@ -4495,7 +4509,7 @@ html.native-perf.dark .ios-tabbar,
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 0 16px;
+  padding: 0 14px;
   background: transparent;
   border: none;
   text-align: left;
@@ -4598,10 +4612,10 @@ html.native-perf.dark .ios-tabbar,
 .ios-today {
   position: relative;
   display: block;
-  border-radius: 24px;
+  border-radius: 20px;
   overflow: hidden;
   aspect-ratio: 16 / 9;
-  max-height: 220px;
+  max-height: 190px;
   width: 100%;
   text-decoration: none;
   color: #fff;
@@ -4611,6 +4625,7 @@ html.native-perf.dark .ios-tabbar,
   position: absolute;
   inset: 0;
   object-fit: cover;
+  object-position: left center;
   width: 100%;
   height: 100%;
 }
@@ -4844,10 +4859,10 @@ html.native-perf.dark .ios-tabbar,
   background: var(--ios-material);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border-radius: 24px;
+  border-radius: 20px;
   border: 1px solid var(--liquid-border);
   box-shadow: inset 0 1px 0 var(--glass-highlight);
-  padding: 16px;
+  padding: 14px;
 }
 
 .ios-stats {
@@ -4856,11 +4871,16 @@ html.native-perf.dark .ios-tabbar,
   gap: 10px;
 }
 .ios-stats__card {
-  border-radius: 24px;
-  padding: 14px 12px;
+  height: 72px;
+  border-radius: 20px;
+  padding: 10px 10px;
   background: var(--card);
   border: 0.5px solid var(--sep);
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 .ios-stats__value {
   font-size: 22px;
@@ -4871,7 +4891,7 @@ html.native-perf.dark .ios-tabbar,
 }
 .ios-stats__label {
   margin-top: 4px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--label2);
 }
@@ -4896,7 +4916,7 @@ html.native-perf.dark .ios-tabbar,
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
-  border-radius: 24px;
+  border-radius: 20px;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
@@ -4911,8 +4931,8 @@ html.native-perf.dark .ios-tabbar,
   display: block;
   width: 100%;
   aspect-ratio: 16 / 9;
-  max-height: 220px;
-  border-radius: 24px;
+  max-height: 190px;
+  border-radius: 20px;
   overflow: hidden;
   background: var(--blue);
   text-decoration: none;
@@ -4920,12 +4940,12 @@ html.native-perf.dark .ios-tabbar,
 }
 .home-hero__img {
   object-fit: cover;
-  object-position: center;
+  object-position: left center;
   z-index: 0;
 }
 .home-hero__img--contain {
   object-fit: contain;
-  object-position: center;
+  object-position: left center;
   padding: 12px;
 }
 .home-hero__fallback-bg {
@@ -5007,7 +5027,7 @@ html.native-perf.dark .ios-tabbar,
   margin-bottom: 12px;
 }
 .premium-section-header__title {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
 }
 .premium-section-header__title::before {
@@ -5023,6 +5043,10 @@ html.native-perf.dark .ios-tabbar,
 .vcm-search {
   border: 1px solid var(--liquid-border) !important;
   background: var(--ios-material) !important;
+  border-radius: 12px !important;
+}
+.vcm-search.glass-chip {
+  border-radius: 12px !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -5040,7 +5064,7 @@ html.native-perf.dark .ios-tabbar,
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     background: var(--bg);
-    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 84px);
   }
 }
 @media (min-width: 1024px) {

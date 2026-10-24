@@ -7,31 +7,20 @@ import BrandLogo from "./BrandLogo";
 
 const STORAGE_KEY = "vcm-splash-dismissed";
 const MIN_VISIBLE_MS = 450;
-const FADE_OUT_MS = 300;
+const FADE_OUT_MS = 250;
+
+function initialPhase(): "hidden" | "visible" {
+  if (typeof window === "undefined") return "hidden";
+  return sessionStorage.getItem(STORAGE_KEY) ? "hidden" : "visible";
+}
 
 export default function AppSplash() {
-  const [phase, setPhase] = useState<"hidden" | "visible" | "exiting">("hidden");
+  const [phase, setPhase] = useState<"hidden" | "visible" | "exiting">(initialPhase);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (phase !== "visible") return;
 
-    const alreadySeen = sessionStorage.getItem(STORAGE_KEY);
-
-    // Always hide native Capacitor splash as soon as JS loads
-    // (launchAutoHide is false so we must do it manually)
-    void import("@capacitor/core").then(({ Capacitor }) => {
-      if (Capacitor.isNativePlatform()) {
-        void import("@capacitor/splash-screen").then(({ SplashScreen }) => {
-          void SplashScreen.hide({ fadeOutDuration: 300 });
-        });
-      }
-    });
-
-    if (alreadySeen) return;
-
-    setPhase("visible");
     const started = Date.now();
-
     const dismiss = () => {
       const elapsed = Date.now() - started;
       const wait = Math.max(0, MIN_VISIBLE_MS - elapsed);
@@ -40,15 +29,16 @@ export default function AppSplash() {
 
     if (document.readyState === "complete") {
       dismiss();
-    } else {
-      window.addEventListener("load", dismiss, { once: true });
-      const fallback = window.setTimeout(dismiss, 3000);
-      return () => {
-        window.removeEventListener("load", dismiss);
-        window.clearTimeout(fallback);
-      };
+      return;
     }
-  }, []);
+
+    window.addEventListener("load", dismiss, { once: true });
+    const fallback = window.setTimeout(dismiss, 3000);
+    return () => {
+      window.removeEventListener("load", dismiss);
+      window.clearTimeout(fallback);
+    };
+  }, [phase]);
 
   useEffect(() => {
     if (phase !== "exiting") return;

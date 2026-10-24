@@ -1,23 +1,70 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="mn">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Offline</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#F2F2F7" />
+    <title>VCM</title>
     <style>
-      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; padding: 24px; background: #F2F2F7; color: #111; }
-      .card { max-width: 520px; margin: 12vh auto 0; background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,.08); }
-      h1 { font-size: 18px; margin: 0 0 8px; }
-      p { margin: 0; line-height: 1.45; opacity: .85; }
-      button { margin-top: 14px; padding: 10px 14px; border: 0; border-radius: 12px; background: #111; color: #fff; cursor: pointer; }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body {
+        height: 100%;
+        background: #F2F2F7;
+        color: #000;
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+        -webkit-tap-highlight-color: transparent;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: env(safe-area-inset-top) 24px env(safe-area-inset-bottom);
+        text-align: center;
+      }
+      img {
+        width: 88px;
+        height: 88px;
+        border-radius: 22px;
+        object-fit: cover;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+      }
+      h1 {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.3px;
+        margin-bottom: 8px;
+      }
+      p {
+        font-size: 15px;
+        color: rgba(60, 60, 67, 0.7);
+        margin-bottom: 24px;
+        max-width: 280px;
+        line-height: 1.4;
+      }
+      button {
+        appearance: none;
+        border: none;
+        background: #1E5BD8;
+        color: #fff;
+        font-size: 17px;
+        font-weight: 600;
+        min-height: 48px;
+        padding: 0 28px;
+        border-radius: 14px;
+        cursor: pointer;
+      }
+      button:active { opacity: 0.88; transform: scale(0.98); }
     </style>
   </head>
   <body>
-    <div class="card">
-      <h1>You’re offline</h1>
-      <p>Internet connection алга байна. Сүлжээ орж ирмэгц дахин оролдоорой.</p>
-      <button onclick="location.reload()">Retry</button>
-    </div>
+    <img src="/branding/icon-192.png" alt="VCM" width="88" height="88" />
+    <h1>Ачааллаж байна</h1>
+    <p>Сүлжээний холболтыг шалгаад дахин оролдоно уу.</p>
+    <button type="button" onclick="location.reload()">Дахин оролдох</button>
   </body>
 </html>
-

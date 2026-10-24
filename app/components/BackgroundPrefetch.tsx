@@ -36,12 +36,16 @@ export default function BackgroundPrefetch() {
     };
 
     const timer = setTimeout(() => {
+      const finish = () => {
+        run();
+        window.dispatchEvent(new CustomEvent("vcm:app-ready"));
+      };
       if ("requestIdleCallback" in window) {
-        (window as Window & { requestIdleCallback: typeof requestIdleCallback }).requestIdleCallback(run, {
+        (window as Window & { requestIdleCallback: typeof requestIdleCallback }).requestIdleCallback(finish, {
           timeout: 1500,
         });
       } else {
-        run();
+        finish();
       }
     }, 800);
 

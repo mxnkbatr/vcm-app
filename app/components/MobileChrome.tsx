@@ -212,9 +212,9 @@ export default function MobileChrome() {
             className={`ios-tabbar liquid-glass-dock lg:hidden ${tabs.length === 4 ? "cols-4" : "cols-5"} ${dockCompact ? "is-compact" : ""}`}
             aria-label="Үндсэн цэс"
             animate={{
-              height: dockCompact ? 52 : 64,
-              paddingTop: dockCompact ? 4 : 4,
-              paddingBottom: dockCompact ? 4 : 4,
+              height: dockCompact ? 52 : 60,
+              paddingTop: 4,
+              paddingBottom: 4,
             }}
             transition={springNative}
           >
@@ -251,7 +251,7 @@ export default function MobileChrome() {
                     animate={bounceId === id ? { y: [0, -4, 0], scale: [1, 1.12, 1] } : { y: 0, scale: 1 }}
                     transition={springNative}
                   >
-                    <Icon size={dockCompact ? 26 : 24} strokeWidth={active ? 2 : 1.75} />
+                    <Icon size={22} strokeWidth={active ? 2 : 1.75} />
                   </motion.span>
                   <motion.span
                     className="ios-tabbar__label"

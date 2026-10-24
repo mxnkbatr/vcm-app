@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useTheme } from "next-themes";
 import { BRAND } from "@/lib/branding";
 
-/** Sync native status bar with app theme; overlays WebView + safe-area header. */
+/** Sync native status bar; light bg uses DARK (dark glyphs). */
 export default function NativeStatusBar() {
   const { resolvedTheme } = useTheme();
 
@@ -14,7 +14,7 @@ export default function NativeStatusBar() {
 
       void import("@capacitor/status-bar").then(async ({ StatusBar, Style }) => {
         const isDark = resolvedTheme === "dark";
-        const color = isDark ? BRAND.colors.backgroundDark : BRAND.colors.background;
+        const color = isDark ? BRAND.colors.backgroundDark : "#F2F2F7";
 
         try {
           await StatusBar.setOverlaysWebView({ overlay: true });
@@ -22,7 +22,7 @@ export default function NativeStatusBar() {
           /* older runtimes */
         }
         void StatusBar.setBackgroundColor({ color });
-        // Style.Dark = dark icons (light bg); Style.Light = light icons (dark bg)
+        // Style.Dark = dark text/icons on light backgrounds
         void StatusBar.setStyle({ style: isDark ? Style.Light : Style.Dark });
       });
     });

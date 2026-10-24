@@ -14,11 +14,13 @@ const NativePullRefresh = dynamic(() => import("./NativePullRefresh"), { ssr: fa
 const NativePerfBoot = dynamic(() => import("./NativePerfBoot"), { ssr: false });
 const NativeStatusBar = dynamic(() => import("./NativeStatusBar"), { ssr: false });
 const NativeHapticPress = dynamic(() => import("./NativeHapticPress"), { ssr: false });
+const NativeSplashGate = dynamic(() => import("./NativeSplashGate"), { ssr: false });
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       <NativePerfBoot />
+      <NativeSplashGate />
       <NativeAppLifecycle />
       <NativeStatusBar />
       <NativeHapticPress />

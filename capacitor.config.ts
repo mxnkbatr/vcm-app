@@ -18,22 +18,32 @@ const config: CapacitorConfig = {
   webDir: "public",
   // Lets Next.js middleware reliably detect App Store / TestFlight WebView traffic.
   appendUserAgent: " VCMNativeApp",
+  ios: {
+    contentInset: "never",
+    backgroundColor: "#F2F2F7",
+  },
+  backgroundColor: "#F2F2F7",
   ...(serverUrl
     ? {
       server: {
         url: serverUrl,
         cleartext: serverUrl.startsWith("http://"),
         androidScheme: serverUrl.startsWith("https") ? "https" : "http",
+        errorPath: "offline.html",
       },
     }
-    : {}),
+    : {
+      server: {
+        errorPath: "offline.html",
+      },
+    }),
   plugins: {
     PushNotifications: {
       presentationOptions: ["badge", "sound", "alert"],
     },
     SplashScreen: {
       launchAutoHide: false,
-      launchShowDuration: 0,
+      launchShowDuration: 3000,
       backgroundColor: "#F2F2F7",
       showSpinner: false,
       androidSplashResourceName: "splash",

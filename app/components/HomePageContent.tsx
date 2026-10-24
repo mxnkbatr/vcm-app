@@ -159,22 +159,22 @@ export default function HomePageContent({
 
   return (
     <PremiumPageShell className="home-dash" padded>
-      <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-6">
+      <motion.div variants={staggerContainer} initial="initial" animate="animate" className="home-sections">
         <motion.div variants={staggerItem}>
           <IOSLargeTitle title={greeting}>
-            <p className="ios-footnote mt-1">{BRAND.taglineMn}</p>
+            <p className="ios-subhead mt-1">{BRAND.taglineMn}</p>
           </IOSLargeTitle>
         </motion.div>
 
         <motion.div variants={staggerItem}>
-          <label className="vcm-search glass-chip flex items-center gap-2 h-11 px-3.5">
+          <label className="vcm-search glass-chip flex items-center gap-2">
             <Search size={18} strokeWidth={1.75} color="var(--label2)" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Хайх"
               aria-label="Хайх"
-              className="flex-1 bg-transparent outline-none text-[17px] text-[var(--label)] placeholder:text-[var(--label2)]"
+              className="flex-1 bg-transparent outline-none text-[var(--label)] placeholder:text-[var(--label2)]"
             />
           </label>
         </motion.div>
