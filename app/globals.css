@@ -106,7 +106,7 @@
    --native-header-bar-h: 52px;
    --safe-top: env(safe-area-inset-top, 0px);
    --native-header-offset: calc(var(--safe-top) + 58px);
-   --tab-h: 49px;
+   --tab-h: 49px; /* UIKit UITabBar content height */
    --ios-tab-float: 16px;
    --s-card: none;
    --s-float: none;
@@ -4374,126 +4374,79 @@ html.native-perf .vcm-tabbar {
   justify-content: center;
 }
 
-.ios-dock-fade {
+.ios-dock-fade { display: none; }
+
+/* React Native / UIKit-style tab bar */
+.ios-tabbar,
+.ios-tabbar--native,
+.liquid-glass-dock {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
-  height: calc(110px + env(safe-area-inset-bottom, 0px));
-  z-index: 90;
-  pointer-events: none;
-  background: linear-gradient(
-    to top,
-    var(--bg) 0%,
-    color-mix(in srgb, var(--bg) 92%, transparent) 38%,
-    color-mix(in srgb, var(--bg) 40%, transparent) 68%,
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(to top, #000 28%, rgba(0,0,0,0.55) 55%, transparent 100%);
-  mask-image: linear-gradient(to top, #000 28%, rgba(0,0,0,0.55) 55%, transparent 100%);
-}
-
-.ios-tabbar,
-.liquid-glass-dock {
-  position: fixed;
-  left: 14px;
-  right: 14px;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
   z-index: 100;
-  height: 62px;
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.52);
-  backdrop-filter: blur(40px) saturate(220%);
-  -webkit-backdrop-filter: blur(40px) saturate(220%);
-  border: 0.5px solid rgba(255, 255, 255, 0.7);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.92),
-    0 12px 32px rgba(15, 23, 42, 0.14),
-    0 2px 8px rgba(15, 23, 42, 0.05);
+  height: calc(49px + env(safe-area-inset-bottom, 0px));
+  padding: 4px 0 env(safe-area-inset-bottom, 0px);
+  border-radius: 0;
+  background: rgba(249, 249, 249, 0.94);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: none;
+  border-top: 0.5px solid rgba(60, 60, 67, 0.29);
+  box-shadow: none;
   display: grid;
-  padding: 4px;
   overflow: hidden;
 }
 .dark .ios-tabbar,
+.dark .ios-tabbar--native,
 .dark .liquid-glass-dock {
-  background: rgba(28, 28, 30, 0.6);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    0 10px 28px rgba(0, 0, 0, 0.45);
+  background: rgba(22, 22, 24, 0.94);
+  border-top-color: rgba(84, 84, 88, 0.65);
 }
 .ios-tabbar::before,
-.liquid-glass-dock::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.55) 0%,
-    rgba(255, 255, 255, 0.12) 28%,
-    transparent 55%
-  );
-  z-index: 0;
-}
-.dark .ios-tabbar::before,
-.dark .liquid-glass-dock::before {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.16) 0%,
-    rgba(255, 255, 255, 0.04) 30%,
-    transparent 55%
-  );
-}
-html.native-perf .ios-tabbar {
-  backdrop-filter: blur(30px) saturate(200%) !important;
-  -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
-  background: rgba(255, 255, 255, 0.62) !important;
+.liquid-glass-dock::before { display: none; }
+html.native-perf .ios-tabbar,
+html.native-perf .ios-tabbar--native {
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  background: rgba(249, 249, 249, 0.94) !important;
 }
 html.native-perf.dark .ios-tabbar,
 .dark html.native-perf .ios-tabbar {
-  background: rgba(28, 28, 30, 0.6) !important;
+  background: rgba(22, 22, 24, 0.94) !important;
 }
 .ios-tabbar.cols-4 { grid-template-columns: repeat(4, 1fr); }
 .ios-tabbar.cols-5 { grid-template-columns: repeat(5, 1fr); }
-.ios-tabbar.is-compact .ios-tabbar__label {
-  pointer-events: none;
-}
 .ios-tabbar__item {
   position: relative;
-  min-height: 44px;
+  min-height: 49px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 2px;
+  justify-content: flex-start;
+  gap: 1px;
+  padding-top: 4px;
   text-decoration: none;
-  color: var(--label2);
-  border-radius: 999px;
+  color: rgba(60, 60, 67, 0.6);
+  border-radius: 0;
   z-index: 1;
+  -webkit-tap-highlight-color: transparent;
 }
+.dark .ios-tabbar__item { color: rgba(235, 235, 245, 0.55); }
 .ios-tabbar__item.on { color: var(--blue); }
-.ios-tabbar__pill {
-  position: absolute;
-  inset: 3px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.55);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    0 4px 14px rgba(30, 91, 216, 0.12);
-  backdrop-filter: blur(12px) saturate(160%);
-  -webkit-backdrop-filter: blur(12px) saturate(160%);
-  z-index: -1;
-}
-.dark .ios-tabbar__pill {
-  background: rgba(255, 255, 255, 0.12);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
-}
+.ios-tabbar__item:active { opacity: 0.55; }
+.ios-tabbar__pill { display: none !important; }
 .ios-tabbar__label {
   font-size: 10px;
   font-weight: 500;
   letter-spacing: -0.08px;
+  line-height: 12px;
+  max-width: 100%;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  padding: 0 2px;
 }
 
 .ios-page {
@@ -4501,7 +4454,7 @@ html.native-perf.dark .ios-tabbar,
   z-index: 1;
   min-height: 100dvh;
   background: transparent;
-  padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
 }
 .ios-page__pad {
   padding: 0 16px 16px;
@@ -6170,16 +6123,48 @@ html.native-perf.dark .ios-tabbar,
   -webkit-backdrop-filter: blur(24px) saturate(170%);
 }
 
+/* Classic iOS search field */
+.ios-searchbar {
+  width: 100%;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(118, 118, 128, 0.12);
+  color: var(--label);
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+.ios-searchbar:active { opacity: 0.85; }
+.ios-searchbar__icon {
+  color: rgba(60, 60, 67, 0.6);
+  flex-shrink: 0;
+}
+.dark .ios-searchbar__icon { color: rgba(235, 235, 245, 0.45); }
+.ios-searchbar__placeholder {
+  flex: 1;
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: -0.2px;
+  color: rgba(60, 60, 67, 0.6);
+  line-height: 22px;
+}
+.dark .ios-searchbar__placeholder { color: rgba(235, 235, 245, 0.45); }
+.dark .ios-searchbar { background: rgba(118, 118, 128, 0.24); }
+
 .vcm-search,
 .ios26-search {
-  min-height: 48px !important;
-  padding: 0 14px !important;
-  border-radius: 16px !important;
-  background: var(--ios-material) !important;
-  border: 0.5px solid var(--liquid-border) !important;
-  box-shadow: var(--liquid-shadow), inset 0 1px 0 var(--glass-highlight) !important;
-  backdrop-filter: blur(24px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  min-height: 36px !important;
+  padding: 0 10px !important;
+  border-radius: 10px !important;
+  background: rgba(118, 118, 128, 0.12) !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .app-header__glass {
@@ -6198,47 +6183,29 @@ html.native-perf.dark .ios-tabbar,
 }
 
 .ios-tabbar,
+.ios-tabbar--native,
 .liquid-glass-dock {
-  background: rgba(255, 255, 255, 0.52) !important;
-  border: 0.5px solid rgba(255, 255, 255, 0.72) !important;
-  backdrop-filter: blur(40px) saturate(220%) !important;
-  -webkit-backdrop-filter: blur(40px) saturate(220%) !important;
+  background: rgba(249, 249, 249, 0.94) !important;
+  border: none !important;
+  border-top: 0.5px solid rgba(60, 60, 67, 0.29) !important;
+  border-radius: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
 }
 .dark .ios-tabbar,
+.dark .ios-tabbar--native,
 .dark .liquid-glass-dock {
-  background: rgba(28, 28, 30, 0.52) !important;
+  background: rgba(22, 22, 24, 0.94) !important;
+  border-top-color: rgba(84, 84, 88, 0.65) !important;
 }
 
 .ios-list-row__chev {
   color: var(--label4);
   flex-shrink: 0;
-}
-
-/* Home greeting + quick chips */
-.home-greeting-glass {
-  padding: 2px 2px 0;
-}
-.home-greeting-glass__date {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--label2);
-  text-transform: capitalize;
-  letter-spacing: -0.1px;
-}
-.home-greeting-glass__hi {
-  margin-top: 4px;
-  font-size: 28px;
-  font-weight: 760;
-  letter-spacing: -0.55px;
-  line-height: 1.12;
-  color: var(--label);
-}
-.home-greeting-glass__sub {
-  margin-top: 4px;
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--label2);
-  line-height: 1.35;
 }
 
 .ios-quick-chips {

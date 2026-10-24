@@ -67,18 +67,6 @@ function subscribeClient(onStoreChange: () => void) {
   return () => {};
 }
 
-function todayLabel() {
-  try {
-    return new Date().toLocaleDateString("mn-MN", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-    });
-  } catch {
-    return "";
-  }
-}
-
 export default function HomePageContent({
   shopItems,
   initialPrograms,
@@ -180,31 +168,19 @@ export default function HomePageContent({
     [initialBanners]
   );
 
-  const dateLine = todayLabel();
-
   return (
     <PremiumPageShell className="home-dash" padded>
       <motion.div variants={staggerContainer} initial="initial" animate="animate" className="home-sections">
-        <motion.div variants={staggerItem}>
-          <IOSLargeTitle title={greeting}>
-            <div className="home-greeting-glass">
-              <p className="home-greeting-glass__date">{dateLine}</p>
-              <p className="home-greeting-glass__hi">{greeting}</p>
-              <p className="home-greeting-glass__sub">{BRAND.taglineMn}</p>
-            </div>
-          </IOSLargeTitle>
-        </motion.div>
+        <IOSLargeTitle title={greeting || "Нүүр"} />
 
         <motion.div variants={staggerItem}>
           <button
             type="button"
-            className="vcm-search ios26-search glass-chip flex items-center gap-2 w-full text-left press"
+            className="ios-searchbar press"
             onClick={() => window.dispatchEvent(new CustomEvent("vcm:open-search"))}
           >
-            <Search size={18} strokeWidth={1.75} color="var(--label2)" />
-            <span className="flex-1 text-[15px]" style={{ color: "var(--label2)" }}>
-              Хайх
-            </span>
+            <Search size={16} strokeWidth={2.25} className="ios-searchbar__icon" />
+            <span className="ios-searchbar__placeholder">Хайх</span>
           </button>
         </motion.div>
 

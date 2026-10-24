@@ -3,14 +3,12 @@
 import React, { useState, useEffect, useSyncExternalStore } from "react";
 import { Link, usePathname, useRouter } from "@/navigation";
 import { useLocale } from "next-intl";
-import { motion } from "framer-motion";
 import {
   Home, Plane, Ticket, BookOpen, User, ShoppingBag,
 } from "lucide-react";
 import { useSession } from "@/lib/hooks/useSession";
 import { hapticSelection } from "@/lib/haptics";
 import { isNativeApp } from "@/lib/native-perf";
-import { springNative } from "@/lib/motion";
 import { isTabRoute } from "@/lib/navigation-motion";
 import AppHeader from "@/app/components/AppHeader";
 import { nativeShare } from "@/lib/native-share";
@@ -53,9 +51,7 @@ export default function MobileChrome() {
   const { data: session, status } = useSession();
 
   const [scrolled, setScrolled] = useState(false);
-  const [dockCompact, setDockCompact] = useState(false);
   const [pageTitle, setPageTitle] = useState("");
-  const [bounceId, setBounceId] = useState<string | null>(null);
   const [bookmarkVersion, setBookmarkVersion] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -73,7 +69,7 @@ export default function MobileChrome() {
         TABS[0],
         TABS[1],
         { id: "events", href: "/events", label: { en: "Events", mn: "Эвент" }, Icon: Ticket },
-        TABS[2], // shop
+        TABS[2],
         TABS[4],
       ]
     : TABS;
@@ -138,15 +134,7 @@ export default function MobileChrome() {
   useEffect(() => {
     const main = document.querySelector(".native-app-main");
     if (!main) return;
-    let lastY = main.scrollTop;
-    const onScroll = () => {
-      const y = main.scrollTop;
-      setScrolled(y > 40);
-      if (y > lastY + 10 && y > 48) setDockCompact(true);
-      else if (y < lastY - 8) setDockCompact(false);
-      if (y < 12) setDockCompact(false);
-      lastY = y;
-    };
+    const onScroll = () => setScrolled(main.scrollTop > 40);
     onScroll();
     main.addEventListener("scroll", onScroll, { passive: true });
     return () => main.removeEventListener("scroll", onScroll);
@@ -197,16 +185,9 @@ export default function MobileChrome() {
         bookmarked={bookmarked}
       />
 
-      <div className="ios-dock-fade lg:hidden" aria-hidden />
-      <motion.nav
-        className={`ios-tabbar liquid-glass-dock lg:hidden ${tabs.length === 4 ? "cols-4" : "cols-5"} ${dockCompact ? "is-compact" : ""}`}
+      <nav
+        className={`ios-tabbar ios-tabbar--native lg:hidden ${tabs.length === 4 ? "cols-4" : "cols-5"}`}
         aria-label="Үндсэн цэс"
-        animate={{
-          height: dockCompact ? 52 : 60,
-          paddingTop: 4,
-          paddingBottom: 4,
-        }}
-        transition={springNative}
       >
         {tabs.map(({ id, Icon, href, label }) => {
           const active =
@@ -222,42 +203,16 @@ export default function MobileChrome() {
               onTouchStart={() => {
                 try { router.prefetch(href); } catch { /* noop */ }
               }}
-              onClick={() => {
-                void hapticSelection();
-                setBounceId(id);
-                setTimeout(() => setBounceId(null), 320);
-              }}
-              className={`ios-tabbar__item glass-press ${active ? "on" : ""}`}
+              onClick={() => void hapticSelection()}
+              className={`ios-tabbar__item ${active ? "on" : ""}`}
               aria-current={active ? "page" : undefined}
             >
-              {active && (
-                <motion.span
-                  layoutId="tab-pill"
-                  className="ios-tabbar__pill"
-                  transition={springNative}
-                />
-              )}
-              <motion.span
-                animate={bounceId === id ? { y: -4, scale: 1.1 } : { y: 0, scale: 1 }}
-                transition={
-                  bounceId === id
-                    ? { type: "spring", stiffness: 520, damping: 28, mass: 0.7 }
-                    : { duration: 0.16 }
-                }
-              >
-                <Icon size={22} strokeWidth={active ? 2 : 1.75} />
-              </motion.span>
-              <motion.span
-                className="ios-tabbar__label"
-                animate={{ opacity: dockCompact ? 0 : 1, height: dockCompact ? 0 : "auto" }}
-                transition={{ duration: 0.18 }}
-              >
-                {text}
-              </motion.span>
+              <Icon size={24} strokeWidth={active ? 2.25 : 1.75} />
+              <span className="ios-tabbar__label">{text}</span>
             </Link>
           );
         })}
-      </motion.nav>
+      </nav>
     </>
   );
 }
