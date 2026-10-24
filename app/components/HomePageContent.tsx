@@ -20,8 +20,7 @@ import StatCards from "./ui/StatCards";
 import { type ProgramId } from "@/lib/color-system";
 import { isNativeApp } from "@/lib/native-perf";
 import { staggerContainer, staggerItem } from "@/lib/motion";
-import ProgramGlyph from "./ui/ProgramGlyph";
-import { IOSList, IOSListRow } from "./ui/IOSList";
+import HomeProgramCards from "./HomeProgramCards";
 import { isVisibleShopItem } from "./ShopProductCard";
 import {
   normalizeProgramDisplayName,
@@ -91,14 +90,21 @@ export default function HomePageContent({
   locale?: string;
 }) {
   const mapPrograms = (data: ProgramApi[]) =>
-    data.map((p) => {
-      const raw = String(p.slug || p.code?.toLowerCase() || "edu");
-      const slug = programSlugKey(raw) as ProgramId;
+    data.map((p, i) => {
+      const slugRaw = String(p.slug || "").toLowerCase().trim();
+      const codeRaw = String(p.code || "").toLowerCase().trim();
+      const isVolunteer = slugRaw.startsWith("vorg") || codeRaw.startsWith("vorg");
+      const coreKey = !isVolunteer ? programSlugKey(slugRaw || codeRaw) : null;
+      const slug = isVolunteer ? slugRaw || codeRaw || `prog-${i}` : (coreKey as ProgramId);
+      const id = slug || `prog-${i}`;
+      const label = isVolunteer
+        ? (p.name?.mn || p.code || id).trim()
+        : normalizeProgramDisplayName(p.name?.mn || p.code, slug, "mn");
       return {
-        id: slug,
+        id,
         slug,
-        label: normalizeProgramDisplayName(p.name?.mn || p.code, slug, "mn"),
-        sub: p.description?.mn || "",
+        label,
+        sub: (p.description?.mn || "").trim(),
         href: p.href || `/programs/${slug}`,
       };
     });
@@ -119,12 +125,13 @@ export default function HomePageContent({
     ? [NAV_GRID[0], NAV_GRID[1], NAV_GRID[4], NAV_GRID[5]]
     : NAV_GRID.slice(0, 4);
 
-  // Home keeps the 3 core VCM programs only — volunteer.org.mn flood stays on /programs
   const CORE = new Set(["edu", "and", "vclub"]);
-  const corePrograms = programs
-    .filter((p) => CORE.has(String(p.slug || p.id).toLowerCase()))
-    .slice(0, 3);
-  const shownPrograms = corePrograms.length ? corePrograms : FALLBACK_PROGRAMS;
+  const corePrograms = programs.filter((p) => CORE.has(String(p.slug).toLowerCase()));
+  const extraPrograms = programs.filter((p) => !CORE.has(String(p.slug).toLowerCase()));
+  const shownPrograms = [
+    ...(corePrograms.length ? corePrograms : FALLBACK_PROGRAMS),
+    ...extraPrograms,
+  ].slice(0, 12);
 
   const name =
     (session?.user as { name?: string } | undefined)?.name ||
@@ -266,23 +273,7 @@ export default function HomePageContent({
 
         <motion.section variants={staggerItem}>
           <PremiumSectionHeader title="Хөтөлбөр" href="/programs" />
-          <IOSList>
-            {shownPrograms.map((a) => (
-              <IOSListRow
-                key={a.id}
-                href={a.href}
-                icon={<ProgramGlyph id={a.slug || a.id} size={22} />}
-                title={a.label}
-                subtitle={a.sub}
-              />
-            ))}
-            <IOSListRow
-              href="/programs/apply"
-              icon={<ClipboardList size={22} strokeWidth={1.75} />}
-              title="Нэгдэх"
-              subtitle="Өргөдөл илгээх"
-            />
-          </IOSList>
+          <HomeProgramCards programs={shownPrograms} />
         </motion.section>
 
         {!nativeApp && items.length > 0 && locale && (
