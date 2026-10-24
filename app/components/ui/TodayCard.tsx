@@ -34,8 +34,8 @@ export default function TodayCard({
         <div className="ios-today__overlay" />
         <div className="ios-today__content">
           <p className="ios-today__eyebrow">{eyebrow}</p>
-          <h2 className="ios-today__title">{title}</h2>
-          {subtitle ? <p className="ios-today__sub">{subtitle}</p> : null}
+          <h2 className="ios-today__title line-clamp-2">{title}</h2>
+          {subtitle ? <p className="ios-today__sub line-clamp-2">{subtitle}</p> : null}
         </div>
       </motion.div>
     </Link>

@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
 import { useSession } from "@/lib/hooks/useSession";
 import { useDashboard } from "@/lib/hooks/useDashboard";
@@ -11,15 +11,21 @@ import {
 } from "lucide-react";
 import { BRAND } from "@/lib/branding";
 import PremiumPageShell from "./PremiumPageShell";
+import PremiumSectionHeader from "./PremiumSectionHeader";
 import HomeUpcomingEvents from "./HomeUpcomingEvents";
+import HomeHeroCarousel from "./HomeHeroCarousel";
 import IOSLargeTitle from "./ui/IOSLargeTitle";
-import TodayCard from "./ui/TodayCard";
 import FitnessRing from "./ui/FitnessRing";
+import StatCards from "./ui/StatCards";
 import { type ProgramId } from "@/lib/color-system";
 import { isNativeApp } from "@/lib/native-perf";
 import { staggerContainer, staggerItem } from "@/lib/motion";
 import ProgramGlyph from "./ui/ProgramGlyph";
 import { IOSList, IOSListRow } from "./ui/IOSList";
+import {
+  normalizeProgramDisplayName,
+  programSlugKey,
+} from "@/lib/programLabels";
 
 const ShopClient = dynamic(() => import("@/app/[locale]/shop/ShopClient"), { ssr: false });
 
@@ -38,45 +44,62 @@ const NAV_GRID = [
   { id: "more", href: "/about", label: "Бусад", icon: LayoutGrid },
 ];
 
+type ProgramApi = {
+  slug?: string;
+  code?: string;
+  name?: { mn?: string };
+  description?: { mn?: string };
+  href?: string;
+};
+
+type BannerApi = {
+  _id?: string;
+  id?: string;
+  title?: string | { mn?: string };
+  subtitle?: string | { mn?: string };
+  image?: string;
+  link?: string;
+};
+
+function subscribeClient(onStoreChange: () => void) {
+  onStoreChange();
+  return () => {};
+}
+
 export default function HomePageContent({
   shopItems,
   initialPrograms,
   initialBanners,
   locale,
 }: {
-  shopItems?: any[];
-  initialBanners?: any[];
-  initialPrograms?: any[];
+  shopItems?: unknown[];
+  initialBanners?: BannerApi[];
+  initialPrograms?: ProgramApi[];
   locale?: string;
 }) {
-  const mapPrograms = (data: any[]) =>
-    data.map((p: any) => {
+  const mapPrograms = (data: ProgramApi[]) =>
+    data.map((p) => {
       const raw = String(p.slug || p.code?.toLowerCase() || "edu");
-      const slug: ProgramId = raw === "and" || raw === "vclub" ? raw : "edu";
+      const slug = programSlugKey(raw) as ProgramId;
       return {
         id: slug,
         slug,
-        label: p.name?.mn || p.code,
+        label: normalizeProgramDisplayName(p.name?.mn || p.code, slug, "mn"),
         sub: p.description?.mn || "",
         href: p.href || `/programs/${slug}`,
       };
     });
 
-  const [items] = useState<any[]>(shopItems || []);
+  const [items] = useState(shopItems || []);
   const [programs] = useState(() =>
     initialPrograms?.length ? mapPrograms(initialPrograms) : FALLBACK_PROGRAMS
   );
   const [query, setQuery] = useState("");
-  const [mounted, setMounted] = useState(false);
-  const [nativeApp, setNativeApp] = useState(false);
+  const mounted = useSyncExternalStore(subscribeClient, () => true, () => false);
+  const nativeApp = mounted && isNativeApp();
   const { data: session, status } = useSession();
   const isSignedIn = mounted && status === "authenticated";
   const { data: dash } = useDashboard({ enabled: isSignedIn });
-
-  useEffect(() => {
-    setMounted(true);
-    setNativeApp(isNativeApp());
-  }, []);
 
   const quick = nativeApp
     ? [NAV_GRID[0], NAV_GRID[1], NAV_GRID[4], NAV_GRID[5]]
@@ -96,11 +119,13 @@ export default function HomePageContent({
 
   const featured = useMemo(() => {
     const banner = initialBanners?.[0];
+    const asText = (v: string | { mn?: string } | undefined, fallback: string) =>
+      typeof v === "string" ? v : v?.mn || fallback;
     if (banner) {
       return {
-        title: banner.title || "Онцлох боломж",
-        subtitle: banner.subtitle || BRAND.taglineMn,
-        image: banner.image as string | undefined,
+        title: asText(banner.title, "Онцлох боломж"),
+        subtitle: asText(banner.subtitle, BRAND.taglineMn),
+        image: banner.image,
         href: banner.link || "/programs",
       };
     }
@@ -108,7 +133,7 @@ export default function HomePageContent({
     return {
       title: program?.label || "Сайн дурын ажил",
       subtitle: program?.sub || BRAND.taglineMn,
-      image: undefined,
+      image: undefined as string | undefined,
       href: program?.href || "/programs",
     };
   }, [initialBanners, programs]);
@@ -117,9 +142,21 @@ export default function HomePageContent({
   const events = dash?.attendedEvents?.length ?? 0;
   const lessons = dash?.lmsEnrollments?.length ?? dash?.enrolledLessons?.length ?? 0;
 
+  const heroBanners = useMemo(
+    () =>
+      (initialBanners || []).map((b) => ({
+        _id: b._id || b.id,
+        title: typeof b.title === "string" ? b.title : b.title?.mn,
+        subtitle: typeof b.subtitle === "string" ? b.subtitle : b.subtitle?.mn,
+        image: b.image,
+        link: b.link,
+      })),
+    [initialBanners]
+  );
+
   return (
     <PremiumPageShell className="home-dash" padded>
-      <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-5">
+      <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-6">
         <motion.div variants={staggerItem}>
           <IOSLargeTitle title={greeting}>
             <p className="ios-footnote mt-1">{BRAND.taglineMn}</p>
@@ -127,7 +164,7 @@ export default function HomePageContent({
         </motion.div>
 
         <motion.div variants={staggerItem}>
-          <label className="vcm-search flex items-center gap-2 h-11 px-3 rounded-[12px] bg-[var(--card)] border-[0.5px] border-[var(--sep)]">
+          <label className="vcm-search glass-chip flex items-center gap-2 h-11 px-3.5">
             <Search size={18} strokeWidth={1.75} color="var(--label2)" />
             <input
               value={query}
@@ -140,17 +177,21 @@ export default function HomePageContent({
         </motion.div>
 
         <motion.div variants={staggerItem}>
-          <TodayCard
-            href={featured.href}
-            title={featured.title}
-            subtitle={featured.subtitle}
-            image={featured.image}
-            layoutId="today-featured"
-          />
+          <HomeHeroCarousel banners={heroBanners} fallback={featured} />
         </motion.div>
 
+        <motion.section variants={staggerItem}>
+          <StatCards
+            stats={[
+              { value: 10000, suffix: "+", label: "Сайн дурынхан" },
+              { value: 50, suffix: "+", label: "Төсөл" },
+              { value: 3, label: "Хөтөлбөр" },
+            ]}
+          />
+        </motion.section>
+
         {isSignedIn && (
-          <motion.section variants={staggerItem} className="bg-[var(--card)] rounded-[20px] p-4">
+          <motion.section variants={staggerItem} className="ios-frost-section">
             <p className="ios-headline mb-3">Таны явц</p>
             <FitnessRing
               rings={[
@@ -160,7 +201,7 @@ export default function HomePageContent({
               ]}
             />
             {!apps && !events && (
-              <Link href="/programs/apply" className="btn btn-primary mt-4 inline-flex w-full items-center justify-center">
+              <Link href="/programs/apply" className="btn btn-primary glass-press mt-4 inline-flex w-full items-center justify-center">
                 Эхлэх
               </Link>
             )}
@@ -170,7 +211,7 @@ export default function HomePageContent({
         <motion.section variants={staggerItem}>
           <div className="ios-quick">
             {quick.map(({ id, href, label, icon: Icon }) => (
-              <Link key={id} href={href} className="ios-quick__item press">
+              <Link key={id} href={href} className="ios-quick__item glass-press">
                 <span className="ios-quick__icon">
                   <Icon size={22} strokeWidth={1.75} />
                 </span>
@@ -181,35 +222,25 @@ export default function HomePageContent({
         </motion.section>
 
         <motion.section variants={staggerItem}>
-          <div className="flex items-end justify-between mb-3">
-            <h2 className="ios-title" style={{ fontSize: 22 }}>Удахгүй болох эвент</h2>
-            <Link href="/events" className="ios-footnote" style={{ color: "var(--blue)", fontWeight: 600 }}>
-              Бүгд
-            </Link>
-          </div>
+          <PremiumSectionHeader title="Удахгүй болох эвент" href="/events" />
           <HomeUpcomingEvents limit={8} query={q} />
         </motion.section>
 
         <motion.section variants={staggerItem}>
-          <div className="flex items-end justify-between mb-3">
-            <h2 className="ios-title" style={{ fontSize: 22 }}>Хөтөлбөр</h2>
-            <Link href="/programs" className="ios-footnote" style={{ color: "var(--blue)", fontWeight: 600 }}>
-              Бүгд
-            </Link>
-          </div>
+          <PremiumSectionHeader title="Хөтөлбөр" href="/programs" />
           <IOSList>
             {shownPrograms.map((a) => (
               <IOSListRow
                 key={a.id}
                 href={a.href}
-                icon={<ProgramGlyph id={a.slug || a.id} size={16} />}
+                icon={<ProgramGlyph id={a.slug || a.id} size={22} />}
                 title={a.label}
                 subtitle={a.sub}
               />
             ))}
             <IOSListRow
               href="/programs/apply"
-              icon={<ClipboardList size={16} strokeWidth={1.75} />}
+              icon={<ClipboardList size={22} strokeWidth={1.75} />}
               title="Нэгдэх"
               subtitle="Өргөдөл илгээх"
             />
@@ -218,21 +249,13 @@ export default function HomePageContent({
 
         {!nativeApp && items.length > 0 && locale && (
           <motion.section variants={staggerItem}>
-            <div className="flex items-end justify-between mb-3">
-              <h2 className="ios-title" style={{ fontSize: 22 }}>Дэлгүүр</h2>
-              <Link href="/shop" className="ios-footnote" style={{ color: "var(--blue)", fontWeight: 600 }}>
-                Бүгд
-              </Link>
-            </div>
+            <PremiumSectionHeader title="Дэлгүүр" href="/shop" />
             <ShopClient items={items} locale={locale} embedded />
           </motion.section>
         )}
 
-        <footer className="pt-2 pb-4 text-center">
+        <footer className="pt-1 pb-2 text-center">
           <p className="ios-footnote">{BRAND.name}</p>
-          <Link href="/about" className="inline-flex min-h-[44px] items-center ios-footnote" style={{ color: "var(--blue)", fontWeight: 600 }}>
-            Тухай
-          </Link>
         </footer>
       </motion.div>
     </PremiumPageShell>

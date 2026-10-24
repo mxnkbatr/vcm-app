@@ -12,6 +12,8 @@
     "build:mobile": "npm run build:ionic",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
     "seed": "ts-node --compiler-options {\\\"module\\\":\\\"commonjs\\\"} lib/seed.ts",
     "ionic:build": "npm run build:ionic",
     "cap:copy": "cap copy",
@@ -42,6 +44,8 @@
     "@supabase/supabase-js": "^2.110.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/nodemailer": "^7.0.5",
+    "@upstash/ratelimit": "^2.2.0",
+    "@upstash/redis": "^1.39.0",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.8.0",
     "clsx": "^2.1.1",
@@ -80,7 +84,8 @@
     "postcss": "^8.5.8",
     "tailwindcss": "^3.4.19",
     "ts-node": "^10.9.2",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.7"
   },
   "browserslist": [
     "last 2 versions",

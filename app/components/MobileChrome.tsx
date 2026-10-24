@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useSyncExternalStore } from "react";
 import { Link, usePathname, useRouter } from "@/navigation";
 import { useLocale } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
@@ -47,22 +47,23 @@ export default function MobileChrome() {
   const router = useRouter();
   const { data: session, status } = useSession();
 
-  const [visible, setVisible] = useState(true);
   const [showNotif, setShowNotif] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [dockCompact, setDockCompact] = useState(false);
   const [pageTitle, setPageTitle] = useState("");
   const [bounceId, setBounceId] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<
     Array<{ _id: string; type: string; title: string; body: string; createdAt: string; readAt?: string | null }>
   >([]);
   const [notifLoading, setNotifLoading] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-  const [nativeApp, setNativeApp] = useState(false);
 
-  useEffect(() => {
-    setIsMounted(true);
-    setNativeApp(isNativeApp());
-  }, []);
+  const isMounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+  const nativeApp = isMounted && isNativeApp();
+  const visible = !AUTH_PATHS.some((p) => pathname.includes(p));
 
   const tabs = nativeApp
     ? [
@@ -96,14 +97,17 @@ export default function MobileChrome() {
   }, [router, nativeApp]);
 
   useEffect(() => {
-    if (status !== "authenticated") {
-      setNotifications([]);
-      return;
-    }
+    if (status !== "authenticated") return;
+    let cancelled = false;
     fetch("/api/user/notifications", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : { notifications: [] }))
-      .then((d) => setNotifications(d.notifications || []))
+      .then((d) => {
+        if (!cancelled) setNotifications(d.notifications || []);
+      })
       .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
   }, [status]);
 
   useEffect(() => {
@@ -120,20 +124,28 @@ export default function MobileChrome() {
 
   useEffect(() => {
     if (!showNotif || status !== "authenticated") return;
-    setNotifLoading(true);
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (!cancelled) setNotifLoading(true);
+    });
     fetch("/api/user/notifications", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : { notifications: [] }))
-      .then((d) => setNotifications(d.notifications || []))
-      .catch(() => setNotifications([]))
-      .finally(() => setNotifLoading(false));
+      .then((d) => {
+        if (!cancelled) setNotifications(d.notifications || []);
+      })
+      .catch(() => {
+        if (!cancelled) setNotifications([]);
+      })
+      .finally(() => {
+        if (!cancelled) setNotifLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [showNotif, status]);
 
   useEffect(() => {
-    setVisible(!AUTH_PATHS.some((p) => pathname.includes(p)));
-  }, [pathname]);
-
-  useEffect(() => {
-    setShowNotif(false);
+    queueMicrotask(() => setShowNotif(false));
   }, [pathname]);
 
   useEffect(() => {
@@ -148,7 +160,15 @@ export default function MobileChrome() {
   useEffect(() => {
     const main = document.querySelector(".native-app-main");
     if (!main) return;
-    const onScroll = () => setScrolled(main.scrollTop > 28);
+    let lastY = main.scrollTop;
+    const onScroll = () => {
+      const y = main.scrollTop;
+      setScrolled(y > 28);
+      if (y > lastY + 10 && y > 48) setDockCompact(true);
+      else if (y < lastY - 8) setDockCompact(false);
+      if (y < 12) setDockCompact(false);
+      lastY = y;
+    };
     onScroll();
     main.addEventListener("scroll", onScroll, { passive: true });
     return () => main.removeEventListener("scroll", onScroll);
@@ -156,7 +176,8 @@ export default function MobileChrome() {
 
   if (!isMounted || !visible) return null;
 
-  const unreadCount = notifications.filter((n) => !n.readAt).length;
+  const visibleNotifications = status === "authenticated" ? notifications : [];
+  const unreadCount = visibleNotifications.filter((n) => !n.readAt).length;
   const user = session?.user as { name?: string; image?: string } | undefined;
   const initial = (user?.name || "V").charAt(0).toUpperCase();
 
@@ -169,7 +190,7 @@ export default function MobileChrome() {
             <button
               type="button"
               onClick={() => setShowNotif((v) => !v)}
-              className="ios-icon-btn press"
+              className="ios-icon-btn glass-press"
               aria-label="Мэдэгдэл"
             >
               <Bell size={22} strokeWidth={1.75} />
@@ -177,7 +198,7 @@ export default function MobileChrome() {
                 <span className="ios-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
               )}
             </button>
-            <Link href="/profile" prefetch className="ios-icon-btn press" aria-label="Профайл">
+            <Link href="/profile" prefetch className="ios-icon-btn glass-press" aria-label="Профайл">
               <span className="ios-avatar-btn">{initial}</span>
             </Link>
           </div>
@@ -185,47 +206,65 @@ export default function MobileChrome() {
       </header>
 
       {!showNotif && (
-        <nav className={`ios-tabbar lg:hidden ${tabs.length === 4 ? "cols-4" : "cols-5"}`} aria-label="Үндсэн цэс">
-          {tabs.map(({ id, Icon, href, label }) => {
-            const active =
-              id === "profile"
-                ? pathname === "/profile" || pathname.startsWith("/profile/")
-                : pathname === href || (href !== "/" && pathname.startsWith(href));
-            const text = locale === "mn" ? label.mn : label.en;
-            return (
-              <Link
-                key={id}
-                href={href}
-                prefetch
-                onTouchStart={() => {
-                  try { router.prefetch(href); } catch { /* noop */ }
-                }}
-                onClick={() => {
-                  void hapticImpact(ImpactStyle.Light);
-                  setBounceId(id);
-                  setTimeout(() => setBounceId(null), 320);
-                }}
-                className={`ios-tabbar__item press ${active ? "on" : ""}`}
-                aria-current={active ? "page" : undefined}
-              >
-                {active && (
-                  <motion.span
-                    layoutId="tab-pill"
-                    className="ios-tabbar__pill"
-                    transition={springNative}
-                  />
-                )}
-                <motion.span
-                  animate={bounceId === id ? { y: [0, -4, 0], scale: [1, 1.12, 1] } : { y: 0, scale: 1 }}
-                  transition={springNative}
+        <>
+          <div className="ios-dock-fade lg:hidden" aria-hidden />
+          <motion.nav
+            className={`ios-tabbar liquid-glass-dock lg:hidden ${tabs.length === 4 ? "cols-4" : "cols-5"} ${dockCompact ? "is-compact" : ""}`}
+            aria-label="Үндсэн цэс"
+            animate={{
+              height: dockCompact ? 52 : 64,
+              paddingTop: dockCompact ? 4 : 4,
+              paddingBottom: dockCompact ? 4 : 4,
+            }}
+            transition={springNative}
+          >
+            {tabs.map(({ id, Icon, href, label }) => {
+              const active =
+                id === "profile"
+                  ? pathname === "/profile" || pathname.startsWith("/profile/")
+                  : pathname === href || (href !== "/" && pathname.startsWith(href));
+              const text = locale === "mn" ? label.mn : label.en;
+              return (
+                <Link
+                  key={id}
+                  href={href}
+                  prefetch
+                  onTouchStart={() => {
+                    try { router.prefetch(href); } catch { /* noop */ }
+                  }}
+                  onClick={() => {
+                    void hapticImpact(ImpactStyle.Light);
+                    setBounceId(id);
+                    setTimeout(() => setBounceId(null), 320);
+                  }}
+                  className={`ios-tabbar__item glass-press ${active ? "on" : ""}`}
+                  aria-current={active ? "page" : undefined}
                 >
-                  <Icon size={24} strokeWidth={active ? 2 : 1.75} />
-                </motion.span>
-                <span className="ios-tabbar__label">{text}</span>
-              </Link>
-            );
-          })}
-        </nav>
+                  {active && (
+                    <motion.span
+                      layoutId="tab-pill"
+                      className="ios-tabbar__pill"
+                      transition={springNative}
+                    />
+                  )}
+                  <motion.span
+                    animate={bounceId === id ? { y: [0, -4, 0], scale: [1, 1.12, 1] } : { y: 0, scale: 1 }}
+                    transition={springNative}
+                  >
+                    <Icon size={dockCompact ? 26 : 24} strokeWidth={active ? 2 : 1.75} />
+                  </motion.span>
+                  <motion.span
+                    className="ios-tabbar__label"
+                    animate={{ opacity: dockCompact ? 0 : 1, height: dockCompact ? 0 : "auto" }}
+                    transition={{ duration: 0.18 }}
+                  >
+                    {text}
+                  </motion.span>
+                </Link>
+              );
+            })}
+          </motion.nav>
+        </>
       )}
 
       <AnimatePresence>
@@ -235,14 +274,11 @@ export default function MobileChrome() {
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="fixed right-3 z-[120] lg:hidden overflow-hidden"
+            transition={springNative}
+            className="ios-notif-panel liquid-glass-panel fixed right-3 z-[120] lg:hidden overflow-hidden"
             style={{
               top: "calc(env(safe-area-inset-top, 0px) + 52px)",
               width: "min(320px, calc(100vw - 24px))",
-              background: "var(--card)",
-              borderRadius: 20,
-              border: "0.5px solid var(--sep)",
             }}
           >
             <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: "0.5px solid var(--sep)" }}>
@@ -262,13 +298,13 @@ export default function MobileChrome() {
               <div className="px-4 py-4 space-y-3">
                 {[1, 2, 3].map((i) => <div key={i} className="ios-skel h-12" />)}
               </div>
-            ) : notifications.length === 0 ? (
+            ) : visibleNotifications.length === 0 ? (
               <div className="px-4 py-8 text-center">
                 <p className="ios-headline">Мэдэгдэл байхгүй</p>
                 <p className="ios-footnote mt-1">Шинэ мэдээлэл энд харагдана</p>
               </div>
             ) : (
-              notifications.slice(0, 8).map((n) => (
+              visibleNotifications.slice(0, 8).map((n) => (
                 <div key={n._id} className="flex items-start gap-3 px-4 py-3" style={{ borderTop: "0.5px solid var(--sep)" }}>
                   <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--blue-light)", color: "var(--blue)" }}>
                     <NotifIcon type={n.type} />

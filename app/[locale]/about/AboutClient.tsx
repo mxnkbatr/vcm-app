@@ -40,9 +40,9 @@ const VALUES = [
 ];
 
 const PROGRAMS = [
-  { emoji: "📚", name: "VCM EDU", desc: { mn: "Боловсролын хөтөлбөр", en: "Education Program" }, href: "/programs/edu", color: "var(--blue)" },
-  { emoji: "🤝", name: "AND Program", desc: { mn: "Хамтын ажиллагааны хөтөлбөр", en: "Collaboration Program" }, href: "/programs/and", color: "var(--emerald)" },
-  { emoji: "🏆", name: "V-CLUB", desc: { mn: "Клубын хөтөлбөр", en: "Club Program" }, href: "/programs/vclub", color: "var(--orange)" },
+  { emoji: "📚", name: "EDU", desc: { mn: "Боловсролын хөтөлбөр", en: "Education Program" }, href: "/programs/edu", color: "var(--blue)" },
+  { emoji: "🤝", name: "АНД", desc: { mn: "Нийгмийн халамжийн хөтөлбөр", en: "AND Program" }, href: "/programs/and", color: "var(--emerald)" },
+  { emoji: "🏆", name: "V-Club", desc: { mn: "Клубын хөтөлбөр", en: "Club Program" }, href: "/programs/vclub", color: "var(--orange)" },
 ];
 
 const HIGHLIGHTS = [

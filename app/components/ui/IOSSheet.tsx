@@ -46,7 +46,7 @@ export default function IOSSheet({
             role="dialog"
             aria-modal="true"
             aria-label={title}
-            className={`ios-sheet ${detent === "half" ? "ios-sheet--half" : ""}`}
+            className={`ios-sheet liquid-glass-sheet ${detent === "half" ? "ios-sheet--half" : ""}`}
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}

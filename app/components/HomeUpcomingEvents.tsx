@@ -12,20 +12,40 @@ import EmptyState from "./ui/EmptyState";
 type EventItem = {
   _id: string;
   title?: Record<string, string> | string;
-  date?: string;
+  date?: string | Date;
+  startDate?: string | Date;
+  eventDate?: string | Date;
+  timeString?: string;
   image?: string;
 };
 
-function parts(date?: string, lang?: string) {
-  if (!date) return { day: "—", month: "" };
-  const raw = typeof date === "string" ? date : String(date);
-  const normalized = raw.includes("T") ? raw : raw.replace(/-/g, "/");
+function resolveDate(item: EventItem): Date | null {
+  const raw = item.date ?? item.startDate ?? item.eventDate;
+  if (!raw) return null;
+  if (raw instanceof Date) {
+    return Number.isNaN(raw.getTime()) ? null : raw;
+  }
+  const s = String(raw).trim();
+  if (!s) return null;
+  // Prefer ISO; also accept "YYYY-MM-DD" / "YYYY/MM/DD"
+  const normalized = s.includes("T") || s.includes("Z") ? s : s.replace(/-/g, "/");
   const d = new Date(normalized);
-  if (Number.isNaN(d.getTime())) return { day: "—", month: "" };
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function parts(item: EventItem, lang?: string) {
+  const d = resolveDate(item);
+  if (!d) return { day: "—", month: "" };
   return {
     day: d.getDate().toString().padStart(2, "0"),
     month: d.toLocaleDateString(lang === "mn" ? "mn-MN" : "en-US", { month: "short" }),
   };
+}
+
+function startOfToday() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
 }
 
 export default function HomeUpcomingEvents({ limit = 8, query = "" }: { limit?: number; query?: string }) {
@@ -45,8 +65,9 @@ export default function HomeUpcomingEvents({ limit = 8, query = "" }: { limit?: 
         const res = await fetch("/api/events");
         if (res.ok) {
           const data = await res.json();
-          clientCache.set("/api/events", data);
-          setEvents(Array.isArray(data) ? data : []);
+          const list = Array.isArray(data) ? data : [];
+          clientCache.set("/api/events", list);
+          setEvents(list);
         }
       } catch {
         /* noop */
@@ -62,7 +83,7 @@ export default function HomeUpcomingEvents({ limit = 8, query = "" }: { limit?: 
       <div className="ios-carousel">
         {[1, 2, 3].map((i) => (
           <div key={i} className="ios-event-card">
-            <div className="ios-skel" style={{ aspectRatio: "16/10", borderRadius: 20 }} />
+            <div className="ios-skel" style={{ aspectRatio: "16/10", borderRadius: 24 }} />
             <div className="ios-skel h-4 mt-2 w-3/4" />
           </div>
         ))}
@@ -71,8 +92,17 @@ export default function HomeUpcomingEvents({ limit = 8, query = "" }: { limit?: 
   }
 
   const q = query.trim().toLowerCase();
+  const today = startOfToday().getTime();
   const upcoming = events
-    .filter((item) => !q || pickI18n(item.title as any, lang).toLowerCase().includes(q))
+    .filter((item) => !q || pickI18n(item.title, lang).toLowerCase().includes(q))
+    .sort((a, b) => {
+      const da = resolveDate(a)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+      const db = resolveDate(b)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+      // Prefer upcoming, then soonest overall
+      const ra = da >= today ? da : da + 1e15;
+      const rb = db >= today ? db : db + 1e15;
+      return ra - rb;
+    })
     .slice(0, limit);
 
   if (upcoming.length === 0) {
@@ -90,8 +120,8 @@ export default function HomeUpcomingEvents({ limit = 8, query = "" }: { limit?: 
   return (
     <div className="ios-carousel">
       {upcoming.map((item) => {
-        const title = pickI18n(item.title as any, lang) || "Арга хэмжээ";
-        const { day, month } = parts(item.date, lang);
+        const title = pickI18n(item.title, lang) || "Арга хэмжээ";
+        const { day, month } = parts(item, lang);
         return (
           <Link key={item._id} href={`/events/${item._id}`} className="ios-event-card press">
             <div className="ios-event-card__media">
