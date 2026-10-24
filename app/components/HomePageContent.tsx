@@ -98,7 +98,7 @@ export default function HomePageContent({
   );
   const mounted = useSyncExternalStore(subscribeClient, () => true, () => false);
   const nativeApp = mounted && isNativeApp();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const isSignedIn = mounted && status === "authenticated";
   const { data: dash } = useDashboard({ enabled: isSignedIn });
 
