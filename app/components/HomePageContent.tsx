@@ -67,6 +67,18 @@ function subscribeClient(onStoreChange: () => void) {
   return () => {};
 }
 
+function todayLabel() {
+  try {
+    return new Date().toLocaleDateString("mn-MN", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+    });
+  } catch {
+    return "";
+  }
+}
+
 export default function HomePageContent({
   shopItems,
   initialPrograms,
@@ -156,20 +168,25 @@ export default function HomePageContent({
     [initialBanners]
   );
 
+  const dateLine = todayLabel();
+
   return (
-    <PremiumPageShell className="home-dash ios26-page" padded>
+    <PremiumPageShell className="home-dash" padded>
       <motion.div variants={staggerContainer} initial="initial" animate="animate" className="home-sections">
         <motion.div variants={staggerItem}>
           <IOSLargeTitle title={greeting}>
-            <p className="ios-title" style={{ fontSize: 22 }}>{greeting}</p>
-            <p className="ios-subhead mt-1">{BRAND.taglineMn}</p>
+            <div className="home-greeting-glass">
+              <p className="home-greeting-glass__date">{dateLine}</p>
+              <p className="home-greeting-glass__hi">{greeting}</p>
+              <p className="home-greeting-glass__sub">{BRAND.taglineMn}</p>
+            </div>
           </IOSLargeTitle>
         </motion.div>
 
         <motion.div variants={staggerItem}>
           <button
             type="button"
-            className="vcm-search glass-chip flex items-center gap-2 w-full text-left press"
+            className="vcm-search ios26-search glass-chip flex items-center gap-2 w-full text-left press"
             onClick={() => window.dispatchEvent(new CustomEvent("vcm:open-search"))}
           >
             <Search size={18} strokeWidth={1.75} color="var(--label2)" />
@@ -182,6 +199,20 @@ export default function HomePageContent({
         <motion.div variants={staggerItem}>
           <HomeHeroCarousel banners={heroBanners} fallback={featured} />
         </motion.div>
+
+        {/* Mobile quick glass chips — dock covers main tabs; these jump to key actions */}
+        <motion.section variants={staggerItem} className="lg:hidden">
+          <div className="ios-quick-chips">
+            {quick.map(({ id, href, label, icon: Icon }) => (
+              <Link key={id} href={href} prefetch className="ios-quick-chip glass-press press">
+                <span className="ios-quick-chip__icon">
+                  <Icon size={18} strokeWidth={1.75} />
+                </span>
+                <span className="ios-quick-chip__label">{label}</span>
+              </Link>
+            ))}
+          </div>
+        </motion.section>
 
         <motion.section variants={staggerItem}>
           <StatCards
@@ -204,18 +235,17 @@ export default function HomePageContent({
               ]}
             />
             {!apps && !events && (
-              <Link href="/programs/apply" className="btn btn-primary glass-press mt-4 inline-flex w-full items-center justify-center">
+              <Link href="/programs/apply" prefetch className="btn btn-primary glass-press mt-4 inline-flex w-full items-center justify-center">
                 Эхлэх
               </Link>
             )}
           </motion.section>
         )}
 
-        {/* Desktop-only quick links — mobile uses the glass dock instead */}
         <motion.section variants={staggerItem} className="hidden lg:block">
           <div className="ios-quick">
             {quick.map(({ id, href, label, icon: Icon }) => (
-              <Link key={id} href={href} className="ios-quick__item glass-press">
+              <Link key={id} href={href} prefetch className="ios-quick__item glass-press">
                 <span className="ios-quick__icon">
                   <Icon size={22} strokeWidth={1.75} />
                 </span>

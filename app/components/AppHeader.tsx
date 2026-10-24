@@ -45,7 +45,7 @@ export default function AppHeader({
           initial={false}
           animate={{
             opacity: compact ? 1 : 0,
-            backdropFilter: compact ? "blur(20px) saturate(180%)" : "blur(0px)",
+            backdropFilter: compact ? "blur(28px) saturate(190%)" : "blur(0px)",
           }}
           transition={{ duration: 0.22 }}
           aria-hidden
@@ -69,16 +69,16 @@ export default function AppHeader({
             </motion.span>
           )}
           <div className="app-header__actions">
-            <button type="button" className="app-header__btn" aria-label="Хайх" onClick={onSearch}>
-              <Search size={20} strokeWidth={1.75} />
+            <button type="button" className="app-header__btn app-header__glass-btn press" aria-label="Хайх" onClick={onSearch}>
+              <Search size={18} strokeWidth={1.75} />
             </button>
-            <button type="button" className="app-header__btn" aria-label="Мэдэгдэл" onClick={onBell}>
-              <Bell size={20} strokeWidth={1.75} />
+            <button type="button" className="app-header__btn app-header__glass-btn press" aria-label="Мэдэгдэл" onClick={onBell}>
+              <Bell size={18} strokeWidth={1.75} />
               {unreadCount > 0 && (
                 <span className="ios-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
               )}
             </button>
-            <Link href="/profile" prefetch className="app-header__btn" aria-label="Профайл">
+            <Link href="/profile" prefetch className="app-header__btn app-header__glass-btn press" aria-label="Профайл">
               <span className="ios-avatar-btn">{avatarInitial}</span>
             </Link>
           </div>
@@ -105,7 +105,7 @@ export default function AppHeader({
       <div className="app-header__bar app-header__bar--detail">
         <button
           type="button"
-          className="app-header__round"
+          className="app-header__round press"
           aria-label="Буцах"
           onClick={() => router.back()}
         >
@@ -125,12 +125,12 @@ export default function AppHeader({
           )}
         </AnimatePresence>
         <div className="app-header__actions">
-          <button type="button" className="app-header__round" aria-label="Хуваалцах" onClick={onShare}>
+          <button type="button" className="app-header__round press" aria-label="Хуваалцах" onClick={onShare}>
             <Share2 size={18} strokeWidth={1.75} />
           </button>
           <button
             type="button"
-            className={`app-header__round ${bookmarked ? "is-on" : ""}`}
+            className={`app-header__round press ${bookmarked ? "is-on" : ""}`}
             aria-label="Хадгалах"
             onClick={onBookmark}
           >

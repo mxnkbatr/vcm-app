@@ -8,6 +8,7 @@ type PremiumPageShellProps = {
   padded?: boolean;
 };
 
+/** Shared page chrome — transparent so liquid mesh shows through glass cards. */
 export default function PremiumPageShell({
   children,
   className = "",
@@ -16,7 +17,7 @@ export default function PremiumPageShell({
   padded = true,
 }: PremiumPageShellProps) {
   return (
-    <div className={`ios-page ${bottomPad ? "" : "!pb-0"} ${className}`}>
+    <div className={`ios-page ios26-page ${bottomPad ? "" : "!pb-0"} ${className}`}>
       {!immersive && <div className="native-header-spacer lg:hidden" aria-hidden />}
       {padded ? <div className="ios-page__pad">{children}</div> : children}
     </div>
