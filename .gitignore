@@ -52,3 +52,5 @@ next-env.d.ts
 target/
 **/*.rs.bk
 rust-service/target/
+
+lighthouse-report.json
