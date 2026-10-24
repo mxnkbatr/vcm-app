@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState, useSyncExternalStore } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingBag, SlidersHorizontal } from "lucide-react";
 import { staggerContainer, staggerItem } from "@/lib/motion";
@@ -29,6 +29,8 @@ export default function ShopClient({
   isHorizontal = false,
   embedded = false,
 }: {
+  // Shop catalog rows come from mixed API shapes
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   items?: any[];
   locale?: string;
   isHorizontal?: boolean;
@@ -36,22 +38,23 @@ export default function ShopClient({
 }) {
   const [filter, setFilter] = useState("all");
   const [sheet, setSheet] = useState(false);
-  const [nativeApp, setNativeApp] = useState(false);
-
-  useEffect(() => {
-    setNativeApp(isNativeApp());
-  }, []);
+  const ready = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+  const nativeApp = ready && isNativeApp();
 
   const catalog = useMemo(
     () => items.filter((item) => isVisibleShopItem(item, locale)),
     [items, locale]
   );
   const categories = useMemo(
-    () => ["all", ...Array.from(new Set(catalog.map((item: any) => item.category).filter(Boolean)))],
+    () => ["all", ...Array.from(new Set(catalog.map((item) => String(item.category || "")).filter(Boolean)))],
     [catalog]
   );
   const filteredItems = useMemo(
-    () => catalog.filter((item: any) => filter === "all" || item.category === filter),
+    () => catalog.filter((item) => filter === "all" || item.category === filter),
     [catalog, filter]
   );
 
@@ -73,9 +76,9 @@ export default function ShopClient({
     if (!row.length) return null;
     return (
       <>
-        {row.map((item: any, i: number) => (
+        {row.map((item, i) => (
           <ShopProductCard
-            key={item._id}
+            key={String(item._id)}
             item={item}
             locale={locale}
             index={i}
@@ -91,17 +94,17 @@ export default function ShopClient({
     if (nativeApp || catalog.length === 0) return null;
     return (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {catalog.slice(0, 4).map((item: any, i: number) => (
-          <ShopProductCard key={item._id} item={item} locale={locale} index={i} animated={false} />
+        {catalog.slice(0, 4).map((item, i) => (
+          <ShopProductCard key={String(item._id)} item={item} locale={locale} index={i} animated={false} />
         ))}
       </div>
     );
   }
 
   return (
-    <PremiumPageShell>
+    <PremiumPageShell className="ios26-page">
       <motion.div
-        className="space-y-4 pt-2"
+        className="home-sections pt-1"
         variants={staggerContainer}
         initial="initial"
         animate="animate"
@@ -126,7 +129,7 @@ export default function ShopClient({
 
         <IOSSheet open={sheet} title={locale === "mn" ? "Ангилал" : "Category"} onClose={() => setSheet(false)} detent="half">
           <div className="ios-list">
-            {categories.map((cat: any) => (
+            {categories.map((cat) => (
               <button
                 key={cat}
                 type="button"
@@ -149,8 +152,8 @@ export default function ShopClient({
           {filteredItems.length > 0 ? (
             <motion.div layout className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               <AnimatePresence mode="popLayout">
-                {filteredItems.map((item: any, i: number) => (
-                  <ShopProductCard key={item._id} item={item} locale={locale} index={i} />
+                {filteredItems.map((item, i) => (
+                  <ShopProductCard key={String(item._id)} item={item} locale={locale} index={i} />
                 ))}
               </AnimatePresence>
             </motion.div>

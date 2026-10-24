@@ -198,7 +198,7 @@ export default function NotificationsPage() {
 
   if (status === "unauthenticated") {
     return (
-      <PremiumPageShell>
+      <PremiumPageShell className="ios26-page">
         <IOSLargeTitle title="Мэдэгдэл" />
         <div className="notif-empty">
           <Bell size={48} strokeWidth={1.5} style={{ color: "var(--label3)" }} />
@@ -213,7 +213,7 @@ export default function NotificationsPage() {
   }
 
   return (
-    <PremiumPageShell>
+    <PremiumPageShell className="ios26-page">
       <div className="flex items-start justify-between gap-3">
         <IOSLargeTitle title="Мэдэгдэл" />
         {unread.length > 0 && (

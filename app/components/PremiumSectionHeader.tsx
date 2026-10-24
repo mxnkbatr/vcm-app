@@ -7,7 +7,7 @@ export default function PremiumSectionHeader({
   title,
   subtitle,
   href,
-  linkLabel = "Бүгд →",
+  linkLabel = "Бүгд",
 }: {
   title: string;
   subtitle?: string;
@@ -15,17 +15,17 @@ export default function PremiumSectionHeader({
   linkLabel?: string;
 }) {
   return (
-    <div className="premium-section-header">
+    <div className="ios26-section-head">
       <div className="min-w-0">
-        <h2 className="premium-section-header__title">{title}</h2>
-        {subtitle && <p className="premium-section-header__sub">{subtitle}</p>}
+        <h2 className="ios26-section-head__title">{title}</h2>
+        {subtitle ? <p className="ios26-section-head__sub">{subtitle}</p> : null}
       </div>
-      {href && (
-        <Link href={href} className="premium-section-header__link press glass-chip">
+      {href ? (
+        <Link href={href} className="ios26-section-head__link press">
           <span>{linkLabel.replace(/\s*→\s*$/, "")}</span>
-          <ChevronRight size={14} strokeWidth={2.5} aria-hidden />
+          <ChevronRight size={15} strokeWidth={2.4} aria-hidden />
         </Link>
-      )}
+      ) : null}
     </div>
   );
 }

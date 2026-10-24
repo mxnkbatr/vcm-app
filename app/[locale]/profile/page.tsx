@@ -114,8 +114,8 @@ export default function ProfilePage() {
     ((dash?.attendedEvents?.length || 0) * 4) + ((dash?.applications?.length || 0) * 2);
 
   return (
-    <PremiumPageShell>
-      <div className="space-y-5 pb-6">
+    <PremiumPageShell className="ios26-page">
+      <div className="home-sections pb-6">
         <AnimatePresence>
           {toast && (
             <motion.div
@@ -132,19 +132,14 @@ export default function ProfilePage() {
 
         <IOSLargeTitle title="Профайл" />
 
-        <div className="flex items-center gap-4 px-1">
-          <div
-            className="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-bold"
-            style={{ background: "var(--blue)" }}
-          >
-            {initials}
-          </div>
+        <div className="ios26-profile-hero">
+          <div className="ios26-profile-hero__avatar">{initials}</div>
           <div className="min-w-0 flex-1">
             <p className="ios-title" style={{ fontSize: 22 }}>{userData.fullName}</p>
-            <p className="ios-footnote">{userData.email || userData.phone || "—"}</p>
+            <p className="ios-subhead mt-0.5">{userData.email || userData.phone || "—"}</p>
           </div>
-          <button type="button" onClick={() => setIsEditing(true)} className="ios-icon-btn press" aria-label="Засах">
-            <Edit3 size={20} strokeWidth={1.75} />
+          <button type="button" onClick={() => setIsEditing(true)} className="app-header__round press" aria-label="Засах">
+            <Edit3 size={18} strokeWidth={1.75} />
           </button>
         </div>
 

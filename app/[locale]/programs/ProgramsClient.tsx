@@ -5,7 +5,7 @@ import { Link } from "@/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import {
-  Clock, Globe, CheckCircle2, Star, Users, BookOpen, Heart, Zap,
+  Clock, Globe, Star, Users, BookOpen, Heart, Zap,
   GraduationCap, CalendarDays, MapPin, Sparkles, ChevronLeft,
 } from "lucide-react";
 import { useSession } from "@/lib/hooks/useSession";
@@ -13,6 +13,7 @@ import PremiumPageShell from "@/app/components/PremiumPageShell";
 import ProgramGlyph from "@/app/components/ui/ProgramGlyph";
 import IOSLargeTitle from "@/app/components/ui/IOSLargeTitle";
 import IOSSegmented from "@/app/components/ui/IOSSegmented";
+import IOS26Card from "@/app/components/ui/IOS26Card";
 import { programColorsByCode, PROGRAM_COLORS } from "@/lib/color-system";
 import { springNative } from "@/lib/motion";
 
@@ -90,25 +91,41 @@ const FALLBACK_PROGRAMS = [
 
 type Prog = (typeof FALLBACK_PROGRAMS)[0];
 
-function mapApiToProg(p: any): Prog {
+function mapApiToProg(raw: unknown): Prog {
+  const p = raw as {
+    code?: string;
+    slug?: string;
+    color?: string;
+    gradFrom?: string;
+    gradTo?: string;
+    name?: { mn?: string };
+    description?: { mn?: string };
+    href?: string;
+    duration?: string;
+    location?: string;
+    slots?: number;
+    tags?: string[];
+    features?: Array<{ mn?: string; en?: string }>;
+    why?: { mn?: string; en?: string };
+  };
   const icons = [GraduationCap, BookOpen, Users, Star, Globe];
-  const colors = programColorsByCode(p.code || p.slug);
+  const colors = programColorsByCode(p.code || p.slug || "");
   return {
-    id: p.code,
+    id: p.code || "PROG",
     color: p.color || colors.main,
     gradFrom: p.gradFrom || colors.gradFrom,
     gradTo: p.gradTo || colors.gradTo,
     iconBg: colors.soft,
     iconColor: p.color || colors.main,
-    nameKey: p.name?.mn || p.code,
+    nameKey: p.name?.mn || p.code || "",
     descKey: p.description?.mn || "",
     href: p.href || `/programs/${p.slug}`,
     duration: p.duration || "",
     location: p.location || "",
     slots: p.slots || 0,
     tags: p.tags || [],
-    features: (p.features || []).map((f: any, i: number) => ({
-      I: icons[i % icons.length],
+    features: (p.features || []).map((f, i) => ({
+      I: icons[i % icons.length]!,
       t: f.mn || f.en || "",
     })),
     why: p.why?.mn || p.why?.en || "",
@@ -122,33 +139,31 @@ function programDesc(p: Prog, nt: (k: string) => string) {
   return p.descKey.startsWith("prog_") ? nt(p.descKey) : p.descKey;
 }
 
-function ProgCard({ p, onTap, nt }: { p: Prog; onTap: () => void; nt: any }) {
+function ProgCard({ p, onTap, nt }: { p: Prog; onTap: () => void; nt: (k: string) => string }) {
   return (
-    <motion.button
-      type="button"
-      onClick={onTap}
-      whileTap={{ scale: 0.97 }}
-      transition={springNative}
-      className="w-full text-left overflow-hidden rounded-[20px] bg-[var(--card)] border-[0.5px] border-[var(--sep)]"
-    >
-      <div className="relative h-36" style={{ background: `linear-gradient(145deg, ${p.gradFrom}, ${p.gradTo})` }}>
+    <IOS26Card onClick={onTap}>
+      <div
+        className="ios26-card__media"
+        style={{ background: `linear-gradient(145deg, ${p.gradFrom}, ${p.gradTo})` }}
+      >
         <div className="absolute inset-0 flex items-center justify-center text-white/90">
           <ProgramGlyph id={p.id} size={48} />
         </div>
-        <div className="absolute bottom-3 left-4 right-4 text-white">
-          <p className="text-[12px] font-semibold uppercase tracking-wide opacity-80">{p.id}</p>
-          <p className="text-[20px] font-bold leading-tight">{programTitle(p, nt)}</p>
+        <div className="ios26-card__shade" />
+        <div className="absolute bottom-3 left-4 right-4 text-white z-[1]">
+          <p className="text-[11px] font-semibold uppercase tracking-wider opacity-85">{p.id}</p>
+          <p className="text-[20px] font-bold leading-tight mt-0.5">{programTitle(p, nt)}</p>
         </div>
       </div>
-      <div className="px-4 py-3 flex items-center gap-3 ios-footnote">
+      <div className="ios26-card__body ios26-card__meta">
         <span className="inline-flex items-center gap-1"><Clock size={14} strokeWidth={1.75} />{p.duration}</span>
         <span className="inline-flex items-center gap-1"><MapPin size={14} strokeWidth={1.75} />{p.location}</span>
       </div>
-    </motion.button>
+    </IOS26Card>
   );
 }
 
-function ProgDetail({ p, onBack, nt, signed }: { p: Prog; onBack: () => void; nt: any; signed: boolean }) {
+function ProgDetail({ p, onBack, nt, signed }: { p: Prog; onBack: () => void; nt: (k: string) => string; signed: boolean }) {
   return (
     <motion.div
       key="detail"
@@ -206,7 +221,7 @@ function ProgDetail({ p, onBack, nt, signed }: { p: Prog; onBack: () => void; nt
   );
 }
 
-export default function ProgramsClient({ initialPrograms }: { initialPrograms?: any[] }) {
+export default function ProgramsClient({ initialPrograms }: { initialPrograms?: unknown[] }) {
   const nt = useTranslations("navbar");
   const { status } = useSession();
   const signed = status === "authenticated";
@@ -233,11 +248,13 @@ export default function ProgramsClient({ initialPrograms }: { initialPrograms?: 
   ];
 
   return (
-    <PremiumPageShell>
+    <PremiumPageShell className="ios26-page">
       <AnimatePresence mode="wait">
         {!sel ? (
-          <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
-            <IOSLargeTitle title="Хөтөлбөрүүд" />
+          <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="home-sections">
+            <IOSLargeTitle title="Хөтөлбөрүүд">
+              <p className="ios-subhead mt-1">EDU · AND · V-Club — танд тохирохыг сонго</p>
+            </IOSLargeTitle>
             <IOSSegmented options={segOptions} value={filter} onChange={setFilter} />
             <div className="space-y-3">
               {list.map((p) => (
@@ -245,9 +262,9 @@ export default function ProgramsClient({ initialPrograms }: { initialPrograms?: 
               ))}
             </div>
             {!signed && (
-              <div className="ios-list p-4">
+              <div className="ios26-cta-banner">
                 <p className="ios-headline">Нэгдэхэд бэлэн үү?</p>
-                <p className="ios-footnote mt-1 mb-3">Бүртгүүлж хөтөлбөрт өргөдлөө гаргаарай</p>
+                <p className="ios-subhead mt-1 mb-3">Бүртгүүлж хөтөлбөрт өргөдлөө гаргаарай</p>
                 <Link href="/register" className="btn btn-primary inline-flex w-full items-center justify-center">
                   Эхлэх
                 </Link>

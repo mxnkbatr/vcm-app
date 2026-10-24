@@ -157,7 +157,7 @@ export default function HomePageContent({
   );
 
   return (
-    <PremiumPageShell className="home-dash" padded>
+    <PremiumPageShell className="home-dash ios26-page" padded>
       <motion.div variants={staggerContainer} initial="initial" animate="animate" className="home-sections">
         <motion.div variants={staggerItem}>
           <IOSLargeTitle title={greeting}>

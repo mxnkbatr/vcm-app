@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect, useSyncExternalStore } from "react";
 import Image from "next/image";
-import { Link } from "@/navigation";
-import { motion } from "framer-motion";
 import { Clock, Sparkles, TrendingUp, ChevronRight, PlayCircle, BookOpen } from "lucide-react";
 import { useLocale } from "next-intl";
 import Skeleton from "@/app/components/Skeleton";
@@ -13,7 +11,7 @@ import { isNativeApp } from "@/lib/native-perf";
 import IOSLargeTitle from "@/app/components/ui/IOSLargeTitle";
 import IOSSegmented from "@/app/components/ui/IOSSegmented";
 import EmptyState from "@/app/components/ui/EmptyState";
-import { springNative } from "@/lib/motion";
+import IOS26Card from "@/app/components/ui/IOS26Card";
 
 type LmsI18n = { en: string; mn: string; de?: string };
 type Course = {
@@ -44,42 +42,38 @@ function CourseCard({ c, locale }: { c: Course; locale: string }) {
   const isFree = isCourseFree(c);
 
   return (
-    <motion.div whileTap={{ scale: 0.97 }} transition={springNative}>
-      <Link href={`/lessons/${c.slug}`} className="press block overflow-hidden rounded-[20px] bg-[var(--card)] border-[0.5px] border-[var(--sep)]">
-        <div className="relative h-36 bg-[var(--fill2)]">
-          {!!c.thumbnailUrl && <Image src={c.thumbnailUrl} alt={title} fill className="object-cover" />}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-          <div className="absolute top-3 left-3">
-            <span
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold"
-              style={{
-                background: isFree ? "var(--emerald-dim)" : "var(--orange-dim)",
-                color: isFree ? "var(--emerald)" : "var(--orange)",
-              }}
-            >
-              {isFree ? <Sparkles size={10} strokeWidth={1.75} /> : <TrendingUp size={10} strokeWidth={1.75} />}
-              {isFree ? (locale === "mn" ? "Үнэгүй" : "Free") : locale === "mn" ? "Төлбөртэй" : "Paid"}
-            </span>
-          </div>
-          <div className="absolute bottom-3 right-3 w-9 h-9 rounded-full flex items-center justify-center" style={{ background: "rgba(0,0,0,0.45)" }}>
-            <PlayCircle size={18} color="white" strokeWidth={1.75} />
-          </div>
+    <IOS26Card href={`/lessons/${c.slug}`}>
+      <div className="ios26-card__media ios26-card__media--sm">
+        {!!c.thumbnailUrl && <Image src={c.thumbnailUrl} alt={title} fill className="object-cover" />}
+        <div className="ios26-card__shade" />
+        <span
+          className="ios26-card__chip"
+          style={{
+            background: isFree ? "var(--emerald-dim)" : "var(--orange-dim)",
+            color: isFree ? "var(--emerald)" : "var(--orange)",
+          }}
+        >
+          {isFree ? <Sparkles size={10} strokeWidth={1.75} /> : <TrendingUp size={10} strokeWidth={1.75} />}
+          {isFree ? (locale === "mn" ? "Үнэгүй" : "Free") : locale === "mn" ? "Төлбөртэй" : "Paid"}
+        </span>
+        <div className="ios26-card__play">
+          <PlayCircle size={18} color="white" strokeWidth={1.75} />
         </div>
-        <div className="p-4 space-y-1">
-          <h3 className="ios-headline line-clamp-1">{title}</h3>
-          <p className="ios-footnote line-clamp-2">{desc}</p>
-          <div className="flex items-center justify-between pt-2">
-            <span className="ios-caption inline-flex items-center gap-1">
-              <Clock size={12} strokeWidth={1.75} />
-              {isFree ? (locale === "mn" ? "Шууд үзэх" : "Instant access") : locale === "mn" ? "Төлбөр шаардлагатай" : "Payment required"}
-            </span>
-            <span className="inline-flex items-center gap-1 ios-footnote" style={{ color: "var(--blue)", fontWeight: 600 }}>
-              {locale === "mn" ? "Нээх" : "Open"} <ChevronRight size={14} strokeWidth={1.75} />
-            </span>
-          </div>
+      </div>
+      <div className="ios26-card__body">
+        <h3 className="ios26-card__title">{title}</h3>
+        <p className="ios26-card__desc">{desc}</p>
+        <div className="ios26-card__meta">
+          <span className="inline-flex items-center gap-1">
+            <Clock size={12} strokeWidth={1.75} />
+            {isFree ? (locale === "mn" ? "Шууд үзэх" : "Instant access") : locale === "mn" ? "Төлбөр шаардлагатай" : "Payment required"}
+          </span>
+          <span className="inline-flex items-center gap-1" style={{ color: "var(--blue)", fontWeight: 600 }}>
+            {locale === "mn" ? "Нээх" : "Open"} <ChevronRight size={14} strokeWidth={1.75} />
+          </span>
         </div>
-      </Link>
-    </motion.div>
+      </div>
+    </IOS26Card>
   );
 }
 
@@ -156,10 +150,10 @@ export default function LessonsClient({ initialCourses }: { initialCourses?: Cou
   }
 
   return (
-    <PremiumPageShell>
-      <div className="space-y-4">
+    <PremiumPageShell className="ios26-page">
+      <div className="home-sections">
         <IOSLargeTitle title={locale === "mn" ? "Сургалтууд" : "Courses"}>
-          <p className="ios-footnote mt-1">
+          <p className="ios-subhead mt-1">
             {courses.length} {locale === "mn" ? "курс байна" : "courses"}
           </p>
         </IOSLargeTitle>

@@ -1,7 +1,9 @@
 "use client";
 
 import { Link } from "@/navigation";
+import { Globe } from "lucide-react";
 import PremiumPageShell from "@/app/components/PremiumPageShell";
+import EmptyState from "@/app/components/ui/EmptyState";
 
 export default function NativeFeatureUnavailable({
   locale = "mn",
@@ -18,12 +20,17 @@ export default function NativeFeatureUnavailable({
 }) {
   const mn = locale === "mn";
   return (
-    <PremiumPageShell>
-      <div className="premium-empty-state pt-10">
-        <p className="premium-empty-state__title">{mn ? titleMn : titleEn}</p>
-        <p className="premium-empty-state__sub">{mn ? subMn : subEn}</p>
-        <Link href="/" className="btn btn-secondary btn-sm mt-4 press">
-          {mn ? "Нүүр рүү" : "Back home"}
+    <PremiumPageShell className="ios26-page">
+      <EmptyState
+        icon={Globe}
+        title={mn ? titleMn : titleEn}
+        description={mn ? subMn : subEn}
+        actionLabel={mn ? "Нүүр рүү" : "Back home"}
+        href="/"
+      />
+      <div className="text-center mt-2">
+        <Link href="/" className="ios-subhead press" style={{ color: "var(--blue)" }}>
+          {mn ? "Нүүр рүү буцах" : "Return home"}
         </Link>
       </div>
     </PremiumPageShell>
