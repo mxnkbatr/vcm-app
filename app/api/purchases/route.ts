@@ -1,127 +1,77 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { connectToDB } from "@/lib/db";
 import Purchase from "@/lib/models/Purchase";
-import PromoCode from "@/lib/models/PromoCode";
-import ShoppingItem from "@/lib/models/ShoppingItem";
-import { validatePromoForShop, incrementPromoUsage } from "@/lib/promo";
+import { getAuthSession, getAuthUserId } from "@/lib/authHelpers";
+import { parseJsonBody } from "@/lib/api/validate";
+import { jsonError } from "@/lib/api/errors";
+import { createShopPurchaseInvoice } from "@/lib/shop-payment";
+import { rateLimit } from "@/lib/security/rateLimit";
 
-export async function POST(req: Request) {
-  try {
-    await connectToDB();
-    const data = await req.json();
+export const dynamic = "force-dynamic";
 
-    const { itemId, phoneNumber, amount, promoCode } = data;
-
-    if (!itemId || !phoneNumber || amount === undefined) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-    }
-
-    let finalAmount = Number(amount);
-    let originalAmount = finalAmount;
-    let discountAmount = 0;
-    let promoId: string | undefined;
-
-    if (promoCode) {
-      const promo = await PromoCode.findOne({ code: String(promoCode).trim().toUpperCase() }).lean();
-      const item = await ShoppingItem.findById(itemId).lean();
-      if (!promo || !item) {
-        return NextResponse.json({ error: "Промо код буруу байна." }, { status: 400 });
-      }
-      const result = validatePromoForShop(promo as any, [
-        { id: String(item._id), price: item.price, quantity: 1 },
-      ]);
-      if (!result.valid) {
-        return NextResponse.json({ error: result.error }, { status: 400 });
-      }
-      originalAmount = item.price;
-      discountAmount = result.discountAmount;
-      finalAmount = result.finalAmount;
-      promoId = result.promoId;
-    }
-
-    const newPurchase = new Purchase({
-      itemId,
-      phoneNumber,
-      amount: finalAmount,
-      originalAmount,
-      discountAmount,
-      promoCode: promoCode ? String(promoCode).trim().toUpperCase() : undefined,
-      promoId,
-      status: "pending",
-      paymentMethod: "QPay",
-    });
-
-    await newPurchase.save();
-
-    // 2. QPay Authentication
-    const basicAuth = Buffer.from(`${process.env.QPAY_USERNAME}:${process.env.QPAY_PASSWORD}`).toString('base64');
-    const authRes = await fetch(`${process.env.QPAY_BASE_URL}/v2/auth/token`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Basic ${basicAuth}`,
-        "Content-Type": "application/json"
-      }
-    });
-
-    if (!authRes.ok) {
-      console.error("QPay auth failed:", await authRes.text());
-      throw new Error("Failed to authenticate with QPay");
-    }
-
-    const authData = await authRes.json();
-    const accessToken = authData.access_token;
-
-    // 3. QPay Create Invoice
-    const invoiceRes = await fetch(`${process.env.QPAY_BASE_URL}/v2/invoice`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${accessToken}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        invoice_code: process.env.QPAY_INVOICE_CODE,
-        sender_invoice_no: newPurchase._id.toString(),
-        invoice_receiver_code: phoneNumber,
-        invoice_description: "VCM Shop Purchase",
-        amount: finalAmount
-      })
-    });
-
-    if (!invoiceRes.ok) {
-      console.error("QPay invoice failed:", await invoiceRes.text());
-      throw new Error("Failed to create QPay invoice");
-    }
-
-    const invoiceData = await invoiceRes.json();
-
-    if (promoId) {
-      await incrementPromoUsage(promoId);
-    }
-
-    return NextResponse.json({
-      message: "Invoice created successfully", 
-      purchase: newPurchase,
-      qpay: invoiceData
-    }, { status: 201 });
-  } catch (error: any) {
-    console.error("Error processing purchase:", error);
-    return NextResponse.json({ error: error.message || "Failed to process purchase" }, { status: 500 });
-  }
-}
+const bodySchema = z.object({
+  itemId: z.string().min(1),
+  quantity: z.coerce.number().int().min(1).max(99).default(1),
+  phoneNumber: z.string().min(8).max(32),
+  promoCode: z.string().max(64).optional(),
+});
 
 export async function GET() {
   try {
+    const session = await getAuthSession();
+    if (!session?.userId) return jsonError(401, "Unauthorized");
+
     await connectToDB();
-    
-    // Fetch purchases, populate itemId to get product details
-    const purchases = await Purchase.find()
-      .populate("itemId", "name price image category")
+    const isAdmin = session.role === "admin" || session.role === "manager";
+    const filter = isAdmin ? {} : { userId: session.userId };
+    const purchases = await Purchase.find(filter)
       .sort({ createdAt: -1 })
+      .limit(100)
+      .populate("itemId")
       .lean();
 
     return NextResponse.json(purchases);
-  } catch (error: any) {
-    console.error("Error fetching purchases:", error);
-    return NextResponse.json({ error: error.message || "Failed to fetch purchases" }, { status: 500 });
+  } catch (e) {
+    return jsonError(500, "Failed to fetch purchases", e);
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const userId = await getAuthUserId();
+    if (!userId) return jsonError(401, "Unauthorized");
+
+    const rl = rateLimit({ key: `shop-pay:${userId}`, limit: 20, windowMs: 60_000 });
+    if (!rl.ok) return jsonError(429, "Too many requests");
+
+    const parsed = await parseJsonBody(req, bodySchema);
+    if ("error" in parsed) return parsed.error;
+
+    const result = await createShopPurchaseInvoice({
+      userId,
+      lines: [{ itemId: parsed.data.itemId, quantity: parsed.data.quantity }],
+      phoneNumber: parsed.data.phoneNumber,
+      promoCode: parsed.data.promoCode,
+      description: "VCM Shop Purchase",
+    });
+
+    return NextResponse.json({
+      purchase: {
+        _id: result.purchase._id,
+        amount: result.finalAmount,
+        status: "pending",
+        invoiceId: result.invoiceId,
+      },
+      qpay: result.qpay,
+    });
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : "";
+    if (msg === "ITEM_NOT_FOUND") return jsonError(400, "Item not found");
+    if (msg === "PROMO_NOT_FOUND") return jsonError(400, "Invalid promo");
+    if (msg && !msg.includes("QPay") && msg.length < 120) {
+      return jsonError(400, msg);
+    }
+    return jsonError(500, "Failed to create purchase", e);
   }
 }

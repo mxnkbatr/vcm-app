@@ -55,7 +55,7 @@ export async function qpayCreateInvoice({
   return invoiceRes.json();
 }
 
-export async function qpayCheckInvoicePaid(invoiceId: string) {
+export async function qpayCheckInvoicePaid(invoiceId: string, minAmount = 0) {
   const accessToken = await qpayGetAccessToken();
   const checkRes = await fetch(`${process.env.QPAY_BASE_URL}/v2/payment/check`, {
     method: "POST",
@@ -75,14 +75,21 @@ export async function qpayCheckInvoicePaid(invoiceId: string) {
   }
 
   const checkData = await checkRes.json();
+  const paidAmount = Number(checkData.paid_amount || 0);
+  const hasPaidRow =
+    checkData.count > 0 &&
+    checkData.rows?.some(
+      (row: any) =>
+        row.payment_status === "PAID" || row.payment_status === "SUCCESS"
+    );
+  const required = Math.max(0, Number(minAmount) || 0);
+  // Shop payments pass minAmount; require PAID row and full amount.
+  // LMS legacy (minAmount=0): PAID row or any positive paid_amount.
   const isPaid =
-    (checkData.count > 0 &&
-      checkData.rows?.some(
-        (row: any) =>
-          row.payment_status === "PAID" || row.payment_status === "SUCCESS"
-      )) ||
-    (checkData.paid_amount || 0) > 0;
+    required > 0
+      ? Boolean(hasPaidRow && paidAmount >= required)
+      : Boolean(hasPaidRow || paidAmount > 0);
 
-  return { isPaid: !!isPaid, raw: checkData };
+  return { isPaid, paidAmount, raw: checkData };
 }
 

@@ -27,7 +27,10 @@ export async function POST(req: Request) {
     if (!payment) return NextResponse.json({ error: "Payment not found" }, { status: 404 });
     if (payment.userId.toString() !== userId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-    const { isPaid, raw } = await qpayCheckInvoicePaid(parsed.data.invoiceId);
+    const { isPaid, raw } = await qpayCheckInvoicePaid(
+      parsed.data.invoiceId,
+      Number(payment.amount) || 0
+    );
     if (!isPaid) return NextResponse.json({ status: "pending", data: raw }, { status: 200 });
 
     payment.status = "completed";

@@ -358,14 +358,17 @@ export default function ItemClient({ item, locale = "en" }: { item: any; locale:
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
                     itemId: item._id,
+                    quantity: 1,
                     phoneNumber,
-                    amount: payAmount,
                     promoCode: appliedPromo?.code,
                   }),
                 });
                 const data = await res.json();
                 if (res.ok) {
-                  setQpayResponse(data.qpay);
+                  setQpayResponse({
+                    ...data.qpay,
+                    invoice_id: data.purchase?.invoiceId || data.qpay?.invoice_id,
+                  });
                   setActivePurchaseId(data.purchase._id);
                   setShowCheckout(false);
                   setCheckoutStep("qpay");
@@ -399,7 +402,18 @@ export default function ItemClient({ item, locale = "en" }: { item: any; locale:
           onConfirm={async () => {
             setIsProcessing(true);
             try {
-              const res = await fetch(`/api/purchases/${activePurchaseId}/check`, { method: "POST" });
+              const invoiceId =
+                qpayResponse?.invoice_id ||
+                qpayResponse?.invoiceId ||
+                qpayResponse?.id;
+              const res = await fetch(`/api/purchases/check`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  purchaseId: activePurchaseId,
+                  invoiceId,
+                }),
+              });
               if (res.ok) {
                 setCheckoutStep("success");
               } else {

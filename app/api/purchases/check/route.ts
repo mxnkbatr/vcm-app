@@ -1,71 +1,62 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { connectToDB } from "@/lib/db";
 import Purchase from "@/lib/models/Purchase";
+import { getAuthUserId } from "@/lib/authHelpers";
+import { parseJsonBody } from "@/lib/api/validate";
+import { jsonError } from "@/lib/api/errors";
+import { markPurchasePaidIfValid } from "@/lib/shop-payment";
 
-export async function POST(req: Request) {
+export const dynamic = "force-dynamic";
+
+const bodySchema = z.object({
+  purchaseId: z.string().min(1),
+  invoiceId: z.string().min(1),
+});
+
+export async function POST(req: NextRequest) {
   try {
-    const { purchaseId, invoiceId } = await req.json();
+    const userId = await getAuthUserId();
+    if (!userId) return jsonError(401, "Unauthorized");
 
-    if (!purchaseId || !invoiceId) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    const parsed = await parseJsonBody(req, bodySchema);
+    if ("error" in parsed) return parsed.error;
+
+    await connectToDB();
+    const purchase = await Purchase.findById(parsed.data.purchaseId);
+    if (!purchase) return jsonError(404, "Purchase not found");
+
+    if (String(purchase.userId) !== String(userId)) {
+      return jsonError(403, "Forbidden");
     }
 
-    // 1. QPay Authentication
-    const basicAuth = Buffer.from(`${process.env.QPAY_USERNAME}:${process.env.QPAY_PASSWORD}`).toString('base64');
-    const authRes = await fetch(`${process.env.QPAY_BASE_URL}/v2/auth/token`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Basic ${basicAuth}`,
-        "Content-Type": "application/json"
-      }
+    if (!purchase.invoiceId || purchase.invoiceId !== parsed.data.invoiceId) {
+      return jsonError(400, "Invoice mismatch");
+    }
+
+    const result = await markPurchasePaidIfValid(purchase, {
+      invoiceId: parsed.data.invoiceId,
     });
 
-    if (!authRes.ok) {
-      throw new Error("Failed to authenticate with QPay");
+    if (result.status === "paid") {
+      return NextResponse.json({
+        success: true,
+        status: "paid",
+        purchase: {
+          _id: result.purchase._id,
+          status: "completed",
+          amount: result.purchase.amount,
+        },
+      });
     }
 
-    const authData = await authRes.json();
-    const accessToken = authData.access_token;
-
-    // 2. QPay Payment Check
-    // QPay payment check accepts object_type and object_id
-    const checkRes = await fetch(`${process.env.QPAY_BASE_URL}/v2/payment/check`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${accessToken}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        object_type: "INVOICE",
-        object_id: invoiceId
-      })
-    });
-
-    if (!checkRes.ok) {
-      throw new Error("Failed to check QPay payment status");
-    }
-
-    const checkData = await checkRes.json();
-    
-    // checkData.count > 0 and checkData.rows contains the payment
-    const isPaid = checkData.count > 0 && checkData.rows?.some((row: any) => row.payment_status === "PAID" || row.payment_status === "SUCCESS");
-
-    // Some versions of QPay return paid_amount
-    const totalPaid = checkData.paid_amount || 0;
-    
-    if (isPaid || totalPaid > 0) {
-      await connectToDB();
-      const updatedPurchase = await Purchase.findByIdAndUpdate(
-        purchaseId,
-        { status: "completed" },
-        { new: true }
-      );
-      return NextResponse.json({ status: "paid", purchase: updatedPurchase });
-    }
-
-    return NextResponse.json({ status: "pending", data: checkData });
-  } catch (error: any) {
-    console.error("Error checking payment:", error);
-    return NextResponse.json({ error: error.message || "Failed to check payment" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, status: "pending", message: "Payment not completed" },
+      { status: 402 }
+    );
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : "";
+    if (msg === "INVOICE_MISMATCH") return jsonError(400, "Invoice mismatch");
+    return jsonError(500, "Failed to check payment", e);
   }
 }

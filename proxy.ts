@@ -35,7 +35,17 @@ const publicPaths = [
 function isPublicRoute(pathname: string): boolean {
     if (pathname.startsWith('/api/auth')) return true;
 
-    const publicApis = ['/api/events', '/api/news', '/api/livekit', '/api/shopping', '/api/lessons', '/api/posts', '/api/purchases', '/api/banners', '/api/programs'];
+    const publicApis = [
+        '/api/events',
+        '/api/news',
+        '/api/livekit',
+        '/api/shopping',
+        '/api/lessons',
+        '/api/posts',
+        '/api/banners',
+        '/api/programs',
+        '/api/qpay/webhook',
+    ];
     if (publicApis.some(api => pathname.startsWith(api))) return true;
 
     const pathWithoutLocale = pathname.replace(/^\/(en|mn|de)/, '') || '/';
