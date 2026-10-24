@@ -2,12 +2,13 @@
 
 import dynamic from "next/dynamic";
 import { useMemo, useState, useSyncExternalStore } from "react";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { useSession } from "@/lib/hooks/useSession";
 import { useDashboard } from "@/lib/hooks/useDashboard";
 import { Link } from "@/navigation";
-import { ClipboardList } from "lucide-react";
+import {
+  Users, ShoppingBag, BookOpen, Ticket, ClipboardList, LayoutGrid, Search,
+} from "lucide-react";
 import { BRAND } from "@/lib/branding";
 import PremiumPageShell from "./PremiumPageShell";
 import PremiumSectionHeader from "./PremiumSectionHeader";
@@ -19,7 +20,8 @@ import StatCards from "./ui/StatCards";
 import { type ProgramId } from "@/lib/color-system";
 import { isNativeApp } from "@/lib/native-perf";
 import { staggerContainer, staggerItem } from "@/lib/motion";
-import { personalGreetingMn } from "@/lib/greeting";
+import ProgramGlyph from "./ui/ProgramGlyph";
+import { IOSList, IOSListRow } from "./ui/IOSList";
 import { isVisibleShopItem } from "./ShopProductCard";
 import {
   normalizeProgramDisplayName,
@@ -29,16 +31,19 @@ import {
 const ShopClient = dynamic(() => import("@/app/[locale]/shop/ShopClient"), { ssr: false });
 
 const FALLBACK_PROGRAMS = [
-  { id: "edu", slug: "edu", label: "EDU", sub: "Сургуульд заалт", href: "/programs/edu", image: "" },
-  { id: "and", slug: "and", label: "АНД", sub: "Нийгмийн халамж", href: "/programs/and", image: "" },
-  { id: "vclub", slug: "vclub", label: "V-Club", sub: "Олон улсын сүлжээ", href: "/programs/vclub", image: "" },
+  { id: "edu", slug: "edu", label: "EDU", sub: "Сургуульд заалт", href: "/programs/edu" },
+  { id: "and", slug: "and", label: "АНД", sub: "Нийгмийн халамж", href: "/programs/and" },
+  { id: "vclub", slug: "vclub", label: "V-Club", sub: "Олон улсын сүлжээ", href: "/programs/vclub" },
 ];
 
-const BENTO_TINT: Record<string, string> = {
-  edu: "linear-gradient(145deg, rgba(30,91,216,0.55), rgba(24,72,168,0.75))",
-  and: "linear-gradient(145deg, rgba(52,199,89,0.45), rgba(30,91,216,0.65))",
-  vclub: "linear-gradient(145deg, rgba(175,82,222,0.5), rgba(30,91,216,0.7))",
-};
+const NAV_GRID = [
+  { id: "programs", href: "/programs", label: "Хөтөлбөр", icon: Users },
+  { id: "events", href: "/events", label: "Эвент", icon: Ticket },
+  { id: "lessons", href: "/lessons", label: "Сургалт", icon: BookOpen },
+  { id: "shop", href: "/shop", label: "Дэлгүүр", icon: ShoppingBag },
+  { id: "apply", href: "/programs/apply", label: "Өргөдөл", icon: ClipboardList },
+  { id: "more", href: "/about", label: "Бусад", icon: LayoutGrid },
+];
 
 type ProgramApi = {
   slug?: string;
@@ -46,8 +51,6 @@ type ProgramApi = {
   name?: { mn?: string };
   description?: { mn?: string };
   href?: string;
-  image?: string;
-  emoji?: string;
 };
 
 type BannerApi = {
@@ -62,6 +65,18 @@ type BannerApi = {
 function subscribeClient(onStoreChange: () => void) {
   onStoreChange();
   return () => {};
+}
+
+function todayLabel() {
+  try {
+    return new Date().toLocaleDateString("mn-MN", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+    });
+  } catch {
+    return "";
+  }
 }
 
 export default function HomePageContent({
@@ -85,32 +100,40 @@ export default function HomePageContent({
         label: normalizeProgramDisplayName(p.name?.mn || p.code, slug, "mn"),
         sub: p.description?.mn || "",
         href: p.href || `/programs/${slug}`,
-        image: p.image || "",
       };
     });
 
   const [items] = useState(() =>
     (shopItems || []).filter((item) => isVisibleShopItem(item, locale || "mn"))
   );
-  const [programs] = useState(() => {
-    const mapped = initialPrograms?.length ? mapPrograms(initialPrograms) : FALLBACK_PROGRAMS;
-    // Prefer core VCM programs for bento; fall back to first 3
-    const core = ["edu", "and", "vclub"]
-      .map((id) => mapped.find((p) => p.id === id || p.slug === id))
-      .filter(Boolean) as typeof mapped;
-    return core.length >= 2 ? core.slice(0, 3) : mapped.slice(0, 3);
-  });
+  const [programs] = useState(() =>
+    initialPrograms?.length ? mapPrograms(initialPrograms) : FALLBACK_PROGRAMS
+  );
   const mounted = useSyncExternalStore(subscribeClient, () => true, () => false);
   const nativeApp = mounted && isNativeApp();
   const { data: session, status } = useSession();
   const isSignedIn = mounted && status === "authenticated";
   const { data: dash } = useDashboard({ enabled: isSignedIn });
 
+  const quick = nativeApp
+    ? [NAV_GRID[0], NAV_GRID[1], NAV_GRID[4], NAV_GRID[5]]
+    : NAV_GRID.slice(0, 4);
+
+  // Home keeps the 3 core VCM programs only — volunteer.org.mn flood stays on /programs
+  const CORE = new Set(["edu", "and", "vclub"]);
+  const corePrograms = programs
+    .filter((p) => CORE.has(String(p.slug || p.id).toLowerCase()))
+    .slice(0, 3);
+  const shownPrograms = corePrograms.length ? corePrograms : FALLBACK_PROGRAMS;
+
   const name =
     (session?.user as { name?: string } | undefined)?.name ||
     dash?.user?.fullName ||
     "";
-  const greeting = personalGreetingMn(name);
+
+  const greeting = name
+    ? `Сайн уу, ${name.split(" ")[0]}`
+    : "Сайн уу";
 
   const featured = useMemo(() => {
     const banner = initialBanners?.[0];
@@ -121,22 +144,21 @@ export default function HomePageContent({
         title: asText(banner.title, "Онцлох боломж"),
         subtitle: asText(banner.subtitle, BRAND.taglineMn),
         image: banner.image,
-        href: banner.link || "/programs/apply",
+        href: banner.link || "/programs",
       };
     }
     const program = programs[0];
     return {
       title: program?.label || "Сайн дурын ажил",
       subtitle: program?.sub || BRAND.taglineMn,
-      image: program?.image || undefined,
-      href: "/programs/apply",
+      image: undefined as string | undefined,
+      href: program?.href || "/programs",
     };
   }, [initialBanners, programs]);
 
   const apps = dash?.applications?.length ?? 0;
   const events = dash?.attendedEvents?.length ?? 0;
   const lessons = dash?.lmsEnrollments?.length ?? dash?.enrolledLessons?.length ?? 0;
-  const showShop = !nativeApp && items.length > 0 && !!locale;
 
   const heroBanners = useMemo(
     () =>
@@ -150,108 +172,129 @@ export default function HomePageContent({
     [initialBanners]
   );
 
-  const edu = programs.find((p) => p.id === "edu" || p.slug === "edu") || programs[0];
-  const rest = programs.filter((p) => p !== edu).slice(0, 2);
+  const dateLine = todayLabel();
 
   return (
-    <PremiumPageShell className="home-dash home-dash--wow" padded={false}>
-      <motion.div variants={staggerContainer} initial="initial" animate="animate" className="home-sections home-sections--wow">
-        {/* Greeting lives in AppHeader — keep for a11y / title sync only */}
-        <IOSLargeTitle title={greeting} />
+    <PremiumPageShell className="home-dash" padded>
+      <motion.div variants={staggerContainer} initial="initial" animate="animate" className="home-sections">
+        <motion.div variants={staggerItem}>
+          <IOSLargeTitle title={greeting}>
+            <div className="home-greeting-glass">
+              <p className="home-greeting-glass__date">{dateLine}</p>
+              <p className="home-greeting-glass__hi">{greeting}</p>
+              <p className="home-greeting-glass__sub">{BRAND.taglineMn}</p>
+            </div>
+          </IOSLargeTitle>
+        </motion.div>
 
-        <motion.div variants={staggerItem} className="home-hero-wrap">
+        <motion.div variants={staggerItem}>
+          <button
+            type="button"
+            className="vcm-search ios26-search glass-chip flex items-center gap-2 w-full text-left press"
+            onClick={() => window.dispatchEvent(new CustomEvent("vcm:open-search"))}
+          >
+            <Search size={18} strokeWidth={1.75} color="var(--label2)" />
+            <span className="flex-1 text-[15px]" style={{ color: "var(--label2)" }}>
+              Хайх
+            </span>
+          </button>
+        </motion.div>
+
+        <motion.div variants={staggerItem}>
           <HomeHeroCarousel banners={heroBanners} fallback={featured} />
         </motion.div>
 
-        <div className="ios-page__pad home-sections home-sections--body">
-          <motion.section variants={staggerItem}>
-            <StatCards
-              stats={[
-                { value: 10000, suffix: "+", label: "Сайн дурынхан" },
-                { value: 50, suffix: "+", label: "Төсөл" },
-                { value: 3, label: "Хөтөлбөр" },
+        {/* Mobile quick glass chips — dock covers main tabs; these jump to key actions */}
+        <motion.section variants={staggerItem} className="lg:hidden">
+          <div className="ios-quick-chips">
+            {quick.map(({ id, href, label, icon: Icon }) => (
+              <Link key={id} href={href} prefetch className="ios-quick-chip glass-press press">
+                <span className="ios-quick-chip__icon">
+                  <Icon size={18} strokeWidth={1.75} />
+                </span>
+                <span className="ios-quick-chip__label">{label}</span>
+              </Link>
+            ))}
+          </div>
+        </motion.section>
+
+        <motion.section variants={staggerItem}>
+          <StatCards
+            stats={[
+              { value: 10000, suffix: "+", label: "Сайн дурынхан" },
+              { value: 50, suffix: "+", label: "Төсөл" },
+              { value: 3, label: "Хөтөлбөр" },
+            ]}
+          />
+        </motion.section>
+
+        {isSignedIn && (
+          <motion.section variants={staggerItem} className="ios-frost-section">
+            <p className="ios-headline mb-3">Таны явц</p>
+            <FitnessRing
+              rings={[
+                { value: apps, max: Math.max(3, apps), color: "#1E5BD8", label: "Өргөдөл" },
+                { value: events, max: Math.max(5, events), color: "#34C759", label: "Эвент" },
+                { value: lessons, max: Math.max(4, lessons), color: "#FF9F0A", label: "Сургалт" },
               ]}
             />
+            {!apps && !events && (
+              <Link href="/programs/apply" prefetch className="btn btn-primary glass-press mt-4 inline-flex w-full items-center justify-center">
+                Эхлэх
+              </Link>
+            )}
           </motion.section>
+        )}
 
-          {isSignedIn && (
-            <motion.section variants={staggerItem} className="ios-frost-section glass-surface">
-              <p className="ios-headline mb-3">Таны явц</p>
-              <FitnessRing
-                rings={[
-                  { value: apps, max: Math.max(3, apps), color: "#1E5BD8", label: "Өргөдөл" },
-                  { value: events, max: Math.max(5, events), color: "#34C759", label: "Эвент" },
-                  { value: lessons, max: Math.max(4, lessons), color: "#FF9F0A", label: "Сургалт" },
-                ]}
+        <motion.section variants={staggerItem} className="hidden lg:block">
+          <div className="ios-quick">
+            {quick.map(({ id, href, label, icon: Icon }) => (
+              <Link key={id} href={href} prefetch className="ios-quick__item glass-press">
+                <span className="ios-quick__icon">
+                  <Icon size={22} strokeWidth={1.75} />
+                </span>
+                <span className="ios-quick__label">{label}</span>
+              </Link>
+            ))}
+          </div>
+        </motion.section>
+
+        <motion.section variants={staggerItem}>
+          <PremiumSectionHeader title="Удахгүй болох эвент" href="/events" />
+          <HomeUpcomingEvents limit={8} />
+        </motion.section>
+
+        <motion.section variants={staggerItem}>
+          <PremiumSectionHeader title="Хөтөлбөр" href="/programs" />
+          <IOSList>
+            {shownPrograms.map((a) => (
+              <IOSListRow
+                key={a.id}
+                href={a.href}
+                icon={<ProgramGlyph id={a.slug || a.id} size={22} />}
+                title={a.label}
+                subtitle={a.sub}
               />
-              {!apps && !events && (
-                <Link href="/programs/apply" prefetch className="btn btn-primary glass-press mt-4 inline-flex w-full items-center justify-center">
-                  Эхлэх
-                </Link>
-              )}
-            </motion.section>
-          )}
+            ))}
+            <IOSListRow
+              href="/programs/apply"
+              icon={<ClipboardList size={22} strokeWidth={1.75} />}
+              title="Нэгдэх"
+              subtitle="Өргөдөл илгээх"
+            />
+          </IOSList>
+        </motion.section>
 
+        {!nativeApp && items.length > 0 && locale && (
           <motion.section variants={staggerItem}>
-            <PremiumSectionHeader title="Удахгүй болох эвент" href="/events" />
-            <HomeUpcomingEvents limit={8} />
+            <PremiumSectionHeader title="Дэлгүүр" href="/shop" />
+            <ShopClient items={items} locale={locale} embedded />
           </motion.section>
+        )}
 
-          <motion.section variants={staggerItem}>
-            <PremiumSectionHeader title="Хөтөлбөрүүд" href="/programs" />
-            <div className="home-bento">
-              {edu ? (
-                <Link href={edu.href} prefetch className="home-bento__hero press glass-press">
-                  {edu.image ? (
-                    <Image src={edu.image} alt={edu.label} fill className="object-cover" sizes="(max-width:520px) 100vw, 480px" />
-                  ) : (
-                    <div className="home-bento__fallback" />
-                  )}
-                  <div className="home-bento__tint" style={{ background: BENTO_TINT.edu }} />
-                  <div className="home-bento__copy">
-                    <p className="home-bento__code">EDU</p>
-                    <h3 className="home-bento__title">{edu.label}</h3>
-                    <p className="home-bento__sub">{edu.sub}</p>
-                  </div>
-                </Link>
-              ) : null}
-              <div className="home-bento__stack">
-                {rest.map((p) => (
-                  <Link key={p.id} href={p.href} prefetch className="home-bento__tile press glass-press">
-                    {p.image ? (
-                      <Image src={p.image} alt={p.label} fill className="object-cover" sizes="240px" />
-                    ) : (
-                      <div className="home-bento__fallback" />
-                    )}
-                    <div
-                      className="home-bento__tint"
-                      style={{ background: BENTO_TINT[p.id] || BENTO_TINT.vclub }}
-                    />
-                    <div className="home-bento__copy">
-                      <p className="home-bento__code">{p.id.toUpperCase()}</p>
-                      <h3 className="home-bento__title">{p.label}</h3>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-            <Link href="/programs/apply" prefetch className="home-join-chip glass-surface press mt-3 inline-flex items-center gap-2">
-              <ClipboardList size={16} strokeWidth={1.75} />
-              Нэгдэх — өргөдөл илгээх
-            </Link>
-          </motion.section>
-
-          {showShop && locale && (
-            <motion.section variants={staggerItem}>
-              <PremiumSectionHeader title="Дэлгүүр" href="/shop" />
-              <ShopClient items={items} locale={locale} embedded />
-            </motion.section>
-          )}
-
-          <footer className="pt-2 pb-2 text-center">
-            <p className="ios-footnote">{BRAND.name}</p>
-          </footer>
-        </div>
+        <footer className="pt-1 pb-2 text-center">
+          <p className="ios-footnote">{BRAND.name}</p>
+        </footer>
       </motion.div>
     </PremiumPageShell>
   );
