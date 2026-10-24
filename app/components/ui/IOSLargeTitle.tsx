@@ -2,7 +2,10 @@
 
 import { useEffect } from "react";
 
-/** Publishes page title to MobileChrome for large-title collapse. */
+/**
+ * Publishes page title to AppHeader. Visual large title lives in AppHeader on tab roots;
+ * detail pages still use this for the scrolled inline title.
+ */
 export default function IOSLargeTitle({
   title,
   children,
@@ -18,8 +21,9 @@ export default function IOSLargeTitle({
   }, [title]);
 
   return (
-    <div className="pt-1 pb-2">
-      <h1 className="ios-large-title">{title}</h1>
+    <div className="app-large-title-slot pt-1 pb-2">
+      {/* Spacer — tab large title is rendered in AppHeader; keep subtitle/children */}
+      <h1 className="ios-large-title sr-only">{title}</h1>
       {children}
     </div>
   );

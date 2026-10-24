@@ -1,123 +1,79 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { BRAND } from "@/lib/branding";
+import React, { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import BrandLogo from "./BrandLogo";
+import Onboarding from "./Onboarding";
+import { hasCompletedOnboarding } from "@/lib/onboarding";
+import { springNative } from "@/lib/motion";
 
-const STORAGE_KEY = "vcm-splash-dismissed";
-const MIN_VISIBLE_MS = 450;
-const FADE_OUT_MS = 250;
+type Phase = "boot" | "morph" | "onboarding" | "done";
 
-function initialPhase(): "hidden" | "visible" {
-  if (typeof window === "undefined") return "hidden";
-  return sessionStorage.getItem(STORAGE_KEY) ? "hidden" : "visible";
-}
-
+/**
+ * #F2F2F7 splash → logo morphs into header (layoutId) → optional onboarding → home.
+ * Never paints black.
+ */
 export default function AppSplash() {
-  const [phase, setPhase] = useState<"hidden" | "visible" | "exiting">(initialPhase);
+  const [phase, setPhase] = useState<Phase>("boot");
+  const ran = useRef(false);
 
   useEffect(() => {
-    if (phase !== "visible") return;
+    if (ran.current) return;
+    ran.current = true;
 
-    const started = Date.now();
-    const dismiss = () => {
-      const elapsed = Date.now() - started;
-      const wait = Math.max(0, MIN_VISIBLE_MS - elapsed);
-      window.setTimeout(() => setPhase("exiting"), wait);
-    };
+    const t1 = window.setTimeout(() => setPhase("morph"), 280);
+    const t2 = window.setTimeout(() => {
+      void hasCompletedOnboarding().then((done) => {
+        if (done) {
+          setPhase("done");
+          window.dispatchEvent(new CustomEvent("vcm:app-ready"));
+        } else {
+          setPhase("onboarding");
+        }
+      });
+    }, 700);
 
-    if (document.readyState === "complete") {
-      dismiss();
-      return;
-    }
-
-    window.addEventListener("load", dismiss, { once: true });
-    const fallback = window.setTimeout(dismiss, 3000);
     return () => {
-      window.removeEventListener("load", dismiss);
-      window.clearTimeout(fallback);
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
     };
-  }, [phase]);
+  }, []);
 
-  useEffect(() => {
-    if (phase !== "exiting") return;
-    const t = window.setTimeout(() => {
-      sessionStorage.setItem(STORAGE_KEY, "1");
-      setPhase("hidden");
-    }, FADE_OUT_MS);
-    return () => window.clearTimeout(t);
-  }, [phase]);
+  const finishOnboarding = () => {
+    setPhase("done");
+    window.dispatchEvent(new CustomEvent("vcm:app-ready"));
+  };
+
+  if (phase === "done") return null;
 
   return (
     <AnimatePresence>
-      {phase !== "hidden" && (
-        <motion.div
-          key="app-splash"
-          role="status"
-          aria-label="Loading"
-          initial={{ opacity: 1 }}
-          animate={{ opacity: phase === "exiting" ? 0 : 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: FADE_OUT_MS / 1000, ease: [0.4, 0, 0.2, 1] }}
-          className="app-splash"
-        >
-          <div className="app-splash__cream-wash" aria-hidden />
-
+      <motion.div
+        key="splash-root"
+        className="app-splash app-splash--morph"
+        initial={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.28 }}
+      >
+        {phase === "onboarding" ? (
+          <Onboarding onDone={finishOnboarding} />
+        ) : (
           <motion.div
-            className="app-splash__card"
-            initial={{ opacity: 0, y: 18, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="app-splash__morph-stage"
+            initial={false}
+            animate={
+              phase === "morph"
+                ? { scale: 0.42, y: -120, opacity: 0.95 }
+                : { scale: 1, y: 0, opacity: 1 }
+            }
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           >
-            <BrandLogo size={112} priority className="app-splash__logo-icon" />
-
-            <motion.div
-              className="app-splash__brand"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.18, duration: 0.45 }}
-            >
-              <p className="app-splash__brand-name">Volunteer Center</p>
-              <div className="app-splash__brand-rule">
-                <span className="app-splash__brand-line" />
-                <span className="app-splash__brand-of">of Mongolia</span>
-                <span className="app-splash__brand-line" />
-              </div>
+            <motion.div layoutId="vcm-brand-logo" transition={springNative}>
+              <BrandLogo size={phase === "boot" ? 112 : 72} priority />
             </motion.div>
-
-            <motion.p
-              className="app-splash__tagline"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.28, duration: 0.4 }}
-            >
-              {BRAND.taglineMn}
-            </motion.p>
-
-            <div className="app-splash__progress" aria-hidden>
-              <motion.div
-                className="app-splash__progress-bar"
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: phase === "exiting" ? 1 : 0.92 }}
-                transition={{
-                  duration: phase === "exiting" ? 0.3 : MIN_VISIBLE_MS / 1000,
-                  ease: phase === "exiting" ? "easeOut" : [0.22, 1, 0.36, 1],
-                }}
-              />
-            </div>
           </motion.div>
-
-          <motion.p
-            className="app-splash__footer"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.6 }}
-            transition={{ delay: 0.5 }}
-          >
-            {BRAND.descriptorMn}
-          </motion.p>
-        </motion.div>
-      )}
+        )}
+      </motion.div>
     </AnimatePresence>
   );
 }

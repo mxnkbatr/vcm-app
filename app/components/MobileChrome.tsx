@@ -12,6 +12,9 @@ import { formatRelativeTime } from "@/lib/format-time";
 import { hapticSelection } from "@/lib/haptics";
 import { isNativeApp } from "@/lib/native-perf";
 import { springNative } from "@/lib/motion";
+import { isTabRoute } from "@/lib/navigation-motion";
+import AppHeader from "@/app/components/AppHeader";
+import { nativeShare } from "@/lib/native-share";
 
 type Tab = {
   id: string;
@@ -30,6 +33,15 @@ const TABS: Tab[] = [
 
 const AUTH_PATHS = ["/sign-in", "/sign-up", "/register", "/admin"];
 
+const TAB_TITLES: Record<string, { mn: string; en: string }> = {
+  "/": { mn: "Нүүр", en: "Home" },
+  "/programs": { mn: "Хөтөлбөр", en: "Programs" },
+  "/shop": { mn: "Дэлгүүр", en: "Shop" },
+  "/lessons": { mn: "Сургалт", en: "Learn" },
+  "/events": { mn: "Эвент", en: "Events" },
+  "/profile": { mn: "Профайл", en: "Profile" },
+};
+
 function NotifIcon({ type }: { type: string }) {
   const Icon =
     type.includes("event") ? Ticket
@@ -38,6 +50,10 @@ function NotifIcon({ type }: { type: string }) {
     : type.includes("application") ? ClipboardList
     : Bell;
   return <Icon size={16} strokeWidth={1.75} />;
+}
+
+function bookmarkKey(path: string) {
+  return `vcm-bookmark:${path}`;
 }
 
 export default function MobileChrome() {
@@ -51,6 +67,7 @@ export default function MobileChrome() {
   const [dockCompact, setDockCompact] = useState(false);
   const [pageTitle, setPageTitle] = useState("");
   const [bounceId, setBounceId] = useState<string | null>(null);
+  const [bookmarkVersion, setBookmarkVersion] = useState(0);
   const [notifications, setNotifications] = useState<
     Array<{ _id: string; type: string; title: string; body: string; createdAt: string; readAt?: string | null }>
   >([]);
@@ -63,6 +80,7 @@ export default function MobileChrome() {
   );
   const nativeApp = isMounted && isNativeApp();
   const visible = !AUTH_PATHS.some((p) => pathname.includes(p));
+  const tabMode = isTabRoute(pathname);
 
   const tabs = nativeApp
     ? [
@@ -162,7 +180,7 @@ export default function MobileChrome() {
     let lastY = main.scrollTop;
     const onScroll = () => {
       const y = main.scrollTop;
-      setScrolled(y > 28);
+      setScrolled(y > 40);
       if (y > lastY + 10 && y > 48) setDockCompact(true);
       else if (y < lastY - 8) setDockCompact(false);
       if (y < 12) setDockCompact(false);
@@ -180,30 +198,57 @@ export default function MobileChrome() {
   const user = session?.user as { name?: string; image?: string } | undefined;
   const initial = (user?.name || "V").charAt(0).toUpperCase();
 
+  const tabTitle =
+    TAB_TITLES[pathname]?.[locale === "mn" ? "mn" : "en"] ||
+    pageTitle ||
+    "VCM";
+  const headerTitle = tabMode ? tabTitle : pageTitle;
+  let bookmarked = false;
+  try {
+    bookmarked = localStorage.getItem(bookmarkKey(pathname)) === "1";
+  } catch {
+    bookmarked = false;
+  }
+  void bookmarkVersion;
+
+  const focusSearch = () => {
+    const input = document.querySelector<HTMLInputElement>(".vcm-search input");
+    if (input) {
+      input.scrollIntoView({ behavior: "smooth", block: "center" });
+      input.focus();
+      return;
+    }
+    router.push("/");
+  };
+
+  const toggleBookmark = () => {
+    try {
+      if (bookmarked) localStorage.removeItem(bookmarkKey(pathname));
+      else localStorage.setItem(bookmarkKey(pathname), "1");
+    } catch {
+      /* noop */
+    }
+    setBookmarkVersion((v) => v + 1);
+  };
+
   return (
     <>
-      <header className={`ios-chrome-header lg:hidden ${scrolled ? "is-solid is-compact" : ""}`}>
-        <div className="ios-chrome-header__bar">
-          <span className="ios-chrome-header__spacer" aria-hidden />
-          <span className="ios-chrome-header__title">{pageTitle || "VCM"}</span>
-          <div className="ios-chrome-header__actions">
-            <button
-              type="button"
-              onClick={() => setShowNotif((v) => !v)}
-              className="ios-icon-btn glass-press"
-              aria-label="Мэдэгдэл"
-            >
-              <Bell size={22} strokeWidth={1.75} />
-              {unreadCount > 0 && !showNotif && (
-                <span className="ios-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
-              )}
-            </button>
-            <Link href="/profile" prefetch className="ios-icon-btn glass-press" aria-label="Профайл">
-              <span className="ios-avatar-btn">{initial}</span>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <AppHeader
+        title={headerTitle}
+        scrolled={scrolled}
+        unreadCount={unreadCount}
+        avatarInitial={initial}
+        onSearch={focusSearch}
+        onBell={() => setShowNotif((v) => !v)}
+        onShare={() => {
+          void nativeShare({
+            title: headerTitle || "VCM",
+            url: typeof window !== "undefined" ? window.location.href : undefined,
+          });
+        }}
+        onBookmark={toggleBookmark}
+        bookmarked={bookmarked}
+      />
 
       {!showNotif && (
         <>

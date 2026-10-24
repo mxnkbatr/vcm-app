@@ -162,6 +162,7 @@ export default function HomePageContent({
       <motion.div variants={staggerContainer} initial="initial" animate="animate" className="home-sections">
         <motion.div variants={staggerItem}>
           <IOSLargeTitle title={greeting}>
+            <p className="ios-title" style={{ fontSize: 22 }}>{greeting}</p>
             <p className="ios-subhead mt-1">{BRAND.taglineMn}</p>
           </IOSLargeTitle>
         </motion.div>

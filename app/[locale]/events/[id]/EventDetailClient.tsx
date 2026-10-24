@@ -77,6 +77,15 @@ export default function EventDetailClient({
   const id = params.id as string;
 
   useEffect(() => {
+    if (!event) return;
+    const t = event.title[locale] || event.title.en;
+    window.dispatchEvent(new CustomEvent("vcm:page-title", { detail: { title: t } }));
+    return () => {
+      window.dispatchEvent(new CustomEvent("vcm:page-title", { detail: { title: "" } }));
+    };
+  }, [event, locale]);
+
+  useEffect(() => {
     if (initialEvent || !id) return;
     fetch(`/api/events/${id}`)
       .then(r => r.ok ? r.json() : Promise.reject())
