@@ -22,6 +22,7 @@ import { isNativeApp } from "@/lib/native-perf";
 import { staggerContainer, staggerItem } from "@/lib/motion";
 import ProgramGlyph from "./ui/ProgramGlyph";
 import { IOSList, IOSListRow } from "./ui/IOSList";
+import { isVisibleShopItem } from "./ShopProductCard";
 import {
   normalizeProgramDisplayName,
   programSlugKey,
@@ -90,7 +91,9 @@ export default function HomePageContent({
       };
     });
 
-  const [items] = useState(shopItems || []);
+  const [items] = useState(() =>
+    (shopItems || []).filter((item) => isVisibleShopItem(item, locale || "mn"))
+  );
   const [programs] = useState(() =>
     initialPrograms?.length ? mapPrograms(initialPrograms) : FALLBACK_PROGRAMS
   );
@@ -208,7 +211,8 @@ export default function HomePageContent({
           </motion.section>
         )}
 
-        <motion.section variants={staggerItem}>
+        {/* Desktop-only quick links — mobile uses the glass dock instead */}
+        <motion.section variants={staggerItem} className="hidden lg:block">
           <div className="ios-quick">
             {quick.map(({ id, href, label, icon: Icon }) => (
               <Link key={id} href={href} className="ios-quick__item glass-press">

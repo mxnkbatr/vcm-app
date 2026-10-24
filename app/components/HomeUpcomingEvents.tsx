@@ -27,18 +27,24 @@ function resolveDate(item: EventItem): Date | null {
   }
   const s = String(raw).trim();
   if (!s) return null;
-  // Prefer ISO; also accept "YYYY-MM-DD" / "YYYY/MM/DD"
-  const normalized = s.includes("T") || s.includes("Z") ? s : s.replace(/-/g, "/");
+  // ISO or Mongo date string
+  if (s.includes("T") || s.includes("Z") || /^\d{4}-\d{2}-\d{2}/.test(s)) {
+    const d = new Date(s);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  const normalized = s.replace(/-/g, "/");
   const d = new Date(normalized);
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
-function parts(item: EventItem, lang?: string) {
+/** Format badge from event.date — never hardcode day/month. */
+function formatEventBadge(item: EventItem, lang: string) {
   const d = resolveDate(item);
   if (!d) return { day: "—", month: "" };
+  const locale = lang === "mn" ? "mn-MN" : "en-US";
   return {
-    day: d.getDate().toString().padStart(2, "0"),
-    month: d.toLocaleDateString(lang === "mn" ? "mn-MN" : "en-US", { month: "short" }),
+    day: String(d.getDate()),
+    month: d.toLocaleDateString(locale, { month: "short" }),
   };
 }
 
@@ -98,7 +104,6 @@ export default function HomeUpcomingEvents({ limit = 8, query = "" }: { limit?: 
     .sort((a, b) => {
       const da = resolveDate(a)?.getTime() ?? Number.MAX_SAFE_INTEGER;
       const db = resolveDate(b)?.getTime() ?? Number.MAX_SAFE_INTEGER;
-      // Prefer upcoming, then soonest overall
       const ra = da >= today ? da : da + 1e15;
       const rb = db >= today ? db : db + 1e15;
       return ra - rb;
@@ -121,12 +126,18 @@ export default function HomeUpcomingEvents({ limit = 8, query = "" }: { limit?: 
     <div className="ios-carousel">
       {upcoming.map((item) => {
         const title = pickI18n(item.title, lang) || "Арга хэмжээ";
-        const { day, month } = parts(item, lang);
+        const { day, month } = formatEventBadge(item, lang);
         return (
           <Link key={item._id} href={`/events/${item._id}`} className="ios-event-card press">
             <div className="ios-event-card__media">
               {item.image ? (
-                <Image src={item.image} alt="" fill className="object-cover" sizes="240px" />
+                <Image
+                  src={item.image}
+                  alt={title}
+                  fill
+                  className="object-cover object-center"
+                  sizes="240px"
+                />
               ) : (
                 <div className="w-full h-full flex items-center justify-center" style={{ color: "var(--blue)" }}>
                   <Calendar size={28} strokeWidth={1.75} />

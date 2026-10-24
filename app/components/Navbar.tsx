@@ -67,7 +67,7 @@ export default function Navbar() {
   return (
     <>
       <motion.header
-        className="fixed top-5 left-0 right-0 hidden lg:flex justify-center pointer-events-none z-[999]"
+        className="fixed top-5 left-0 right-0 hidden lg:flex max-lg:!hidden justify-center pointer-events-none z-[999]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}

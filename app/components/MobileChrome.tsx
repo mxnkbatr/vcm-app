@@ -183,8 +183,9 @@ export default function MobileChrome() {
 
   return (
     <>
-      <header className={`ios-chrome-header lg:hidden ${scrolled ? "is-solid" : ""}`}>
+      <header className={`ios-chrome-header lg:hidden ${scrolled ? "is-solid is-compact" : ""}`}>
         <div className="ios-chrome-header__bar">
+          <span className="ios-chrome-header__spacer" aria-hidden />
           <span className="ios-chrome-header__title">{pageTitle || "VCM"}</span>
           <div className="ios-chrome-header__actions">
             <button

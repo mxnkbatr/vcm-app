@@ -14,6 +14,15 @@ type Banner = {
   link?: string;
 };
 
+function shouldContainImage(image?: string, title?: string) {
+  if (!image) return true;
+  const src = image.toLowerCase();
+  if (/logo|brand|mark|wordmark|badge|seal/.test(src)) return true;
+  // Short title + no subtitle-like photo banners often are graphics
+  if (title && title.trim().length <= 3) return true;
+  return false;
+}
+
 export default function HomeHeroCarousel({
   banners,
   fallback,
@@ -59,36 +68,34 @@ export default function HomeHeroCarousel({
   return (
     <section className="home-hero">
       <div className="home-hero__glow" aria-hidden />
-      <div
-        ref={scrollerRef}
-        className="home-hero__track"
-        onScroll={onScroll}
-      >
+      <div ref={scrollerRef} className="home-hero__track" onScroll={onScroll}>
         {slides.map((b, i) => {
           const key = b._id || b.id || `slide-${i}`;
           const href = b.link || fallback.href;
           const title = b.title || fallback.title;
           const subtitle = b.subtitle || fallback.subtitle || BRAND.taglineMn;
+          const contain = shouldContainImage(b.image, title);
           const inner = (
             <>
+              <div className="home-hero__fallback-bg" aria-hidden />
               {b.image ? (
                 <Image
                   src={b.image}
-                  alt={title}
+                  alt={title || "Banner"}
                   fill
                   priority={i === 0}
-                  className="home-hero__img"
+                  className={`home-hero__img ${contain ? "home-hero__img--contain" : ""}`}
                   sizes="(max-width: 520px) 100vw, 480px"
                 />
-              ) : (
-                <div className="home-hero__fallback-bg" />
-              )}
+              ) : null}
               <div className="home-hero__overlay" />
-              <div className="home-hero__copy">
-                <p className="home-hero__eyebrow">Онцлох</p>
-                <h2 className="home-hero__title">{title}</h2>
-                {subtitle ? <p className="home-hero__sub">{subtitle}</p> : null}
-              </div>
+              {(title || subtitle) && (
+                <div className="home-hero__copy">
+                  <p className="home-hero__eyebrow">Онцлох</p>
+                  {title ? <h2 className="home-hero__title">{title}</h2> : null}
+                  {subtitle ? <p className="home-hero__sub">{subtitle}</p> : null}
+                </div>
+              )}
             </>
           );
           return (
@@ -110,9 +117,10 @@ export default function HomeHeroCarousel({
             <button
               key={i}
               type="button"
+              role="tab"
               className={`home-hero__dot ${i === index ? "on" : ""}`}
               aria-label={`Slide ${i + 1}`}
-              aria-current={i === index ? "true" : undefined}
+              aria-selected={i === index}
               onClick={() => {
                 const el = scrollerRef.current;
                 if (!el) return;

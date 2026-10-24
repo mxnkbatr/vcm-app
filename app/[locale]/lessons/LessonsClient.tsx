@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { Link } from "@/navigation";
 import { motion } from "framer-motion";
@@ -37,8 +37,10 @@ function isCourseFree(c: Course) {
 }
 
 function CourseCard({ c, locale }: { c: Course; locale: string }) {
-  const title = (c.title as any)?.[locale] || c.title?.en || "";
-  const desc = (c.description as any)?.[locale] || c.description?.en || "";
+  const title =
+    c.title?.[locale as keyof LmsI18n] || c.title?.en || c.title?.mn || "";
+  const desc =
+    c.description?.[locale as keyof LmsI18n] || c.description?.en || c.description?.mn || "";
   const isFree = isCourseFree(c);
 
   return (
@@ -86,29 +88,31 @@ export default function LessonsClient({ initialCourses }: { initialCourses?: Cou
   const [courses, setCourses] = useState<Course[]>(initialCourses ?? []);
   const [loading, setLoading] = useState(!initialCourses?.length);
   const [filter, setFilter] = useState("all");
-  const [nativeApp, setNativeApp] = useState(false);
-  const [ready, setReady] = useState(false);
+  const ready = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+  const nativeApp = ready && isNativeApp();
 
   useEffect(() => {
-    const native = isNativeApp();
-    setNativeApp(native);
-    setReady(true);
-    if (native) setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    if (!ready || nativeApp) return;
-    if (initialCourses?.length) {
-      setLoading(false);
+    if (!ready || nativeApp) {
       return;
     }
+    if (initialCourses?.length) return;
+    let cancelled = false;
     fetch("/api/lms/courses")
       .then((r) => r.json())
       .then((d) => {
-        if (Array.isArray(d)) setCourses(d);
+        if (!cancelled && Array.isArray(d)) setCourses(d);
       })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [initialCourses, nativeApp, ready]);
 
   if (!ready) {
@@ -173,6 +177,8 @@ export default function LessonsClient({ initialCourses }: { initialCourses?: Cou
                   ? "Одоогоор үзэх боломжтой сургалт алга."
                   : "There are no courses available right now."
               }
+              actionLabel={locale === "mn" ? "Хөтөлбөр үзэх" : "Browse programs"}
+              href="/programs"
             />
           )}
         </div>

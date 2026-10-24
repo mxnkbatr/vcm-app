@@ -76,19 +76,27 @@ const InteractiveCardWrapper = ({ children, isMobile }: { children: (rotateX: an
   return children(rotateX, rotateY, handleMouseMove, handleMouseLeave);
 };
 
-const ContentCard = ({ item, lang, isDark, isMobile, type }: any) => {
-  // Calculate date client-side to avoid hydration mismatch
-  const [dateObj, setDateObj] = useState({ day: "00", month: "..." });
+function eventBadgeFromDate(raw: unknown, lang: string) {
+  if (!raw) return { day: "—", month: "" };
+  const d =
+    raw instanceof Date
+      ? raw
+      : new Date(
+          typeof raw === "string" && (raw.includes("T") || raw.includes("Z"))
+            ? raw
+            : String(raw).replace(/-/g, "/")
+        );
+  if (Number.isNaN(d.getTime())) return { day: "—", month: "" };
+  return {
+    day: String(d.getDate()),
+    month: d
+      .toLocaleDateString(lang === "mn" ? "mn-MN" : "en-US", { month: "short" })
+      .toUpperCase(),
+  };
+}
 
-  useEffect(() => {
-    if (item.date) {
-      const d = new Date(typeof item.date === 'string' ? item.date.replace(/-/g, "/") : item.date);
-      setDateObj({
-        day: d.getDate().toString().padStart(2, '0'),
-        month: d.toLocaleDateString(lang === 'mn' ? 'mn-MN' : 'en-US', { month: 'short' }).toUpperCase()
-      });
-    }
-  }, [item.date, lang]);
+const ContentCard = ({ item, lang, isDark, isMobile, type }: any) => {
+  const dateObj = eventBadgeFromDate(item.date, lang);
 
   const isBlog = type === 'blogs';
   const authorName = typeof item.author === 'string' ? item.author : (item.author?.[lang] || item.author?.en);
