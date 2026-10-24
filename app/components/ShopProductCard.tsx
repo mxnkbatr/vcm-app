@@ -23,6 +23,22 @@ export function formatShopPrice(price: number | string) {
   return `₮${Number(price).toLocaleString()}`;
 }
 
+const JUNK_NAMES = new Set(["k", "21312", "test", "asdf", "xxx", "qwe", "asd"]);
+
+/** Hide empty, test, and About-page rows from the shop catalog. */
+export function isVisibleShopItem(item: any, locale = "en") {
+  const name = String(item?.name?.[locale] || item?.name?.en || item?.name?.mn || "").trim();
+  if (!name || name.length < 2) return false;
+  const norm = name.toLowerCase();
+  if (JUNK_NAMES.has(norm) || /^\d+$/.test(norm)) return false;
+  const desc = String(item?.description?.[locale] || item?.description?.en || item?.description?.mn || "");
+  const blob = `${name}\n${desc}`.toLowerCase();
+  if (/(^|\n)\s*(about|тухай|бидний тухай)\b/.test(blob) && name.length < 12) return false;
+  if (/volunteer center of mongolia|small actions, big differences/.test(blob) && norm.length < 8) return false;
+  if (String(item?.category || "").toLowerCase() === "about") return false;
+  return true;
+}
+
 type ShopProductCardProps = {
   item: any;
   locale?: string;
@@ -38,8 +54,7 @@ export default function ShopProductCard({
   variant = "grid",
   animated = true,
 }: ShopProductCardProps) {
-  const name = item.name?.[locale] || item.name?.en || "Unknown Item";
-  const desc = item.description?.[locale] || item.description?.en || "";
+  const name = item.name?.[locale] || item.name?.en || item.name?.mn || "";
   const inStock = item.stock > 0;
   const stockLabel = inStock
     ? T.inStock[locale as keyof typeof T.inStock] || T.inStock.en
@@ -64,10 +79,6 @@ export default function ShopProductCard({
             <ShoppingBag size={28} strokeWidth={1.8} />
           </div>
         )}
-        <div className="shop-product-card__shine" aria-hidden />
-        <span className="shop-product-card__cat">
-          {formatShopCategory(item.category || "general", locale)}
-        </span>
         {!inStock && (
           <div className="shop-product-card__sold-overlay">
             <span>{stockLabel}</span>
@@ -77,14 +88,8 @@ export default function ShopProductCard({
 
       <div className="shop-product-card__body">
         <p className="shop-product-card__name">{name}</p>
-        {desc && variant === "grid" && (
-          <p className="shop-product-card__desc">{desc}</p>
-        )}
         <div className="shop-product-card__footer">
           <span className="shop-product-card__price">{formatShopPrice(item.price)}</span>
-          <span className={`shop-product-card__stock ${inStock ? "shop-product-card__stock--in" : ""}`}>
-            {inStock ? "●" : "○"} {stockLabel}
-          </span>
         </div>
       </div>
     </Link>

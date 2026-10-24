@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import { BRAND } from "@/lib/branding";
 import BrandLogo from "@/app/components/BrandLogo";
 import { Link } from "@/navigation";
 import { motion } from "framer-motion";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, ScanFace } from "lucide-react";
+import { springNative } from "@/lib/motion";
 
 type AuthScreenProps = {
   title: string;
@@ -24,17 +24,20 @@ export default function AuthScreen({
 }: AuthScreenProps) {
   return (
     <div
-      className="min-h-dvh flex flex-col relative overflow-hidden auth-screen"
-      style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+      className="min-h-dvh flex flex-col relative overflow-hidden"
+      style={{ background: "var(--bg)", paddingTop: "env(safe-area-inset-top, 0px)" }}
     >
       {showBack && (
-        <div className="absolute top-0 left-0 right-0 z-20 px-4 pt-3" style={{ paddingTop: "calc(env(safe-area-inset-top, 12px) + 12px)" }}>
+        <div
+          className="absolute top-0 left-0 right-0 z-20 px-4"
+          style={{ paddingTop: "calc(env(safe-area-inset-top, 12px) + 8px)" }}
+        >
           <Link
             href="/"
-            className="press inline-flex items-center gap-1 px-3 py-2 rounded-full liquid-chrome text-[13px] font-semibold"
-            style={{ color: "var(--label2)" }}
+            className="press inline-flex items-center gap-1 min-h-[44px] px-2 text-[17px] font-semibold"
+            style={{ color: "var(--blue)" }}
           >
-            <ChevronLeft size={16} />
+            <ChevronLeft size={22} strokeWidth={1.75} />
             Буцах
           </Link>
         </div>
@@ -42,32 +45,28 @@ export default function AuthScreen({
 
       <div className="relative z-10 flex-1 flex flex-col justify-center max-w-sm mx-auto w-full px-6 py-10 pb-16">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          transition={springNative}
           className="text-center mb-8"
         >
-          <BrandLogo size={88} priority className="mb-5 mx-auto" />
-          <p
-            className="text-[11px] font-bold uppercase tracking-[0.2em] mb-2"
-            style={{ color: "var(--blue)" }}
+          <BrandLogo size={72} priority className="mb-5 mx-auto" />
+          <div
+            className="mx-auto mb-4 w-14 h-14 rounded-full flex items-center justify-center"
+            style={{ background: "var(--fill2)", color: "var(--blue)" }}
+            aria-hidden
           >
-            Volunteer Center Mongolia
-          </p>
-          <h1 className="text-[28px] font-black tracking-tight leading-tight" style={{ color: "var(--label)" }}>
-            {title}
-          </h1>
-          <p className="text-[14px] mt-2 font-medium" style={{ color: "var(--label2)" }}>
-            {subtitle}
-          </p>
+            <ScanFace size={28} strokeWidth={1.75} />
+          </div>
+          <h1 className="ios-large-title" style={{ fontSize: 28 }}>{title}</h1>
+          <p className="ios-footnote mt-2">{subtitle}</p>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.08, duration: 0.4 }}
-          className="liquid-chrome p-5"
-          style={{ borderRadius: 28 }}
+          transition={{ ...springNative, delay: 0.05 }}
+          className="bg-[var(--card)] p-5 rounded-[20px] border-[0.5px] border-[var(--sep)]"
         >
           {children}
         </motion.div>
@@ -76,7 +75,7 @@ export default function AuthScreen({
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.16 }}
+            transition={{ delay: 0.12 }}
             className="mt-6 text-center"
           >
             {footer}
@@ -87,28 +86,15 @@ export default function AuthScreen({
   );
 }
 
-export function AuthDivider() {
-  return (
-    <div className="flex items-center gap-3 my-5">
-      <div className="flex-1 h-px" style={{ background: "var(--sep)" }} />
-      <span className="text-[12px] font-semibold" style={{ color: "var(--label3)" }}>
-        эсвэл
-      </span>
-      <div className="flex-1 h-px" style={{ background: "var(--sep)" }} />
-    </div>
-  );
-}
-
 export function AuthError({ message }: { message: string }) {
   if (!message) return null;
   return (
-    <motion.p
-      initial={{ opacity: 0, scale: 0.98 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="text-[13px] text-center py-3 px-4 rounded-2xl font-medium mb-4"
+    <div
+      className="mb-3 px-3 py-2.5 rounded-[12px] text-[13px] font-medium"
       style={{ background: "var(--red-dim)", color: "var(--red)" }}
+      role="alert"
     >
       {message}
-    </motion.p>
+    </div>
   );
 }

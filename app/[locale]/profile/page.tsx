@@ -4,20 +4,25 @@ import React, { useState, useEffect } from "react";
 import { useSession } from "@/lib/hooks/useSession";
 import { useDashboard } from "@/lib/hooks/useDashboard";
 import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
 import ProfileActivityHistory from "@/app/components/ProfileActivityHistory";
 import {
   User, Mail, Phone, MapPin, Edit3, Save, X,
-  Lock, Eye, EyeOff, ShieldCheck,
-  CheckCircle2, Camera, History
+  Lock, Eye, EyeOff, ShieldCheck, History, Settings, Moon, Sun, Info,
 } from "lucide-react";
-import { Link } from "@/navigation";
 import PremiumPageShell from "@/app/components/PremiumPageShell";
-import PremiumSectionHeader from "@/app/components/PremiumSectionHeader";
+import IOSLargeTitle from "@/app/components/ui/IOSLargeTitle";
+import { IOSList, IOSListRow } from "@/app/components/ui/IOSList";
+import IOSSheet from "@/app/components/ui/IOSSheet";
+import { signOutToSignIn } from "@/lib/auth-signout";
+import { useLocale } from "next-intl";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const locale = useLocale();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const { data: dash, loading } = useDashboard({ enabled: status === "authenticated" });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -25,6 +30,9 @@ export default function ProfilePage() {
   const [showPw, setShowPw] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [toast, setToast] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [mountedTheme, setMountedTheme] = useState(false);
+
+  useEffect(() => setMountedTheme(true), []);
 
   useEffect(() => {
     if (status === "loading") return;
@@ -87,128 +95,100 @@ export default function ProfilePage() {
 
   if (!userData) return null;
 
-  const initials = (userData.fullName || "U").split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase();
+  const initials = (userData.fullName || "U")
+    .split(" ")
+    .map((w: string) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  const isDark = mountedTheme && (resolvedTheme === "dark" || theme === "dark");
 
   return (
     <PremiumPageShell>
-      <div className="space-y-5 pb-6 pt-2">
-
-        {/* Toast */}
+      <div className="space-y-5 pb-6">
         <AnimatePresence>
           {toast && (
             <motion.div
               initial={{ opacity: 0, y: -12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
-              className="fixed top-[calc(env(safe-area-inset-top,12px)+60px)] left-1/2 -translate-x-1/2 z-[200] px-5 py-3 rounded-2xl shadow-lg text-sm font-semibold"
-              style={{ background: toast.ok ? "var(--emerald)" : "var(--red)", color: "white", whiteSpace: "nowrap" }}
+              className="fixed top-[calc(env(safe-area-inset-top,12px)+52px)] left-1/2 -translate-x-1/2 z-[200] px-5 py-3 rounded-[14px] text-sm font-semibold text-white"
+              style={{ background: toast.ok ? "var(--emerald)" : "var(--red)" }}
             >
               {toast.msg}
             </motion.div>
           )}
         </AnimatePresence>
 
-        <PremiumSectionHeader title="Профайл" subtitle={userData.fullName || "Миний бүртгэл"} />
+        <IOSLargeTitle title="Профайл" />
 
-        {/* Avatar + Name card */}
-        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="card p-6">
-          <div className="flex items-center gap-4">
-            {/* Avatar */}
-            <div className="relative">
-              <div
-                className="w-[72px] h-[72px] rounded-full flex items-center justify-center text-white text-2xl font-black shadow-lg"
-                style={{ background: "var(--blue)" }}
-              >
-                {initials}
-              </div>
-              <button
-                className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center shadow"
-                style={{ background: "var(--card)", border: "2px solid var(--bg)" }}
-              >
-                <Camera size={13} style={{ color: "var(--label2)" }} />
-              </button>
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <h2 className="t-title2 truncate">{userData.fullName}</h2>
-              <span
-                className="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest"
-                style={{ background: "var(--blue-dim)", color: "var(--blue)" }}
-              >
-                {userData.role === "guest" ? "Зочин" : userData.role}
-              </span>
-            </div>
-
-            <button
-              onClick={() => setIsEditing(true)}
-              className="icon-box-sm press"
-              style={{ background: "var(--fill2)", color: "var(--label2)" }}
-            >
-              <Edit3 size={16} />
-            </button>
+        <div className="flex items-center gap-4 px-1">
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-bold"
+            style={{ background: "var(--blue)" }}
+          >
+            {initials}
           </div>
-        </motion.div>
-
-        {/* Info rows */}
-        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="card p-2">
-          {[
-            { icon: <Mail size={16} />, label: "Имэйл", value: userData.email || "—", color: "var(--blue)" },
-            { icon: <Phone size={16} />, label: "Утас", value: userData.phone || "Тохируулаагүй", color: "var(--emerald)" },
-            { icon: <MapPin size={16} />, label: "Хот", value: userData.profile?.address?.city || "Тохируулаагүй", color: "var(--orange)" },
-          ].map((row, i, arr) => (
-            <React.Fragment key={row.label}>
-              <div className="flex items-center gap-3 px-3 py-3.5">
-                <div className="icon-box-sm" style={{ background: `${row.color}18`, color: row.color }}>
-                  {row.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: "var(--label3)" }}>{row.label}</p>
-                  <p className="text-[14px] font-semibold truncate" style={{ color: "var(--label)" }}>{row.value}</p>
-                </div>
-              </div>
-              {i < arr.length - 1 && <div className="h-px mx-3" style={{ background: "var(--sep)" }} />}
-            </React.Fragment>
-          ))}
-        </motion.div>
-
-        {/* Status */}
-        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid grid-cols-2 gap-3">
-          <div className="card p-4 space-y-2">
-            <div className="icon-box-sm" style={{ background: "var(--blue-dim)", color: "var(--blue)" }}>
-              <ShieldCheck size={16} />
-            </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--label3)" }}>Эрх</p>
-              <p className="text-[15px] font-bold mt-0.5" style={{ color: "var(--label)" }}>
-                {userData.role === "guest" ? "Зочин" : userData.role}
-              </p>
-            </div>
+          <div className="min-w-0 flex-1">
+            <p className="ios-title" style={{ fontSize: 22 }}>{userData.fullName}</p>
+            <p className="ios-footnote">{userData.email || userData.phone || "—"}</p>
           </div>
-          <div className="card p-4 space-y-2">
-            <div className="icon-box-sm" style={{ background: "var(--emerald-dim)", color: "var(--emerald)" }}>
-              <CheckCircle2 size={16} />
-            </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--label3)" }}>Явц</p>
-              <p className="text-[15px] font-bold mt-0.5" style={{ color: "var(--label)" }}>
-                {userData.step && userData.step !== "-" ? userData.step : "Бүртгэл"}
-              </p>
-            </div>
-          </div>
-        </motion.div>
+          <button type="button" onClick={() => setIsEditing(true)} className="ios-icon-btn press" aria-label="Засах">
+            <Edit3 size={20} strokeWidth={1.75} />
+          </button>
+        </div>
 
-        {/* Activity history */}
-        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
-          <div className="flex items-center gap-2 mb-3">
-            <div className="icon-box-sm" style={{ background: "var(--blue-dim)", color: "var(--blue)" }}>
-              <History size={16} />
-            </div>
-            <div>
-              <p className="sec-label mb-0">Миний түүх</p>
-              <p className="text-[12px]" style={{ color: "var(--label3)" }}>
-                Хөтөлбөр, захиалга, хичээлийн бүртгэл
-              </p>
-            </div>
+        <div>
+          <p className="ios-caption px-4 mb-2 uppercase tracking-wide">Мэдээлэл</p>
+          <IOSList>
+            <IOSListRow icon={<Mail size={16} strokeWidth={1.75} />} title="Имэйл" subtitle={userData.email || "—"} />
+            <IOSListRow icon={<Phone size={16} strokeWidth={1.75} />} title="Утас" subtitle={userData.phone || "Тохируулаагүй"} />
+            <IOSListRow
+              icon={<MapPin size={16} strokeWidth={1.75} />}
+              title="Хот"
+              subtitle={userData.profile?.address?.city || "Тохируулаагүй"}
+            />
+            <IOSListRow
+              icon={<ShieldCheck size={16} strokeWidth={1.75} />}
+              title="Эрх"
+              subtitle={userData.role === "guest" ? "Зочин" : userData.role}
+            />
+          </IOSList>
+        </div>
+
+        <div>
+          <p className="ios-caption px-4 mb-2 uppercase tracking-wide">Тохиргоо</p>
+          <IOSList>
+            <IOSListRow
+              icon={isDark ? <Moon size={16} strokeWidth={1.75} /> : <Sun size={16} strokeWidth={1.75} />}
+              title="Харанхуй горим"
+              trailing={
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={!!isDark}
+                  aria-label="Харанхуй горим"
+                  onClick={() => setTheme(isDark ? "light" : "dark")}
+                  className="w-12 h-7 rounded-full relative press"
+                  style={{ background: isDark ? "var(--blue)" : "var(--fill)" }}
+                >
+                  <span
+                    className="absolute top-0.5 w-6 h-6 rounded-full bg-white transition-transform"
+                    style={{ left: isDark ? 22 : 2 }}
+                  />
+                </button>
+              }
+            />
+            <IOSListRow href="/settings" icon={<Settings size={16} strokeWidth={1.75} />} title="Тохиргоо" />
+            <IOSListRow href="/about" icon={<Info size={16} strokeWidth={1.75} />} title="Тухай" />
+          </IOSList>
+        </div>
+
+        <div>
+          <div className="flex items-center gap-2 px-1 mb-2">
+            <History size={16} strokeWidth={1.75} style={{ color: "var(--blue)" }} />
+            <p className="ios-headline">Миний түүх</p>
           </div>
           <ProfileActivityHistory
             applications={activity.applications}
@@ -217,97 +197,77 @@ export default function ProfilePage() {
             enrolledLessons={activity.enrolledLessons}
             activeProgram={userData.program}
           />
-        </motion.div>
+        </div>
 
+        <button
+          type="button"
+          onClick={() => void signOutToSignIn(locale)}
+          className="ios-list w-full ios-list-row press justify-center"
+          style={{ color: "var(--red)", fontWeight: 600 }}
+        >
+          Гарах
+        </button>
       </div>
 
-      {/* Edit Sheet */}
-      <AnimatePresence>
-        {isEditing && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[110] bg-black/40 backdrop-blur-sm"
-              onClick={() => setIsEditing(false)}
-            />
-            <motion.div
-              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 z-[120] rounded-t-[32px] p-6 space-y-5"
-              style={{
-                background: "var(--card)",
-                paddingBottom: "calc(env(safe-area-inset-bottom, 24px) + 24px)",
-                maxHeight: "90dvh",
-                overflowY: "auto",
-              }}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="t-title2">Мэдээлэл засах</h2>
-                <button onClick={() => setIsEditing(false)} className="icon-box-sm press" style={{ background: "var(--fill2)" }}>
-                  <X size={18} style={{ color: "var(--label2)" }} />
-                </button>
-              </div>
-
-              <form onSubmit={handleSave} className="space-y-4">
-                <div className="input-group">
-                  <div className="input-row">
-                    <User size={17} style={{ color: "var(--label3)", flexShrink: 0 }} />
-                    <input
-                      type="text" value={editForm.fullName}
-                      onChange={e => setEditForm(p => ({ ...p, fullName: e.target.value }))}
-                      placeholder="Нэр" required
-                    />
-                  </div>
-                  <div className="input-row">
-                    <Mail size={17} style={{ color: "var(--label3)", flexShrink: 0 }} />
-                    <input
-                      type="email" value={editForm.email}
-                      onChange={e => setEditForm(p => ({ ...p, email: e.target.value }))}
-                      placeholder="Имэйл"
-                    />
-                  </div>
-                  <div className="input-row">
-                    <MapPin size={17} style={{ color: "var(--label3)", flexShrink: 0 }} />
-                    <input
-                      type="text" value={editForm.city}
-                      onChange={e => setEditForm(p => ({ ...p, city: e.target.value }))}
-                      placeholder="Хот"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-[11px] font-bold uppercase tracking-widest mb-2" style={{ color: "var(--label3)" }}>
-                    Нууц үг солих (заавал биш)
-                  </p>
-                  <div className="input-group">
-                    <div className="input-row">
-                      <Lock size={17} style={{ color: "var(--label3)", flexShrink: 0 }} />
-                      <input
-                        type={showPw ? "text" : "password"}
-                        value={editForm.password}
-                        onChange={e => setEditForm(p => ({ ...p, password: e.target.value }))}
-                        placeholder="Шинэ нууц үг"
-                        minLength={8}
-                      />
-                      <button type="button" onClick={() => setShowPw(v => !v)} className="press">
-                        {showPw ? <EyeOff size={17} style={{ color: "var(--label3)" }} /> : <Eye size={17} style={{ color: "var(--label3)" }} />}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 pt-2">
-                  <button type="button" onClick={() => setIsEditing(false)} className="btn btn-secondary">Болих</button>
-                  <button type="submit" disabled={updating} className="btn btn-primary">
-                    {updating ? <span className="ios-spinner !w-4 !h-4" /> : <><Save size={15} /> Хадгалах</>}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      <IOSSheet open={isEditing} title="Мэдээлэл засах" onClose={() => setIsEditing(false)}>
+        <form onSubmit={handleSave} className="space-y-4">
+          <div className="ios-list">
+            <div className="ios-list-row">
+              <User size={17} strokeWidth={1.75} style={{ color: "var(--label2)" }} />
+              <input
+                className="flex-1 bg-transparent outline-none text-[17px]"
+                type="text"
+                value={editForm.fullName}
+                onChange={(e) => setEditForm((p) => ({ ...p, fullName: e.target.value }))}
+                placeholder="Нэр"
+                required
+              />
+            </div>
+            <div className="ios-list-row">
+              <Mail size={17} strokeWidth={1.75} style={{ color: "var(--label2)" }} />
+              <input
+                className="flex-1 bg-transparent outline-none text-[17px]"
+                type="email"
+                value={editForm.email}
+                onChange={(e) => setEditForm((p) => ({ ...p, email: e.target.value }))}
+                placeholder="Имэйл"
+              />
+            </div>
+            <div className="ios-list-row">
+              <MapPin size={17} strokeWidth={1.75} style={{ color: "var(--label2)" }} />
+              <input
+                className="flex-1 bg-transparent outline-none text-[17px]"
+                type="text"
+                value={editForm.city}
+                onChange={(e) => setEditForm((p) => ({ ...p, city: e.target.value }))}
+                placeholder="Хот"
+              />
+            </div>
+            <div className="ios-list-row">
+              <Lock size={17} strokeWidth={1.75} style={{ color: "var(--label2)" }} />
+              <input
+                className="flex-1 bg-transparent outline-none text-[17px]"
+                type={showPw ? "text" : "password"}
+                value={editForm.password}
+                onChange={(e) => setEditForm((p) => ({ ...p, password: e.target.value }))}
+                placeholder="Шинэ нууц үг (заавал биш)"
+                minLength={8}
+              />
+              <button type="button" onClick={() => setShowPw((v) => !v)} className="press" aria-label="Нууц үг харах">
+                {showPw ? <EyeOff size={17} strokeWidth={1.75} /> : <Eye size={17} strokeWidth={1.75} />}
+              </button>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <button type="button" onClick={() => setIsEditing(false)} className="btn btn-secondary">
+              Болих
+            </button>
+            <button type="submit" disabled={updating} className="btn btn-primary inline-flex items-center justify-center gap-2">
+              {updating ? <span className="ios-spinner !w-4 !h-4" /> : <><Save size={15} strokeWidth={1.75} /> Хадгалах</>}
+            </button>
+          </div>
+        </form>
+      </IOSSheet>
     </PremiumPageShell>
   );
 }

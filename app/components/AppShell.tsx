@@ -27,7 +27,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <SmoothScroll />
         <MobileChrome />
         <Navbar />
-        <main className="native-app-main min-h-[100dvh] h-[100dvh] overflow-y-auto overflow-x-hidden pb-24 lg:pb-0 lg:h-auto lg:overflow-visible">
+        <main className="native-app-main min-h-dvh overflow-x-hidden lg:min-h-0 lg:h-auto lg:overflow-visible">
           {children}
         </main>
         <div className="hidden lg:block">

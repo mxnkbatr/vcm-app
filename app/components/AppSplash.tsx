@@ -14,7 +14,20 @@ export default function AppSplash() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (sessionStorage.getItem(STORAGE_KEY)) return;
+
+    const alreadySeen = sessionStorage.getItem(STORAGE_KEY);
+
+    // Always hide native Capacitor splash as soon as JS loads
+    // (launchAutoHide is false so we must do it manually)
+    void import("@capacitor/core").then(({ Capacitor }) => {
+      if (Capacitor.isNativePlatform()) {
+        void import("@capacitor/splash-screen").then(({ SplashScreen }) => {
+          void SplashScreen.hide({ fadeOutDuration: 200 });
+        });
+      }
+    });
+
+    if (alreadySeen) return;
 
     setPhase("visible");
     const started = Date.now();

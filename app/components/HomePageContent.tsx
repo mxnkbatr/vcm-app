@@ -2,44 +2,40 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import { useSession } from "@/lib/hooks/useSession";
+import { useDashboard } from "@/lib/hooks/useDashboard";
 import { Link } from "@/navigation";
 import {
-  ArrowRight,
-  Users,
-  ShoppingBag,
-  BookOpen,
-  Ticket,
-  ClipboardList,
-  LayoutGrid,
-  Sparkles,
-  GraduationCap,
-  FileText,
+  Users, ShoppingBag, BookOpen, Ticket, ClipboardList, LayoutGrid, Search,
 } from "lucide-react";
 import { BRAND } from "@/lib/branding";
-
-import LazySection from "./LazySection";
-import PremiumSectionHeader from "./PremiumSectionHeader";
 import PremiumPageShell from "./PremiumPageShell";
 import HomeUpcomingEvents from "./HomeUpcomingEvents";
-import { PROGRAM_COLORS, programColorsBySlug, type ProgramId } from "@/lib/color-system";
+import IOSLargeTitle from "./ui/IOSLargeTitle";
+import TodayCard from "./ui/TodayCard";
+import FitnessRing from "./ui/FitnessRing";
+import { type ProgramId } from "@/lib/color-system";
 import { isNativeApp } from "@/lib/native-perf";
+import { staggerContainer, staggerItem } from "@/lib/motion";
+import ProgramGlyph from "./ui/ProgramGlyph";
+import { IOSList, IOSListRow } from "./ui/IOSList";
 
 const ShopClient = dynamic(() => import("@/app/[locale]/shop/ShopClient"), { ssr: false });
 
-const QUICK_ACTIONS_FALLBACK = [
-  { id: "edu", slug: "edu", emoji: "🎓", label: "EDU", sub: "Сургуульд заалт", href: "/programs/edu" },
-  { id: "and", slug: "and", emoji: "🤝", label: "АНД", sub: "Нийгмийн халамж", href: "/programs/and" },
-  { id: "vclub", slug: "vclub", emoji: "🌍", label: "V-Club", sub: "Олон улсын сүлжээ", href: "/programs/vclub" },
+const FALLBACK_PROGRAMS = [
+  { id: "edu", slug: "edu", label: "EDU", sub: "Сургуульд заалт", href: "/programs/edu" },
+  { id: "and", slug: "and", label: "АНД", sub: "Нийгмийн халамж", href: "/programs/and" },
+  { id: "vclub", slug: "vclub", label: "V-Club", sub: "Олон улсын сүлжээ", href: "/programs/vclub" },
 ];
 
 const NAV_GRID = [
-  { id: "programs", href: "/programs", label: "Хөтөлбөр", icon: Users, tone: "programs" as const },
-  { id: "events", href: "/events", label: "Эвент", icon: Ticket, tone: "events" as const },
-  { id: "lessons", href: "/lessons", label: "Сургалт", icon: BookOpen, tone: "lessons" as const },
-  { id: "shop", href: "/shop", label: "Дэлгүүр", icon: ShoppingBag, tone: "shop" as const },
-  { id: "apply", href: "/programs/apply", label: "Өргөдөл", icon: ClipboardList, tone: "programs" as const },
-  { id: "more", href: "/about", label: "Бусад", icon: LayoutGrid, tone: "lessons" as const },
+  { id: "programs", href: "/programs", label: "Хөтөлбөр", icon: Users },
+  { id: "events", href: "/events", label: "Эвент", icon: Ticket },
+  { id: "lessons", href: "/lessons", label: "Сургалт", icon: BookOpen },
+  { id: "shop", href: "/shop", label: "Дэлгүүр", icon: ShoppingBag },
+  { id: "apply", href: "/programs/apply", label: "Өргөдөл", icon: ClipboardList },
+  { id: "more", href: "/about", label: "Бусад", icon: LayoutGrid },
 ];
 
 export default function HomePageContent({
@@ -60,7 +56,6 @@ export default function HomePageContent({
       return {
         id: slug,
         slug,
-        emoji: p.emoji || PROGRAM_COLORS[slug].emoji,
         label: p.name?.mn || p.code,
         sub: p.description?.mn || "",
         href: p.href || `/programs/${slug}`,
@@ -69,20 +64,35 @@ export default function HomePageContent({
 
   const [items] = useState<any[]>(shopItems || []);
   const [programs] = useState(() =>
-    initialPrograms?.length ? mapPrograms(initialPrograms) : QUICK_ACTIONS_FALLBACK
+    initialPrograms?.length ? mapPrograms(initialPrograms) : FALLBACK_PROGRAMS
   );
+  const [query, setQuery] = useState("");
   const [mounted, setMounted] = useState(false);
   const [nativeApp, setNativeApp] = useState(false);
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const isSignedIn = mounted && status === "authenticated";
-  const navGrid = nativeApp
-    ? NAV_GRID.filter((n) => n.id !== "shop" && n.id !== "lessons")
-    : NAV_GRID;
+  const { data: dash } = useDashboard({ enabled: isSignedIn });
 
   useEffect(() => {
     setMounted(true);
     setNativeApp(isNativeApp());
   }, []);
+
+  const quick = nativeApp
+    ? [NAV_GRID[0], NAV_GRID[1], NAV_GRID[4], NAV_GRID[5]]
+    : NAV_GRID.slice(0, 4);
+
+  const q = query.trim().toLowerCase();
+  const shownPrograms = programs.filter((p) => !q || `${p.label} ${p.sub}`.toLowerCase().includes(q));
+
+  const name =
+    (session?.user as { name?: string } | undefined)?.name ||
+    dash?.user?.fullName ||
+    "";
+
+  const greeting = name
+    ? `Сайн уу, ${name.split(" ")[0]}`
+    : "Сайн уу";
 
   const featured = useMemo(() => {
     const banner = initialBanners?.[0];
@@ -90,211 +100,141 @@ export default function HomePageContent({
       return {
         title: banner.title || "Онцлох боломж",
         subtitle: banner.subtitle || BRAND.taglineMn,
-        image: banner.image,
+        image: banner.image as string | undefined,
         href: banner.link || "/programs",
-        type: "banner" as const,
       };
     }
     const program = programs[0];
-    if (program) {
-      return {
-        title: program.label,
-        subtitle: program.sub || "Хөтөлбөрт нэгдэх боломж",
-        image: null,
-        href: program.href,
-        emoji: program.emoji,
-        type: "program" as const,
-      };
-    }
     return {
-      title: "Сайн дурын ажил",
-      subtitle: BRAND.taglineMn,
-      image: null,
-      href: "/programs",
-      type: "fallback" as const,
+      title: program?.label || "Сайн дурын ажил",
+      subtitle: program?.sub || BRAND.taglineMn,
+      image: undefined,
+      href: program?.href || "/programs",
     };
   }, [initialBanners, programs]);
 
+  const apps = dash?.applications?.length ?? 0;
+  const events = dash?.attendedEvents?.length ?? 0;
+  const lessons = dash?.lmsEnrollments?.length ?? dash?.enrolledLessons?.length ?? 0;
+
   return (
-    <PremiumPageShell className="home-dash" padded={false}>
+    <PremiumPageShell className="home-dash" padded>
+      <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-5">
+        <motion.div variants={staggerItem}>
+          <IOSLargeTitle title={greeting}>
+            <p className="ios-footnote mt-1">{BRAND.taglineMn}</p>
+          </IOSLargeTitle>
+        </motion.div>
 
-      {/* 1. Featured opportunity — header-ийн доор шууд */}
-      <section className="px-5 pt-2 anim-fade">
-        <PremiumSectionHeader title="Онцлох боломж" subtitle="Танд санал болгож байна" />
-        <Link href={featured.href} className="home-featured press mt-3 block">
-          {featured.image ? (
-            <div
-              className="home-featured__bg"
-              style={{ backgroundImage: `url(${featured.image})` }}
-              aria-hidden
+        <motion.div variants={staggerItem}>
+          <label className="vcm-search flex items-center gap-2 h-11 px-3 rounded-[12px] bg-[var(--card)] border-[0.5px] border-[var(--sep)]">
+            <Search size={18} strokeWidth={1.75} color="var(--label2)" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Хайх"
+              aria-label="Хайх"
+              className="flex-1 bg-transparent outline-none text-[17px] text-[var(--label)] placeholder:text-[var(--label2)]"
             />
-          ) : (
-            <div className="home-featured__bg home-featured__bg--gradient" aria-hidden>
-              {"emoji" in featured && featured.emoji ? (
-                <span className="home-featured__emoji">{featured.emoji}</span>
-              ) : (
-                <Sparkles size={32} strokeWidth={1.8} />
-              )}
-            </div>
-          )}
-          <div className="home-featured__overlay" aria-hidden />
-          <div className="home-featured__content">
-            <span className="home-featured__tag">Онцлох</span>
-            <h2 className="home-featured__title">{featured.title}</h2>
-            <p className="home-featured__sub">{featured.subtitle}</p>
-            <span className="home-featured__cta">
-              Дэлгэрэнгүй
-              <ArrowRight size={15} />
-            </span>
-          </div>
-        </Link>
-      </section>
+          </label>
+        </motion.div>
 
-      {/* 2. Compact quick nav */}
-      <section className="px-5 mt-5 anim-in anim-in-delay-1">
-        <div className="home-quick-grid">
-          {navGrid.map(({ id, href, label, icon: Icon, tone }) => (
-            <Link key={id} href={href} className={`home-quick-item home-quick-item--${tone} press`}>
-              <span className="home-quick-item__icon">
-                <Icon size={20} strokeWidth={2.1} />
-              </span>
-              <span className="home-quick-item__label">{label}</span>
-            </Link>
-          ))}
-        </div>
-      </section>
+        <motion.div variants={staggerItem}>
+          <TodayCard
+            href={featured.href}
+            title={featured.title}
+            subtitle={featured.subtitle}
+            image={featured.image}
+            layoutId="today-featured"
+          />
+        </motion.div>
 
-      {/* 3. Personalized — зөвхөн нэвтэрсэн хэрэглэгчид */}
-      {isSignedIn && (
-        <section className="px-5 mt-7 anim-in anim-in-delay-2">
-          <PremiumSectionHeader title="Таны идэвх" subtitle="Хурдан холбоос" />
-          <div className="home-you-grid mt-4">
-            <Link href="/programs/apply" className="home-you-card press">
-              <FileText size={20} strokeWidth={2} />
-              <span className="home-you-card__title">Миний өргөдөл</span>
-              <span className="home-you-card__sub">Төлөв шалгах</span>
-            </Link>
-            <Link href="/events" className="home-you-card press">
-              <Ticket size={20} strokeWidth={2} />
-              <span className="home-you-card__title">Ирэх эвент</span>
-              <span className="home-you-card__sub">Бүртгүүлэх</span>
-            </Link>
-            {!nativeApp && (
-              <Link href="/lessons" className="home-you-card press">
-                <GraduationCap size={20} strokeWidth={2} />
-                <span className="home-you-card__title">Сургалт</span>
-                <span className="home-you-card__sub">Үргэлжлүүлэх</span>
+        {isSignedIn && (
+          <motion.section variants={staggerItem} className="bg-[var(--card)] rounded-[20px] p-4">
+            <p className="ios-headline mb-3">Таны явц</p>
+            <FitnessRing
+              rings={[
+                { value: apps, max: Math.max(3, apps), color: "#1E5BD8", label: "Өргөдөл" },
+                { value: events, max: Math.max(5, events), color: "#34C759", label: "Эвент" },
+                { value: lessons, max: Math.max(4, lessons), color: "#FF9F0A", label: "Сургалт" },
+              ]}
+            />
+            {!apps && !events && (
+              <Link href="/programs/apply" className="btn btn-primary mt-4 inline-flex w-full items-center justify-center">
+                Эхлэх
               </Link>
             )}
-          </div>
-        </section>
-      )}
+          </motion.section>
+        )}
 
-      {/* 5. Upcoming events — vertical list */}
-      <section className="px-5 mt-8">
-        <PremiumSectionHeader
-          title="Удахгүй болох эвент"
-          subtitle="Ойрын арга хэмжээ"
-          href="/events"
-        />
-        <LazySection
-          placeholder={
-            <div className="home-events-list mt-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="home-event-row home-event-row--skeleton animate-pulse" />
-              ))}
-            </div>
-          }
-        >
-          <div className="mt-4">
-            <HomeUpcomingEvents limit={3} />
+        <motion.section variants={staggerItem}>
+          <div className="ios-quick">
+            {quick.map(({ id, href, label, icon: Icon }) => (
+              <Link key={id} href={href} className="ios-quick__item press">
+                <span className="ios-quick__icon">
+                  <Icon size={22} strokeWidth={1.75} />
+                </span>
+                <span className="ios-quick__label">{label}</span>
+              </Link>
+            ))}
           </div>
-        </LazySection>
-      </section>
+        </motion.section>
 
-      {/* 6. Recommended programs */}
-      <section className="mt-8 anim-in">
-        <div className="px-5">
-          <PremiumSectionHeader
-            title="Танд санал болгох"
-            subtitle="EDU · АНД · V-Club"
-            href="/programs"
-          />
-        </div>
-        <div className="flex gap-3 overflow-x-auto no-scroll px-5 pb-1 mt-4 snap-x-mandatory">
-          {programs.map((a) => {
-            const slug = (a.slug || a.id || "edu") as ProgramId;
-            const chipClass =
-              slug === "and" ? "program-chip--and" : slug === "vclub" ? "program-chip--vclub" : "program-chip--edu";
-            const colors = programColorsBySlug(slug);
-            return (
-              <div key={a.id} className="snap-start">
-                <Link
-                  href={a.href}
-                  className={`flex-shrink-0 press block program-chip premium-program-card ${chipClass}`}
-                  style={{ width: 148 }}
-                >
-                  <div className="p-3.5 h-[120px] flex flex-col justify-between">
-                    <span className="text-[28px] leading-none">{a.emoji}</span>
-                    <div>
-                      <p className="font-bold text-[13px] leading-tight" style={{ color: "var(--label)" }}>
-                        {a.label}
-                      </p>
-                      <p className="text-[10px] font-semibold mt-0.5 line-clamp-1" style={{ color: colors.onSoft }}>
-                        {a.sub}
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              </div>
-            );
-          })}
-          <div className="snap-start">
-            <Link href="/programs/apply" className="premium-apply-card press" style={{ width: 148, height: 120 }}>
-              <span className="premium-apply-card__label">Өргөдөл</span>
-              <span className="premium-apply-card__title text-[14px]">Нэгдэх</span>
-              <ArrowRight size={16} className="premium-apply-card__icon" />
+        <motion.section variants={staggerItem}>
+          <div className="flex items-end justify-between mb-3">
+            <h2 className="ios-title" style={{ fontSize: 22 }}>Удахгүй болох эвент</h2>
+            <Link href="/events" className="ios-footnote" style={{ color: "var(--blue)", fontWeight: 600 }}>
+              Бүгд
             </Link>
           </div>
-        </div>
-      </section>
+          <HomeUpcomingEvents limit={8} query={q} />
+        </motion.section>
 
-      {/* 7. Shop preview — bottom (web only; no catalog on native App Store build) */}
-      {!nativeApp && items.length > 0 && locale && (
-        <LazySection
-          placeholder={
-            <div className="mt-8 px-5">
-              <div className="flex gap-3">
-                {[1, 2].map((i) => (
-                  <div
-                    key={i}
-                    className="flex-shrink-0 rounded-3xl animate-pulse premium-skeleton"
-                    style={{ width: 140, height: 180 }}
-                  />
-                ))}
-              </div>
-            </div>
-          }
-        >
-          <section className="mt-8">
-            <div className="px-5">
-              <PremiumSectionHeader title="Дэлгүүр" subtitle="VCM бүтээгдэхүүн" href="/shop" />
-            </div>
-            <div className="flex overflow-x-auto gap-3 px-5 pb-3 mt-4 no-scroll">
-              <ShopClient items={items.slice(0, 4)} locale={locale} isHorizontal />
-            </div>
-          </section>
-        </LazySection>
-      )}
+        <motion.section variants={staggerItem}>
+          <div className="flex items-end justify-between mb-3">
+            <h2 className="ios-title" style={{ fontSize: 22 }}>Хөтөлбөр</h2>
+            <Link href="/programs" className="ios-footnote" style={{ color: "var(--blue)", fontWeight: 600 }}>
+              Бүгд
+            </Link>
+          </div>
+          <IOSList>
+            {shownPrograms.map((a) => (
+              <IOSListRow
+                key={a.id}
+                href={a.href}
+                icon={<ProgramGlyph id={a.slug || a.id} size={16} />}
+                title={a.label}
+                subtitle={a.sub}
+              />
+            ))}
+            <IOSListRow
+              href="/programs/apply"
+              icon={<ClipboardList size={16} strokeWidth={1.75} />}
+              title="Нэгдэх"
+              subtitle="Өргөдөл илгээх"
+            />
+          </IOSList>
+        </motion.section>
 
-      <footer className="px-5 mt-10 pb-4 text-center">
-        <p className="text-[11px] font-semibold tracking-wide" style={{ color: "var(--label3)" }}>
-          {BRAND.name}
-        </p>
-        <p className="text-[10px] mt-1" style={{ color: "var(--label4)" }}>
-          {BRAND.taglineMn}
-        </p>
-      </footer>
+        {!nativeApp && items.length > 0 && locale && (
+          <motion.section variants={staggerItem}>
+            <div className="flex items-end justify-between mb-3">
+              <h2 className="ios-title" style={{ fontSize: 22 }}>Дэлгүүр</h2>
+              <Link href="/shop" className="ios-footnote" style={{ color: "var(--blue)", fontWeight: 600 }}>
+                Бүгд
+              </Link>
+            </div>
+            <ShopClient items={items} locale={locale} embedded />
+          </motion.section>
+        )}
+
+        <footer className="pt-2 pb-4 text-center">
+          <p className="ios-footnote">{BRAND.name}</p>
+          <Link href="/about" className="inline-flex min-h-[44px] items-center ios-footnote" style={{ color: "var(--blue)", fontWeight: 600 }}>
+            Тухай
+          </Link>
+        </footer>
+      </motion.div>
     </PremiumPageShell>
   );
 }

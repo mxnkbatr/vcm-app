@@ -8,7 +8,6 @@ export const BRAND = {
   descriptorMn: "Монголын сайн дурын үйлсийн тэргүүлэгч платформ",
   descriptorEn: "Mongolia's leading volunteer platform",
 
-  /** App icon = logo (нэг эх сурвалж) */
   appIcon: "/branding/icon-512.png",
   logo: "/branding/icon-512.png",
   icon192: "/branding/icon-192.png",
@@ -16,23 +15,23 @@ export const BRAND = {
   appleTouchIcon: "/branding/apple-touch-icon.png",
 
   colors: {
-    primary: "#0B84E5",
-    primaryLight: "#E3F2FD",
-    navy: "#142433",
-    cream: "#FBF8F3",
-    creamLight: "#FFFDFB",
-    creamWarm: "#F3EEE6",
-    creamBlue: "#EEF4FA",
-    background: "#FBF8F3",
-    backgroundDark: "#0F172A",
+    primary: "#1E5BD8",
+    primaryLight: "#E8EEFB",
+    navy: "#000000",
+    cream: "#F2F2F7",
+    creamLight: "#FFFFFF",
+    creamWarm: "#E5E5EA",
+    creamBlue: "#F2F2F7",
+    background: "#F2F2F7",
+    backgroundDark: "#000000",
 
-    modulePrograms: "#0B84E5",
-    moduleShop: "#E8910A",
-    moduleLessons: "#0FA878",
-    moduleEvents: "#E8457A",
+    modulePrograms: "#1E5BD8",
+    moduleShop: "#1E5BD8",
+    moduleLessons: "#1E5BD8",
+    moduleEvents: "#1E5BD8",
 
-    programEdu: "#0B84E5",
-    programAnd: "#0FA878",
-    programVclub: "#E8910A",
+    programEdu: "#1E5BD8",
+    programAnd: "#1E5BD8",
+    programVclub: "#1E5BD8",
   },
 } as const;

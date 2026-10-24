@@ -1,4 +1,11 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+
+const inter = Inter({
+  subsets: ["latin", "cyrillic"],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 import "../globals.css";
 import AuthProvider from "../components/AuthProvider";
@@ -55,42 +62,43 @@ export default async function RootLayout({
   return (
     <AuthProvider>
       <CartProvider>
-        <html lang={locale} suppressHydrationWarning className="">
-        <head>
-          <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-          <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
-          <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        <html lang={locale} suppressHydrationWarning className={inter.variable}>
+          <head>
+            <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+            <link rel="preconnect" href="https://fonts.googleapis.com" />
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+            <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
+            <link rel="dns-prefetch" href="https://res.cloudinary.com" />
 
-          <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
-          <meta name="theme-color" content={BRAND.colors.creamLight} media="(prefers-color-scheme: light)" />
-          <meta name="theme-color" content={BRAND.colors.backgroundDark} media="(prefers-color-scheme: dark)" />
-          <meta name="apple-mobile-web-app-title" content={BRAND.shortName} />
-          <meta name="mobile-web-app-capable" content="yes" />
-          <meta name="apple-mobile-web-app-capable" content="yes" />
-          <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-          <meta name="apple-touch-fullscreen" content="yes" />
-          <meta name="format-detection" content="telephone=no" />
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `(function(){try{var ua=navigator.userAgent||"";var C=window.Capacitor;var native=(C&&C.isNativePlatform&&C.isNativePlatform())||ua.indexOf("VCMNativeApp")!==-1;if(native){var r=document.documentElement;r.classList.add("native-shell");r.style.setProperty("--safe-top","47px");document.cookie="vcm_native=1;path=/;max-age=31536000;SameSite=Lax";}}catch(e){}})();`,
-            }}
-          />
-        </head>
-        <body className="font-sans overscroll-none bg-[var(--bg)] dark:bg-[#0F172A]" suppressHydrationWarning>
-          <AppSplash />
-          <NextIntlClientProvider messages={messages}>
-            <ThemeProvider>
-              <ServiceWorkerRegister />
-              <BackgroundPrefetch />
-              <PushRegister />
-              <NetworkBanner />
-              <AppShell>{children}</AppShell>
-            </ThemeProvider>
-          </NextIntlClientProvider>
-        </body>
-      </html>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+            <meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)" />
+            <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+            <meta name="apple-mobile-web-app-title" content={BRAND.shortName} />
+            <meta name="mobile-web-app-capable" content="yes" />
+            <meta name="apple-mobile-web-app-capable" content="yes" />
+            <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+            <meta name="apple-touch-fullscreen" content="yes" />
+            <meta name="format-detection" content="telephone=no" />
+            <link rel="apple-touch-icon" href={BRAND.appleTouchIcon} />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `(function(){try{var ua=navigator.userAgent||"";var C=window.Capacitor;var native=(C&&C.isNativePlatform&&C.isNativePlatform())||ua.indexOf("VCMNativeApp")!==-1;var mobile=window.innerWidth<=1023;var r=document.documentElement;if(native){r.classList.add("native-shell");document.cookie="vcm_native=1;path=/;max-age=31536000;SameSite=Lax";}if(native||mobile){r.classList.add("native-perf");}}catch(e){}})();`,
+              }}
+            />
+          </head>
+          <body className={`${inter.className} overscroll-none bg-[var(--bg)] text-[var(--label)]`} suppressHydrationWarning>
+            <AppSplash />
+            <NextIntlClientProvider messages={messages}>
+              <ThemeProvider>
+                <ServiceWorkerRegister />
+                <BackgroundPrefetch />
+                <PushRegister />
+                <NetworkBanner />
+                <AppShell>{children}</AppShell>
+              </ThemeProvider>
+            </NextIntlClientProvider>
+          </body>
+        </html>
       </CartProvider>
     </AuthProvider>
   );

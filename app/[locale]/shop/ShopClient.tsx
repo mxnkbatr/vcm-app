@@ -2,13 +2,15 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, SlidersHorizontal } from "lucide-react";
 import { staggerContainer, staggerItem } from "@/lib/motion";
 import PremiumPageShell from "@/app/components/PremiumPageShell";
-import PremiumSectionHeader from "@/app/components/PremiumSectionHeader";
-import ShopProductCard, { formatShopCategory } from "@/app/components/ShopProductCard";
+import ShopProductCard, { formatShopCategory, isVisibleShopItem } from "@/app/components/ShopProductCard";
 import NativeFeatureUnavailable from "@/app/components/NativeFeatureUnavailable";
 import { isNativeApp } from "@/lib/native-perf";
+import IOSSheet from "@/app/components/ui/IOSSheet";
+import IOSLargeTitle from "@/app/components/ui/IOSLargeTitle";
+import EmptyState from "@/app/components/ui/EmptyState";
 
 const T = {
   shopTitle: { en: "Our Shop", mn: "Дэлгүүр", de: "Unser Shop" },
@@ -25,25 +27,32 @@ export default function ShopClient({
   items = [],
   locale = "en",
   isHorizontal = false,
+  embedded = false,
 }: {
   items?: any[];
   locale?: string;
   isHorizontal?: boolean;
+  embedded?: boolean;
 }) {
   const [filter, setFilter] = useState("all");
+  const [sheet, setSheet] = useState(false);
   const [nativeApp, setNativeApp] = useState(false);
 
   useEffect(() => {
     setNativeApp(isNativeApp());
   }, []);
 
+  const catalog = useMemo(
+    () => items.filter((item) => isVisibleShopItem(item, locale)),
+    [items, locale]
+  );
   const categories = useMemo(
-    () => ["all", ...Array.from(new Set(items.map((item: any) => item.category).filter(Boolean)))],
-    [items]
+    () => ["all", ...Array.from(new Set(catalog.map((item: any) => item.category).filter(Boolean)))],
+    [catalog]
   );
   const filteredItems = useMemo(
-    () => items.filter((item: any) => filter === "all" || item.category === filter),
-    [items, filter]
+    () => catalog.filter((item: any) => filter === "all" || item.category === filter),
+    [catalog, filter]
   );
 
   if (nativeApp && !isHorizontal) {
@@ -60,9 +69,11 @@ export default function ShopClient({
 
   if (isHorizontal) {
     if (nativeApp) return null;
+    const row = catalog.slice(0, 4);
+    if (!row.length) return null;
     return (
       <>
-        {items.map((item: any, i: number) => (
+        {row.map((item: any, i: number) => (
           <ShopProductCard
             key={item._id}
             item={item}
@@ -76,6 +87,17 @@ export default function ShopClient({
     );
   }
 
+  if (embedded) {
+    if (nativeApp || catalog.length === 0) return null;
+    return (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {catalog.slice(0, 4).map((item: any, i: number) => (
+          <ShopProductCard key={item._id} item={item} locale={locale} index={i} animated={false} />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <PremiumPageShell>
       <motion.div
@@ -85,43 +107,47 @@ export default function ShopClient({
         animate="animate"
       >
         <motion.div variants={staggerItem}>
-          <PremiumSectionHeader
-            title={T.shopTitle[locale as keyof typeof T.shopTitle] || T.shopTitle.en}
-            subtitle="VCM merchandise"
-          />
+          <IOSLargeTitle title={T.shopTitle[locale as keyof typeof T.shopTitle] || T.shopTitle.en} />
         </motion.div>
 
-        <motion.div variants={staggerItem} className="premium-filter-row">
-          {categories.slice(0, 6).map((cat: any) => {
-            const on = filter === cat;
-            return (
+        <motion.div variants={staggerItem} className="flex items-center justify-between">
+          <span className="ios-footnote">
+            {filteredItems.length} {locale === "mn" ? "бараа" : "items"}
+          </span>
+          {categories.length > 2 && (
+            <button type="button" className="btn btn-ghost press inline-flex items-center gap-2" onClick={() => setSheet(true)}>
+              <SlidersHorizontal size={16} strokeWidth={1.75} />
+              {filter === "all"
+                ? T.catAll[locale as keyof typeof T.catAll] || T.catAll.en
+                : formatShopCategory(filter, locale)}
+            </button>
+          )}
+        </motion.div>
+
+        <IOSSheet open={sheet} title={locale === "mn" ? "Ангилал" : "Category"} onClose={() => setSheet(false)} detent="half">
+          <div className="ios-list">
+            {categories.map((cat: any) => (
               <button
                 key={cat}
                 type="button"
-                onClick={() => setFilter(cat)}
-                className={`premium-filter-pill press ${on ? "on" : ""}`}
-                style={
-                  on
-                    ? {
-                        background: "linear-gradient(180deg, #FFAA22 0%, var(--module-shop) 100%)",
-                        borderColor: "rgba(255,255,255,0.22)",
-                        boxShadow: "0 4px 14px rgba(232, 145, 10, 0.28), inset 0 1px 0 rgba(255,255,255,0.25)",
-                        color: "white",
-                      }
-                    : undefined
-                }
+                className="ios-list-row press"
+                style={{ color: filter === cat ? "var(--blue)" : undefined, fontWeight: filter === cat ? 600 : 400 }}
+                onClick={() => {
+                  setFilter(cat);
+                  setSheet(false);
+                }}
               >
                 {cat === "all"
                   ? T.catAll[locale as keyof typeof T.catAll] || T.catAll.en
                   : formatShopCategory(cat, locale)}
               </button>
-            );
-          })}
-        </motion.div>
+            ))}
+          </div>
+        </IOSSheet>
 
         <div className="min-h-[400px]">
           {filteredItems.length > 0 ? (
-            <motion.div layout className="grid grid-cols-2 gap-3">
+            <motion.div layout className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               <AnimatePresence mode="popLayout">
                 {filteredItems.map((item: any, i: number) => (
                   <ShopProductCard key={item._id} item={item} locale={locale} index={i} />
@@ -129,17 +155,13 @@ export default function ShopClient({
               </AnimatePresence>
             </motion.div>
           ) : (
-            <motion.div variants={staggerItem} className="premium-empty-state">
-              <div className="premium-empty-state__icon">
-                <ShoppingBag size={26} strokeWidth={2} style={{ color: "var(--module-shop)" }} />
-              </div>
-              <p className="premium-empty-state__title">
-                {T.notFound[locale as keyof typeof T.notFound] || T.notFound.en}
-              </p>
-              <p className="premium-empty-state__sub">
-                {T.notFoundSub[locale as keyof typeof T.notFoundSub] || T.notFoundSub.en}
-              </p>
-            </motion.div>
+            <EmptyState
+              icon={ShoppingBag}
+              title={T.notFound[locale as keyof typeof T.notFound] || T.notFound.en}
+              description={T.notFoundSub[locale as keyof typeof T.notFoundSub] || T.notFoundSub.en}
+              actionLabel={locale === "mn" ? "Нүүр лүү" : "Home"}
+              href="/"
+            />
           )}
         </div>
       </motion.div>

@@ -9,8 +9,9 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/",
     scope: "/",
     display: "standalone",
-    background_color: BRAND.colors.creamLight,
-    theme_color: BRAND.colors.primary,
+    orientation: "portrait",
+    background_color: BRAND.colors.background,
+    theme_color: BRAND.colors.background,
     icons: [
       {
         src: BRAND.icon192,
@@ -33,4 +34,3 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
   };
 }
-

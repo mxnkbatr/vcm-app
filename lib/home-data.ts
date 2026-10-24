@@ -73,10 +73,13 @@ export async function getHomeShopItems() {
       .sort({ createdAt: -1 })
       .limit(8)
       .lean();
-    return items.map((item: any) => ({
-      ...item,
-      _id: item._id.toString(),
-    }));
+    // Fully serialize to strip Mongoose ObjectId buffers and toJSON methods
+    return JSON.parse(JSON.stringify(
+      items.map((item: any) => ({
+        ...item,
+        _id: item._id.toString(),
+      }))
+    ));
   });
 }
 
@@ -85,10 +88,13 @@ export async function getHomePrograms() {
     await connectToDB();
     await ensureDefaultPrograms();
     const programs = await Program.find({ active: true }).sort({ order: 1, code: 1 }).lean();
-    return programs.map((p: any) => ({
-      ...p,
-      _id: p._id?.toString(),
-    }));
+    // Fully serialize to strip nested ObjectId buffers and i18n sub-documents
+    return JSON.parse(JSON.stringify(
+      programs.map((p: any) => ({
+        ...p,
+        _id: p._id?.toString(),
+      }))
+    ));
   });
 }
 

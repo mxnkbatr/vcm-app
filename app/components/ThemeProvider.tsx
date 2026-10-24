@@ -6,9 +6,9 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
   return (
     <NextThemesProvider
       attribute="class"
-      defaultTheme="light"
-      enableSystem={false}
-      disableTransitionOnChange={true}
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
       storageKey="vcm-theme"
     >
       {children}

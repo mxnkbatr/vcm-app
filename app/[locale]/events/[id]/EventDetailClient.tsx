@@ -58,6 +58,7 @@ export default function EventDetailClient({
   const [loading, setLoading] = useState(!initialEvent);
   const [joining, setJoining] = useState(false);
   const [hasJoined, setHasJoined] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   const [alert, setAlert] = useState<{ title: string; message: string; type?: "error" | "info" } | null>(null);
 
   useEffect(() => setMounted(true), []);
@@ -85,6 +86,8 @@ export default function EventDetailClient({
       const data = await res.json();
       if (res.ok) {
         setHasJoined(true);
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 1800);
         if (user?.id) {
           setEvent((prev) =>
             prev ? { ...prev, attendees: [...(prev.attendees || []), user.id] } : prev
@@ -422,37 +425,47 @@ export default function EventDetailClient({
 
       </div>
 
-      {/* ── Sticky bottom CTA ── */}
-      <div
-        className="fixed left-0 right-0 px-4 pt-3 space-y-2"
-        style={{
-          bottom: "calc(64px + env(safe-area-inset-bottom, 0px))",
-          paddingBottom: 16,
-          background: "linear-gradient(to top, var(--bg) 60%, transparent)",
-          zIndex: 50,
-        }}
-      >
+      {showConfetti && (
+        <div className="pointer-events-none fixed inset-0 z-[80] overflow-hidden" aria-hidden>
+          {Array.from({ length: 24 }).map((_, i) => (
+            <span
+              key={i}
+              className="absolute w-2 h-2 rounded-sm"
+              style={{
+                left: `${(i * 17) % 100}%`,
+                top: "-8px",
+                background: ["#1E5BD8", "#34C759", "#FF9F0A", "#FF3B30", "#AF52DE"][i % 5],
+                animation: `ios-confetti-fall 1.4s ease-in ${i * 0.04}s forwards`,
+              }}
+            />
+          ))}
+          <style>{`@keyframes ios-confetti-fall{to{transform:translateY(110vh) rotate(540deg);opacity:0}}`}</style>
+        </div>
+      )}
+
+      <div className="ios-sticky-cta">
         {hasJoined ? (
-          <div
-            className="w-full py-4 rounded-2xl flex items-center justify-center gap-2 text-[16px] font-bold shadow-lg"
-            style={{ background: "var(--card)", color: "#30D158" }}
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="w-full min-h-[50px] rounded-[14px] flex items-center justify-center gap-2 text-[17px] font-semibold"
+            style={{ background: "var(--card)", color: "var(--emerald)", border: "0.5px solid var(--sep)" }}
           >
-            <CheckCircle2 size={20} />
+            <CheckCircle2 size={22} strokeWidth={1.75} />
             Амжилттай бүртгүүлсэн
-          </div>
+          </motion.div>
         ) : (
           <button
             onClick={handleJoin}
             disabled={joining || status === "loading"}
-            className="w-full py-4 rounded-2xl flex items-center justify-center gap-2 text-[16px] font-bold text-white transition-all active:scale-[0.97] disabled:opacity-60"
-            style={{ background: cat.color, boxShadow: `0 8px 24px ${cat.color}55` }}
+            className="btn btn-primary press disabled:opacity-60"
           >
             {joining ? (
-              <span className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+              <span className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin inline-block" />
             ) : (
               <>
-                {user ? "Оролцох" : "Нэвтэрч бүртгүүлэх"}
-                <ChevronRight size={18} />
+                {user ? "Нэгдэх" : "Нэвтэрч бүртгүүлэх"}
+                <ChevronRight size={18} strokeWidth={1.75} className="inline ml-1" />
               </>
             )}
           </button>

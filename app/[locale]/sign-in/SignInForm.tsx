@@ -19,7 +19,24 @@ export default function SignInForm() {
   const [busy, setBusy] = useState(false);
 
   const finishLogin = async () => {
+    // Refresh session on the server side
     await fetch("/api/auth/session", { method: "POST" });
+
+    // Verify the session is ready — retry once if MongoDB sync is still in progress
+    let sessionOk = false;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      if (attempt > 0) await new Promise((r) => setTimeout(r, 600));
+      const res = await fetch("/api/auth/session", { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.user) { sessionOk = true; break; }
+      }
+    }
+
+    if (!sessionOk) {
+      throw new Error("Нэвтрэхэд алдаа гарлаа. Дахин оролдоно уу.");
+    }
+
     router.push(callbackUrl.startsWith("/") ? callbackUrl : "/");
     router.refresh();
   };
