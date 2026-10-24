@@ -4174,9 +4174,18 @@ html.native-perf .vcm-tabbar {
   color: #0F1F33;
 }
 .shop-product-card__price {
-  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 13px;
   font-weight: 700;
-  color: #0F1F33;
+  color: var(--blue);
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
+  backdrop-filter: blur(12px);
 }
 .shop-product-card__placeholder {
   background: #E8EEFB;
@@ -5449,17 +5458,20 @@ html.native-perf.dark .ios-tabbar,
   position: relative;
   height: 52px;
   border-radius: 14px;
-  border: 1.5px solid var(--sep);
-  background: #fff;
+  border: 1px solid var(--glass-border);
+  background: var(--glass);
   display: flex;
   align-items: center;
   padding: 0 14px;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
-.dark .auth-field { background: #1C1C1E; }
+.dark .auth-field { background: rgba(28, 28, 30, 0.55); }
 .auth-field.is-focus {
-  border-color: var(--blue);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 18%, transparent);
+  border-color: rgba(30, 91, 216, 0.65);
+  box-shadow: 0 0 0 4px rgba(30, 91, 216, 0.18), inset 0 1px 0 var(--glass-highlight);
 }
 .auth-field.is-error { border-color: var(--red); }
 .auth-field__label {
