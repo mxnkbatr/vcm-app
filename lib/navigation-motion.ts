@@ -13,6 +13,9 @@ const TAB_ROOTS = new Set([
   "/profile",
 ]);
 
+/** Full-screen overlays that still use push chrome */
+export const OVERLAY_ROUTES = new Set(["/notifications"]);
+
 /** Routes that slide up like iOS sheets */
 const MODAL_ROUTES = new Set([
   "/cart",

@@ -97,7 +97,6 @@ export default function HomePageContent({
   const [programs] = useState(() =>
     initialPrograms?.length ? mapPrograms(initialPrograms) : FALLBACK_PROGRAMS
   );
-  const [query, setQuery] = useState("");
   const mounted = useSyncExternalStore(subscribeClient, () => true, () => false);
   const nativeApp = mounted && isNativeApp();
   const { data: session, status } = useSession();
@@ -108,7 +107,7 @@ export default function HomePageContent({
     ? [NAV_GRID[0], NAV_GRID[1], NAV_GRID[4], NAV_GRID[5]]
     : NAV_GRID.slice(0, 4);
 
-  const q = query.trim().toLowerCase();
+  const q = "";
   const shownPrograms = programs.filter((p) => !q || `${p.label} ${p.sub}`.toLowerCase().includes(q));
 
   const name =
@@ -168,16 +167,16 @@ export default function HomePageContent({
         </motion.div>
 
         <motion.div variants={staggerItem}>
-          <label className="vcm-search glass-chip flex items-center gap-2">
+          <button
+            type="button"
+            className="vcm-search glass-chip flex items-center gap-2 w-full text-left press"
+            onClick={() => window.dispatchEvent(new CustomEvent("vcm:open-search"))}
+          >
             <Search size={18} strokeWidth={1.75} color="var(--label2)" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Хайх"
-              aria-label="Хайх"
-              className="flex-1 bg-transparent outline-none text-[var(--label)] placeholder:text-[var(--label2)]"
-            />
-          </label>
+            <span className="flex-1 text-[15px]" style={{ color: "var(--label2)" }}>
+              Хайх
+            </span>
+          </button>
         </motion.div>
 
         <motion.div variants={staggerItem}>

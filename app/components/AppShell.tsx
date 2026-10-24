@@ -15,6 +15,8 @@ const NativePerfBoot = dynamic(() => import("./NativePerfBoot"), { ssr: false })
 const NativeStatusBar = dynamic(() => import("./NativeStatusBar"), { ssr: false });
 const NativeHapticPress = dynamic(() => import("./NativeHapticPress"), { ssr: false });
 const NativeSplashGate = dynamic(() => import("./NativeSplashGate"), { ssr: false });
+const GlobalSearch = dynamic(() => import("./GlobalSearch"), { ssr: false });
+const InAppBanner = dynamic(() => import("./InAppBanner"), { ssr: false });
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -30,6 +32,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <MotionProvider>
         <SmoothScroll />
         <MobileChrome />
+        <GlobalSearch />
+        <InAppBanner />
         <Navbar />
         <main className="native-app-main min-h-dvh overflow-x-hidden lg:min-h-0 lg:h-auto lg:overflow-visible">
           {children}

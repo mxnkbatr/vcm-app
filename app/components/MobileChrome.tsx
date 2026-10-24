@@ -3,12 +3,11 @@
 import React, { useState, useEffect, useSyncExternalStore } from "react";
 import { Link, usePathname, useRouter } from "@/navigation";
 import { useLocale } from "next-intl";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import {
-  Home, Plane, Ticket, BookOpen, Bell, X, User, ShoppingBag, ClipboardList,
+  Home, Plane, Ticket, BookOpen, User, ShoppingBag,
 } from "lucide-react";
 import { useSession } from "@/lib/hooks/useSession";
-import { formatRelativeTime } from "@/lib/format-time";
 import { hapticSelection } from "@/lib/haptics";
 import { isNativeApp } from "@/lib/native-perf";
 import { springNative } from "@/lib/motion";
@@ -40,17 +39,8 @@ const TAB_TITLES: Record<string, { mn: string; en: string }> = {
   "/lessons": { mn: "Сургалт", en: "Learn" },
   "/events": { mn: "Эвент", en: "Events" },
   "/profile": { mn: "Профайл", en: "Profile" },
+  "/notifications": { mn: "Мэдэгдэл", en: "Notifications" },
 };
-
-function NotifIcon({ type }: { type: string }) {
-  const Icon =
-    type.includes("event") ? Ticket
-    : type.includes("course") || type.includes("lesson") ? BookOpen
-    : type.includes("order") || type.includes("shop") ? ShoppingBag
-    : type.includes("application") ? ClipboardList
-    : Bell;
-  return <Icon size={16} strokeWidth={1.75} />;
-}
 
 function bookmarkKey(path: string) {
   return `vcm-bookmark:${path}`;
@@ -62,16 +52,12 @@ export default function MobileChrome() {
   const router = useRouter();
   const { data: session, status } = useSession();
 
-  const [showNotif, setShowNotif] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [dockCompact, setDockCompact] = useState(false);
   const [pageTitle, setPageTitle] = useState("");
   const [bounceId, setBounceId] = useState<string | null>(null);
   const [bookmarkVersion, setBookmarkVersion] = useState(0);
-  const [notifications, setNotifications] = useState<
-    Array<{ _id: string; type: string; title: string; body: string; createdAt: string; readAt?: string | null }>
-  >([]);
-  const [notifLoading, setNotifLoading] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const isMounted = useSyncExternalStore(
     () => () => {},
@@ -93,8 +79,8 @@ export default function MobileChrome() {
 
   useEffect(() => {
     const routes = nativeApp
-      ? ["/", "/programs", "/events", "/profile"]
-      : ["/", "/programs", "/shop", "/events", "/lessons", "/profile"];
+      ? ["/", "/programs", "/events", "/profile", "/notifications"]
+      : ["/", "/programs", "/shop", "/events", "/lessons", "/profile", "/notifications"];
     const run = () => {
       routes.forEach((href) => {
         try { router.prefetch(href); } catch { /* noop */ }
@@ -113,57 +99,31 @@ export default function MobileChrome() {
     };
   }, [router, nativeApp]);
 
-  useEffect(() => {
-    if (status !== "authenticated") return;
-    let cancelled = false;
+  const refreshUnread = () => {
+    if (status !== "authenticated") {
+      setUnreadCount(0);
+      return;
+    }
     fetch("/api/user/notifications", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : { notifications: [] }))
       .then((d) => {
-        if (!cancelled) setNotifications(d.notifications || []);
+        const list = (d.notifications || []) as Array<{ readAt?: string | null }>;
+        setUnreadCount(list.filter((n) => !n.readAt).length);
       })
       .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
+  };
+
+  useEffect(() => {
+    refreshUnread();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- status gate
   }, [status]);
 
   useEffect(() => {
-    const onRefresh = () => {
-      if (status !== "authenticated") return;
-      fetch("/api/user/notifications", { cache: "no-store" })
-        .then((r) => (r.ok ? r.json() : { notifications: [] }))
-        .then((d) => setNotifications(d.notifications || []))
-        .catch(() => {});
-    };
+    const onRefresh = () => refreshUnread();
     window.addEventListener("vcm:notifications-changed", onRefresh);
     return () => window.removeEventListener("vcm:notifications-changed", onRefresh);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
-
-  useEffect(() => {
-    if (!showNotif || status !== "authenticated") return;
-    let cancelled = false;
-    queueMicrotask(() => {
-      if (!cancelled) setNotifLoading(true);
-    });
-    fetch("/api/user/notifications", { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : { notifications: [] }))
-      .then((d) => {
-        if (!cancelled) setNotifications(d.notifications || []);
-      })
-      .catch(() => {
-        if (!cancelled) setNotifications([]);
-      })
-      .finally(() => {
-        if (!cancelled) setNotifLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [showNotif, status]);
-
-  useEffect(() => {
-    queueMicrotask(() => setShowNotif(false));
-  }, [pathname]);
 
   useEffect(() => {
     const onTitle = (e: Event) => {
@@ -193,8 +153,6 @@ export default function MobileChrome() {
 
   if (!isMounted || !visible) return null;
 
-  const visibleNotifications = status === "authenticated" ? notifications : [];
-  const unreadCount = visibleNotifications.filter((n) => !n.readAt).length;
   const user = session?.user as { name?: string; image?: string } | undefined;
   const initial = (user?.name || "V").charAt(0).toUpperCase();
 
@@ -202,7 +160,7 @@ export default function MobileChrome() {
     TAB_TITLES[pathname]?.[locale === "mn" ? "mn" : "en"] ||
     pageTitle ||
     "VCM";
-  const headerTitle = tabMode ? tabTitle : pageTitle;
+  const headerTitle = tabMode ? tabTitle : pageTitle || tabTitle;
   let bookmarked = false;
   try {
     bookmarked = localStorage.getItem(bookmarkKey(pathname)) === "1";
@@ -211,26 +169,6 @@ export default function MobileChrome() {
   }
   void bookmarkVersion;
 
-  const focusSearch = () => {
-    const input = document.querySelector<HTMLInputElement>(".vcm-search input");
-    if (input) {
-      input.scrollIntoView({ behavior: "smooth", block: "center" });
-      input.focus();
-      return;
-    }
-    router.push("/");
-  };
-
-  const toggleBookmark = () => {
-    try {
-      if (bookmarked) localStorage.removeItem(bookmarkKey(pathname));
-      else localStorage.setItem(bookmarkKey(pathname), "1");
-    } catch {
-      /* noop */
-    }
-    setBookmarkVersion((v) => v + 1);
-  };
-
   return (
     <>
       <AppHeader
@@ -238,134 +176,83 @@ export default function MobileChrome() {
         scrolled={scrolled}
         unreadCount={unreadCount}
         avatarInitial={initial}
-        onSearch={focusSearch}
-        onBell={() => setShowNotif((v) => !v)}
+        onSearch={() => window.dispatchEvent(new CustomEvent("vcm:open-search"))}
+        onBell={() => router.push("/notifications")}
         onShare={() => {
           void nativeShare({
             title: headerTitle || "VCM",
             url: typeof window !== "undefined" ? window.location.href : undefined,
           });
         }}
-        onBookmark={toggleBookmark}
+        onBookmark={() => {
+          try {
+            if (bookmarked) localStorage.removeItem(bookmarkKey(pathname));
+            else localStorage.setItem(bookmarkKey(pathname), "1");
+          } catch {
+            /* noop */
+          }
+          setBookmarkVersion((v) => v + 1);
+        }}
         bookmarked={bookmarked}
       />
 
-      {!showNotif && (
-        <>
-          <div className="ios-dock-fade lg:hidden" aria-hidden />
-          <motion.nav
-            className={`ios-tabbar liquid-glass-dock lg:hidden ${tabs.length === 4 ? "cols-4" : "cols-5"} ${dockCompact ? "is-compact" : ""}`}
-            aria-label="Үндсэн цэс"
-            animate={{
-              height: dockCompact ? 52 : 60,
-              paddingTop: 4,
-              paddingBottom: 4,
-            }}
-            transition={springNative}
-          >
-            {tabs.map(({ id, Icon, href, label }) => {
-              const active =
-                id === "profile"
-                  ? pathname === "/profile" || pathname.startsWith("/profile/")
-                  : pathname === href || (href !== "/" && pathname.startsWith(href));
-              const text = locale === "mn" ? label.mn : label.en;
-              return (
-                <Link
-                  key={id}
-                  href={href}
-                  prefetch
-                  onTouchStart={() => {
-                    try { router.prefetch(href); } catch { /* noop */ }
-                  }}
-                  onClick={() => {
-                    void hapticSelection();
-                    setBounceId(id);
-                    setTimeout(() => setBounceId(null), 320);
-                  }}
-                  className={`ios-tabbar__item glass-press ${active ? "on" : ""}`}
-                  aria-current={active ? "page" : undefined}
-                >
-                  {active && (
-                    <motion.span
-                      layoutId="tab-pill"
-                      className="ios-tabbar__pill"
-                      transition={springNative}
-                    />
-                  )}
-                  <motion.span
-                    animate={bounceId === id ? { y: [0, -4, 0], scale: [1, 1.12, 1] } : { y: 0, scale: 1 }}
-                    transition={springNative}
-                  >
-                    <Icon size={22} strokeWidth={active ? 2 : 1.75} />
-                  </motion.span>
-                  <motion.span
-                    className="ios-tabbar__label"
-                    animate={{ opacity: dockCompact ? 0 : 1, height: dockCompact ? 0 : "auto" }}
-                    transition={{ duration: 0.18 }}
-                  >
-                    {text}
-                  </motion.span>
-                </Link>
-              );
-            })}
-          </motion.nav>
-        </>
-      )}
-
-      <AnimatePresence>
-        {showNotif && (
-          <motion.div
-            key="notif"
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={springNative}
-            className="ios-notif-panel liquid-glass-panel fixed right-3 z-[120] lg:hidden overflow-hidden"
-            style={{
-              top: "calc(env(safe-area-inset-top, 0px) + 52px)",
-              width: "min(320px, calc(100vw - 24px))",
-            }}
-          >
-            <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: "0.5px solid var(--sep)" }}>
-              <span className="ios-headline">Мэдэгдэл</span>
-              <button type="button" onClick={() => setShowNotif(false)} className="ios-icon-btn" aria-label="Хаах">
-                <X size={18} strokeWidth={1.75} />
-              </button>
-            </div>
-            {status !== "authenticated" ? (
-              <div className="px-4 py-6 text-center">
-                <p className="ios-footnote">Мэдэгдэл харахын тулд нэвтэрнэ үү</p>
-                <Link href="/sign-in" onClick={() => setShowNotif(false)} className="inline-flex min-h-[44px] items-center ios-headline" style={{ color: "var(--blue)" }}>
-                  Нэвтрэх
-                </Link>
-              </div>
-            ) : notifLoading ? (
-              <div className="px-4 py-4 space-y-3">
-                {[1, 2, 3].map((i) => <div key={i} className="ios-skel h-12" />)}
-              </div>
-            ) : visibleNotifications.length === 0 ? (
-              <div className="px-4 py-8 text-center">
-                <p className="ios-headline">Мэдэгдэл байхгүй</p>
-                <p className="ios-footnote mt-1">Шинэ мэдээлэл энд харагдана</p>
-              </div>
-            ) : (
-              visibleNotifications.slice(0, 8).map((n) => (
-                <div key={n._id} className="flex items-start gap-3 px-4 py-3" style={{ borderTop: "0.5px solid var(--sep)" }}>
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--blue-light)", color: "var(--blue)" }}>
-                    <NotifIcon type={n.type} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="ios-headline" style={{ fontSize: 15 }}>{n.title || "VCM"}</p>
-                    <p className="ios-footnote mt-0.5 line-clamp-2">{n.body}</p>
-                    <p className="ios-caption mt-1">{formatRelativeTime(n.createdAt, locale)}</p>
-                  </div>
-                  {!n.readAt && <span className="w-2 h-2 rounded-full flex-shrink-0 mt-1.5" style={{ background: "var(--blue)" }} />}
-                </div>
-              ))
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div className="ios-dock-fade lg:hidden" aria-hidden />
+      <motion.nav
+        className={`ios-tabbar liquid-glass-dock lg:hidden ${tabs.length === 4 ? "cols-4" : "cols-5"} ${dockCompact ? "is-compact" : ""}`}
+        aria-label="Үндсэн цэс"
+        animate={{
+          height: dockCompact ? 52 : 60,
+          paddingTop: 4,
+          paddingBottom: 4,
+        }}
+        transition={springNative}
+      >
+        {tabs.map(({ id, Icon, href, label }) => {
+          const active =
+            id === "profile"
+              ? pathname === "/profile" || pathname.startsWith("/profile/")
+              : pathname === href || (href !== "/" && pathname.startsWith(href));
+          const text = locale === "mn" ? label.mn : label.en;
+          return (
+            <Link
+              key={id}
+              href={href}
+              prefetch
+              onTouchStart={() => {
+                try { router.prefetch(href); } catch { /* noop */ }
+              }}
+              onClick={() => {
+                void hapticSelection();
+                setBounceId(id);
+                setTimeout(() => setBounceId(null), 320);
+              }}
+              className={`ios-tabbar__item glass-press ${active ? "on" : ""}`}
+              aria-current={active ? "page" : undefined}
+            >
+              {active && (
+                <motion.span
+                  layoutId="tab-pill"
+                  className="ios-tabbar__pill"
+                  transition={springNative}
+                />
+              )}
+              <motion.span
+                animate={bounceId === id ? { y: [0, -4, 0], scale: [1, 1.12, 1] } : { y: 0, scale: 1 }}
+                transition={springNative}
+              >
+                <Icon size={22} strokeWidth={active ? 2 : 1.75} />
+              </motion.span>
+              <motion.span
+                className="ios-tabbar__label"
+                animate={{ opacity: dockCompact ? 0 : 1, height: dockCompact ? 0 : "auto" }}
+                transition={{ duration: 0.18 }}
+              >
+                {text}
+              </motion.span>
+            </Link>
+          );
+        })}
+      </motion.nav>
     </>
   );
 }

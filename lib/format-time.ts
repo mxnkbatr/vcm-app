@@ -4,7 +4,7 @@ export function formatRelativeTime(date: string | Date, locale = "mn") {
   const diff = Date.now() - then;
   const mins = Math.floor(diff / 60_000);
   if (mins < 1) return locale === "mn" ? "Саяхан" : "Just now";
-  if (mins < 60) return locale === "mn" ? `${mins} мин өмнө` : `${mins}m ago`;
+  if (mins < 60) return locale === "mn" ? `${mins} мин` : `${mins}m`;
   const hours = Math.floor(mins / 60);
   if (hours < 24) return locale === "mn" ? `${hours} цагийн өмнө` : `${hours}h ago`;
   const days = Math.floor(hours / 24);

@@ -33,8 +33,16 @@ async function registerNativePush() {
       }
     }),
     PushNotifications.addListener("registrationError", () => {}),
-    PushNotifications.addListener("pushNotificationReceived", () => {
+    PushNotifications.addListener("pushNotificationReceived", (ev) => {
       window.dispatchEvent(new CustomEvent("vcm:notifications-changed"));
+      window.dispatchEvent(
+        new CustomEvent("vcm:in-app-banner", {
+          detail: {
+            title: ev.notification?.title || "VCM",
+            body: ev.notification?.body || "",
+          },
+        })
+      );
     }),
     PushNotifications.addListener("pushNotificationActionPerformed", () => {
       window.dispatchEvent(new CustomEvent("vcm:notifications-changed"));
@@ -71,8 +79,16 @@ async function registerWebPush() {
     }
   }
 
-  onMessage(messaging, () => {
+  onMessage(messaging, (payload) => {
     window.dispatchEvent(new CustomEvent("vcm:notifications-changed"));
+    window.dispatchEvent(
+      new CustomEvent("vcm:in-app-banner", {
+        detail: {
+          title: payload.notification?.title || payload.data?.title || "VCM",
+          body: payload.notification?.body || payload.data?.body || "",
+        },
+      })
+    );
   });
 
   return null;

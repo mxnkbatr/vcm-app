@@ -21,7 +21,7 @@ export default function NativePullRefresh() {
   const startY = useRef(0);
 
   const path = stripLocale(pathname);
-  const enabled = path === "/" || path === "/events" || path === "/shop";
+  const enabled = path === "/" || path === "/events" || path === "/shop" || path === "/notifications";
 
   useEffect(() => {
     pullRef.current = pull;
