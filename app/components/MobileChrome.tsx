@@ -9,8 +9,7 @@ import {
 } from "lucide-react";
 import { useSession } from "@/lib/hooks/useSession";
 import { formatRelativeTime } from "@/lib/format-time";
-import { hapticImpact } from "@/lib/haptics";
-import { ImpactStyle } from "@capacitor/haptics";
+import { hapticSelection } from "@/lib/haptics";
 import { isNativeApp } from "@/lib/native-perf";
 import { springNative } from "@/lib/motion";
 
@@ -234,7 +233,7 @@ export default function MobileChrome() {
                     try { router.prefetch(href); } catch { /* noop */ }
                   }}
                   onClick={() => {
-                    void hapticImpact(ImpactStyle.Light);
+                    void hapticSelection();
                     setBounceId(id);
                     setTimeout(() => setBounceId(null), 320);
                   }}

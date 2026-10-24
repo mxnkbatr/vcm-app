@@ -8,7 +8,7 @@ import { useRouter } from "@/navigation";
 import { clientCache } from "@/lib/client-cache";
 
 const API_PREFETCH = ["/api/events", "/api/news", "/api/programs", "/api/shopping"];
-const ROUTE_PREFETCH = ["/programs", "/shop", "/lessons", "/events", "/profile"];
+const ROUTE_PREFETCH = ["/", "/programs", "/shop", "/lessons", "/events", "/profile"];
 
 function prefetchOne(url: string) {
   if (clientCache.age(url) < 60_000) return;

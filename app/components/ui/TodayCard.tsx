@@ -4,6 +4,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Link } from "@/navigation";
 import { springNative } from "@/lib/motion";
+import { BLUR_DATA_URL } from "@/lib/image-blur";
 
 export default function TodayCard({
   href,
@@ -29,7 +30,16 @@ export default function TodayCard({
         transition={springNative}
       >
         {image ? (
-          <Image src={image} alt="" fill className="ios-today__img object-cover" sizes="(max-width: 520px) 100vw, 480px" priority />
+          <Image
+            src={image}
+            alt=""
+            fill
+            className="ios-today__img object-cover"
+            sizes="(max-width: 520px) 100vw, 480px"
+            priority
+            placeholder="blur"
+            blurDataURL={BLUR_DATA_URL}
+          />
         ) : null}
         <div className="ios-today__overlay" />
         <div className="ios-today__content">

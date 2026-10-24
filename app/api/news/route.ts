@@ -3,8 +3,6 @@ import { connectToDB } from "@/lib/db";
 import News from "@/lib/models/News";
 import { withCache } from "@/lib/server-cache";
 
-export const revalidate = 0;
-
 export async function GET() {
   try {
     const news = await withCache("news:all", 120_000, async () => {

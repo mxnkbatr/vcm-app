@@ -5,8 +5,6 @@ import { requireNonGuest } from "@/lib/rbac";
 import { CreateEventSchema } from "@/lib/modules/events/events.schemas";
 import { withCache } from "@/lib/server-cache";
 
-export const revalidate = 0;
-
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);

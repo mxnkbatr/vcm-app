@@ -70,7 +70,7 @@ export default async function RootLayout({
             <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
             <link rel="dns-prefetch" href="https://res.cloudinary.com" />
 
-            <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
             <meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)" />
             <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
             <meta name="apple-mobile-web-app-title" content={BRAND.shortName} />

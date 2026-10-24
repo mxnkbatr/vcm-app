@@ -48,7 +48,7 @@ export default function NetworkBanner() {
         className="frosted px-4 py-2 rounded-full text-[12px] font-bold"
         style={{ color: "var(--label2)", border: "0.5px solid var(--sep)" }}
       >
-        Интернэтгүй — хадгалсан өгөгдлөөр ажиллаж байна
+        Интернет байхгүй — кэшлэсэн өгөгдөл харуулж байна
       </div>
     </div>
   );

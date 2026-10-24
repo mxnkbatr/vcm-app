@@ -3,8 +3,6 @@ import { connectToDB } from "@/lib/db";
 import ShoppingItem from "@/lib/models/ShoppingItem";
 import { withCache } from "@/lib/server-cache";
 
-export const revalidate = 0;
-
 export async function GET() {
   try {
     const items = await withCache("shopping:all", 90_000, async () => {

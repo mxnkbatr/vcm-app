@@ -20,28 +20,28 @@ const config: CapacitorConfig = {
   appendUserAgent: " VCMNativeApp",
   ...(serverUrl
     ? {
-        server: {
-          url: serverUrl,
-          cleartext: serverUrl.startsWith("http://"),
-          androidScheme: serverUrl.startsWith("https") ? "https" : "http",
-        },
-      }
+      server: {
+        url: serverUrl,
+        cleartext: serverUrl.startsWith("http://"),
+        androidScheme: serverUrl.startsWith("https") ? "https" : "http",
+      },
+    }
     : {}),
   plugins: {
     PushNotifications: {
       presentationOptions: ["badge", "sound", "alert"],
     },
     SplashScreen: {
-      launchAutoHide: true,
-      launchShowDuration: 1200,
-      backgroundColor: "#FBF8F3",
+      launchAutoHide: false,
+      launchShowDuration: 0,
+      backgroundColor: "#F2F2F7",
       showSpinner: false,
       androidSplashResourceName: "splash",
     },
     StatusBar: {
-      overlaysWebView: false,
-      backgroundColor: "#FBF8F3",
-      style: "LIGHT",
+      overlaysWebView: true,
+      backgroundColor: "#F2F2F7",
+      style: "DARK",
     },
   },
 };

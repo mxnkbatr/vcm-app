@@ -13,6 +13,7 @@ const SwipeBackGesture = dynamic(() => import("./SwipeBackGesture"), { ssr: fals
 const NativePullRefresh = dynamic(() => import("./NativePullRefresh"), { ssr: false });
 const NativePerfBoot = dynamic(() => import("./NativePerfBoot"), { ssr: false });
 const NativeStatusBar = dynamic(() => import("./NativeStatusBar"), { ssr: false });
+const NativeHapticPress = dynamic(() => import("./NativeHapticPress"), { ssr: false });
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -20,6 +21,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <NativePerfBoot />
       <NativeAppLifecycle />
       <NativeStatusBar />
+      <NativeHapticPress />
       <SwipeBackGesture />
       <NativePullRefresh />
       <LiquidBackground />

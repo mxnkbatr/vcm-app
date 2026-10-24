@@ -3,8 +3,6 @@ import { connectToDB } from "@/lib/db";
 import LmsCourse from "@/lib/models/LmsCourse";
 import { withCache } from "@/lib/server-cache";
 
-export const revalidate = 0;
-
 export async function GET() {
   try {
     const courses = await withCache("lms:courses", 120_000, async () => {

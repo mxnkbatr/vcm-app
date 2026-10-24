@@ -1432,9 +1432,7 @@ a:active {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% 15%, rgba(210, 228, 248, 0.35) 0%, transparent 60%),
-    linear-gradient(168deg, var(--cream-light) 0%, var(--cream) 45%, var(--cream-blue) 100%);
+  background: #F2F2F7;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   overflow: hidden;
 }
@@ -2192,6 +2190,69 @@ html.native-shell {
     env(safe-area-inset-top, 0px),
     constant(safe-area-inset-top, 0px)
   );
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  overscroll-behavior: none;
+  background-color: var(--bg, #F2F2F7);
+}
+
+html.native-shell,
+html.native-shell body {
+  overscroll-behavior: none;
+  background-color: var(--bg, #F2F2F7);
+  /* Kill iOS link callout / text selection chrome except editable / selectable content */
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: default;
+}
+
+html.native-shell input,
+html.native-shell textarea,
+html.native-shell [contenteditable="true"],
+html.native-shell .allow-select,
+html.native-shell .selectable,
+html.native-shell article,
+html.native-shell .prose,
+html.native-shell p.selectable-text {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
+/* iOS input zoom lock — never below 16px in native shell */
+html.native-shell input,
+html.native-shell textarea,
+html.native-shell select {
+  font-size: max(16px, 1em);
+}
+
+/* No web hover / pointer cues on native */
+html.native-shell a,
+html.native-shell button,
+html.native-shell [role="button"],
+html.native-shell .press {
+  cursor: default;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  /* keep desktop hover; native UA never matches fine pointer on device */
+}
+
+html.native-shell a:hover,
+html.native-shell .hover\:underline:hover {
+  text-decoration: none;
+}
+
+/* Bounce only inside intentional scroll regions */
+html.native-shell .native-scroll,
+html.native-shell .ios-scroll,
+html.native-shell main.native-app-main {
+  overscroll-behavior-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+html.native-shell .native-page-layer {
+  background-color: var(--bg, #F2F2F7);
 }
 
 /* ═══════════════════════════════════════════

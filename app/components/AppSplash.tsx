@@ -7,7 +7,7 @@ import BrandLogo from "./BrandLogo";
 
 const STORAGE_KEY = "vcm-splash-dismissed";
 const MIN_VISIBLE_MS = 450;
-const FADE_OUT_MS = 220;
+const FADE_OUT_MS = 300;
 
 export default function AppSplash() {
   const [phase, setPhase] = useState<"hidden" | "visible" | "exiting">("hidden");
@@ -22,7 +22,7 @@ export default function AppSplash() {
     void import("@capacitor/core").then(({ Capacitor }) => {
       if (Capacitor.isNativePlatform()) {
         void import("@capacitor/splash-screen").then(({ SplashScreen }) => {
-          void SplashScreen.hide({ fadeOutDuration: 200 });
+          void SplashScreen.hide({ fadeOutDuration: 300 });
         });
       }
     });

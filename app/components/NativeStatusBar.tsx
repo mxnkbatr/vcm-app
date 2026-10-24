@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useTheme } from "next-themes";
 import { BRAND } from "@/lib/branding";
 
-/** Sync native status bar with VCM cream / dark theme. */
+/** Sync native status bar with app theme; overlays WebView + safe-area header. */
 export default function NativeStatusBar() {
   const { resolvedTheme } = useTheme();
 
@@ -14,16 +14,16 @@ export default function NativeStatusBar() {
 
       void import("@capacitor/status-bar").then(async ({ StatusBar, Style }) => {
         const isDark = resolvedTheme === "dark";
-        const color = isDark ? BRAND.colors.backgroundDark : BRAND.colors.creamLight;
+        const color = isDark ? BRAND.colors.backgroundDark : BRAND.colors.background;
 
-        // Keep WebView below the status bar; CSS keeps a notch-safe minimum regardless.
         try {
-          await StatusBar.setOverlaysWebView({ overlay: false });
+          await StatusBar.setOverlaysWebView({ overlay: true });
         } catch {
           /* older runtimes */
         }
         void StatusBar.setBackgroundColor({ color });
-        void StatusBar.setStyle({ style: isDark ? Style.Dark : Style.Light });
+        // Style.Dark = dark icons (light bg); Style.Light = light icons (dark bg)
+        void StatusBar.setStyle({ style: isDark ? Style.Light : Style.Dark });
       });
     });
   }, [resolvedTheme]);

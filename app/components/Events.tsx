@@ -23,6 +23,7 @@ import { useIsMobile, Motion as motion } from "./MotionProxy";
 import { clientCache } from "@/lib/client-cache";
 import { useTheme } from "next-themes";
 import { useLocale } from "next-intl";
+import { BLUR_DATA_URL } from "@/lib/image-blur";
 
 // --- CONFIG & BRAND ---
 const BRAND = {
@@ -332,7 +333,10 @@ export default function LatestUpdatesSection({
               style={{ width: 190, height: 250, borderRadius: "var(--r-2xl)" }}
             >
               {/* Image */}
-              <div className="absolute inset-0 bg-slate-200">
+              <motion.div
+                className="absolute inset-0 bg-slate-200"
+                layoutId={!isBlog ? `event-hero-${item._id}` : undefined}
+              >
                 <Image
                   src={item.image || "/logo.jpg"}
                   alt={title}
@@ -340,8 +344,10 @@ export default function LatestUpdatesSection({
                   className="object-cover"
                   sizes="190px"
                   priority={true}
+                  placeholder="blur"
+                  blurDataURL={BLUR_DATA_URL}
                 />
-              </div>
+              </motion.div>
               {/* Gradient */}
               <div
                 className="absolute inset-0"

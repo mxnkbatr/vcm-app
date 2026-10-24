@@ -20,7 +20,7 @@ export default function NativeAppLifecycle() {
           const tabRoots = ["/", "/programs", "/shop", "/events", "/lessons"];
           const isTabRoot = tabRoots.some((p) => pathname === p || pathname.endsWith(p));
           if (window.history.length > 1 && !isTabRoot) {
-            window.history.back();
+            router.back();
             return;
           }
           if (!isTabRoot) router.push("/");

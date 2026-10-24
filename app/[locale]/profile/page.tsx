@@ -7,10 +7,14 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
 import ProfileActivityHistory from "@/app/components/ProfileActivityHistory";
+import VolunteerHoursRing from "@/app/components/VolunteerHoursRing";
+import VolunteerIdQr from "@/app/components/VolunteerIdQr";
 import {
-  User, Mail, Phone, MapPin, Edit3, Save, X,
+  User, Mail, Phone, MapPin, Edit3, Save,
   Lock, Eye, EyeOff, ShieldCheck, History, Settings, Moon, Sun, Info,
 } from "lucide-react";
+import { hapticNotification } from "@/lib/haptics";
+import { NotificationType } from "@capacitor/haptics";
 import PremiumPageShell from "@/app/components/PremiumPageShell";
 import IOSLargeTitle from "@/app/components/ui/IOSLargeTitle";
 import { IOSList, IOSListRow } from "@/app/components/ui/IOSList";
@@ -44,7 +48,7 @@ export default function ProfilePage() {
     setEditForm({
       fullName: dash.user.fullName || "",
       email: dash.user.email || "",
-      city: (dash.user.profile as any)?.address?.city || "",
+      city: dash.user.profile?.address?.city || "",
       password: "",
     });
   }, [dash?.user]);
@@ -74,11 +78,14 @@ export default function ProfilePage() {
       const data = await res.json();
       if (res.ok) {
         setIsEditing(false);
+        void hapticNotification(NotificationType.Success);
         showToast(true, "Мэдээлэл амжилттай хадгалагдлаа");
       } else {
+        void hapticNotification(NotificationType.Error);
         showToast(false, data.error || "Алдаа гарлаа");
       }
     } catch {
+      void hapticNotification(NotificationType.Error);
       showToast(false, "Алдаа гарлаа");
     } finally {
       setUpdating(false);
@@ -103,6 +110,8 @@ export default function ProfilePage() {
     .toUpperCase();
 
   const isDark = mountedTheme && (resolvedTheme === "dark" || theme === "dark");
+  const volunteerHours =
+    ((dash?.attendedEvents?.length || 0) * 4) + ((dash?.applications?.length || 0) * 2);
 
   return (
     <PremiumPageShell>
@@ -139,6 +148,9 @@ export default function ProfilePage() {
           </button>
         </div>
 
+        <VolunteerHoursRing hours={volunteerHours} locale={locale} />
+        <VolunteerIdQr userId={String(userData._id)} name={userData.fullName} locale={locale} />
+
         <div>
           <p className="ios-caption px-4 mb-2 uppercase tracking-wide">Мэдээлэл</p>
           <IOSList>
@@ -163,13 +175,19 @@ export default function ProfilePage() {
             <IOSListRow
               icon={isDark ? <Moon size={16} strokeWidth={1.75} /> : <Sun size={16} strokeWidth={1.75} />}
               title="Харанхуй горим"
+              subtitle={theme === "system" ? "Системтэй хамт" : undefined}
               trailing={
                 <button
                   type="button"
                   role="switch"
                   aria-checked={!!isDark}
                   aria-label="Харанхуй горим"
-                  onClick={() => setTheme(isDark ? "light" : "dark")}
+                  onClick={() => {
+                    // cycle: system → dark → light → system (follows OS by default)
+                    if (theme === "system") setTheme("dark");
+                    else if (isDark) setTheme("light");
+                    else setTheme("system");
+                  }}
                   className="w-12 h-7 rounded-full relative press"
                   style={{ background: isDark ? "var(--blue)" : "var(--fill)" }}
                 >
