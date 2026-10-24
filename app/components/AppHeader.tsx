@@ -69,16 +69,16 @@ export default function AppHeader({
             </motion.span>
           )}
           <div className="app-header__actions">
-            <button type="button" className="app-header__btn app-header__glass-btn press" aria-label="Хайх" onClick={onSearch}>
-              <Search size={18} strokeWidth={1.75} />
+            <button type="button" className="app-header__btn press" aria-label="Хайх" onClick={onSearch}>
+              <Search size={22} strokeWidth={1.75} />
             </button>
-            <button type="button" className="app-header__btn app-header__glass-btn press" aria-label="Мэдэгдэл" onClick={onBell}>
-              <Bell size={18} strokeWidth={1.75} />
+            <button type="button" className="app-header__btn press" aria-label="Мэдэгдэл" onClick={onBell}>
+              <Bell size={22} strokeWidth={1.75} />
               {unreadCount > 0 && (
                 <span className="ios-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
               )}
             </button>
-            <Link href="/profile" prefetch className="app-header__btn app-header__glass-btn press" aria-label="Профайл">
+            <Link href="/profile" prefetch className="app-header__avatar press" aria-label="Профайл">
               <span className="ios-avatar-btn">{avatarInitial}</span>
             </Link>
           </div>

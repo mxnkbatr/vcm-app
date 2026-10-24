@@ -7,7 +7,7 @@ import { useSession } from "@/lib/hooks/useSession";
 import { useDashboard } from "@/lib/hooks/useDashboard";
 import { Link } from "@/navigation";
 import {
-  Users, ShoppingBag, BookOpen, Ticket, ClipboardList, LayoutGrid, Search,
+  Users, ShoppingBag, BookOpen, Ticket, ClipboardList, LayoutGrid,
 } from "lucide-react";
 import { BRAND } from "@/lib/branding";
 import PremiumPageShell from "./PremiumPageShell";
@@ -16,7 +16,6 @@ import HomeUpcomingEvents from "./HomeUpcomingEvents";
 import HomeHeroCarousel from "./HomeHeroCarousel";
 import IOSLargeTitle from "./ui/IOSLargeTitle";
 import FitnessRing from "./ui/FitnessRing";
-import StatCards from "./ui/StatCards";
 import { type ProgramId } from "@/lib/color-system";
 import { isNativeApp } from "@/lib/native-perf";
 import { staggerContainer, staggerItem } from "@/lib/motion";
@@ -67,18 +66,6 @@ function subscribeClient(onStoreChange: () => void) {
   return () => {};
 }
 
-function todayLabel() {
-  try {
-    return new Date().toLocaleDateString("mn-MN", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-    });
-  } catch {
-    return "";
-  }
-}
-
 export default function HomePageContent({
   shopItems,
   initialPrograms,
@@ -119,17 +106,7 @@ export default function HomePageContent({
     ? [NAV_GRID[0], NAV_GRID[1], NAV_GRID[4], NAV_GRID[5]]
     : NAV_GRID.slice(0, 4);
 
-  const q = "";
-  const shownPrograms = programs.filter((p) => !q || `${p.label} ${p.sub}`.toLowerCase().includes(q));
-
-  const name =
-    (session?.user as { name?: string } | undefined)?.name ||
-    dash?.user?.fullName ||
-    "";
-
-  const greeting = name
-    ? `Сайн уу, ${name.split(" ")[0]}`
-    : "Сайн уу";
+  const shownPrograms = programs.slice(0, 6);
 
   const featured = useMemo(() => {
     const banner = initialBanners?.[0];
@@ -168,63 +145,17 @@ export default function HomePageContent({
     [initialBanners]
   );
 
-  const dateLine = todayLabel();
-
   return (
     <PremiumPageShell className="home-dash" padded>
       <motion.div variants={staggerContainer} initial="initial" animate="animate" className="home-sections">
-        <motion.div variants={staggerItem}>
-          <IOSLargeTitle title={greeting}>
-            <div className="home-greeting-glass">
-              <p className="home-greeting-glass__date">{dateLine}</p>
-              <p className="home-greeting-glass__hi">{greeting}</p>
-              <p className="home-greeting-glass__sub">{BRAND.taglineMn}</p>
-            </div>
-          </IOSLargeTitle>
-        </motion.div>
-
-        <motion.div variants={staggerItem}>
-          <button
-            type="button"
-            className="vcm-search ios26-search glass-chip flex items-center gap-2 w-full text-left press"
-            onClick={() => window.dispatchEvent(new CustomEvent("vcm:open-search"))}
-          >
-            <Search size={18} strokeWidth={1.75} color="var(--label2)" />
-            <span className="flex-1 text-[15px]" style={{ color: "var(--label2)" }}>
-              Хайх
-            </span>
-          </button>
-        </motion.div>
+        {/* Large title lives in AppHeader — keep slot for sync only */}
+        <IOSLargeTitle title="Нүүр" />
 
         <motion.div variants={staggerItem}>
           <HomeHeroCarousel banners={heroBanners} fallback={featured} />
         </motion.div>
 
-        {/* Mobile quick glass chips — dock covers main tabs; these jump to key actions */}
-        <motion.section variants={staggerItem} className="lg:hidden">
-          <div className="ios-quick-chips">
-            {quick.map(({ id, href, label, icon: Icon }) => (
-              <Link key={id} href={href} prefetch className="ios-quick-chip glass-press press">
-                <span className="ios-quick-chip__icon">
-                  <Icon size={18} strokeWidth={1.75} />
-                </span>
-                <span className="ios-quick-chip__label">{label}</span>
-              </Link>
-            ))}
-          </div>
-        </motion.section>
-
-        <motion.section variants={staggerItem}>
-          <StatCards
-            stats={[
-              { value: 10000, suffix: "+", label: "Сайн дурынхан" },
-              { value: 50, suffix: "+", label: "Төсөл" },
-              { value: 3, label: "Хөтөлбөр" },
-            ]}
-          />
-        </motion.section>
-
-        {isSignedIn && (
+        {isSignedIn && (apps > 0 || events > 0 || lessons > 0) && (
           <motion.section variants={staggerItem} className="ios-frost-section">
             <p className="ios-headline mb-3">Таны явц</p>
             <FitnessRing
@@ -234,11 +165,6 @@ export default function HomePageContent({
                 { value: lessons, max: Math.max(4, lessons), color: "#FF9F0A", label: "Сургалт" },
               ]}
             />
-            {!apps && !events && (
-              <Link href="/programs/apply" prefetch className="btn btn-primary glass-press mt-4 inline-flex w-full items-center justify-center">
-                Эхлэх
-              </Link>
-            )}
           </motion.section>
         )}
 
@@ -257,7 +183,7 @@ export default function HomePageContent({
 
         <motion.section variants={staggerItem}>
           <PremiumSectionHeader title="Удахгүй болох эвент" href="/events" />
-          <HomeUpcomingEvents limit={8} query={q} />
+          <HomeUpcomingEvents limit={8} />
         </motion.section>
 
         <motion.section variants={staggerItem}>
