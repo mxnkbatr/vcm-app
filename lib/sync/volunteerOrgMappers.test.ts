@@ -112,6 +112,23 @@ describe("volunteer.org.mn mappers", () => {
     expect(doc?.setOnInsert.featured).toBe(false);
   });
 
+  it("keeps same-day events upcoming until end of UB day", () => {
+    const doc = mapEventDoc(
+      {
+        id: 39,
+        title: "Today event",
+        is_publish: 1,
+        event_date1: "2026-10-24 10:00:00",
+        banner: "/uploaded/e.jpg",
+        content: null,
+        address: null,
+        price: 0,
+      },
+      new Date("2026-10-24T14:00:00+08:00")
+    );
+    expect(doc?.set.status).toBe("upcoming");
+  });
+
   it("maps banners and ignores inactive without image", () => {
     const active = mapBannerDoc({
       id: 1,

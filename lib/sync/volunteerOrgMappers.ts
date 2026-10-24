@@ -151,6 +151,21 @@ export function shouldSkipEvent(item: z.infer<typeof eventItemSchema>): boolean 
   return false;
 }
 
+/** End of Asia/Ulaanbaatar calendar day for a start instant (keeps same-day events visible). */
+export function endOfUbDay(d: Date): Date {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Ulaanbaatar",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(d);
+  const y = parts.find((p) => p.type === "year")?.value;
+  const m = parts.find((p) => p.type === "month")?.value;
+  const day = parts.find((p) => p.type === "day")?.value;
+  if (!y || !m || !day) return new Date(d.getTime() + 12 * 60 * 60 * 1000);
+  return new Date(`${y}-${m}-${day}T23:59:59+08:00`);
+}
+
 export function mapEventDoc(item: z.infer<typeof eventItemSchema>, now = new Date()) {
   if (shouldSkipEvent(item)) return null;
   const id = String(item.id);
@@ -162,7 +177,9 @@ export function mapEventDoc(item: z.infer<typeof eventItemSchema>, now = new Dat
   const location = (item.address || "").trim() || "Улаанбаатар";
   const image = absUrl(item.banner) || `${BASE}/favicon.ico`;
   const price = Number(item.price) || 0;
-  const status = date.getTime() < now.getTime() ? "past" : "upcoming";
+  // Prefer explicit end; otherwise keep "upcoming" through the UB calendar day of start.
+  const effectiveEnd = end && end.getTime() >= date.getTime() ? end : endOfUbDay(date);
+  const status = effectiveEnd.getTime() < now.getTime() ? "past" : "upcoming";
 
   return {
     filter: { source: SOURCE, externalId: id },

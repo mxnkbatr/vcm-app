@@ -237,8 +237,12 @@ export default function MobileChrome() {
                 />
               )}
               <motion.span
-                animate={bounceId === id ? { y: [0, -4, 0], scale: [1, 1.12, 1] } : { y: 0, scale: 1 }}
-                transition={springNative}
+                animate={bounceId === id ? { y: -4, scale: 1.1 } : { y: 0, scale: 1 }}
+                transition={
+                  bounceId === id
+                    ? { type: "spring", stiffness: 520, damping: 28, mass: 0.7 }
+                    : { duration: 0.16 }
+                }
               >
                 <Icon size={22} strokeWidth={active ? 2 : 1.75} />
               </motion.span>
