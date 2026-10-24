@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { Link } from "@/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
@@ -28,6 +29,7 @@ const FALLBACK_PROGRAMS = [
     nameKey: "prog_edu",
     descKey: "prog_edu_desc",
     href: "/programs/edu",
+    image: "",
     duration: "3–12 сар",
     location: "Монгол улс",
     slots: 8,
@@ -51,6 +53,7 @@ const FALLBACK_PROGRAMS = [
     nameKey: "prog_and",
     descKey: "prog_and_desc",
     href: "/programs/and",
+    image: "",
     duration: "Уян хатан",
     location: "Улаанбаатар",
     slots: 12,
@@ -74,6 +77,7 @@ const FALLBACK_PROGRAMS = [
     nameKey: "prog_vclub",
     descKey: "prog_vclub_desc",
     href: "/programs/vclub",
+    image: "",
     duration: "Арга хэмжээгээр",
     location: "Монгол улс",
     slots: 20,
@@ -101,6 +105,7 @@ function mapApiToProg(raw: unknown): Prog {
     name?: { mn?: string };
     description?: { mn?: string };
     href?: string;
+    image?: string;
     duration?: string;
     location?: string;
     slots?: number;
@@ -120,6 +125,7 @@ function mapApiToProg(raw: unknown): Prog {
     nameKey: p.name?.mn || p.code || "",
     descKey: p.description?.mn || "",
     href: p.href || `/programs/${p.slug}`,
+    image: p.image || "",
     duration: p.duration || "",
     location: p.location || "",
     slots: p.slots || 0,
@@ -141,23 +147,27 @@ function programDesc(p: Prog, nt: (k: string) => string) {
 
 function ProgCard({ p, onTap, nt }: { p: Prog; onTap: () => void; nt: (k: string) => string }) {
   return (
-    <IOS26Card onClick={onTap}>
+    <IOS26Card onClick={onTap} className="prog-card-wow">
       <div
         className="ios26-card__media"
         style={{ background: `linear-gradient(145deg, ${p.gradFrom}, ${p.gradTo})` }}
       >
-        <div className="absolute inset-0 flex items-center justify-center text-white/90">
-          <ProgramGlyph id={p.id} size={48} />
-        </div>
+        {p.image ? (
+          <Image src={p.image} alt="" fill className="object-cover" sizes="(max-width:520px) 100vw, 480px" />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-white/90">
+            <ProgramGlyph id={p.id} size={48} />
+          </div>
+        )}
         <div className="ios26-card__shade" />
-        <div className="absolute bottom-3 left-4 right-4 text-white z-[1]">
-          <p className="text-[11px] font-semibold uppercase tracking-wider opacity-85">{p.id}</p>
-          <p className="text-[20px] font-bold leading-tight mt-0.5">{programTitle(p, nt)}</p>
-        </div>
       </div>
-      <div className="ios26-card__body ios26-card__meta">
-        <span className="inline-flex items-center gap-1"><Clock size={14} strokeWidth={1.75} />{p.duration}</span>
-        <span className="inline-flex items-center gap-1"><MapPin size={14} strokeWidth={1.75} />{p.location}</span>
+      <div className="ios26-card__body prog-card-wow__glass">
+        <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--label2)" }}>{p.id}</p>
+        <h3 className="ios26-card__title mt-0.5">{programTitle(p, nt)}</h3>
+        <div className="ios26-card__meta">
+          <span className="inline-flex items-center gap-1"><Clock size={14} strokeWidth={1.75} />{p.duration || "—"}</span>
+          <span className="inline-flex items-center gap-1"><MapPin size={14} strokeWidth={1.75} />{p.location || "—"}</span>
+        </div>
       </div>
     </IOS26Card>
   );

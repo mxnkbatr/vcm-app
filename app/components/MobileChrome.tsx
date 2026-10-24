@@ -11,9 +11,10 @@ import { useSession } from "@/lib/hooks/useSession";
 import { hapticSelection } from "@/lib/haptics";
 import { isNativeApp } from "@/lib/native-perf";
 import { springNative } from "@/lib/motion";
-import { isTabRoute } from "@/lib/navigation-motion";
+import { isTabRoute, stripLocale } from "@/lib/navigation-motion";
 import AppHeader from "@/app/components/AppHeader";
 import { nativeShare } from "@/lib/native-share";
+import { personalGreetingMn, todayLabelMn } from "@/lib/greeting";
 
 type Tab = {
   id: string;
@@ -155,12 +156,19 @@ export default function MobileChrome() {
 
   const user = session?.user as { name?: string; image?: string } | undefined;
   const initial = (user?.name || "V").charAt(0).toUpperCase();
+  const isHome = stripLocale(pathname) === "/";
+  const homeGreeting = personalGreetingMn(user?.name);
+  const homeDate = todayLabelMn();
 
   const tabTitle =
     TAB_TITLES[pathname]?.[locale === "mn" ? "mn" : "en"] ||
     pageTitle ||
     "VCM";
-  const headerTitle = tabMode ? tabTitle : pageTitle || tabTitle;
+  const headerTitle = isHome
+    ? homeGreeting
+    : tabMode
+      ? tabTitle
+      : pageTitle || tabTitle;
   let bookmarked = false;
   try {
     bookmarked = localStorage.getItem(bookmarkKey(pathname)) === "1";
@@ -173,6 +181,8 @@ export default function MobileChrome() {
     <>
       <AppHeader
         title={headerTitle}
+        subtitle={isHome ? homeDate : undefined}
+        homeMode={isHome}
         scrolled={scrolled}
         unreadCount={unreadCount}
         avatarInitial={initial}

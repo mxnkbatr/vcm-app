@@ -19,10 +19,10 @@ export default function IOSSegmented({
   const width = `${100 / Math.max(options.length, 1)}%`;
 
   return (
-    <div className="ios-seg" role="tablist">
+    <div className="ios-seg glass-surface" role="tablist">
       <motion.div
         className="ios-seg__thumb"
-        layout
+        layoutId="ios-seg-thumb"
         transition={springNative}
         style={{ left: `calc(${idx} * ${width} + 2px)`, width: `calc(${width} - 4px)` }}
       />

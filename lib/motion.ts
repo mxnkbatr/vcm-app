@@ -42,7 +42,7 @@ export const slideFromBottom = {
 export const staggerContainer = {
   initial: {},
   animate: {
-    transition: { staggerChildren: 0.05, delayChildren: 0.02 },
+    transition: { staggerChildren: 0.06, delayChildren: 0.04 },
   },
 };
 
@@ -54,6 +54,8 @@ export const staggerItem = {
     transition: springNative,
   },
 };
+
+export const pressScale = { scale: 0.96 };
 
 export const dockEnter = {
   initial: { opacity: 0, y: 24, scale: 0.96 },

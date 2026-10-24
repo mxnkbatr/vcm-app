@@ -10,7 +10,7 @@ import NativeFeatureUnavailable from "@/app/components/NativeFeatureUnavailable"
 import { isNativeApp } from "@/lib/native-perf";
 import IOSSheet from "@/app/components/ui/IOSSheet";
 import IOSLargeTitle from "@/app/components/ui/IOSLargeTitle";
-import EmptyState from "@/app/components/ui/EmptyState";
+import { Link } from "@/navigation";
 
 const T = {
   shopTitle: { en: "Our Shop", mn: "Дэлгүүр", de: "Unser Shop" },
@@ -158,13 +158,22 @@ export default function ShopClient({
               </AnimatePresence>
             </motion.div>
           ) : (
-            <EmptyState
-              icon={ShoppingBag}
-              title={T.notFound[locale as keyof typeof T.notFound] || T.notFound.en}
-              description={T.notFoundSub[locale as keyof typeof T.notFoundSub] || T.notFoundSub.en}
-              actionLabel={locale === "mn" ? "Нүүр лүү" : "Home"}
-              href="/"
-            />
+            <div className="shop-coming glass-surface">
+              <div className="shop-coming__art" aria-hidden>
+                <ShoppingBag size={40} strokeWidth={1.5} />
+              </div>
+              <h3 className="shop-coming__title">
+                {locale === "mn" ? "Тун удахгүй" : "Coming soon"}
+              </h3>
+              <p className="shop-coming__sub">
+                {locale === "mn"
+                  ? "Дэлгүүрийн бараа бэлтгэгдэж байна. Шинэчлэлтийг мэдэгдлээр хүлээн аваарай."
+                  : "Merchandise is on the way. Get notified when it drops."}
+              </p>
+              <Link href="/notifications" prefetch className="btn btn-primary glass-press inline-flex items-center justify-center">
+                {locale === "mn" ? "Мэдэгдэл авах" : "Notify me"}
+              </Link>
+            </div>
           )}
         </div>
       </motion.div>

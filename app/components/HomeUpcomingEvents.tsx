@@ -17,6 +17,7 @@ type EventItem = {
   eventDate?: string | Date;
   timeString?: string;
   image?: string;
+  location?: Record<string, string> | string;
 };
 
 function resolveDate(item: EventItem): Date | null {
@@ -27,17 +28,14 @@ function resolveDate(item: EventItem): Date | null {
   }
   const s = String(raw).trim();
   if (!s) return null;
-  // ISO or Mongo date string
   if (s.includes("T") || s.includes("Z") || /^\d{4}-\d{2}-\d{2}/.test(s)) {
     const d = new Date(s);
     return Number.isNaN(d.getTime()) ? null : d;
   }
-  const normalized = s.replace(/-/g, "/");
-  const d = new Date(normalized);
+  const d = new Date(s.replace(/-/g, "/"));
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
-/** Format badge from event.date — never hardcode day/month. */
 function formatEventBadge(item: EventItem, lang: string) {
   const d = resolveDate(item);
   if (!d) return { day: "—", month: "" };
@@ -86,11 +84,10 @@ export default function HomeUpcomingEvents({ limit = 8, query = "" }: { limit?: 
 
   if (loading) {
     return (
-      <div className="ios-carousel">
+      <div className="ios-carousel ios-carousel--wide">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="ios-event-card">
+          <div key={i} className="ios-event-card ios-event-card--wow">
             <div className="ios-skel" style={{ aspectRatio: "16/10", borderRadius: 24 }} />
-            <div className="ios-skel h-4 mt-2 w-3/4" />
           </div>
         ))}
       </div>
@@ -123,12 +120,13 @@ export default function HomeUpcomingEvents({ limit = 8, query = "" }: { limit?: 
   }
 
   return (
-    <div className="ios-carousel">
+    <div className="ios-carousel ios-carousel--wide">
       {upcoming.map((item) => {
         const title = pickI18n(item.title, lang) || "Арга хэмжээ";
+        const loc = pickI18n(item.location, lang);
         const { day, month } = formatEventBadge(item, lang);
         return (
-          <Link key={item._id} href={`/events/${item._id}`} className="ios-event-card press">
+          <Link key={item._id} href={`/events/${item._id}`} prefetch className="ios-event-card ios-event-card--wow press">
             <div className="ios-event-card__media">
               {item.image ? (
                 <Image
@@ -136,19 +134,26 @@ export default function HomeUpcomingEvents({ limit = 8, query = "" }: { limit?: 
                   alt={title}
                   fill
                   className="object-cover object-center"
-                  sizes="240px"
+                  sizes="(max-width:520px) 80vw, 360px"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center" style={{ color: "var(--blue)" }}>
+                <div className="w-full h-full flex items-center justify-center" style={{ color: "var(--blue)", background: "var(--blue-light)" }}>
                   <Calendar size={28} strokeWidth={1.75} />
                 </div>
               )}
-              <div className="ios-event-card__badge">
+              <div className="ios-event-card__badge glass-surface">
                 <strong>{day}</strong>
                 <span>{month}</span>
               </div>
+              <div className="ios-event-card__glass glass-surface">
+                <p className="ios-event-card__title">{title}</p>
+                {item.timeString || loc ? (
+                  <p className="ios-event-card__meta">
+                    {[item.timeString, loc].filter(Boolean).join(" · ")}
+                  </p>
+                ) : null}
+              </div>
             </div>
-            <p className="ios-event-card__title">{title}</p>
           </Link>
         );
       })}

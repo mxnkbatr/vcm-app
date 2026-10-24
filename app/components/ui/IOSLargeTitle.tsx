@@ -20,12 +20,9 @@ export default function IOSLargeTitle({
     };
   }, [title]);
 
-  if (!children) {
-    return <h1 className="ios-large-title sr-only">{title}</h1>;
-  }
-
   return (
-    <div className="app-large-title-slot pt-1 pb-2">
+    <div className={`app-large-title-slot ${children ? "pt-1 pb-2" : "sr-only"}`}>
+      {/* Spacer — tab large title is rendered in AppHeader; keep subtitle/children */}
       <h1 className="ios-large-title sr-only">{title}</h1>
       {children}
     </div>
