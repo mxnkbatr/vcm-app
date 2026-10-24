@@ -7,6 +7,7 @@ import { Calendar, Eye, ArrowLeft, Tag, User } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLocale } from "next-intl";
 import { Link } from "@/navigation";
+import SourceAttribution from "@/app/components/SourceAttribution";
 
 export default function NewsDetailPage() {
   const locale = useLocale() as "en" | "mn" | "de";
@@ -120,6 +121,8 @@ export default function NewsDetailPage() {
             style={{ color: "var(--label)" }}
             dangerouslySetInnerHTML={{ __html: t(news.content) }}
           />
+
+          <SourceAttribution source={news.source} href={news.externalUrl} />
 
           {news.tags?.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-8 pt-6 border-t" style={{ borderColor: "var(--sep)" }}>

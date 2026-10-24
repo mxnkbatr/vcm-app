@@ -10,7 +10,7 @@ export async function GET() {
     const news = await withCache("news:all", 120_000, async () => {
       await connectToDB();
       return News.find({})
-        .select("_id title summary image author publishedDate tags featured views")
+        .select("_id title summary image author publishedDate tags featured views source externalId externalUrl")
         .sort({ publishedDate: -1 })
         .limit(30)
         .lean();

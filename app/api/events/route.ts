@@ -17,7 +17,7 @@ export async function GET(req: Request) {
       await connectToDB();
       const query = category !== "all" ? { category } : {};
       return Event.find(query)
-        .select("_id title description date timeString location image category status featured attendees university")
+        .select("_id title description date timeString location image category status featured attendees university source externalId externalUrl")
         .sort({ date: 1 })
         .lean();
     });

@@ -46,8 +46,25 @@ const ProgramSchema = new mongoose.Schema(
     order: { type: Number, default: 0, index: true },
     active: { type: Boolean, default: true, index: true },
     applicationQuestions: { type: [ApplicationQuestionSchema], default: [] },
+    source: {
+      type: String,
+      enum: ["vcm", "volunteer.org.mn"],
+      default: "vcm",
+      index: true,
+    },
+    externalId: { type: String },
+    externalUrl: { type: String },
+    syncedAt: { type: Date },
   },
   { timestamps: true }
+);
+
+ProgramSchema.index(
+  { source: 1, externalId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { externalId: { $type: "string" } },
+  }
 );
 
 const Program = mongoose.models.Program || mongoose.model("Program", ProgramSchema);

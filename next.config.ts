@@ -43,6 +43,11 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'volunteer.org.mn',
+        pathname: '/uploaded/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'ui-avatars.com',
       },
       {

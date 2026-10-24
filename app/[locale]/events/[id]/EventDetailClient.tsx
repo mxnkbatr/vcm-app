@@ -16,6 +16,7 @@ import { Link } from "@/navigation";
 
 import { QRCodeSVG } from "qrcode.react";
 import { IOSAlert } from "@/app/components/iOSAlert";
+import SourceAttribution from "@/app/components/SourceAttribution";
 
 interface EventDetail {
   _id: string;
@@ -31,6 +32,8 @@ interface EventDetail {
   featured: boolean;
   attendees: string[];
   ticketPrice?: number;
+  source?: string;
+  externalUrl?: string;
 }
 
 const CAT_META: Record<string, { color: string; bg: string }> = {
@@ -391,11 +394,20 @@ export default function EventDetailClient({
             </span>
           </div>
           <div className="px-5 pb-6 pt-2 space-y-4">
-            {desc.split("\n").filter(p => p.trim()).map((para, i) => (
-              <p key={i} className="text-[15px] leading-relaxed" style={{ color: "var(--label2)" }}>
-                {para}
-              </p>
-            ))}
+            {event.source === "volunteer.org.mn" || /<\/?[a-z][\s\S]*>/i.test(desc) ? (
+              <div
+                className="prose prose-sm max-w-none text-[15px] leading-relaxed"
+                style={{ color: "var(--label2)" }}
+                dangerouslySetInnerHTML={{ __html: desc }}
+              />
+            ) : (
+              desc.split("\n").filter((p) => p.trim()).map((para, i) => (
+                <p key={i} className="text-[15px] leading-relaxed" style={{ color: "var(--label2)" }}>
+                  {para}
+                </p>
+              ))
+            )}
+            <SourceAttribution source={event.source} href={event.externalUrl} />
           </div>
         </motion.div>
 

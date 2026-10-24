@@ -45,6 +45,7 @@ function isPublicRoute(pathname: string): boolean {
         '/api/banners',
         '/api/programs',
         '/api/qpay/webhook',
+        '/api/cron/',
     ];
     if (publicApis.some(api => pathname.startsWith(api))) return true;
 

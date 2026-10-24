@@ -63,12 +63,14 @@ describe("shop payment security", () => {
   });
 
   it("creates invoice with DB total even if caller wanted a lower amount", async () => {
+    const itemId = "507f1f77bcf86cd799439011";
+    const purchaseId = "507f1f77bcf86cd799439012";
     mocks.find.mockReturnValue({
       lean: () =>
-        Promise.resolve([{ _id: "item1", price: 9000, isActive: true }]),
+        Promise.resolve([{ _id: itemId, price: 9000, isActive: true }]),
     });
     mocks.create.mockResolvedValue({
-      _id: { toString: () => "purchase1" },
+      _id: { toString: () => purchaseId },
       amount: 9000,
     });
     mocks.qpayCreateInvoice.mockResolvedValue({
@@ -78,13 +80,13 @@ describe("shop payment security", () => {
     mocks.findByIdAndUpdate.mockResolvedValue({});
 
     const result = await createShopPurchaseInvoice({
-      userId: "507f1f77bcf86cd799439011",
-      lines: [{ itemId: "item1", quantity: 1 }],
+      userId: "507f1f77bcf86cd799439013",
+      lines: [{ itemId, quantity: 1 }],
       phoneNumber: "99112233",
     });
 
     expect(mocks.qpayCreateInvoice).toHaveBeenCalledWith(
-      expect.objectContaining({ amount: 9000, senderInvoiceNo: "purchase1" })
+      expect.objectContaining({ amount: 9000, senderInvoiceNo: purchaseId })
     );
     expect(result.finalAmount).toBe(9000);
   });

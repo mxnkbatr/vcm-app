@@ -146,6 +146,8 @@ function LoadingCard({ label }: { label: string }) {
 function DashboardTab() {
   const [stats, setStats] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(true);
+  const [syncing, setSyncing] = React.useState(false);
+  const [syncMsg, setSyncMsg] = React.useState("");
 
   React.useEffect(() => {
     fetch("/api/admin/stats")
@@ -153,6 +155,27 @@ function DashboardTab() {
       .then((d) => setStats(d))
       .finally(() => setLoading(false));
   }, []);
+
+  const runSync = async () => {
+    setSyncing(true);
+    setSyncMsg("");
+    try {
+      const res = await fetch("/api/admin/sync-volunteer", { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setSyncMsg(data.error || "Sync амжилтгүй");
+      } else {
+        const r = data.result || {};
+        setSyncMsg(
+          `OK — мэдээ +${r.news?.upserted || 0}/${r.news?.updated || 0}, эвент +${r.events?.upserted || 0}/${r.events?.updated || 0}, хөтөлбөр +${r.programs?.upserted || 0}/${r.programs?.updated || 0}, баннер +${r.banners?.upserted || 0}/${r.banners?.updated || 0}`
+        );
+      }
+    } catch {
+      setSyncMsg("Сервертэй холбогдож чадсангүй");
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   if (loading) return <LoadingCard label="статистик" />;
   if (!stats) {
@@ -187,6 +210,22 @@ function DashboardTab() {
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="card p-4 space-y-3">
+        <div className="t-headline">volunteer.org.mn sync</div>
+        <p className="t-caption">
+          Мэдээ, эвент, хөтөлбөр, баннерыг сервер талаас татна. Leaderboard/хувь хүний мэдээлэл татахгүй.
+        </p>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={syncing}
+          onClick={() => void runSync()}
+        >
+          {syncing ? "Sync хийж байна…" : "Одоо sync хийх"}
+        </button>
+        {syncMsg ? <p className="t-caption" style={{ color: "var(--label2)" }}>{syncMsg}</p> : null}
       </div>
 
       <div className="card p-4">

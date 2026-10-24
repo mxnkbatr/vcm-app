@@ -14,10 +14,26 @@ const BannerSchema = new Schema(
     link: { type: String, default: "" },
     active: { type: Boolean, default: true },
     order: { type: Number, default: 0 },
-    /** Auto-rotate interval in seconds (0 = use global default) */
     intervalSec: { type: Number, default: 8 },
+    source: {
+      type: String,
+      enum: ["vcm", "volunteer.org.mn"],
+      default: "vcm",
+      index: true,
+    },
+    externalId: { type: String },
+    externalUrl: { type: String },
+    syncedAt: { type: Date },
   },
   { timestamps: true }
+);
+
+BannerSchema.index(
+  { source: 1, externalId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { externalId: { $type: "string" } },
+  }
 );
 
 const Banner = models.Banner || model("Banner", BannerSchema);
