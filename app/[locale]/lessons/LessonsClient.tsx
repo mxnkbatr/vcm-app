@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useSyncExternalStore } from "react";
-import Image from "next/image";
 import { Link } from "@/navigation";
 import { BookOpen, Search, Star } from "lucide-react";
 import { useLocale } from "next-intl";
@@ -9,6 +8,7 @@ import Skeleton from "@/app/components/Skeleton";
 import PremiumPageShell from "@/app/components/PremiumPageShell";
 import NativeFeatureUnavailable from "@/app/components/NativeFeatureUnavailable";
 import EmptyState from "@/app/components/ui/EmptyState";
+import SharedHero from "@/app/components/SharedHero";
 import { isNativeApp } from "@/lib/native-perf";
 import { hapticSelection } from "@/lib/haptics";
 
@@ -88,7 +88,14 @@ function CourseCard({ c, locale, hot }: { c: Course; locale: string; hot?: boole
     <Link href={`/lessons/${c.slug}`} prefetch className="dc-course-card press">
       <div className="dc-course-card__thumb" style={{ background: `linear-gradient(145deg, ${accent}, #0f172a)` }}>
         {c.thumbnailUrl ? (
-          <Image src={c.thumbnailUrl} alt="" fill className="object-cover" sizes="112px" />
+          <SharedHero
+            kind="lesson"
+            id={c.slug}
+            src={c.thumbnailUrl}
+            alt={title}
+            sizes="112px"
+            radius={14}
+          />
         ) : (
           <span className="dc-course-card__thumb-label">{title.slice(0, 12)}</span>
         )}

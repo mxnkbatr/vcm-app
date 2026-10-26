@@ -26,8 +26,8 @@ const VARIANTS: Record<
     exit: { x: 0 },
   },
   push: {
-    // Detail slides in; list underneath stays put (no card shift)
-    initial: { x: "100%" },
+    // Softer slide so layoutId shared heroes can “fly” over the stack
+    initial: { x: "42%" },
     animate: { x: 0 },
     exit: { x: 0 },
   },

@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { Link } from "@/navigation";
 import { ShoppingBag } from "lucide-react";
 import { staggerItem } from "@/lib/motion";
+import SharedHero from "@/app/components/SharedHero";
 
 const T = {
   inStock: { en: "In stock", mn: "Байгаа", de: "Auf Lager" },
@@ -69,12 +69,14 @@ export default function ShopProductCard({
     >
       <div className="shop-product-card__media">
         {item.image ? (
-          <Image
+          <SharedHero
+            kind="shop"
+            id={String(item._id)}
             src={item.image}
             alt={name}
-            fill
-            className="object-cover shop-product-card__img"
+            imgClassName="object-cover shop-product-card__img"
             sizes={variant === "horizontal" ? "164px" : "(max-width: 520px) 50vw, 260px"}
+            radius={16}
           />
         ) : (
           <div className="shop-product-card__placeholder">

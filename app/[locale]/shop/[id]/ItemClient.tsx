@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import {
   ShoppingCart, Package, Smartphone, X,
   Loader2, Sparkles, Tag,
@@ -14,7 +13,7 @@ import { ImpactStyle } from "@capacitor/haptics";
 import { formatShopCategory, formatShopPrice } from "@/app/components/ShopProductCard";
 import NativeFeatureUnavailable from "@/app/components/NativeFeatureUnavailable";
 import { isNativeApp } from "@/lib/native-perf";
-import { BLUR_DATA_URL } from "@/lib/image-blur";
+import SharedHero from "@/app/components/SharedHero";
 
 const T = {
   back: { en: "Back", mn: "Буцах", de: "Zurück" },
@@ -137,15 +136,15 @@ export default function ItemClient({ item, locale = "en" }: { item: any; locale:
     <div className="app-detail app-detail--shop">
       <div className="app-detail__hero app-detail__hero--shop">
         {hasImage ? (
-          <Image
+          <SharedHero
+            kind="shop"
+            id={String(item._id)}
             src={item.image}
             alt={name}
-            fill
-            className="app-detail__hero-img object-cover"
-            priority
+            imgClassName="app-detail__hero-img object-cover"
             sizes="100vw"
-            placeholder="blur"
-            blurDataURL={BLUR_DATA_URL}
+            priority
+            radius={0}
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center" style={{ background: "var(--fill2)" }} aria-hidden>

@@ -10,6 +10,7 @@ import FloatingField from "@/app/components/auth/FloatingField";
 import { hapticNotification, hapticImpact } from "@/lib/haptics";
 import { ImpactStyle, NotificationType } from "@capacitor/haptics";
 import { springNative } from "@/lib/motion";
+import SuccessBurst from "@/app/components/SuccessBurst";
 
 const INTERESTS = [
   "Боловсрол",
@@ -130,8 +131,12 @@ export default function SignUpPage() {
 
       void hapticNotification(NotificationType.Success);
       await fetch("/api/auth/session", { method: "POST" });
-      router.push("/profile");
-      router.refresh();
+      setSuccess(true);
+      setTimeout(() => {
+        router.push("/profile");
+        router.refresh();
+      }, 1200);
+      return;
     } catch (err: unknown) {
       void hapticNotification(NotificationType.Error);
       setError(err instanceof Error ? err.message : "Бүртгэл амжилтгүй.");
@@ -144,6 +149,7 @@ export default function SignUpPage() {
     return (
       <div className="auth-page">
         <div className="auth-page__bg" aria-hidden />
+        <SuccessBurst active durationMs={1400} />
         <motion.div
           initial={{ scale: 0.96, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -153,7 +159,7 @@ export default function SignUpPage() {
             <CheckCircle2 size={36} />
           </div>
           <h2 className="auth-card__title">Бүртгэл амжилттай!</h2>
-          <p className="auth-card__lead">Нэвтрэх хуудас руу шилжиж байна...</p>
+          <p className="auth-card__lead">Шилжиж байна...</p>
         </motion.div>
       </div>
     );

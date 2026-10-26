@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
+import SharedHero from "@/app/components/SharedHero";
 import { Link } from "@/navigation";
 import { useLocale } from "next-intl";
 import { Calendar } from "lucide-react";
@@ -129,12 +129,14 @@ export default function HomeUpcomingEvents({ limit = 8, query = "" }: { limit?: 
           <Link key={item._id} href={`/events/${item._id}`} prefetch className="ios-event-card ios-event-card--wow press">
             <div className="ios-event-card__media">
               {item.image ? (
-                <Image
+                <SharedHero
+                  kind="event"
+                  id={item._id}
                   src={item.image}
                   alt={title}
-                  fill
-                  className="object-cover object-center"
+                  imgClassName="object-cover object-center"
                   sizes="(max-width:520px) 80vw, 360px"
+                  radius={20}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center" style={{ color: "var(--blue)", background: "var(--blue-light)" }}>

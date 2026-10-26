@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import {
   Calendar, MapPin, Share2,
@@ -22,8 +21,9 @@ import { buildEventIcs, downloadIcs } from "@/lib/event-ics";
 import { scheduleEventDayBeforeReminder } from "@/lib/event-reminder";
 import { hapticNotification } from "@/lib/haptics";
 import { NotificationType } from "@capacitor/haptics";
-import { BLUR_DATA_URL } from "@/lib/image-blur";
 import { springNative } from "@/lib/motion";
+import SuccessBurst from "@/app/components/SuccessBurst";
+import SharedHero from "@/app/components/SharedHero";
 
 interface EventDetail {
   _id: string;
@@ -165,7 +165,6 @@ export default function EventDetailClient({
         setHasJoined(true);
         setShowConfetti(true);
         void hapticNotification(NotificationType.Success);
-        setTimeout(() => setShowConfetti(false), 2200);
         if (user?.id) {
           setEvent((prev) =>
             prev ? { ...prev, attendees: [...(prev.attendees || []), user.id] } : prev
@@ -253,15 +252,15 @@ export default function EventDetailClient({
     <div className="app-detail app-detail--event">
       <div className="app-detail__hero app-detail__hero--event">
         {event.image ? (
-          <Image
+          <SharedHero
+            kind="event"
+            id={event._id}
             src={optimizeCloudinaryUrl(event.image)}
             alt={title}
-            fill
-            className="app-detail__hero-img object-cover"
+            imgClassName="app-detail__hero-img object-cover"
             sizes="100vw"
             priority
-            placeholder="blur"
-            blurDataURL={BLUR_DATA_URL}
+            radius={0}
           />
         ) : (
           <div
@@ -471,32 +470,11 @@ export default function EventDetailClient({
         )}
       </div>
 
-      {showConfetti && (
-        <div className="pointer-events-none fixed inset-0 z-[80] overflow-hidden flex items-center justify-center" aria-hidden>
-          {Array.from({ length: 28 }).map((_, i) => (
-            <span
-              key={i}
-              className="absolute w-2 h-2 rounded-sm"
-              style={{
-                left: `${(i * 17) % 100}%`,
-                top: "-8px",
-                background: ["#1E5BD8", "#34C759", "#FF9F0A", "#FF3B30", "#AF52DE"][i % 5],
-                animation: `ios-confetti-fall 1.4s ease-in ${i * 0.04}s forwards`,
-              }}
-            />
-          ))}
-          <motion.div
-            initial={{ scale: 0.4, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 420, damping: 18 }}
-            className="relative z-10 w-20 h-20 rounded-full flex items-center justify-center"
-            style={{ background: "var(--emerald)", boxShadow: "0 12px 40px rgba(52,199,89,0.45)" }}
-          >
-            <CheckCircle2 size={40} color="white" strokeWidth={2.25} />
-          </motion.div>
-          <style>{`@keyframes ios-confetti-fall{to{transform:translateY(110vh) rotate(540deg);opacity:0}}`}</style>
-        </div>
-      )}
+      <SuccessBurst
+        active={showConfetti}
+        durationMs={1500}
+        onDone={() => setShowConfetti(false)}
+      />
 
       <DetailDock>
         {hasJoined ? (

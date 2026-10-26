@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { useCachedFetch } from "@/lib/client-cache";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, MapPin } from "lucide-react";
 import { useLocale } from "next-intl";
@@ -12,7 +11,7 @@ import IOSSegmented from "@/app/components/ui/IOSSegmented";
 import EmptyState from "@/app/components/ui/EmptyState";
 import IOS26Card from "@/app/components/ui/IOS26Card";
 import { springNative } from "@/lib/motion";
-import { BLUR_DATA_URL } from "@/lib/image-blur";
+import SharedHero from "@/app/components/SharedHero";
 
 interface EventItem {
   _id: string;
@@ -50,14 +49,13 @@ function EventCard({ ev, locale, index }: { ev: EventItem; locale: string; index
       <IOS26Card href={`/events/${ev._id}`}>
         <div className="ios26-card__media">
           {ev.image ? (
-            <Image
+            <SharedHero
+              kind="event"
+              id={ev._id}
               src={ev.image}
               alt={title}
-              fill
-              className="object-cover"
               sizes="(max-width: 520px) 100vw, 480px"
-              placeholder="blur"
-              blurDataURL={BLUR_DATA_URL}
+              radius={18}
             />
           ) : (
             <div className="ios26-card__media-fallback">

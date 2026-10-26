@@ -3,6 +3,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, XCircle, Info, X } from "lucide-react";
+import SuccessBurst from "./SuccessBurst";
 
 interface IOSAlertProps {
   isOpen: boolean;
@@ -25,6 +26,9 @@ export const IOSAlert = ({
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+          {type === "success" ? (
+            <SuccessBurst active showCheck={false} durationMs={1500} />
+          ) : null}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

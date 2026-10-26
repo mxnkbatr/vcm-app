@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
+import SharedHero from "@/app/components/SharedHero";
 import { Link, usePathname, useRouter } from "@/navigation";
 import { useLocale } from "next-intl";
 import { BookOpen, ChevronRight, Lock, Sparkles, TrendingUp } from "lucide-react";
@@ -10,8 +10,6 @@ import { IOSAlert, IOSSheet } from "@/app/components/iOSAlert";
 import DetailDock from "@/app/components/DetailDock";
 import NativeFeatureUnavailable from "@/app/components/NativeFeatureUnavailable";
 import { isNativeApp } from "@/lib/native-perf";
-import { BLUR_DATA_URL } from "@/lib/image-blur";
-
 type LmsI18n = { en: string; mn: string; de?: string };
 type Course = {
   _id: string;
@@ -182,15 +180,15 @@ export default function CourseClient() {
     <div className="app-detail app-detail--course dc-course-detail">
       <div className="app-detail__hero">
         {thumb ? (
-          <Image
+          <SharedHero
+            kind="lesson"
+            id={data.course.slug}
             src={thumb}
             alt={title}
-            fill
-            className="app-detail__hero-img object-cover"
+            imgClassName="app-detail__hero-img object-cover"
             sizes="100vw"
             priority
-            placeholder="blur"
-            blurDataURL={BLUR_DATA_URL}
+            radius={0}
           />
         ) : (
           <div

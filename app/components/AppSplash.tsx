@@ -1,35 +1,35 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import BrandLogo from "./BrandLogo";
 import Onboarding from "./Onboarding";
 import { hasCompletedOnboarding } from "@/lib/onboarding";
 import { BRAND } from "@/lib/branding";
-import { springNative } from "@/lib/motion";
 
 type Phase = "boot" | "morph" | "onboarding" | "done";
 
 /**
- * First launch → splash → onboarding (once, persisted).
- * Later launches → splash (logo + Developed by) → home.
+ * First launch → splash → onboarding (once).
+ * Later → short splash → home.
+ * No layoutId here — Safari left a stuck logo projection.
  */
 export default function AppSplash() {
   const [phase, setPhase] = useState<Phase>("boot");
-  const ran = useRef(false);
 
   useEffect(() => {
-    if (ran.current) return;
-    ran.current = true;
-
     let cancelled = false;
     const timers: number[] = [];
 
     const go = (next: Phase) => {
       if (cancelled) return;
-      setPhase(next);
+      setPhase((prev) => (prev === "done" ? prev : next));
       if (next === "done") {
-        window.dispatchEvent(new CustomEvent("vcm:app-ready"));
+        try {
+          window.dispatchEvent(new CustomEvent("vcm:app-ready"));
+        } catch {
+          /* noop */
+        }
       }
     };
 
@@ -38,8 +38,9 @@ export default function AppSplash() {
       try {
         done = await Promise.race([
           hasCompletedOnboarding(),
-          // If Preferences is slow, treat as first launch (show onboarding)
-          new Promise<boolean>((resolve) => window.setTimeout(() => resolve(false), 900)),
+          new Promise<boolean>((resolve) => {
+            timers.push(window.setTimeout(() => resolve(false), 600));
+          }),
         ]);
       } catch {
         done = false;
@@ -47,16 +48,30 @@ export default function AppSplash() {
       if (cancelled) return;
 
       if (!done) {
-        // Brief splash, then onboarding — never hard-kill this path
-        timers.push(window.setTimeout(() => go("onboarding"), 700));
+        timers.push(window.setTimeout(() => go("onboarding"), 520));
         return;
       }
 
-      // Returning user: morph logo, then exit
-      timers.push(window.setTimeout(() => go("morph"), 320));
-      timers.push(window.setTimeout(() => go("done"), 980));
+      timers.push(window.setTimeout(() => go("morph"), 240));
+      timers.push(window.setTimeout(() => go("done"), 780));
     };
+
     void run();
+
+    // Hard failsafe — Safari / remount must never leave splash forever
+    timers.push(
+      window.setTimeout(() => {
+        setPhase((prev) => {
+          if (prev === "onboarding" || prev === "done") return prev;
+          try {
+            window.dispatchEvent(new CustomEvent("vcm:app-ready"));
+          } catch {
+            /* noop */
+          }
+          return "done";
+        });
+      }, 2200)
+    );
 
     return () => {
       cancelled = true;
@@ -66,53 +81,41 @@ export default function AppSplash() {
 
   const finishOnboarding = () => {
     setPhase("done");
-    window.dispatchEvent(new CustomEvent("vcm:app-ready"));
+    try {
+      window.dispatchEvent(new CustomEvent("vcm:app-ready"));
+    } catch {
+      /* noop */
+    }
   };
 
   if (phase === "done") return null;
 
   return (
-    <AnimatePresence>
-      <motion.div
-        key="splash-root"
-        className="app-splash app-splash--morph"
-        initial={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.28 }}
-      >
-        {phase === "onboarding" ? (
-          <Onboarding onDone={finishOnboarding} />
-        ) : (
-          <>
-            <motion.div
-              className="app-splash__morph-stage"
-              initial={false}
-              animate={
-                phase === "morph"
-                  ? { scale: 0.42, y: -120, opacity: 0.95 }
-                  : { scale: 1, y: 0, opacity: 1 }
-              }
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <motion.div layoutId="vcm-brand-logo" transition={springNative}>
-                <BrandLogo size={phase === "boot" ? 112 : 88} priority />
-              </motion.div>
-              <motion.p
-                className="app-splash__brand-short"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: phase === "morph" ? 0 : 1, y: 0 }}
-                transition={{ delay: 0.1, duration: 0.3 }}
-              >
-                {BRAND.shortName}
-              </motion.p>
-            </motion.div>
+    <div className="app-splash app-splash--morph" role="presentation">
+      {phase === "onboarding" ? (
+        <Onboarding onDone={finishOnboarding} />
+      ) : (
+        <>
+          <motion.div
+            className="app-splash__morph-stage"
+            initial={false}
+            animate={
+              phase === "morph"
+                ? { scale: 0.88, opacity: 0 }
+                : { scale: 1, opacity: 1 }
+            }
+            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {/* No layoutId — Safari kept a floating logo after exit */}
+            <BrandLogo size={112} priority />
+            <p className="app-splash__brand-short">{BRAND.shortName}</p>
+          </motion.div>
 
-            <p className="app-splash__credit">
-              Developed by {BRAND.developedBy}
-            </p>
-          </>
-        )}
-      </motion.div>
-    </AnimatePresence>
+          <p className="app-splash__credit">
+            Developed by {BRAND.developedBy}
+          </p>
+        </>
+      )}
+    </div>
   );
 }

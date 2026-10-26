@@ -63,9 +63,9 @@ export default function AppHeader({
         {!compact ? (
           <div className="app-header__bar">
             <div className="app-header__large-wrap">
-              <motion.div layoutId="vcm-brand-logo" className="app-header__logo">
+              <div className="app-header__logo">
                 <BrandLogo size={28} priority />
-              </motion.div>
+              </div>
               <h1 className="app-header__large-title">{title || "VCM"}</h1>
             </div>
             {actions}

@@ -19,6 +19,7 @@ import {
 import { useSession } from "@/lib/hooks/useSession";
 import DetailDock from "@/app/components/DetailDock";
 import { IOSAlert, IOSSheet } from "./iOSAlert";
+import SuccessBurst from "@/app/components/SuccessBurst";
 
 interface ProgramConfig {
   id: string;
@@ -217,6 +218,7 @@ function ApplyForm({
 function SuccessScreen({ prog, onDashboard }: { prog: ProgramConfig; onDashboard: () => void }) {
   return (
     <div className="app-detail app-detail--empty">
+      <SuccessBurst active durationMs={1400} showCheck />
       <div className="app-detail__empty-icon" style={{ background: "var(--emerald-dim)", color: "var(--emerald)" }}>
         <CheckCircle2 size={28} strokeWidth={1.75} />
       </div>

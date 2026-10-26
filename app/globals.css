@@ -5623,6 +5623,51 @@ html.sheet-open body {
   border: 0;
 }
 
+/* Success burst — payment / join / signup */
+.success-burst {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  overflow: hidden;
+}
+.success-burst__particle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: -4px 0 0 -4px;
+  will-change: transform, opacity;
+}
+.success-burst__check {
+  position: relative;
+  z-index: 1;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #34C759;
+  box-shadow:
+    0 12px 40px rgba(52, 199, 89, 0.45),
+    0 0 0 10px rgba(52, 199, 89, 0.14);
+}
+
+/* Shared hero image fly (layoutId) — must fill parent (never position:relative alone) */
+.shared-hero {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden;
+  background: var(--fill2, #e5e5ea);
+  z-index: 0;
+}
+.shared-hero img {
+  object-fit: cover;
+}
+
 /* Splash morph + onboarding */
 .app-splash--morph {
   background: #F2F2F7 !important;
@@ -6324,6 +6369,7 @@ html.sheet-open body {
 .app-detail__hero-fade {
   position: absolute;
   inset: 0;
+  z-index: 1;
   pointer-events: none;
   background:
     linear-gradient(180deg, rgba(15, 23, 42, 0.35) 0%, transparent 32%),
