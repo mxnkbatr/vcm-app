@@ -6,18 +6,19 @@ import { getAuthUserId } from "@/lib/authHelpers";
 import { parseJsonBody } from "@/lib/api/validate";
 import { jsonError } from "@/lib/api/errors";
 import { markPurchasePaidIfValid } from "@/lib/shop-payment";
+import { normalizeShopPhone } from "@/lib/shop-guest";
 
 export const dynamic = "force-dynamic";
 
 const bodySchema = z.object({
   purchaseId: z.string().min(1),
   invoiceId: z.string().min(1),
+  phoneNumber: z.string().min(8).max(32).optional(),
 });
 
 export async function POST(req: NextRequest) {
   try {
     const userId = await getAuthUserId();
-    if (!userId) return jsonError(401, "Unauthorized");
 
     const parsed = await parseJsonBody(req, bodySchema);
     if ("error" in parsed) return parsed.error;
@@ -26,8 +27,16 @@ export async function POST(req: NextRequest) {
     const purchase = await Purchase.findById(parsed.data.purchaseId);
     if (!purchase) return jsonError(404, "Purchase not found");
 
-    if (String(purchase.userId) !== String(userId)) {
-      return jsonError(403, "Forbidden");
+    if (userId) {
+      if (String(purchase.userId) !== String(userId)) {
+        return jsonError(403, "Forbidden");
+      }
+    } else if (parsed.data.phoneNumber) {
+      const a = normalizeShopPhone(purchase.phoneNumber);
+      const b = normalizeShopPhone(parsed.data.phoneNumber);
+      if (!a || a !== b) return jsonError(403, "Forbidden");
+    } else {
+      return jsonError(401, "Нэвтэрч орно уу эсвэл утасны дугаараа дахин оруулна уу.");
     }
 
     if (!purchase.invoiceId || purchase.invoiceId !== parsed.data.invoiceId) {

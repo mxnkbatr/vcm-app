@@ -16,6 +16,22 @@ const TAB_ROOTS = new Set([
 /** Full-screen overlays that still use push chrome */
 export const OVERLAY_ROUTES = new Set(["/notifications"]);
 
+/**
+ * Immersive stack screens (hero + own RN header).
+ * AppHeader is hidden — screen owns back/share chrome.
+ */
+export function isImmersiveDetail(pathname: string): boolean {
+  const path = stripLocale(pathname);
+  if (/^\/news\/[^/]+$/.test(path)) return true;
+  if (/^\/events\/[^/]+$/.test(path)) return true;
+  if (/^\/shop\/[^/]+$/.test(path)) return true;
+  if (/^\/programs\/[^/]+$/.test(path)) return true;
+  if (/^\/opportunities\/[^/]+$/.test(path)) return true;
+  if (/^\/lessons\/[^/]+$/.test(path)) return true;
+  if (/^\/lessons\/[^/]+\/[^/]+$/.test(path)) return true;
+  return false;
+}
+
 /** Routes that slide up like iOS sheets */
 const MODAL_ROUTES = new Set([
   "/cart",

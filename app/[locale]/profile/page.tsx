@@ -4,14 +4,13 @@ import React, { useState, useEffect } from "react";
 import { useSession } from "@/lib/hooks/useSession";
 import { useDashboard } from "@/lib/hooks/useDashboard";
 import { useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
 import ProfileActivityHistory from "@/app/components/ProfileActivityHistory";
 import VolunteerHoursRing from "@/app/components/VolunteerHoursRing";
 import VolunteerIdQr from "@/app/components/VolunteerIdQr";
 import {
   User, Mail, Phone, MapPin, Edit3, Save,
-  Lock, Eye, EyeOff, ShieldCheck, History, Settings, Moon, Sun, Info,
+  Lock, Eye, EyeOff, ShieldCheck, Settings, Info,
 } from "lucide-react";
 import { hapticNotification } from "@/lib/haptics";
 import { NotificationType } from "@capacitor/haptics";
@@ -26,7 +25,6 @@ export default function ProfilePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const locale = useLocale();
-  const { theme, setTheme, resolvedTheme } = useTheme();
   const { data: dash, loading } = useDashboard({ enabled: status === "authenticated" });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -34,9 +32,6 @@ export default function ProfilePage() {
   const [showPw, setShowPw] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [toast, setToast] = useState<{ ok: boolean; msg: string } | null>(null);
-  const [mountedTheme, setMountedTheme] = useState(false);
-
-  useEffect(() => setMountedTheme(true), []);
 
   useEffect(() => {
     if (status === "loading") return;
@@ -109,7 +104,6 @@ export default function ProfilePage() {
     .slice(0, 2)
     .toUpperCase();
 
-  const isDark = mountedTheme && (resolvedTheme === "dark" || theme === "dark");
   const volunteerHours =
     ((dash?.attendedEvents?.length || 0) * 4) + ((dash?.applications?.length || 0) * 2);
 
@@ -130,7 +124,9 @@ export default function ProfilePage() {
           )}
         </AnimatePresence>
 
-        <IOSLargeTitle title="Профайл" />
+        <IOSLargeTitle title="Профайл">
+          <p className="ios-subhead mt-1">Таны VCM бүртгэл</p>
+        </IOSLargeTitle>
 
         <div className="ios26-profile-hero">
           <div className="ios26-profile-hero__avatar">{initials}</div>
@@ -146,8 +142,8 @@ export default function ProfilePage() {
         <VolunteerHoursRing hours={volunteerHours} locale={locale} />
         <VolunteerIdQr userId={String(userData._id)} name={userData.fullName} locale={locale} />
 
-        <div>
-          <p className="ios-caption px-4 mb-2 uppercase tracking-wide">Мэдээлэл</p>
+        <section>
+          <VcmSectionHead title="Мэдээлэл" />
           <IOSList>
             <IOSListRow icon={<Mail size={16} strokeWidth={1.75} />} title="Имэйл" subtitle={userData.email || "—"} />
             <IOSListRow icon={<Phone size={16} strokeWidth={1.75} />} title="Утас" subtitle={userData.phone || "Тохируулаагүй"} />
@@ -162,47 +158,18 @@ export default function ProfilePage() {
               subtitle={userData.role === "guest" ? "Зочин" : userData.role}
             />
           </IOSList>
-        </div>
+        </section>
 
-        <div>
-          <p className="ios-caption px-4 mb-2 uppercase tracking-wide">Тохиргоо</p>
+        <section>
+          <VcmSectionHead title="Тохиргоо" />
           <IOSList>
-            <IOSListRow
-              icon={isDark ? <Moon size={16} strokeWidth={1.75} /> : <Sun size={16} strokeWidth={1.75} />}
-              title="Харанхуй горим"
-              subtitle={theme === "system" ? "Системтэй хамт" : undefined}
-              trailing={
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={!!isDark}
-                  aria-label="Харанхуй горим"
-                  onClick={() => {
-                    // cycle: system → dark → light → system (follows OS by default)
-                    if (theme === "system") setTheme("dark");
-                    else if (isDark) setTheme("light");
-                    else setTheme("system");
-                  }}
-                  className="w-12 h-7 rounded-full relative press"
-                  style={{ background: isDark ? "var(--blue)" : "var(--fill)" }}
-                >
-                  <span
-                    className="absolute top-0.5 w-6 h-6 rounded-full bg-white transition-transform"
-                    style={{ left: isDark ? 22 : 2 }}
-                  />
-                </button>
-              }
-            />
             <IOSListRow href="/settings" icon={<Settings size={16} strokeWidth={1.75} />} title="Тохиргоо" />
             <IOSListRow href="/about" icon={<Info size={16} strokeWidth={1.75} />} title="Тухай" />
           </IOSList>
-        </div>
+        </section>
 
-        <div>
-          <div className="flex items-center gap-2 px-1 mb-2">
-            <History size={16} strokeWidth={1.75} style={{ color: "var(--blue)" }} />
-            <p className="ios-headline">Миний түүх</p>
-          </div>
+        <section>
+          <VcmSectionHead title="Миний түүх" />
           <ProfileActivityHistory
             applications={activity.applications}
             purchases={activity.purchases}
@@ -210,7 +177,7 @@ export default function ProfilePage() {
             enrolledLessons={activity.enrolledLessons}
             activeProgram={userData.program}
           />
-        </div>
+        </section>
 
         <button
           type="button"

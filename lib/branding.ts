@@ -7,6 +7,7 @@ export const BRAND = {
   taglineMn: "Жижиг үйлдэл — том өөрчлөлт",
   descriptorMn: "Монголын сайн дурын үйлсийн тэргүүлэгч платформ",
   descriptorEn: "Mongolia's leading volunteer platform",
+  developedBy: "Munkhbaatar Dorjsuren",
 
   appIcon: "/branding/icon-512.png",
   logo: "/branding/icon-512.png",
@@ -18,11 +19,11 @@ export const BRAND = {
     primary: "#1E5BD8",
     primaryLight: "#E8EEFB",
     navy: "#000000",
-    cream: "#F2F2F7",
+    cream: "#EEF1F4",
     creamLight: "#FFFFFF",
-    creamWarm: "#E5E5EA",
-    creamBlue: "#F2F2F7",
-    background: "#F2F2F7",
+    creamWarm: "#E4E8ED",
+    creamBlue: "#EEF1F4",
+    background: "#EEF1F4",
     backgroundDark: "#000000",
 
     modulePrograms: "#1E5BD8",

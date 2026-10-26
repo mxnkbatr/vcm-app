@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { AnimatePresence, motion, useDragControls, PanInfo } from "framer-motion";
 import { X } from "lucide-react";
 import { springNative } from "@/lib/motion";
@@ -20,6 +21,19 @@ export default function IOSSheet({
   children: React.ReactNode;
 }) {
   const controls = useDragControls();
+
+  useEffect(() => {
+    if (!open) return;
+    const root = document.documentElement;
+    root.classList.add("sheet-open");
+    const main = document.querySelector(".native-app-main") as HTMLElement | null;
+    const prevOverflow = main?.style.overflow ?? "";
+    if (main) main.style.overflow = "hidden";
+    return () => {
+      root.classList.remove("sheet-open");
+      if (main) main.style.overflow = prevOverflow;
+    };
+  }, [open]);
 
   const onDragEnd = (_: unknown, info: PanInfo) => {
     if (info.offset.y > 120 || info.velocity.y > 800) {
@@ -46,7 +60,7 @@ export default function IOSSheet({
             role="dialog"
             aria-modal="true"
             aria-label={title}
-            className={`ios-sheet liquid-glass-sheet ${detent === "half" ? "ios-sheet--half" : ""}`}
+            className={`ios-sheet ${detent === "half" ? "ios-sheet--half" : ""}`}
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}

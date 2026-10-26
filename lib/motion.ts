@@ -28,9 +28,9 @@ export const fadeScale = {
 };
 
 export const slideFromRight = {
-  initial: { x: "100%", opacity: 1 },
-  animate: { x: 0, opacity: 1 },
-  exit: { x: "-30%", opacity: 0.6 },
+  initial: { x: "100%" },
+  animate: { x: 0 },
+  exit: { x: "-28%" },
 };
 
 export const slideFromBottom = {
@@ -42,25 +42,24 @@ export const slideFromBottom = {
 export const staggerContainer = {
   initial: {},
   animate: {
-    transition: { staggerChildren: 0.06, delayChildren: 0.04 },
+    transition: { staggerChildren: 0.05, delayChildren: 0.02 },
   },
 };
 
 export const staggerItem = {
-  initial: { opacity: 0, y: 12 },
+  // No offset — remount after detail pop was making cards “jump”
+  initial: { opacity: 1, y: 0 },
   animate: {
     opacity: 1,
     y: 0,
-    transition: springNative,
   },
 };
 
-export const pressScale = { scale: 0.96 };
-
 export const dockEnter = {
-  initial: { opacity: 0, y: 24, scale: 0.96 },
-  animate: { opacity: 1, y: 0, scale: 1 },
-  exit: { opacity: 0, y: 16, scale: 0.98 },
+  // No opacity — avoids white flash / “weird” fade on detail enter
+  initial: { y: 28 },
+  animate: { y: 0 },
+  exit: { y: 20 },
 };
 
 export function prefersReducedMotion(): boolean {

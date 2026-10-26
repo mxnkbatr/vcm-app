@@ -79,7 +79,7 @@ export default function HomeNewsCards({ limit = 6 }: { limit?: number }) {
       <EmptyState
         icon={Newspaper}
         title="Мэдээ байхгүй"
-        description="volunteer.org.mn-ээс мэдээ синк хийгдсэний дараа энд харагдана."
+        description="Шинэ мэдээ нэмэгдсний дараа энд харагдана."
         actionLabel="Мэдээ"
         href="/news"
       />

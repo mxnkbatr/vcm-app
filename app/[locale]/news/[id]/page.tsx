@@ -2,17 +2,18 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { useParams, useRouter } from "next/navigation";
-import { Calendar, Eye, ArrowLeft, Tag, User } from "lucide-react";
-import { motion } from "framer-motion";
+import { useParams } from "next/navigation";
+import { Calendar, Eye, Tag, User, Newspaper, Share2 } from "lucide-react";
 import { useLocale } from "next-intl";
 import { Link } from "@/navigation";
-import SourceAttribution from "@/app/components/SourceAttribution";
+import RichHtmlContent from "@/app/components/RichHtmlContent";
+import DetailDock from "@/app/components/DetailDock";
+import { BLUR_DATA_URL } from "@/lib/image-blur";
+import { nativeShare } from "@/lib/native-share";
 
 export default function NewsDetailPage() {
   const locale = useLocale() as "en" | "mn" | "de";
   const params = useParams();
-  const router = useRouter();
 
   const [mounted, setMounted] = useState(false);
   const [news, setNews] = useState<any>(null);
@@ -24,35 +25,55 @@ export default function NewsDetailPage() {
   useEffect(() => {
     if (!id) return;
     fetch(`/api/news/${id}`)
-      .then(r => r.ok ? r.json() : Promise.reject())
-      .then(d => setNews(d))
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((d) => setNews(d))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [id]);
 
-  /* ── Loading ── */
-  if (!mounted || loading) return (
-    <div className="min-h-dvh flex items-center justify-center" style={{ background: "var(--bg)" }}>
-      <div className="ios-spinner" />
-    </div>
-  );
+  useEffect(() => {
+    if (!news) return;
+    const title = news.title?.[locale] || news.title?.mn || news.title?.en || "";
+    window.dispatchEvent(new CustomEvent("vcm:page-title", { detail: { title } }));
+    return () => {
+      window.dispatchEvent(new CustomEvent("vcm:page-title", { detail: { title: "" } }));
+    };
+  }, [news, locale]);
 
-  /* ── Not found ── */
-  if (!news) return (
-    <div className="min-h-dvh flex flex-col items-center justify-center gap-4 px-6" style={{ background: "var(--bg)" }}>
-      <div className="text-5xl">📰</div>
-      <h1 className="text-[20px] font-bold text-center" style={{ color: "var(--label)" }}>
-        Мэдээ олдсонгүй
-      </h1>
-      <Link href="/news" className="px-6 py-3 rounded-2xl text-white font-semibold text-[14px]"
-        style={{ background: "var(--blue)" }}>
-        Буцах
-      </Link>
-    </div>
-  );
+  if (!mounted || loading) {
+    return (
+      <div className="rn-screen app-detail app-detail--loading">
+        <div className="app-detail__skeleton-hero" />
+        <div className="app-detail__sheet">
+          <div className="app-detail__skeleton-line w-2/5" />
+          <div className="app-detail__skeleton-line w-4/5 mt-3" />
+          <div className="app-detail__skeleton-line w-full mt-2" />
+          <div className="app-detail__skeleton-line w-3/4 mt-2" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!news) {
+    return (
+      <div className="rn-screen app-detail app-detail--empty">
+        <div className="app-detail__empty-icon">
+          <Newspaper size={28} strokeWidth={1.75} />
+        </div>
+        <h1 className="app-detail__title">Мэдээ олдсонгүй</h1>
+        <Link href="/news" className="btn btn-primary auth-cta" style={{ maxWidth: 200, marginTop: 16 }}>
+          Буцах
+        </Link>
+      </div>
+    );
+  }
 
   const t = (field: { en: string; mn: string; de: string }) =>
     field?.[locale] || field?.mn || field?.en;
+
+  const title = t(news.title);
+  const summary = t(news.summary);
+  const content = t(news.content);
 
   const d = new Date(news.publishedDate);
   const dateFormatted = d.toLocaleDateString(
@@ -60,81 +81,78 @@ export default function NewsDetailPage() {
     { year: "numeric", month: "long", day: "numeric" }
   );
 
-  return (
-    <div className="min-h-dvh relative" style={{ background: "var(--bg)", paddingBottom: 160 }}>
-      {/* ── Top Nav ── */}
-      <div
-        className="absolute top-0 left-0 right-0 px-4 flex justify-between items-center z-20"
-        style={{ paddingTop: "calc(env(safe-area-inset-top, 12px) + 12px)" }}
-      >
-        <button
-          onClick={() => router.back()}
-          className="w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md press"
-          style={{ background: "rgba(255,255,255,0.8)", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
-        >
-          <ArrowLeft size={20} style={{ color: "var(--label)" }} />
-        </button>
-      </div>
+  const handleShare = async () => {
+    await nativeShare({
+      title,
+      text: locale === "mn" ? `${title} — VCM мэдээ` : `${title} — VCM news`,
+      url: typeof window !== "undefined" ? window.location.href : undefined,
+      dialogTitle: locale === "mn" ? "Хуваалцах" : "Share",
+    });
+  };
 
-      {/* ── Hero Image ── */}
-      <div className="relative w-full h-[350px] bg-slate-200">
+  return (
+    <div className="app-detail app-detail--news">
+      <div className="app-detail__hero">
         <Image
           src={news.image || "/logo.jpg"}
-          alt={t(news.title)}
+          alt={title}
           fill
           priority
-          className="object-cover"
+          className="app-detail__hero-img object-cover"
+          sizes="100vw"
+          placeholder="blur"
+          blurDataURL={BLUR_DATA_URL}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        {news.featured && (
-          <div className="absolute bottom-4 left-4">
-            <span className="badge text-[10px] uppercase tracking-widest" style={{ background: "var(--blue)", color: "white" }}>
-              Онцлох
+        <div className="app-detail__hero-fade" aria-hidden />
+      </div>
+
+      <div className="app-detail__sheet">
+        <div className="app-detail__handle" aria-hidden />
+        <div className="app-detail__meta">
+          {news.featured ? <span className="app-detail__pill app-detail__pill--accent">Онцлох</span> : null}
+          <span className="app-detail__meta-item">
+            <Calendar size={13} strokeWidth={2} /> {dateFormatted}
+          </span>
+          {news.author ? (
+            <span className="app-detail__meta-item">
+              <User size={13} strokeWidth={2} /> {news.author}
             </span>
+          ) : null}
+          {typeof news.views === "number" ? (
+            <span className="app-detail__meta-item">
+              <Eye size={13} strokeWidth={2} /> {news.views}
+            </span>
+          ) : null}
+        </div>
+
+        <h1 className="app-detail__title">{title}</h1>
+        {summary ? <p className="app-detail__lead">{summary}</p> : null}
+
+        <div className="app-detail__body">
+          <RichHtmlContent html={content} />
+        </div>
+
+        {news.tags?.length > 0 ? (
+          <div className="app-detail__tags">
+            {news.tags.map((tag: string) => (
+              <span key={tag} className="app-detail__tag">
+                <Tag size={11} strokeWidth={2} /> {tag}
+              </span>
+            ))}
           </div>
-        )}
+        ) : null}
       </div>
 
-      {/* ── Content ── */}
-      <div className="relative z-10 -mt-6 bg-white rounded-t-[32px] px-5 py-8" style={{ minHeight: "60vh", background: "var(--bg)" }}>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-3xl mx-auto"
+      <DetailDock>
+        <button
+          type="button"
+          onClick={() => void handleShare()}
+          className="detail-dock__btn detail-dock__btn--primary press"
         >
-          <div className="flex items-center gap-4 text-[12px] font-medium mb-4" style={{ color: "var(--label3)" }}>
-            <span className="flex items-center gap-1"><Calendar size={14} /> {dateFormatted}</span>
-            <span className="flex items-center gap-1"><User size={14} /> {news.author}</span>
-            <span className="flex items-center gap-1"><Eye size={14} /> {news.views}</span>
-          </div>
-
-          <h1 className="text-[24px] font-black leading-tight mb-4" style={{ color: "var(--label)" }}>
-            {t(news.title)}
-          </h1>
-
-          <p className="text-[15px] font-medium leading-relaxed mb-6" style={{ color: "var(--label2)" }}>
-            {t(news.summary)}
-          </p>
-
-          <div 
-            className="prose prose-sm max-w-none text-[15px] leading-relaxed" 
-            style={{ color: "var(--label)" }}
-            dangerouslySetInnerHTML={{ __html: t(news.content) }}
-          />
-
-          <SourceAttribution source={news.source} href={news.externalUrl} />
-
-          {news.tags?.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-8 pt-6 border-t" style={{ borderColor: "var(--sep)" }}>
-              {news.tags.map((tag: string) => (
-                <span key={tag} className="flex items-center gap-1 px-3 py-1 rounded-xl text-[11px] font-bold" style={{ background: "var(--fill2)", color: "var(--label2)" }}>
-                  <Tag size={10} /> {tag}
-                </span>
-              ))}
-            </div>
-          )}
-        </motion.div>
-      </div>
+          <Share2 size={17} strokeWidth={1.85} />
+          <span>{locale === "mn" ? "Хуваалцах" : "Share"}</span>
+        </button>
+      </DetailDock>
     </div>
   );
 }

@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { dockEnter, springNative } from "@/lib/motion";
+import DetailDock from "@/app/components/DetailDock";
 
 type NativeDockProps = {
   visible?: boolean;
@@ -11,6 +10,7 @@ type NativeDockProps = {
   children: React.ReactNode;
 };
 
+/** @deprecated Prefer DetailDock — kept as thin wrapper for older call sites. */
 export default function NativeDock({
   visible = true,
   price,
@@ -18,25 +18,18 @@ export default function NativeDock({
   children,
 }: NativeDockProps) {
   return (
-    <AnimatePresence>
-      {visible && (
-        <motion.div
-          className="native-dock"
-          variants={dockEnter}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-          transition={springNative}
-        >
-          {price != null && (
-            <div className="native-dock__price">
-              <span className="native-dock__amount">₮{Number(price).toLocaleString()}</span>
-              {priceLabel && <span className="native-dock__label">{priceLabel}</span>}
-            </div>
-          )}
-          <div className="native-dock__actions">{children}</div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <DetailDock
+      visible={visible}
+      leading={
+        price != null ? (
+          <>
+            <span className="detail-dock__price">₮{Number(price).toLocaleString()}</span>
+            {priceLabel ? <span className="detail-dock__price-sub">{priceLabel}</span> : null}
+          </>
+        ) : undefined
+      }
+    >
+      {children}
+    </DetailDock>
   );
 }

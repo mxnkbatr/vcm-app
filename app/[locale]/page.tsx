@@ -30,9 +30,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
 
   return (
     <HomePageContent
-      locale={locale}
       initialBanners={homeData.banners}
-      shopItems={homeData.shopItems}
       initialPrograms={homeData.programs}
     />
   );

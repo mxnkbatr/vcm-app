@@ -6,6 +6,7 @@ import { useLocale } from "next-intl";
 import { ChevronLeft, ChevronRight, PlayCircle } from "lucide-react";
 import Skeleton from "@/app/components/Skeleton";
 import NativeFeatureUnavailable from "@/app/components/NativeFeatureUnavailable";
+import DetailDock from "@/app/components/DetailDock";
 import { isNativeApp } from "@/lib/native-perf";
 
 type LmsI18n = { en: string; mn: string; de?: string };
@@ -22,6 +23,8 @@ type Lesson = {
 
 import { CldVideoPlayer } from "next-cloudinary";
 import "next-cloudinary/dist/cld-video-player.css";
+import YouTubePlayer from "@/app/components/YouTubePlayer";
+import { extractYouTubeId } from "@/lib/youtube";
 
 export default function LessonPlayerClient() {
   const locale = useLocale();
@@ -144,11 +147,15 @@ export default function LessonPlayerClient() {
   }
 
   const src = lesson.videoAssetId || "";
-  const isUrl = src.startsWith("http://") || src.startsWith("https://");
-  const isCloudinary = !isUrl && src.length > 0;
+  const youtubeId =
+    lesson.videoProvider === "youtube" || /youtube|youtu\.be/i.test(src)
+      ? extractYouTubeId(src)
+      : null;
+  const isUrl = !youtubeId && (src.startsWith("http://") || src.startsWith("https://"));
+  const isCloudinary = !youtubeId && !isUrl && src.length > 0;
 
   return (
-    <div className="page">
+    <div className="page page--dock">
       <div className="page-inner space-y-4">
         <div className="pt-2">
           <Link href={`/lessons/${slug}`} className="t-caption font-bold" style={{ color: "var(--blue)" }}>
@@ -163,7 +170,9 @@ export default function LessonPlayerClient() {
         </div>
 
         <div className="card overflow-hidden">
-          {isCloudinary ? (
+          {youtubeId ? (
+            <YouTubePlayer videoId={youtubeId} title={title || "Хичээл"} />
+          ) : isCloudinary ? (
             <div className="aspect-video w-full">
               <CldVideoPlayer
                 width="1920"
@@ -200,17 +209,34 @@ export default function LessonPlayerClient() {
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <button onClick={() => void saveProgress(false)} className="btn btn-secondary btn-full" disabled={saving}>
-            {saving ? (locale === "mn" ? "Хадгалж байна…" : "Saving…") : (locale === "mn" ? "Явц хадгалах" : "Save")}
-          </button>
-          <button onClick={() => void saveProgress(true)} className="btn btn-primary btn-full" disabled={saving}>
-            {locale === "mn" ? "Дуусгасан" : "Mark done"} <ChevronRight size={16} />
-          </button>
-        </div>
-
         {saveError && <p className="t-footnote" style={{ color: "var(--red)" }}>{saveError}</p>}
       </div>
+
+      <DetailDock>
+        <button
+          type="button"
+          onClick={() => void saveProgress(false)}
+          disabled={saving}
+          className="detail-dock__btn detail-dock__btn--secondary press"
+        >
+          {saving
+            ? locale === "mn"
+              ? "Хадгалж байна…"
+              : "Saving…"
+            : locale === "mn"
+              ? "Явц хадгалах"
+              : "Save"}
+        </button>
+        <button
+          type="button"
+          onClick={() => void saveProgress(true)}
+          disabled={saving}
+          className="detail-dock__btn detail-dock__btn--primary press"
+        >
+          <span>{locale === "mn" ? "Дуусгасан" : "Mark done"}</span>
+          <ChevronRight size={16} strokeWidth={1.85} />
+        </button>
+      </DetailDock>
     </div>
   );
 }

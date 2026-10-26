@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import {
-  Calendar, MapPin, ArrowLeft, Share2,
+  Calendar, MapPin, Share2,
   Clock, Building2, CheckCircle2, Users, ChevronRight,
   CalendarPlus, ScanLine, Info,
 } from "lucide-react";
@@ -15,7 +15,8 @@ import { optimizeCloudinaryUrl } from "@/lib/cloudinary";
 import { Link } from "@/navigation";
 import { QRCodeSVG } from "qrcode.react";
 import { IOSAlert } from "@/app/components/iOSAlert";
-import SourceAttribution from "@/app/components/SourceAttribution";
+import RichHtmlContent from "@/app/components/RichHtmlContent";
+import DetailDock from "@/app/components/DetailDock";
 import { nativeShare } from "@/lib/native-share";
 import { buildEventIcs, downloadIcs } from "@/lib/event-ics";
 import { scheduleEventDayBeforeReminder } from "@/lib/event-reminder";
@@ -249,153 +250,56 @@ export default function EventDetailClient({
   ];
 
   return (
-    <div
-      className="min-h-dvh relative"
-      style={{ background: "var(--bg)", paddingBottom: 160 }}
-    >
-      {/* ── Top Nav (Back & Share) ── */}
-      <div
-        className="absolute top-0 left-0 right-0 px-4 flex justify-between items-center z-20"
-        style={{ paddingTop: "calc(env(safe-area-inset-top, 12px) + 12px)" }}
-      >
-        <button
-          onClick={() => router.back()}
-          className="press w-10 h-10 rounded-full flex items-center justify-center"
-          style={{
-            background: "rgba(255,255,255,0.2)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
-            border: "0.5px solid rgba(255,255,255,0.3)"
-          }}
-        >
-          <ArrowLeft size={20} color="white" />
-        </button>
-        <button
-          type="button"
-          onClick={() => void handleShare()}
-          className="press w-10 h-10 rounded-full flex items-center justify-center"
-          aria-label={locale === "mn" ? "Хуваалцах" : "Share"}
-          style={{
-            background: "rgba(255,255,255,0.2)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
-            border: "0.5px solid rgba(255,255,255,0.3)"
-          }}
-        >
-          <Share2 size={18} color="white" />
-        </button>
-      </div>
-
-      {/* ── Hero Image Card ── */}
-      <div className="px-4" style={{ paddingTop: "calc(env(safe-area-inset-top, 12px) + 64px)" }}>
-        <motion.div
-          layoutId={`event-hero-${event._id}`}
-          className="relative w-full overflow-hidden"
-          transition={springNative}
-          style={{
-            height: "45vh",
-            minHeight: 340,
-            maxHeight: 460,
-            borderRadius: "var(--r-3xl)",
-            boxShadow: "var(--s-card)"
-          }}
-        >
-          {event.image ? (
-            <Image
-              src={optimizeCloudinaryUrl(event.image)}
-              alt={title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 800px"
-              priority
-              placeholder="blur"
-              blurDataURL={BLUR_DATA_URL}
-            />
-          ) : (
-            <div
-              className="w-full h-full"
-              style={{ background: `linear-gradient(135deg, ${cat.color}33, ${cat.color}66)` }}
-            />
-          )}
-          
-          {/* Gradient overlay for text readability */}
+    <div className="app-detail app-detail--event">
+      <div className="app-detail__hero app-detail__hero--event">
+        {event.image ? (
+          <Image
+            src={optimizeCloudinaryUrl(event.image)}
+            alt={title}
+            fill
+            className="app-detail__hero-img object-cover"
+            sizes="100vw"
+            priority
+            placeholder="blur"
+            blurDataURL={BLUR_DATA_URL}
+          />
+        ) : (
           <div
             className="absolute inset-0"
-            style={{
-              background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.1) 100%)",
-            }}
+            style={{ background: `linear-gradient(145deg, ${cat.color}, color-mix(in srgb, ${cat.color} 55%, #1a1a2e))` }}
           />
+        )}
+        <div className="app-detail__hero-fade" aria-hidden />
 
-          {/* Date badge (Floating top right inside card) */}
-          <div
-            className="absolute flex flex-col items-center justify-center"
-            style={{
-              top: 16,
-              right: 16,
-              background: "rgba(255,255,255,0.2)",
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
-              border: "0.5px solid rgba(255,255,255,0.3)",
-              borderRadius: 16,
-              padding: "8px 14px",
-              minWidth: 52,
-              zIndex: 30
-            }}
-          >
-            <span className="text-[22px] font-black text-white leading-none">{day}</span>
-            <span className="text-[9px] font-bold text-white/75 uppercase tracking-widest mt-0.5">{month}</span>
-          </div>
-
-          {/* Title & Badges inside Hero */}
-          <div className="absolute bottom-6 left-5 right-5 z-20">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              <div className="flex flex-wrap items-center gap-2 mb-3.5">
-                <span
-                  className="px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-white shadow-sm"
-                  style={{ background: cat.color }}
-                >
-                  {event.category}
-                </span>
-                <span
-                  className="px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-white shadow-sm"
-                  style={{ background: "rgba(255,255,255,0.25)", backdropFilter: "blur(12px)" }}
-                >
-                  {day} {month}
-                </span>
-                {event.featured && (
-                  <span
-                    className="px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-white shadow-sm"
-                    style={{ background: "rgba(255,214,10,0.3)", backdropFilter: "blur(12px)", color: "#FFD60A" }}
-                  >
-                    ⭐ Онцлох
-                  </span>
-                )}
-              </div>
-              <h1 className="text-[26px] font-bold text-white leading-tight drop-shadow-md">
-                {title}
-              </h1>
-            </motion.div>
-          </div>
-        </motion.div>
+        <div className="app-detail__date-float" aria-hidden>
+          <span className="app-detail__date-day">{day}</span>
+          <span className="app-detail__date-month">{month}</span>
+        </div>
       </div>
 
-      {/* ── Content ── */}
-      <div className="relative z-30 px-4 pt-6 pb-8 space-y-5">
+      <div className="app-detail__sheet">
+        <div className="app-detail__handle" aria-hidden />
+
+        <div className="app-detail__meta">
+          <span className="app-detail__pill" style={{ color: cat.color, background: cat.bg }}>
+            {event.category}
+          </span>
+          {event.featured ? (
+            <span className="app-detail__pill app-detail__pill--accent">Онцлох</span>
+          ) : null}
+          <span className="app-detail__meta-item">
+            {day} {month}
+          </span>
+        </div>
+
+        <h1 className="app-detail__title">{title}</h1>
+
         {/* Meta info — iOS grouped rows */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="overflow-hidden"
-          style={{
-            borderRadius: "var(--r-2xl)",
-            background: "var(--card)",
-            boxShadow: "var(--s-card)",
-          }}
+          initial={{ y: 12 }}
+          animate={{ y: 0 }}
+          transition={{ ...springNative, delay: 0.04 }}
+          className="app-detail__card"
         >
           {META_ROWS.map(({ icon: Icon, label, value }, idx) => (
             <div key={label}>
@@ -424,15 +328,10 @@ export default function EventDetailClient({
 
         {/* Attendees */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="flex items-center justify-between px-4 py-4 overflow-hidden"
-          style={{
-            borderRadius: "var(--r-2xl)",
-            background: "var(--card)",
-            boxShadow: "var(--s-card)",
-          }}
+          initial={{ y: 12 }}
+          animate={{ y: 0 }}
+          transition={{ ...springNative, delay: 0.06 }}
+          className="app-detail__card flex items-center justify-between px-4 py-4"
         >
           <div className="flex items-center gap-4">
             <div
@@ -467,15 +366,10 @@ export default function EventDetailClient({
 
         {/* Description */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
-          className="overflow-hidden"
-          style={{
-            borderRadius: "var(--r-2xl)",
-            background: "var(--card)",
-            boxShadow: "var(--s-card)",
-          }}
+          initial={{ y: 12 }}
+          animate={{ y: 0 }}
+          transition={{ ...springNative, delay: 0.08 }}
+          className="app-detail__card overflow-hidden"
         >
           <div className="px-5 pt-5 pb-2 flex items-center gap-3">
             <div
@@ -489,29 +383,23 @@ export default function EventDetailClient({
             </span>
           </div>
           <div className="px-5 pb-6 pt-2 space-y-4">
-            {event.source === "volunteer.org.mn" || /<\/?[a-z][\s\S]*>/i.test(desc) ? (
-              <div
-                className="prose prose-sm max-w-none text-[15px] leading-relaxed"
-                style={{ color: "var(--label2)" }}
-                dangerouslySetInnerHTML={{ __html: desc }}
-              />
+            {/<\/?[a-z][\s\S]*>/i.test(desc) ? (
+              <RichHtmlContent html={desc} />
             ) : (
               desc.split("\n").filter((p) => p.trim()).map((para, i) => (
-                <p key={i} className="text-[15px] leading-relaxed" style={{ color: "var(--label2)" }}>
+                <p key={i} className="app-article__p">
                   {para}
                 </p>
               ))
             )}
-            <SourceAttribution source={event.source} href={event.externalUrl} />
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="app-detail__actions">
           <button
             type="button"
             onClick={handleAddToCalendar}
-            className="press flex items-center justify-center gap-2 min-h-[44px] rounded-[14px] text-[14px] font-semibold"
-            style={{ background: "var(--card)", color: "var(--label)", border: "0.5px solid var(--sep)" }}
+            className="app-detail__action press"
           >
             <CalendarPlus size={18} strokeWidth={1.75} />
             {locale === "mn" ? "Календарьт нэмэх" : "Add to calendar"}
@@ -519,8 +407,7 @@ export default function EventDetailClient({
           <button
             type="button"
             onClick={() => void handleShare()}
-            className="press flex items-center justify-center gap-2 min-h-[44px] rounded-[14px] text-[14px] font-semibold"
-            style={{ background: "var(--card)", color: "var(--label)", border: "0.5px solid var(--sep)" }}
+            className="app-detail__action press"
           >
             <Share2 size={18} strokeWidth={1.75} />
             {locale === "mn" ? "Хуваалцах" : "Share"}
@@ -530,14 +417,10 @@ export default function EventDetailClient({
         {/* Ticket QR + attendance scan */}
         {hasJoined && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="overflow-hidden flex flex-col items-center justify-center py-8 px-4"
-            style={{
-              borderRadius: "var(--r-2xl)",
-              background: "var(--card)",
-              boxShadow: "var(--s-card)",
-            }}
+            initial={{ y: 10 }}
+            animate={{ y: 0 }}
+            transition={springNative}
+            className="app-detail__card flex flex-col items-center justify-center py-8 px-4"
           >
             <p className="text-[14px] font-bold mb-4" style={{ color: "var(--label)" }}>
               Таны тасалбар
@@ -586,7 +469,6 @@ export default function EventDetailClient({
             )}
           </motion.div>
         )}
-
       </div>
 
       {showConfetti && (
@@ -616,34 +498,30 @@ export default function EventDetailClient({
         </div>
       )}
 
-      <div className="ios-sticky-cta">
+      <DetailDock>
         {hasJoined ? (
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="w-full min-h-[50px] rounded-[14px] flex items-center justify-center gap-2 text-[17px] font-semibold"
-            style={{ background: "var(--card)", color: "var(--emerald)", border: "0.5px solid var(--sep)" }}
-          >
-            <CheckCircle2 size={22} strokeWidth={1.75} />
+          <button type="button" className="detail-dock__btn detail-dock__btn--success" disabled>
+            <CheckCircle2 size={20} strokeWidth={1.75} />
             Амжилттай бүртгүүлсэн
-          </motion.div>
+          </button>
         ) : (
           <button
+            type="button"
             onClick={handleJoin}
             disabled={joining || status === "loading"}
-            className="btn btn-primary press disabled:opacity-60"
+            className="detail-dock__btn detail-dock__btn--primary press"
           >
             {joining ? (
               <span className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin inline-block" />
             ) : (
               <>
                 {user ? "Нэгдэх" : "Нэвтэрч бүртгүүлэх"}
-                <ChevronRight size={18} strokeWidth={1.75} className="inline ml-1" />
+                <ChevronRight size={18} strokeWidth={1.75} />
               </>
             )}
           </button>
         )}
-      </div>
+      </DetailDock>
 
       <IOSAlert
         isOpen={!!alert}

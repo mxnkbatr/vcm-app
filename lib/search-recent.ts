@@ -15,7 +15,10 @@ export function loadRecentSearches(): string[] {
 export function saveRecentSearch(q: string): string[] {
   const term = q.trim();
   if (!term) return loadRecentSearches();
-  const next = [term, ...loadRecentSearches().filter((s) => s.toLowerCase() !== term.toLowerCase())].slice(0, MAX);
+  const next = [term, ...loadRecentSearches().filter((s) => s.toLowerCase() !== term.toLowerCase())].slice(
+    0,
+    MAX
+  );
   try {
     localStorage.setItem(KEY, JSON.stringify(next));
   } catch {
@@ -44,9 +47,10 @@ export function clearRecentSearches() {
 
 export const POPULAR_CHIPS = [
   "Эвент",
+  "Мэдээ",
   "EDU",
+  "АНД",
   "V-Club",
   "Сайн дурын",
   "Сургалт",
-  "Дэлгүүр",
 ] as const;

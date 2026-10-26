@@ -100,15 +100,7 @@ export default function ShopProductCard({
   if (!animated) return card;
 
   return (
-    <motion.div
-      layout
-      variants={staggerItem}
-      initial="initial"
-      animate="animate"
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ delay: index * 0.04 }}
-      whileTap={{ scale: 0.98 }}
-    >
+    <motion.div variants={staggerItem} initial={false} animate="animate">
       {card}
     </motion.div>
   );

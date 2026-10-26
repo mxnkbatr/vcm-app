@@ -53,9 +53,10 @@ export async function createShopPurchaseInvoice(opts: {
   let promoId: string | undefined;
   let appliedCode: string | undefined;
 
-  if (opts.promoCode) {
+  const rawPromo = String(opts.promoCode || "").trim();
+  if (rawPromo) {
     const promo = await PromoCode.findOne({
-      code: String(opts.promoCode).trim().toUpperCase(),
+      code: rawPromo.toUpperCase(),
     }).lean();
     if (!promo) throw new Error("PROMO_NOT_FOUND");
     const result = validatePromoForShop(

@@ -2,32 +2,60 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { HeartHandshake, Sparkles, Users } from "lucide-react";
+import {
+  BookOpen,
+  CalendarDays,
+  HeartHandshake,
+  ShoppingBag,
+  Users,
+} from "lucide-react";
 import { markOnboardingDone } from "@/lib/onboarding";
 import { hapticImpact } from "@/lib/haptics";
 import { ImpactStyle } from "@capacitor/haptics";
 import { springNative } from "@/lib/motion";
+import { BRAND } from "@/lib/branding";
+import BrandLogo from "./BrandLogo";
 
-const SLIDES = [
+type Slide = {
+  Icon: typeof HeartHandshake;
+  title: string;
+  body: string;
+  color: string;
+  tint: string;
+  Extra?: typeof BookOpen;
+};
+
+const SLIDES: Slide[] = [
   {
     Icon: HeartHandshake,
     title: "Сайн дурын үйлс",
-    body: "Монголын сайн дурынхны төвтэй хамт нийгэмдээ эерэг өөрчлөлт бүтээ.",
+    body: "VCM-тэй хамт нийгэмдээ эерэг өөрчлөлт бүтээ — жижиг үйлдэл, том үр дүн.",
     color: "#1E5BD8",
+    tint: "#E8EEFB",
   },
   {
     Icon: Users,
-    title: "Хөтөлбөр & эвент",
-    body: "Хөтөлбөр, арга хэмжээнд нэгдэж, шинэ хүмүүстэй холбогд.",
-    color: "#34C759",
+    title: "Хөтөлбөр",
+    body: "EDU, АНД, V-Club болон бусад хөтөлбөрт нэгдэж, өөрийн замыг сонго.",
+    color: "#1E5BD8",
+    tint: "#E8EEFB",
   },
   {
-    Icon: Sparkles,
-    title: "Таны аялал эхэлнэ",
-    body: "Профайл үүсгээд эхний алхмаа хий — жижиг үйлдэл, том өөрчлөлт.",
-    color: "#FF9F0A",
+    Icon: CalendarDays,
+    title: "Эвент & сургалт",
+    body: "Арга хэмжээнд бүртгүүлж, хичээлүүдээр ур чадвараа өсгө.",
+    color: "#34C759",
+    tint: "#E8F8EC",
+    Extra: BookOpen,
   },
-] as const;
+  {
+    Icon: ShoppingBag,
+    title: "Эхлэхэд бэлэн",
+    body: "Дэлгүүр, мэдээ, өргөдөл — бүгд нэг апп дотор. Аяллаа эхлүүлцгээе.",
+    color: "#FF9F0A",
+    tint: "#FFF4E5",
+  },
+];
 
 export default function Onboarding({ onDone }: { onDone: () => void }) {
   const [index, setIndex] = useState(0);
@@ -46,38 +74,76 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
     else setIndex((i) => i + 1);
   };
 
+  const back = () => {
+    if (index === 0) return;
+    void hapticImpact(ImpactStyle.Light);
+    setIndex((i) => i - 1);
+  };
+
   return (
     <div className="onboarding" role="dialog" aria-label="Танилцуулга">
-      <div className="onboarding__skip">
-        {!last && (
-          <button type="button" className="press" onClick={() => void finish()}>
+      <header className="onboarding__top">
+        <div className="onboarding__brand">
+          <BrandLogo size={28} />
+          <span>{BRAND.shortName}</span>
+        </div>
+        {!last ? (
+          <button type="button" className="onboarding__skip-btn press" onClick={() => void finish()}>
             Алгасах
           </button>
+        ) : (
+          <span className="onboarding__skip-spacer" />
         )}
+      </header>
+
+      <div className="onboarding__progress" aria-hidden>
+        <div
+          className="onboarding__progress-fill"
+          style={{ width: `${((index + 1) / SLIDES.length) * 100}%` }}
+        />
       </div>
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={index}
           className="onboarding__slide"
-          initial={{ opacity: 0, x: 40 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -40 }}
+          initial={{ x: 48 }}
+          animate={{ x: 0 }}
+          exit={{ x: -48 }}
           transition={springNative}
           drag="x"
           dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.2}
+          dragElastic={0.18}
           onDragEnd={(_, info) => {
-            if (info.offset.x < -80) next();
-            else if (info.offset.x > 80 && index > 0) setIndex((i) => i - 1);
+            if (info.offset.x < -72) next();
+            else if (info.offset.x > 72) back();
           }}
         >
           <div
             className="onboarding__art"
-            style={{ background: `color-mix(in srgb, ${slide.color} 18%, #F2F2F7)` }}
+            style={{
+              background: `linear-gradient(160deg, ${slide.tint} 0%, color-mix(in srgb, ${slide.color} 12%, #F2F2F7) 100%)`,
+            }}
           >
-            <slide.Icon size={72} strokeWidth={1.5} style={{ color: slide.color }} />
+            <div
+              className="onboarding__art-ring"
+              style={{ borderColor: `color-mix(in srgb, ${slide.color} 28%, transparent)` }}
+            >
+              <slide.Icon size={64} strokeWidth={1.4} style={{ color: slide.color }} />
+            </div>
+            {slide.Extra ? (
+              <span
+                className="onboarding__art-badge"
+                style={{ background: slide.color }}
+              >
+                <slide.Extra size={18} strokeWidth={2} color="#fff" />
+              </span>
+            ) : null}
           </div>
+
+          <p className="onboarding__step">
+            {index + 1} / {SLIDES.length}
+          </p>
           <h2 className="onboarding__title">{slide.title}</h2>
           <p className="onboarding__body">{slide.body}</p>
         </motion.div>
@@ -86,10 +152,20 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
       <div className="onboarding__footer">
         <div className="onboarding__dots" aria-hidden>
           {SLIDES.map((_, i) => (
-            <span key={i} className={`onboarding__dot ${i === index ? "on" : ""}`} />
+            <button
+              key={i}
+              type="button"
+              className={`onboarding__dot ${i === index ? "on" : ""}`}
+              aria-label={`Слайд ${i + 1}`}
+              onClick={() => setIndex(i)}
+            />
           ))}
         </div>
-        <button type="button" className="btn btn-primary btn-full" onClick={next}>
+        <button
+          type="button"
+          className="btn btn-primary btn-full onboarding__cta press"
+          onClick={next}
+        >
           {last ? "Эхлэх" : "Үргэлжлүүлэх"}
         </button>
       </div>

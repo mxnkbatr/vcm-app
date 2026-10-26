@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Link, useRouter } from "@/navigation";
+import { useRouter } from "@/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -142,24 +142,18 @@ export default function SignUpPage() {
 
   if (success) {
     return (
-      <div className="min-h-dvh flex items-center justify-center px-6" style={{ background: "#fff" }}>
+      <div className="auth-page">
+        <div className="auth-page__bg" aria-hidden />
         <motion.div
-          initial={{ scale: 0.92, opacity: 0 }}
+          initial={{ scale: 0.96, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="text-center max-w-sm w-full"
+          className="auth-card auth-card--success"
         >
-          <div
-            className="w-20 h-20 rounded-full mx-auto flex items-center justify-center mb-4"
-            style={{ background: "var(--emerald-dim)" }}
-          >
-            <CheckCircle2 size={40} style={{ color: "var(--emerald)" }} />
+          <div className="auth-success-icon">
+            <CheckCircle2 size={36} />
           </div>
-          <h2 className="text-[22px] font-bold" style={{ color: "var(--label)" }}>
-            Бүртгэл амжилттай!
-          </h2>
-          <p className="text-[15px] mt-2" style={{ color: "var(--label2)" }}>
-            Нэвтрэх хуудас руу шилжиж байна...
-          </p>
+          <h2 className="auth-card__title">Бүртгэл амжилттай!</h2>
+          <p className="auth-card__lead">Нэвтрэх хуудас руу шилжиж байна...</p>
         </motion.div>
       </div>
     );
@@ -169,21 +163,12 @@ export default function SignUpPage() {
 
   return (
     <AuthScreen
-      title="Тавтай морил"
-      subtitle="Шинэ бүртгэл үүсгэх"
-      footer={
-        <p className="text-[14px]" style={{ color: "var(--label2)" }}>
-          Аль хэдийн бүртгэлтэй юу?{" "}
-          <Link href="/sign-in" className="font-bold press" style={{ color: "var(--blue)" }}>
-            Нэвтрэх
-          </Link>
-        </p>
-      }
-      stickyAction={
+      mode="sign-up"
+      action={
         <button
           type="button"
           disabled={busy}
-          className="btn btn-primary btn-full"
+          className="btn btn-primary auth-cta"
           onClick={() => (step < 2 ? goNext() : void handleSubmit())}
         >
           {busy ? (
@@ -204,11 +189,11 @@ export default function SignUpPage() {
       <AnimatePresence mode="wait">
         <motion.div
           key={step}
-          initial={{ opacity: 0, x: 28 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -28 }}
+          initial={{ x: 18 }}
+          animate={{ x: 0 }}
+          exit={{ x: -18 }}
           transition={springNative}
-          className="space-y-3"
+          className="auth-form"
         >
           {step === 0 && (
             <>
@@ -219,6 +204,7 @@ export default function SignUpPage() {
                 autoComplete="name"
                 disabled={busy}
                 error={fieldErrors.fullName}
+                placeholder="Жишээ: Болд"
               />
               <FloatingField
                 label="Утас"
@@ -229,6 +215,7 @@ export default function SignUpPage() {
                 autoComplete="tel"
                 disabled={busy}
                 error={fieldErrors.phone}
+                placeholder="99112233"
               />
               <FloatingField
                 label="Имэйл"
@@ -239,6 +226,7 @@ export default function SignUpPage() {
                 autoComplete="email"
                 disabled={busy}
                 error={fieldErrors.email}
+                placeholder="name@email.com"
               />
             </>
           )}
@@ -252,6 +240,7 @@ export default function SignUpPage() {
                 disabled={busy}
                 passwordToggle
                 error={fieldErrors.password}
+                placeholder="Хамгийн багадаа 8 тэмдэгт"
               />
               <FloatingField
                 label="Нууц үг давтах"
@@ -261,15 +250,16 @@ export default function SignUpPage() {
                 disabled={busy}
                 passwordToggle
                 error={fieldErrors.confirmPassword}
+                placeholder="Нууц үгээ дахин оруулна уу"
               />
-              <p className="text-[12px]" style={{ color: "var(--label3)" }}>
-                8+ тэмдэгт, том/жижиг үсэг, тоо агуулсан байх.
-              </p>
+              <p className="auth-hint">8+ тэмдэгт, том/жижиг үсэг, тоо агуулсан байх.</p>
             </>
           )}
           {step === 2 && (
             <>
-              <p className="ios-subhead mb-1">Сонирхлоо сонгоно уу</p>
+              <p className="auth-hint" style={{ marginBottom: 4 }}>
+                Сонирхлоо сонгоно уу
+              </p>
               <div className="auth-chips">
                 {INTERESTS.map((label) => {
                   const on = interests.includes(label);
@@ -293,7 +283,7 @@ export default function SignUpPage() {
       {step > 0 && (
         <button
           type="button"
-          className="auth-back-step press mt-4"
+          className="auth-back-step press"
           onClick={() => {
             setError("");
             setStep((s) => s - 1);

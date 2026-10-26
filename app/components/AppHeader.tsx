@@ -39,15 +39,17 @@ export default function AppHeader({
 
   const actions = (
     <div className="app-header__actions">
-      <button type="button" className="app-header__btn app-header__glass-btn press" aria-label="Хайх" onClick={onSearch}>
-        <Search size={18} strokeWidth={1.75} />
-      </button>
-      <button type="button" className="app-header__btn app-header__glass-btn press" aria-label="Мэдэгдэл" onClick={onBell}>
-        <Bell size={18} strokeWidth={1.75} />
-        {unreadCount > 0 && (
-          <span className="ios-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
-        )}
-      </button>
+      <div className="app-header__cluster">
+        <button type="button" className="app-header__btn press" aria-label="Хайх" onClick={onSearch}>
+          <Search size={17} strokeWidth={1.85} />
+        </button>
+        <button type="button" className="app-header__btn press" aria-label="Мэдэгдэл" onClick={onBell}>
+          <Bell size={17} strokeWidth={1.85} />
+          {unreadCount > 0 && (
+            <span className="ios-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
+          )}
+        </button>
+      </div>
       <Link href="/profile" prefetch className="app-header__btn app-header__glass-btn press" aria-label="Профайл">
         <span className="ios-avatar-btn">{avatarInitial}</span>
       </Link>
@@ -93,30 +95,35 @@ export default function AppHeader({
           <ArrowLeft size={20} strokeWidth={1.75} />
         </button>
         <AnimatePresence>
-          {compact && (
+          {compact && title ? (
             <motion.span
               className="app-header__inline-title"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ y: 6 }}
+              animate={{ y: 0 }}
+              exit={{ y: 4 }}
               transition={{ duration: 0.16 }}
             >
               {title}
             </motion.span>
+          ) : (
+            <span className="app-header__inline-title app-header__inline-title--spacer" aria-hidden />
           )}
         </AnimatePresence>
         <div className="app-header__actions">
-          <button type="button" className="app-header__round press" aria-label="Хуваалцах" onClick={onShare}>
-            <Share2 size={18} strokeWidth={1.75} />
-          </button>
-          <button
-            type="button"
-            className={`app-header__round press ${bookmarked ? "is-on" : ""}`}
-            aria-label="Хадгалах"
-            onClick={onBookmark}
-          >
-            <Bookmark size={18} strokeWidth={1.75} fill={bookmarked ? "currentColor" : "none"} />
-          </button>
+          <div className="app-header__cluster">
+            <button type="button" className="app-header__btn press" aria-label="Хуваалцах" onClick={onShare}>
+              <Share2 size={17} strokeWidth={1.85} />
+            </button>
+            <button
+              type="button"
+              className={`app-header__btn press ${bookmarked ? "is-on" : ""}`}
+              aria-label="Хадгалах"
+              onClick={onBookmark}
+              style={bookmarked ? { color: "var(--blue)" } : undefined}
+            >
+              <Bookmark size={17} strokeWidth={1.85} fill={bookmarked ? "currentColor" : "none"} />
+            </button>
+          </div>
         </div>
       </div>
       <div className={`app-header__sep ${compact ? "is-on" : ""}`} />

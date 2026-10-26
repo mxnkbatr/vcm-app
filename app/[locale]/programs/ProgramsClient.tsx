@@ -1,22 +1,20 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import { Link } from "@/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import {
   Clock, Globe, Star, Users, BookOpen, Heart, Zap,
-  GraduationCap, CalendarDays, MapPin, Sparkles, ChevronLeft,
+  GraduationCap, CalendarDays, MapPin, Sparkles, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { useSession } from "@/lib/hooks/useSession";
 import PremiumPageShell from "@/app/components/PremiumPageShell";
 import ProgramGlyph from "@/app/components/ui/ProgramGlyph";
 import IOSLargeTitle from "@/app/components/ui/IOSLargeTitle";
-import IOSSegmented from "@/app/components/ui/IOSSegmented";
-import IOS26Card from "@/app/components/ui/IOS26Card";
 import { programColorsByCode, PROGRAM_COLORS } from "@/lib/color-system";
 import { springNative } from "@/lib/motion";
+import { hapticSelection } from "@/lib/haptics";
 
 const FALLBACK_PROGRAMS = [
   {
@@ -29,7 +27,6 @@ const FALLBACK_PROGRAMS = [
     nameKey: "prog_edu",
     descKey: "prog_edu_desc",
     href: "/programs/edu",
-    image: "",
     duration: "3–12 сар",
     location: "Монгол улс",
     slots: 8,
@@ -53,7 +50,6 @@ const FALLBACK_PROGRAMS = [
     nameKey: "prog_and",
     descKey: "prog_and_desc",
     href: "/programs/and",
-    image: "",
     duration: "Уян хатан",
     location: "Улаанбаатар",
     slots: 12,
@@ -77,7 +73,6 @@ const FALLBACK_PROGRAMS = [
     nameKey: "prog_vclub",
     descKey: "prog_vclub_desc",
     href: "/programs/vclub",
-    image: "",
     duration: "Арга хэмжээгээр",
     location: "Монгол улс",
     slots: 20,
@@ -105,7 +100,6 @@ function mapApiToProg(raw: unknown): Prog {
     name?: { mn?: string };
     description?: { mn?: string };
     href?: string;
-    image?: string;
     duration?: string;
     location?: string;
     slots?: number;
@@ -125,7 +119,6 @@ function mapApiToProg(raw: unknown): Prog {
     nameKey: p.name?.mn || p.code || "",
     descKey: p.description?.mn || "",
     href: p.href || `/programs/${p.slug}`,
-    image: p.image || "",
     duration: p.duration || "",
     location: p.location || "",
     slots: p.slots || 0,
@@ -147,29 +140,27 @@ function programDesc(p: Prog, nt: (k: string) => string) {
 
 function ProgCard({ p, onTap, nt }: { p: Prog; onTap: () => void; nt: (k: string) => string }) {
   return (
-    <IOS26Card onClick={onTap} className="prog-card-wow">
-      <div
-        className="ios26-card__media"
+    <button type="button" onClick={onTap} className="prog-glass-card press glass-press">
+      <span
+        className="prog-glass-card__icon"
         style={{ background: `linear-gradient(145deg, ${p.gradFrom}, ${p.gradTo})` }}
       >
-        {p.image ? (
-          <Image src={p.image} alt="" fill className="object-cover" sizes="(max-width:520px) 100vw, 480px" />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-white/90">
-            <ProgramGlyph id={p.id} size={48} />
-          </div>
-        )}
-        <div className="ios26-card__shade" />
-      </div>
-      <div className="ios26-card__body prog-card-wow__glass">
-        <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--label2)" }}>{p.id}</p>
-        <h3 className="ios26-card__title mt-0.5">{programTitle(p, nt)}</h3>
-        <div className="ios26-card__meta">
-          <span className="inline-flex items-center gap-1"><Clock size={14} strokeWidth={1.75} />{p.duration || "—"}</span>
-          <span className="inline-flex items-center gap-1"><MapPin size={14} strokeWidth={1.75} />{p.location || "—"}</span>
-        </div>
-      </div>
-    </IOS26Card>
+        <ProgramGlyph id={p.id} size={22} />
+      </span>
+      <span className="prog-glass-card__body">
+        <span className="prog-glass-card__code">{p.id}</span>
+        <span className="prog-glass-card__title">{programTitle(p, nt)}</span>
+        <span className="prog-glass-card__meta">
+          {p.duration ? (
+            <span><Clock size={12} strokeWidth={2} />{p.duration}</span>
+          ) : null}
+          {p.location ? (
+            <span><MapPin size={12} strokeWidth={2} />{p.location}</span>
+          ) : null}
+        </span>
+      </span>
+      <ChevronRight size={16} strokeWidth={1.75} className="prog-glass-card__chev" />
+    </button>
   );
 }
 
@@ -177,53 +168,67 @@ function ProgDetail({ p, onBack, nt, signed }: { p: Prog; onBack: () => void; nt
   return (
     <motion.div
       key="detail"
-      initial={{ opacity: 0, x: 40 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 40 }}
+      initial={{ x: 28 }}
+      animate={{ x: 0 }}
+      exit={{ x: 28 }}
       transition={springNative}
-      className="space-y-4 pb-28"
+      className="prog-detail"
     >
-      <button type="button" onClick={onBack} className="inline-flex items-center gap-1 min-h-[44px] press" style={{ color: "var(--blue)" }}>
-        <ChevronLeft size={20} strokeWidth={1.75} />
-        <span className="ios-headline">Хөтөлбөрүүд</span>
+      <button type="button" onClick={onBack} className="prog-detail__back press">
+        <ChevronLeft size={20} strokeWidth={1.85} />
+        <span>Хөтөлбөрүүд</span>
       </button>
 
-      <div className="relative overflow-hidden rounded-[28px] h-52" style={{ background: `linear-gradient(145deg, ${p.gradFrom}, ${p.gradTo})` }}>
-        <div className="absolute inset-0 flex items-center justify-center text-white/90">
-          <ProgramGlyph id={p.id} size={56} />
+      <div
+        className="prog-detail__hero"
+        style={{ background: `linear-gradient(145deg, ${p.gradFrom}, ${p.gradTo})` }}
+      >
+        <div className="prog-detail__hero-glow" aria-hidden />
+        <div className="prog-detail__hero-icon">
+          <ProgramGlyph id={p.id} size={44} />
         </div>
-        <div className="absolute bottom-4 left-4 right-4 text-white">
-          <p className="text-[13px] font-semibold uppercase opacity-80">{p.id}</p>
-          <h2 className="text-[28px] font-bold leading-tight">{programTitle(p, nt)}</h2>
+        <p className="prog-detail__code">{p.id}</p>
+        <h2 className="prog-detail__title">{programTitle(p, nt)}</h2>
+        <div className="prog-detail__chips">
+          {p.duration ? <span className="prog-detail__chip"><Clock size={13} />{p.duration}</span> : null}
+          {p.location ? <span className="prog-detail__chip"><MapPin size={13} />{p.location}</span> : null}
         </div>
       </div>
 
-      <div className="ios-list">
-        <div className="px-4 py-3">
-          <p className="ios-headline mb-2">Хөтөлбөрийн тухай</p>
-          <p className="ios-body" style={{ color: "var(--label2)", fontSize: 15 }}>{programDesc(p, nt)}</p>
+      <div className="ios-list prog-detail__list">
+        <div className="prog-detail__block">
+          <p className="ios-headline">Хөтөлбөрийн тухай</p>
+          <p className="prog-detail__text">{programDesc(p, nt)}</p>
         </div>
-        <div className="px-4 py-3" style={{ borderTop: "0.5px solid var(--sep)" }}>
-          <p className="ios-headline mb-3">Юу хийх вэ?</p>
-          <div className="space-y-3">
-            {p.features.map((f, i) => (
-              <div key={i} className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-[8px] flex items-center justify-center flex-shrink-0" style={{ background: p.iconBg, color: p.iconColor }}>
-                  <f.I size={14} strokeWidth={1.75} />
+        {p.features.length > 0 && (
+          <div className="prog-detail__block prog-detail__block--sep">
+            <p className="ios-headline">Юу хийх вэ?</p>
+            <div className="prog-detail__features">
+              {p.features.map((f, i) => (
+                <div key={i} className="prog-detail__feature">
+                  <span className="prog-detail__feature-icon" style={{ background: p.iconBg, color: p.iconColor }}>
+                    <f.I size={14} strokeWidth={1.85} />
+                  </span>
+                  <span>{f.t}</span>
                 </div>
-                <span className="ios-body" style={{ fontSize: 15, color: "var(--label2)" }}>{f.t}</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-        <div className="px-4 py-3" style={{ borderTop: "0.5px solid var(--sep)" }}>
-          <p className="ios-headline mb-2">Яагаад нэгдэх вэ?</p>
-          <p className="ios-body" style={{ color: "var(--label2)", fontSize: 15 }}>{p.why}</p>
-        </div>
+        )}
+        {p.why ? (
+          <div className="prog-detail__block prog-detail__block--sep">
+            <p className="ios-headline">Яагаад нэгдэх вэ?</p>
+            <p className="prog-detail__text">{p.why}</p>
+          </div>
+        ) : null}
       </div>
 
-      <div className="ios-sticky-cta">
-        <Link href={signed ? `/programs/apply?p=${p.id}` : "/register"} prefetch={signed} className="btn btn-primary inline-flex items-center justify-center">
+      <div className="prog-detail__cta">
+        <Link
+          href={signed ? `/programs/apply?p=${p.id}` : "/sign-in"}
+          prefetch={signed}
+          className="btn btn-primary auth-cta"
+        >
           Нэгдэх
         </Link>
       </div>
@@ -252,30 +257,68 @@ export default function ProgramsClient({ initialPrograms }: { initialPrograms?: 
   }, [initialPrograms]);
 
   const list = filter === "all" ? programs : programs.filter((p) => p.id === filter);
-  const segOptions = [
+  const chipOptions = [
     { id: "all", label: "Бүгд" },
-    ...programs.map((p) => ({ id: p.id, label: p.id })),
+    ...programs.map((p) => {
+      const title = programTitle(p, nt);
+      // Keep chip short — prefer code for long volunteer org names
+      const label = title.length <= 14 ? title : p.id;
+      return { id: p.id, label };
+    }),
   ];
 
   return (
     <PremiumPageShell className="ios26-page">
       <AnimatePresence mode="wait">
         {!sel ? (
-          <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="home-sections">
-            <IOSLargeTitle title="Хөтөлбөрүүд">
-              <p className="ios-subhead mt-1">EDU · AND · V-Club — танд тохирохыг сонго</p>
+          <motion.div
+            key="list"
+            initial={false}
+            animate={{ opacity: 1 }}
+            className="home-sections"
+          >
+            <IOSLargeTitle title="Хөтөлбөр">
+              <p className="ios-subhead mt-1">Танд тохирох хөтөлбөрөө сонгоорой</p>
             </IOSLargeTitle>
-            <IOSSegmented options={segOptions} value={filter} onChange={setFilter} />
-            <div className="space-y-3">
+
+            <div className="ios-filter-chips" role="tablist" aria-label="Хөтөлбөрийн шүүлт">
+              {chipOptions.map((o) => {
+                const on = filter === o.id;
+                return (
+                  <button
+                    key={o.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={on}
+                    className={`ios-filter-chip press ${on ? "is-on" : ""}`}
+                    onClick={() => {
+                      void hapticSelection();
+                      setFilter(o.id);
+                    }}
+                  >
+                    {o.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="prog-glass-stack">
               {list.map((p) => (
                 <ProgCard key={p.id} p={p} onTap={() => setSel(p)} nt={nt} />
               ))}
+              {list.length === 0 && (
+                <div className="ios-empty">
+                  <p className="ios-empty__title">Хөтөлбөр олдсонгүй</p>
+                  <p className="ios-empty__desc">Өөр шүүлт сонгоод үзнэ үү.</p>
+                </div>
+              )}
             </div>
+
             {!signed && (
               <div className="ios26-cta-banner">
                 <p className="ios-headline">Нэгдэхэд бэлэн үү?</p>
                 <p className="ios-subhead mt-1 mb-3">Бүртгүүлж хөтөлбөрт өргөдлөө гаргаарай</p>
-                <Link href="/register" className="btn btn-primary inline-flex w-full items-center justify-center">
+                <Link href="/sign-up" className="btn btn-primary auth-cta inline-flex w-full items-center justify-center">
                   Эхлэх
                 </Link>
               </div>

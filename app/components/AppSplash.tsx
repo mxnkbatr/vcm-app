@@ -5,13 +5,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import BrandLogo from "./BrandLogo";
 import Onboarding from "./Onboarding";
 import { hasCompletedOnboarding } from "@/lib/onboarding";
+import { BRAND } from "@/lib/branding";
 import { springNative } from "@/lib/motion";
 
 type Phase = "boot" | "morph" | "onboarding" | "done";
 
 /**
- * #F2F2F7 splash → logo morphs into header (layoutId) → optional onboarding → home.
- * Never paints black.
+ * First launch → splash → onboarding (once, persisted).
+ * Later launches → splash (logo + Developed by) → home.
  */
 export default function AppSplash() {
   const [phase, setPhase] = useState<Phase>("boot");
@@ -21,21 +22,45 @@ export default function AppSplash() {
     if (ran.current) return;
     ran.current = true;
 
-    const t1 = window.setTimeout(() => setPhase("morph"), 280);
-    const t2 = window.setTimeout(() => {
-      void hasCompletedOnboarding().then((done) => {
-        if (done) {
-          setPhase("done");
-          window.dispatchEvent(new CustomEvent("vcm:app-ready"));
-        } else {
-          setPhase("onboarding");
-        }
-      });
-    }, 700);
+    let cancelled = false;
+    const timers: number[] = [];
+
+    const go = (next: Phase) => {
+      if (cancelled) return;
+      setPhase(next);
+      if (next === "done") {
+        window.dispatchEvent(new CustomEvent("vcm:app-ready"));
+      }
+    };
+
+    const run = async () => {
+      let done = false;
+      try {
+        done = await Promise.race([
+          hasCompletedOnboarding(),
+          // If Preferences is slow, treat as first launch (show onboarding)
+          new Promise<boolean>((resolve) => window.setTimeout(() => resolve(false), 900)),
+        ]);
+      } catch {
+        done = false;
+      }
+      if (cancelled) return;
+
+      if (!done) {
+        // Brief splash, then onboarding — never hard-kill this path
+        timers.push(window.setTimeout(() => go("onboarding"), 700));
+        return;
+      }
+
+      // Returning user: morph logo, then exit
+      timers.push(window.setTimeout(() => go("morph"), 320));
+      timers.push(window.setTimeout(() => go("done"), 980));
+    };
+    void run();
 
     return () => {
-      window.clearTimeout(t1);
-      window.clearTimeout(t2);
+      cancelled = true;
+      timers.forEach((t) => window.clearTimeout(t));
     };
   }, []);
 
@@ -58,20 +83,34 @@ export default function AppSplash() {
         {phase === "onboarding" ? (
           <Onboarding onDone={finishOnboarding} />
         ) : (
-          <motion.div
-            className="app-splash__morph-stage"
-            initial={false}
-            animate={
-              phase === "morph"
-                ? { scale: 0.42, y: -120, opacity: 0.95 }
-                : { scale: 1, y: 0, opacity: 1 }
-            }
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <motion.div layoutId="vcm-brand-logo" transition={springNative}>
-              <BrandLogo size={phase === "boot" ? 112 : 72} priority />
+          <>
+            <motion.div
+              className="app-splash__morph-stage"
+              initial={false}
+              animate={
+                phase === "morph"
+                  ? { scale: 0.42, y: -120, opacity: 0.95 }
+                  : { scale: 1, y: 0, opacity: 1 }
+              }
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <motion.div layoutId="vcm-brand-logo" transition={springNative}>
+                <BrandLogo size={phase === "boot" ? 112 : 88} priority />
+              </motion.div>
+              <motion.p
+                className="app-splash__brand-short"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: phase === "morph" ? 0 : 1, y: 0 }}
+                transition={{ delay: 0.1, duration: 0.3 }}
+              >
+                {BRAND.shortName}
+              </motion.p>
             </motion.div>
-          </motion.div>
+
+            <p className="app-splash__credit">
+              Developed by {BRAND.developedBy}
+            </p>
+          </>
         )}
       </motion.div>
     </AnimatePresence>

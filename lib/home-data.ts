@@ -68,12 +68,21 @@ export async function getHomeBanners(locale: string): Promise<HomeBanner[]> {
 export async function getHomeShopItems() {
   return withCache("home:shop", 90_000, async () => {
     await connectToDB();
-    const items = await ShoppingItem.find({ isActive: true })
+    let items = await ShoppingItem.find({ isActive: true })
       .select("_id name price image category stock isActive createdAt")
       .sort({ createdAt: -1 })
       .limit(8)
       .lean();
-    // Fully serialize to strip Mongoose ObjectId buffers and toJSON methods
+
+    // Fallback: active filter empty → still show recent catalog rows
+    if (!items.length) {
+      items = await ShoppingItem.find({})
+        .select("_id name price image category stock isActive createdAt")
+        .sort({ createdAt: -1 })
+        .limit(8)
+        .lean();
+    }
+
     return JSON.parse(JSON.stringify(
       items.map((item: any) => ({
         ...item,

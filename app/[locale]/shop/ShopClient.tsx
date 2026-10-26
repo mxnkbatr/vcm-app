@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { ShoppingBag, SlidersHorizontal } from "lucide-react";
 import { staggerContainer, staggerItem } from "@/lib/motion";
 import PremiumPageShell from "@/app/components/PremiumPageShell";
@@ -85,7 +85,7 @@ export default function ShopClient({
       <motion.div
         className="home-sections pt-1"
         variants={staggerContainer}
-        initial="initial"
+        initial={false}
         animate="animate"
       >
         <motion.div variants={staggerItem}>
@@ -129,13 +129,11 @@ export default function ShopClient({
 
         <div className="min-h-[400px]">
           {filteredItems.length > 0 ? (
-            <motion.div layout className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <AnimatePresence mode="popLayout">
-                {filteredItems.map((item, i) => (
-                  <ShopProductCard key={String(item._id)} item={item} locale={locale} index={i} />
-                ))}
-              </AnimatePresence>
-            </motion.div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              {filteredItems.map((item, i) => (
+                <ShopProductCard key={String(item._id)} item={item} locale={locale} index={i} />
+              ))}
+            </div>
           ) : (
             <EmptyState
               icon={ShoppingBag}

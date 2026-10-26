@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
 import { useSession } from "@/lib/hooks/useSession";
@@ -22,13 +21,10 @@ import { isNativeApp } from "@/lib/native-perf";
 import { staggerContainer, staggerItem } from "@/lib/motion";
 import HomeProgramCards from "./HomeProgramCards";
 import HomeNewsCards from "./HomeNewsCards";
-import { isVisibleShopItem } from "./ShopProductCard";
 import {
   normalizeProgramDisplayName,
   programSlugKey,
 } from "@/lib/programLabels";
-
-const ShopClient = dynamic(() => import("@/app/[locale]/shop/ShopClient"), { ssr: false });
 
 const FALLBACK_PROGRAMS = [
   { id: "edu", slug: "edu", label: "EDU", sub: "Сургуульд заалт", href: "/programs/edu" },
@@ -68,12 +64,9 @@ function subscribeClient(onStoreChange: () => void) {
 }
 
 export default function HomePageContent({
-  shopItems,
   initialPrograms,
   initialBanners,
-  locale,
 }: {
-  shopItems?: unknown[];
   initialBanners?: BannerApi[];
   initialPrograms?: ProgramApi[];
   locale?: string;
@@ -98,9 +91,6 @@ export default function HomePageContent({
       };
     });
 
-  const [items] = useState(() =>
-    (shopItems || []).filter((item) => isVisibleShopItem(item, locale || "mn"))
-  );
   const [programs] = useState(() =>
     initialPrograms?.length ? mapPrograms(initialPrograms) : FALLBACK_PROGRAMS
   );
@@ -120,7 +110,7 @@ export default function HomePageContent({
   const shownPrograms = [
     ...(corePrograms.length ? corePrograms : FALLBACK_PROGRAMS),
     ...extraPrograms,
-  ].slice(0, 24);
+  ].slice(0, 6);
 
   const name =
     (session?.user as { name?: string } | undefined)?.name ||
@@ -170,16 +160,16 @@ export default function HomePageContent({
 
   return (
     <PremiumPageShell className="home-dash" padded>
-      <motion.div variants={staggerContainer} initial="initial" animate="animate" className="home-sections">
+      <motion.div variants={staggerContainer} initial={false} animate="animate" className="home-sections">
         <IOSLargeTitle title={greeting || "Нүүр"} />
 
         <motion.div variants={staggerItem}>
           <button
             type="button"
-            className="ios-searchbar press"
+            className="ios-searchbar"
             onClick={() => window.dispatchEvent(new CustomEvent("vcm:open-search"))}
           >
-            <Search size={16} strokeWidth={2.25} className="ios-searchbar__icon" />
+            <Search size={17} strokeWidth={2.1} className="ios-searchbar__icon" aria-hidden />
             <span className="ios-searchbar__placeholder">Хайх</span>
           </button>
         </motion.div>
@@ -245,7 +235,7 @@ export default function HomePageContent({
 
         <motion.section variants={staggerItem}>
           <PremiumSectionHeader title="Удахгүй болох эвент" href="/events" />
-          <HomeUpcomingEvents limit={8} />
+          <HomeUpcomingEvents limit={5} />
         </motion.section>
 
         <motion.section variants={staggerItem}>
@@ -255,17 +245,10 @@ export default function HomePageContent({
 
         <motion.section variants={staggerItem}>
           <PremiumSectionHeader title="Мэдээ" href="/news" />
-          <HomeNewsCards limit={6} />
+          <HomeNewsCards limit={4} />
         </motion.section>
 
-        {items.length > 0 && locale && (
-          <motion.section variants={staggerItem}>
-            <PremiumSectionHeader title="Дэлгүүр" href="/shop" />
-            <ShopClient items={items} locale={locale} embedded />
-          </motion.section>
-        )}
-
-        <footer className="pt-1 pb-2 text-center">
+        <footer className="pt-2 pb-3 text-center">
           <p className="ios-footnote">{BRAND.name}</p>
         </footer>
       </motion.div>

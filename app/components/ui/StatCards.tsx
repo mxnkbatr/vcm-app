@@ -19,25 +19,24 @@ function getReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-/** Single glass card with 3 columns + count-up. */
 export default function StatCards({ stats }: { stats: StatItem[] }) {
   const reduce = useSyncExternalStore(subscribeReducedMotion, getReducedMotion, () => false);
 
   return (
-    <div className="ios-stats-glass glass-surface">
-      {stats.map((s, i) => (
-        <div key={s.label} className={`ios-stats-glass__col ${i > 0 ? "has-sep" : ""}`}>
-          <p className="ios-stats-glass__value">
+    <div className="ios-stats">
+      {stats.map((s) => (
+        <div key={s.label} className="ios-stats__card">
+          <p className="ios-stats__value">
             {reduce ? (
               <>
-                {s.value.toLocaleString()}
+                {s.value}
                 {s.suffix || ""}
               </>
             ) : (
-              <CountUp end={s.value} duration={1.35} suffix={s.suffix || ""} separator="," enableScrollSpy scrollSpyOnce />
+              <CountUp end={s.value} duration={1.2} suffix={s.suffix || ""} separator="," />
             )}
           </p>
-          <p className="ios-stats-glass__label">{s.label}</p>
+          <p className="ios-stats__label">{s.label}</p>
         </div>
       ))}
     </div>

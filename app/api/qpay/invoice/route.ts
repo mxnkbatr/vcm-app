@@ -19,7 +19,14 @@ const bodySchema = z
     itemId: z.string().min(1).optional(),
     quantity: z.coerce.number().int().min(1).max(99).optional(),
     items: z.array(lineSchema).optional(),
-    promoCode: z.string().max(64).optional(),
+    promoCode: z
+      .string()
+      .max(64)
+      .optional()
+      .transform((v) => {
+        const t = (v || "").trim();
+        return t.length ? t : undefined;
+      }),
     phoneNumber: z.string().max(32).optional(),
     description: z.string().max(200).optional(),
   })

@@ -7,62 +7,109 @@ import { motion } from "framer-motion";
 import { ChevronLeft } from "lucide-react";
 import { springNative } from "@/lib/motion";
 
+type AuthMode = "sign-in" | "sign-up";
+
 type AuthScreenProps = {
+  mode: AuthMode;
   title?: string;
   subtitle?: string;
+  eyebrow?: string;
   children: React.ReactNode;
-  footer?: React.ReactNode;
+  /** Primary CTA — rendered inside the card (dcapital style) */
+  action?: React.ReactNode;
   showBack?: boolean;
-  stickyAction?: React.ReactNode;
 };
 
 export default function AuthScreen({
-  title = "Тавтай морил",
+  mode,
+  title,
   subtitle,
+  eyebrow,
   children,
-  footer,
+  action,
   showBack = true,
-  stickyAction,
 }: AuthScreenProps) {
+  const isLogin = mode === "sign-in";
+  const resolvedTitle = title ?? (isLogin ? "Нэвтрэх" : "Бүртгүүлэх");
+  const resolvedEyebrow = eyebrow ?? (isLogin ? "Тавтай морил" : "Шинэ акаунт");
+  const resolvedSub =
+    subtitle ??
+    (isLogin
+      ? "Имэйл, нууц үгээрээ нэвтэрнэ үү."
+      : "Бүртгүүлээд сайн дурын аяллаа эхлүүлээрэй.");
+
   return (
-    <div className="auth-screen ios26-page">
-      <div className="auth-screen__mesh" aria-hidden />
+    <div className="auth-page app-detail--auth">
+      <div className="auth-page__bg" aria-hidden />
 
-      {showBack && (
-        <div className="auth-screen__nav">
-          <Link href="/" className="app-header__round press" aria-label="Буцах">
-            <ChevronLeft size={22} strokeWidth={1.75} />
+      <div className="auth-page__top">
+        {showBack ? (
+          <Link href="/" className="app-detail__nav-btn press" aria-label="Буцах">
+            <ChevronLeft size={22} strokeWidth={2.1} />
           </Link>
-        </div>
-      )}
-
-      <div className={`auth-screen__body ${stickyAction ? "has-sticky" : ""}`}>
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={springNative}
-          className="auth-screen__hero"
-        >
-          <div className="auth-screen__logo-wrap">
-            <BrandLogo size={72} priority />
-          </div>
-          <h1 className="auth-screen__title">{title}</h1>
-          {subtitle ? <p className="auth-screen__sub">{subtitle}</p> : null}
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ ...springNative, delay: 0.04 }}
-          className="auth-screen__card"
-        >
-          {children}
-        </motion.div>
-
-        {footer && <div className="auth-screen__footer">{footer}</div>}
+        ) : (
+          <span className="auth-page__spacer" aria-hidden />
+        )}
+        <Link href="/" className="auth-page__brand press">
+          <BrandLogo size={28} priority />
+          <span>VCM</span>
+        </Link>
+        <span className="auth-page__spacer" aria-hidden />
       </div>
 
-      {stickyAction ? <div className="auth-screen__sticky">{stickyAction}</div> : null}
+      <div className="auth-page__center">
+        <motion.div
+          className="auth-card app-detail__card"
+          initial={{ y: 12 }}
+          animate={{ y: 0 }}
+          transition={springNative}
+        >
+          <p className="auth-card__eyebrow">{resolvedEyebrow}</p>
+          <h1 className="auth-card__title">{resolvedTitle}</h1>
+          <p className="auth-card__lead">{resolvedSub}</p>
+
+          <div className="auth-tabs" role="tablist" aria-label="Нэвтрэх эсвэл бүртгүүлэх">
+            <Link
+              href="/sign-in"
+              className={`auth-tabs__item press ${isLogin ? "is-active" : ""}`}
+              role="tab"
+              aria-selected={isLogin}
+            >
+              Нэвтрэх
+            </Link>
+            <Link
+              href="/sign-up"
+              className={`auth-tabs__item press ${!isLogin ? "is-active" : ""}`}
+              role="tab"
+              aria-selected={!isLogin}
+            >
+              Бүртгүүлэх
+            </Link>
+          </div>
+
+          <div className="auth-card__body">{children}</div>
+
+          {action ? <div className="auth-card__action">{action}</div> : null}
+
+          <p className="auth-card__foot">
+            {isLogin ? (
+              <>
+                Бүртгэлгүй юу?{" "}
+                <Link href="/sign-up" className="press">
+                  Бүртгүүлэх
+                </Link>
+              </>
+            ) : (
+              <>
+                Бүртгэлтэй юу?{" "}
+                <Link href="/sign-in" className="press">
+                  Нэвтрэх
+                </Link>
+              </>
+            )}
+          </p>
+        </motion.div>
+      </div>
     </div>
   );
 }

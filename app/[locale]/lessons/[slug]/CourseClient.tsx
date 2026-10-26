@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import { Link, usePathname, useRouter } from "@/navigation";
 import { useLocale } from "next-intl";
-import { motion } from "framer-motion";
 import { BookOpen, ChevronRight, Lock, Sparkles, TrendingUp } from "lucide-react";
 import Skeleton from "@/app/components/Skeleton";
 import { IOSAlert, IOSSheet } from "@/app/components/iOSAlert";
+import DetailDock from "@/app/components/DetailDock";
 import NativeFeatureUnavailable from "@/app/components/NativeFeatureUnavailable";
 import { isNativeApp } from "@/lib/native-perf";
+import { BLUR_DATA_URL } from "@/lib/image-blur";
 
 type LmsI18n = { en: string; mn: string; de?: string };
 type Course = {
@@ -78,6 +80,14 @@ export default function CourseClient() {
   const title = data?.course?.title ? ((data.course.title as any)[locale] || data.course.title.en) : "";
   const desc = data?.course?.description ? ((data.course.description as any)[locale] || data.course.description.en) : "";
   const isFree = !!data?.course?.isFree || ((data?.course?.price ?? 0) === 0);
+
+  useEffect(() => {
+    if (!title) return;
+    window.dispatchEvent(new CustomEvent("vcm:page-title", { detail: { title } }));
+    return () => {
+      window.dispatchEvent(new CustomEvent("vcm:page-title", { detail: { title: "" } }));
+    };
+  }, [title]);
 
   const lessonsByModule = useMemo(() => {
     const map = new Map<string, Lesson[]>();
@@ -166,117 +176,98 @@ export default function CourseClient() {
     );
   }
 
+  const thumb = data.course.thumbnailUrl;
+
   return (
-    <div className="page">
-      <div className="page-inner space-y-6">
-        <div className="pt-2 space-y-2">
-          <Link href="/lessons" className="t-caption font-bold" style={{ color: "var(--blue)" }}>
-            {locale === "mn" ? "← Сургалтууд" : "← Courses"}
-          </Link>
-          <h1 className="t-title1">{title}</h1>
-          <p className="t-body" style={{ color: "var(--label2)" }}>
-            {desc}
-          </p>
-          <div className="flex gap-2 pt-1">
-            <span
-              className="badge"
-              style={{
-                background: isFree ? "var(--emerald-dim)" : "var(--orange-dim)",
-                color: isFree ? "var(--emerald)" : "var(--orange)",
-              }}
-            >
-              {isFree ? <Sparkles size={12} /> : <TrendingUp size={12} />}{" "}
-              {isFree ? (locale === "mn" ? "Үнэгүй" : "Free") : (locale === "mn" ? "Төлбөртэй" : "Paid")}
+    <div className="app-detail app-detail--course dc-course-detail">
+      <div className="app-detail__hero">
+        {thumb ? (
+          <Image
+            src={thumb}
+            alt={title}
+            fill
+            className="app-detail__hero-img object-cover"
+            sizes="100vw"
+            priority
+            placeholder="blur"
+            blurDataURL={BLUR_DATA_URL}
+          />
+        ) : (
+          <div
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(145deg, #0d9488, #0f172a)" }}
+          />
+        )}
+        <div className="app-detail__hero-fade" aria-hidden />
+      </div>
+
+      <div className="app-detail__sheet">
+        <div className="app-detail__handle" aria-hidden />
+
+        <div className="app-detail__meta">
+          <span className={`app-detail__pill ${isFree ? "app-detail__pill--ok" : "app-detail__pill--warn"}`}>
+            {isFree ? <Sparkles size={11} /> : <TrendingUp size={11} />}{" "}
+            {isFree ? (locale === "mn" ? "Үнэгүй" : "Free") : (locale === "mn" ? "Төлбөртэй" : "Paid")}
+          </span>
+          <span className="app-detail__pill">
+            {(data.lessons ?? []).length} {locale === "mn" ? "хичээл" : "lessons"}
+          </span>
+          {!isFree ? (
+            <span className="app-detail__pill dc-course-detail__price-pill">
+              {(data.course.price ?? 0).toLocaleString()}₮
             </span>
-            {!isFree && !nativeApp && (
-              <span className="badge" style={{ background: "var(--fill2)", color: "var(--label2)" }}>
-                {data.course.currency || "MNT"} {data.course.price ?? 0}
-              </span>
-            )}
-          </div>
+          ) : null}
         </div>
 
-        {(data.enrolled || isFree) && continueLessonId && (
-          <button
-            onClick={() => startLesson(continueLessonId)}
-            className="btn btn-primary btn-full"
-          >
-            {locale === "mn" ? "Үргэлжлүүлэх" : "Continue"}
-            <ChevronRight size={16} className="ml-1" />
-          </button>
-        )}
+        <h1 className="app-detail__title">{title}</h1>
+        {desc ? <p className="app-detail__lead">{desc}</p> : null}
 
-        {!data.enrolled && !isFree && nativeApp && (
-          <div className="card p-5 space-y-3">
-            <div className="flex items-start gap-3">
-              <div className="icon-box-sm" style={{ background: "var(--fill2)", color: "var(--label2)" }}>
-                <Lock size={16} />
-              </div>
-              <div className="min-w-0">
-                <div className="t-headline" style={{ fontSize: 15 }}>
-                  {locale === "mn" ? "Төлбөртэй сургалт" : "Paid course"}
-                </div>
-                <div className="t-footnote">
-                  {locale === "mn"
-                    ? "Төлбөртэй сургалтын худалдан авалт iOS апп дээр байхгүй. Үнэгүй сургалтуудыг үзнэ үү."
-                    : "Paid course purchases are not available in the iOS app. Please browse free courses instead."}
-                </div>
-              </div>
-            </div>
-            <Link href="/lessons" className="btn btn-secondary btn-full">
-              {locale === "mn" ? "Үнэгүй сургалтууд" : "Browse free courses"}
-            </Link>
-          </div>
-        )}
-
-        {!data.enrolled && !isFree && !nativeApp && (
-          <div className="card p-5 space-y-3">
+        {!data.enrolled && !isFree ? (
+          <div className="app-detail__card" style={{ marginTop: 16, padding: 16 }}>
             <div className="flex items-start gap-3">
               <div className="icon-box-sm" style={{ background: "var(--orange-dim)", color: "var(--orange)" }}>
                 <Lock size={16} />
               </div>
               <div className="min-w-0">
-                <div className="t-headline" style={{ fontSize: 15 }}>
+                <p className="text-[15px] font-bold" style={{ color: "var(--label)" }}>
                   {locale === "mn" ? "Энэ курс төлбөртэй" : "This is a paid course"}
-                </div>
-                <div className="t-footnote">
-                  {locale === "mn"
-                    ? "QPay-р төлж бүртгүүлсний дараа бүх хичээлийг үзэх боломжтой."
-                    : "Pay with QPay to unlock all lessons in this course."}
-                </div>
+                </p>
+                <p className="text-[13px] mt-1" style={{ color: "var(--label3)" }}>
+                  {nativeApp
+                    ? locale === "mn"
+                      ? "Төлбөртэй сургалтын худалдан авалт iOS апп дээр байхгүй."
+                      : "Paid purchases are not available in the iOS app."
+                    : locale === "mn"
+                      ? "QPay-р төлж бүртгүүлсний дараа бүх хичээлийг үзнэ."
+                      : "Pay with QPay to unlock all lessons."}
+                </p>
               </div>
             </div>
-            <button
-              onClick={() => {
-                setCheckoutStep("phone");
-              }}
-              className="btn btn-primary btn-full"
-              disabled={isProcessing}
-            >
-              {locale === "mn" ? "QPay-р төлөх" : "Pay with QPay"}
-            </button>
-            {error && <p className="t-footnote" style={{ color: "var(--red)" }}>{error}</p>}
+            {error ? <p className="text-[13px] mt-2" style={{ color: "var(--red)" }}>{error}</p> : null}
           </div>
-        )}
+        ) : null}
 
-        <section className="space-y-3">
-          <div className="sec-label">{locale === "mn" ? "Хичээлүүд" : "Lessons"}</div>
+        <section style={{ marginTop: 22 }}>
+          <p className="app-detail__section-label" style={{ marginBottom: 10 }}>
+            {locale === "mn" ? "Хичээлүүд" : "Lessons"}
+          </p>
           <div className="space-y-3">
             {(data.modules ?? []).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map((m) => {
               const mTitle = (m.title as any)[locale] || m.title.en;
               const lessons = lessonsByModule.get(m._id) ?? [];
               return (
-                <div key={m._id} className="card p-4 space-y-2">
-                  <div className="flex items-center gap-3">
+                <div key={m._id} className="app-detail__card" style={{ padding: "14px 14px 10px" }}>
+                  <div className="flex items-center gap-3 mb-2">
                     <div className="icon-box-sm" style={{ background: "var(--blue-dim)", color: "var(--blue)" }}>
                       <BookOpen size={16} />
                     </div>
-                    <div className="t-headline" style={{ fontSize: 15 }}>{mTitle}</div>
+                    <div className="text-[15px] font-bold" style={{ color: "var(--label)" }}>{mTitle}</div>
                   </div>
-                  <div className="divider" />
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     {lessons.length === 0 ? (
-                      <div className="t-footnote">{locale === "mn" ? "Хичээл хараахан алга" : "No lessons yet"}</div>
+                      <p className="text-[13px]" style={{ color: "var(--label3)" }}>
+                        {locale === "mn" ? "Хичээл хараахан алга" : "No lessons yet"}
+                      </p>
                     ) : (
                       lessons.map((l) => {
                         const lTitle = (l.title as any)[locale] || l.title.en;
@@ -284,23 +275,35 @@ export default function CourseClient() {
                         return (
                           <button
                             key={l._id}
+                            type="button"
                             onClick={() => accessible && startLesson(l._id)}
-                            className="row w-full text-left press"
-                            style={{ opacity: accessible ? 1 : 0.65 }}
+                            className="w-full text-left press flex items-center gap-3 py-3 px-1"
+                            style={{ opacity: accessible ? 1 : 0.65, borderTop: "0.5px solid var(--sep)" }}
                           >
-                            <div className="icon-box-sm" style={{ background: accessible ? "var(--fill2)" : "var(--fill3)", color: "var(--label2)" }}>
+                            <div
+                              className="icon-box-sm"
+                              style={{
+                                background: accessible ? "var(--fill2)" : "var(--fill3)",
+                                color: "var(--label2)",
+                              }}
+                            >
                               {accessible ? <ChevronRight size={16} /> : <Lock size={16} />}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="t-headline truncate" style={{ fontSize: 14 }}>{lTitle}</div>
-                              <div className="t-caption">
-                                {l.durationSeconds ? `${Math.max(1, Math.round((l.durationSeconds ?? 0) / 60))} min` : ""}
-                                {!accessible && (locale === "mn" ? " • Төлбөртэй" : " • Locked")}
-                                {!!l.isFreePreview && !data.enrolled && !isFree && (locale === "mn" ? " • Preview" : " • Preview")}
+                              <div className="text-[14px] font-semibold truncate" style={{ color: "var(--label)" }}>
+                                {lTitle}
                               </div>
-                            </div>
-                            <div className="t-caption2" style={{ color: "var(--label3)" }}>
-                              {accessible ? (locale === "mn" ? "Үзэх" : "Watch") : (locale === "mn" ? "Түгжээтэй" : "Locked")}
+                              <div className="text-[12px]" style={{ color: "var(--label3)" }}>
+                                {l.durationSeconds
+                                  ? `${Math.max(1, Math.round((l.durationSeconds ?? 0) / 60))} мин`
+                                  : ""}
+                                {!accessible && (locale === "mn" ? " · Төлбөртэй" : " · Locked")}
+                                {!!l.isFreePreview && !data.enrolled && !isFree
+                                  ? locale === "mn"
+                                    ? " · Preview"
+                                    : " · Preview"
+                                  : ""}
+                              </div>
                             </div>
                           </button>
                         );
@@ -313,6 +316,39 @@ export default function CourseClient() {
           </div>
         </section>
       </div>
+
+      <DetailDock
+        visible={checkoutStep === "closed"}
+        leading={
+          !isFree ? (
+            <span className="detail-dock__price">₮{(data.course.price ?? 0).toLocaleString()}</span>
+          ) : undefined
+        }
+      >
+        {(data.enrolled || isFree) && continueLessonId ? (
+          <button
+            type="button"
+            onClick={() => startLesson(continueLessonId)}
+            className="detail-dock__btn detail-dock__btn--primary press"
+          >
+            {locale === "mn" ? "Үргэлжлүүлэх" : "Continue"}
+            <ChevronRight size={18} strokeWidth={1.75} />
+          </button>
+        ) : !data.enrolled && !isFree && !nativeApp ? (
+          <button
+            type="button"
+            onClick={() => setCheckoutStep("phone")}
+            className="detail-dock__btn detail-dock__btn--primary press"
+            disabled={isProcessing}
+          >
+            {locale === "mn" ? "QPay-р төлөх" : "Pay with QPay"}
+          </button>
+        ) : (
+          <Link href="/lessons" className="detail-dock__btn detail-dock__btn--secondary press">
+            {locale === "mn" ? "Сургалтууд" : "Courses"}
+          </Link>
+        )}
+      </DetailDock>
 
       {/* QPay Sheet — web only */}
       {checkoutStep === "phone" && !nativeApp && (

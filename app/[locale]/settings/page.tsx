@@ -2,14 +2,13 @@
 
 import React, { useEffect, useState } from "react";
 import { useLocale } from "next-intl";
-import { useTheme } from "next-themes";
 import { Link, useRouter } from "@/navigation";
 import { signOutToSignIn } from "@/lib/auth-signout";
 import { motion } from "framer-motion";
 import PremiumPageShell from "@/app/components/PremiumPageShell";
 import PremiumSectionHeader from "@/app/components/PremiumSectionHeader";
 import {
-  Moon, Sun, Globe, Bell, BellOff, Shield,
+  Globe, Bell, BellOff, Shield,
   Info, ChevronRight, LogOut, Trash2, Volume2
 } from "lucide-react";
 
@@ -45,16 +44,13 @@ const LANGS = [
 
 export default function SettingsPage() {
   const locale = useLocale();
-  const { resolvedTheme, setTheme } = useTheme();
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
   const [notif, setNotif] = useState(true);
   const [haptic, setHaptic] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showLang, setShowLang] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     fetch("/api/user/settings")
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d?.settings) { setNotif(d.settings.notificationsEnabled ?? true); } })
@@ -75,8 +71,6 @@ export default function SettingsPage() {
     }
   };
 
-  const isDark = mounted && resolvedTheme === "dark";
-
   return (
     <PremiumPageShell>
       <div className="space-y-6 pb-6 pt-2">
@@ -90,21 +84,6 @@ export default function SettingsPage() {
         <section className="space-y-2">
           <p className="sec-label">{locale === "mn" ? "Гадаад төрх" : "Appearance"}</p>
           <div className="card p-2">
-            <div className="flex items-center gap-3 px-3 py-3.5 press" onClick={() => mounted && setTheme(isDark ? "light" : "dark")} role="button">
-              <div className="icon-box-sm" style={{ background: isDark ? "#2C2C2E" : "#FFF3CC", color: isDark ? "#F5C518" : "#F59E0B" }}>
-                {isDark ? <Moon size={16} /> : <Sun size={16} />}
-              </div>
-              <div className="flex-1">
-                <p className="text-[14px] font-semibold" style={{ color: "var(--label)" }}>Dark mode</p>
-                <p className="text-[12px]" style={{ color: "var(--label3)" }}>
-                  {isDark ? (locale === "mn" ? "Идэвхтэй" : "Enabled") : (locale === "mn" ? "Идэвхгүй" : "Disabled")}
-                </p>
-              </div>
-              <IOSToggle checked={isDark} onChange={() => mounted && setTheme(isDark ? "light" : "dark")} color="var(--label)" />
-            </div>
-
-            <div className="h-px mx-3" style={{ background: "var(--sep)" }} />
-
             <div
               className="flex items-center gap-3 px-3 py-3.5 press"
               onClick={() => setShowLang(v => !v)}

@@ -2,21 +2,19 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { Link } from "@/navigation";
-import { motion } from "framer-motion";
 import {
-  ArrowLeft, ShoppingCart, Package, Smartphone, X,
+  ShoppingCart, Package, Smartphone, X,
   Loader2, Sparkles, Tag,
 } from "lucide-react";
 import { IOSAlert, IOSSheet } from "@/app/components/iOSAlert";
-import NativeDock from "@/app/components/NativeDock";
+import DetailDock from "@/app/components/DetailDock";
 import { useCart } from "@/app/context/CartContext";
 import { hapticImpact } from "@/lib/haptics";
 import { ImpactStyle } from "@capacitor/haptics";
-import { staggerContainer, staggerItem } from "@/lib/motion";
 import { formatShopCategory, formatShopPrice } from "@/app/components/ShopProductCard";
 import NativeFeatureUnavailable from "@/app/components/NativeFeatureUnavailable";
 import { isNativeApp } from "@/lib/native-perf";
+import { BLUR_DATA_URL } from "@/lib/image-blur";
 
 const T = {
   back: { en: "Back", mn: "Буцах", de: "Zurück" },
@@ -87,6 +85,13 @@ export default function ItemClient({ item, locale = "en" }: { item: any; locale:
   const desc = item.description?.[locale] || item.description?.en || "";
   const inStock = item.stock > 0;
   const category = formatShopCategory(item.category || "general", locale);
+
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("vcm:page-title", { detail: { title: name } }));
+    return () => {
+      window.dispatchEvent(new CustomEvent("vcm:page-title", { detail: { title: "" } }));
+    };
+  }, [name]);
   const stockText =
     item.stock > 0
       ? locale === "mn"
@@ -129,126 +134,98 @@ export default function ItemClient({ item, locale = "en" }: { item: any; locale:
   };
 
   return (
-    <div className="shop-detail page--immersive">
-      <div className="premium-ambient" aria-hidden>
-        <div className="premium-ambient__mesh" />
-        <div className="premium-ambient__grain" />
-      </div>
-
-      {/* Hero image */}
-      <motion.div
-        className="shop-detail__hero"
-        initial={{ opacity: 0, scale: 1.03 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      >
+    <div className="app-detail app-detail--shop">
+      <div className="app-detail__hero app-detail__hero--shop">
         {hasImage ? (
           <Image
             src={item.image}
             alt={name}
             fill
-            className="shop-detail__hero-img"
+            className="app-detail__hero-img object-cover"
             priority
             sizes="100vw"
+            placeholder="blur"
+            blurDataURL={BLUR_DATA_URL}
           />
         ) : (
-          <div
-            className="shop-detail__hero-img flex items-center justify-center"
-            style={{ background: "var(--fill2)" }}
-            aria-hidden
-          >
+          <div className="absolute inset-0 flex items-center justify-center" style={{ background: "var(--fill2)" }} aria-hidden>
             <Package size={48} style={{ color: "var(--label3)" }} />
           </div>
         )}
-        <div className="shop-detail__hero-fade" aria-hidden />
+        <div className="app-detail__hero-fade" aria-hidden />
+      </div>
 
-        <Link
-          href="/shop"
-          className="shop-detail__back press"
-          onClick={() => hapticImpact(ImpactStyle.Light)}
-        >
-          <ArrowLeft size={16} strokeWidth={2.5} />
-          {T.back[locale as keyof typeof T.back] || T.back.en}
-        </Link>
-      </motion.div>
+      <div className="app-detail__sheet">
+        <div className="app-detail__handle" aria-hidden />
 
-      {/* Content sheet */}
-      <motion.div
-        className="shop-detail__sheet"
-        variants={staggerContainer}
-        initial="initial"
-        animate="animate"
-      >
-        <div className="shop-detail__handle" aria-hidden />
-
-        <motion.div variants={staggerItem}>
-          <span className="shop-detail__eyebrow">
-            <Sparkles size={11} />
-            {category}
+        <div className="app-detail__meta">
+          <span className="app-detail__pill app-detail__pill--shop">
+            <Sparkles size={11} /> {category}
           </span>
-          <h1 className="shop-detail__title">{name}</h1>
+        </div>
+        <h1 className="app-detail__title">{name}</h1>
 
-          <div className="shop-detail__price-row">
-            <span className="shop-detail__price">
+        <div className="app-detail__price-row">
+          <span className="app-detail__price">
+            {formatShopPrice(appliedPromo ? payAmount : item.price)}
+          </span>
+          {appliedPromo ? (
+            <span className="app-detail__price-old">{formatShopPrice(item.price)}</span>
+          ) : null}
+        </div>
+
+        <div className="app-detail__meta" style={{ marginTop: 12 }}>
+          <span className={`app-detail__pill ${inStock ? "app-detail__pill--ok" : "app-detail__pill--warn"}`}>
+            {inStock ? "●" : "○"} {stockText}
+          </span>
+          <span className="app-detail__pill">
+            <Tag size={11} strokeWidth={2.2} /> VCM Shop
+          </span>
+        </div>
+
+        {desc ? (
+          <div className="app-detail__card" style={{ marginTop: 18, padding: "16px 18px" }}>
+            <p className="app-detail__section-label">
+              {T.details[locale as keyof typeof T.details] || T.details.en}
+            </p>
+            <p className="app-article__p" style={{ marginTop: 8 }}>{desc}</p>
+          </div>
+        ) : null}
+
+      </div>
+
+      <DetailDock
+        visible={!showCheckout && checkoutStep !== "qpay"}
+        leading={
+          <>
+            <span className="detail-dock__price">
               {formatShopPrice(appliedPromo ? payAmount : item.price)}
             </span>
-            {appliedPromo && (
-              <span className="shop-detail__price-old">{formatShopPrice(item.price)}</span>
-            )}
-          </div>
-
-          <div className="shop-detail__chips">
-            <span className={`shop-detail__chip ${inStock ? "shop-detail__chip--stock-in" : "shop-detail__chip--stock-out"}`}>
-              {inStock ? "●" : "○"} {stockText}
-            </span>
-            <span className="shop-detail__chip">
-              <Tag size={12} strokeWidth={2.2} />
-              VCM Shop
-            </span>
-          </div>
-        </motion.div>
-
-        {desc && (
-          <motion.div variants={staggerItem} className="shop-detail__section">
-            <h2 className="shop-detail__section-title">
-              {T.details[locale as keyof typeof T.details] || T.details.en}
-            </h2>
-            <p className="shop-detail__desc">{desc}</p>
-          </motion.div>
-        )}
-
-        <div className="h-32" />
-      </motion.div>
-
-      {/* Floating dock */}
-      <div className="native-dock--shop">
-        <NativeDock
-          visible={!showCheckout && checkoutStep !== "qpay"}
-          price={appliedPromo ? payAmount : item.price}
-          priceLabel={appliedPromo ? `${appliedPromo.code} хөнгөлөлт` : undefined}
+            {appliedPromo ? (
+              <span className="detail-dock__price-sub">{appliedPromo.code}</span>
+            ) : null}
+          </>
+        }
+      >
+        <button
+          type="button"
+          onClick={() => void handleAddToCart()}
+          disabled={!inStock}
+          className="detail-dock__btn detail-dock__btn--secondary press"
         >
-          <button
-            type="button"
-            onClick={handleAddToCart}
-            disabled={!inStock}
-            className="native-dock__btn native-dock__btn--secondary press"
-            style={{ opacity: inStock ? 1 : 0.45 }}
-          >
-            <Package size={18} />
-            <span>{addedToCart ? "✓" : T.addCart[locale as keyof typeof T.addCart] || T.addCart.en}</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleOrder}
-            disabled={!inStock}
-            className="native-dock__btn native-dock__btn--primary press"
-            style={{ opacity: inStock ? 1 : 0.45 }}
-          >
-            <ShoppingCart size={18} />
-            <span>{T.order[locale as keyof typeof T.order] || T.order.en}</span>
-          </button>
-        </NativeDock>
-      </div>
+          <Package size={17} strokeWidth={1.85} />
+          <span>{addedToCart ? "✓" : T.addCart[locale as keyof typeof T.addCart] || T.addCart.en}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => void handleOrder()}
+          disabled={!inStock}
+          className="detail-dock__btn detail-dock__btn--primary press"
+        >
+          <ShoppingCart size={17} strokeWidth={1.85} />
+          <span>{T.order[locale as keyof typeof T.order] || T.order.en}</span>
+        </button>
+      </DetailDock>
 
       {/* Checkout sheet */}
       <IOSSheet
@@ -276,7 +253,9 @@ export default function ItemClient({ item, locale = "en" }: { item: any; locale:
           />
 
           <div className="space-y-2">
-            <p className="t-caption font-bold">Промо код</p>
+            <p className="t-caption font-bold">
+              Промо код <span style={{ color: "var(--label3)", fontWeight: 500 }}>(заавал биш)</span>
+            </p>
             {appliedPromo ? (
               <div className="flex items-center justify-between p-3 rounded-xl" style={{ background: "var(--emerald-dim)" }}>
                 <span className="font-bold" style={{ color: "var(--emerald)" }}>
@@ -288,6 +267,7 @@ export default function ItemClient({ item, locale = "en" }: { item: any; locale:
                     setAppliedPromo(null);
                     setPayAmount(item.price);
                     setPromoInput("");
+                    setPromoError("");
                   }}
                   className="press"
                 >
@@ -298,13 +278,18 @@ export default function ItemClient({ item, locale = "en" }: { item: any; locale:
               <div className="flex gap-2">
                 <input
                   className="input flex-1"
-                  placeholder="PROMO"
+                  placeholder="Байвал оруулна уу"
                   value={promoInput}
-                  onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+                  onChange={(e) => {
+                    setPromoInput(e.target.value.toUpperCase());
+                    setPromoError("");
+                  }}
+                  autoComplete="off"
                 />
                 <button
                   type="button"
                   className="btn btn-secondary btn-sm"
+                  disabled={!promoInput.trim()}
                   onClick={async () => {
                     if (!promoInput.trim()) return;
                     setPromoError("");
@@ -319,7 +304,7 @@ export default function ItemClient({ item, locale = "en" }: { item: any; locale:
                         }),
                       });
                       const data = await res.json();
-                      if (!data.valid) throw new Error(data.error);
+                      if (!data.valid) throw new Error(data.error || "Промо код буруу байна");
                       setAppliedPromo({
                         code: data.code,
                         finalAmount: data.finalAmount,
@@ -352,16 +337,19 @@ export default function ItemClient({ item, locale = "en" }: { item: any; locale:
               }
               setIsProcessing(true);
               setError("");
+              setPromoError("");
               try {
+                const body: Record<string, unknown> = {
+                  itemId: item._id,
+                  quantity: 1,
+                  phoneNumber,
+                };
+                if (appliedPromo?.code) body.promoCode = appliedPromo.code;
+
                 const res = await fetch("/api/purchases", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    itemId: item._id,
-                    quantity: 1,
-                    phoneNumber,
-                    promoCode: appliedPromo?.code,
-                  }),
+                  body: JSON.stringify(body),
                 });
                 const data = await res.json();
                 if (res.ok) {
@@ -373,7 +361,11 @@ export default function ItemClient({ item, locale = "en" }: { item: any; locale:
                   setShowCheckout(false);
                   setCheckoutStep("qpay");
                 } else {
-                  setError(data.error || "QPay нэхэмжлэх үүсгэхэд алдаа гарлаа.");
+                  setError(
+                    data.error === "Unauthorized"
+                      ? "Сесс дууссан байна. Хуудсыг шинэчлээд дахин оролдоно уу."
+                      : data.error || "QPay нэхэмжлэх үүсгэхэд алдаа гарлаа."
+                  );
                 }
               } catch {
                 setError("Сервертэй холбогдоход алдаа гарлаа.");
@@ -412,12 +404,16 @@ export default function ItemClient({ item, locale = "en" }: { item: any; locale:
                 body: JSON.stringify({
                   purchaseId: activePurchaseId,
                   invoiceId,
+                  phoneNumber,
                 }),
               });
               if (res.ok) {
                 setCheckoutStep("success");
-              } else {
+              } else if (res.status === 402) {
                 setError("Төлбөр хараахан ороогүй байна.");
+              } else {
+                const data = await res.json().catch(() => ({}));
+                setError(data.error || "Төлбөр шалгахад алдаа гарлаа.");
               }
             } catch {
               setError("Шалгахад алдаа гарлаа.");

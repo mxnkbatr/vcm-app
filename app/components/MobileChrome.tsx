@@ -4,12 +4,12 @@ import React, { useState, useEffect, useSyncExternalStore } from "react";
 import { Link, usePathname, useRouter } from "@/navigation";
 import { useLocale } from "next-intl";
 import {
-  Home, Plane, Ticket, BookOpen, User, ShoppingBag,
+  Home, Plane, Ticket, BookOpen, ShoppingBag,
 } from "lucide-react";
 import { useSession } from "@/lib/hooks/useSession";
 import { hapticSelection } from "@/lib/haptics";
 import { isNativeApp } from "@/lib/native-perf";
-import { isTabRoute } from "@/lib/navigation-motion";
+import { isImmersiveDetail, isTabRoute } from "@/lib/navigation-motion";
 import AppHeader from "@/app/components/AppHeader";
 import { nativeShare } from "@/lib/native-share";
 
@@ -20,12 +20,12 @@ type Tab = {
   Icon: React.ComponentType<{ size?: number; strokeWidth?: number }>;
 };
 
+/** dcapital-style 4-tab dock — profile lives in header avatar */
 const TABS: Tab[] = [
   { id: "home", href: "/", label: { en: "Home", mn: "Нүүр" }, Icon: Home },
   { id: "programs", href: "/programs", label: { en: "Programs", mn: "Хөтөлбөр" }, Icon: Plane },
   { id: "shop", href: "/shop", label: { en: "Shop", mn: "Дэлгүүр" }, Icon: ShoppingBag },
   { id: "lessons", href: "/lessons", label: { en: "Learn", mn: "Сургалт" }, Icon: BookOpen },
-  { id: "profile", href: "/profile", label: { en: "Profile", mn: "Профайл" }, Icon: User },
 ];
 
 const AUTH_PATHS = ["/sign-in", "/sign-up", "/register", "/admin"];
@@ -51,6 +51,7 @@ export default function MobileChrome() {
   const { data: session, status } = useSession();
 
   const [scrolled, setScrolled] = useState(false);
+  const [tabMinimized, setTabMinimized] = useState(false);
   const [pageTitle, setPageTitle] = useState("");
   const [bookmarkVersion, setBookmarkVersion] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -63,6 +64,9 @@ export default function MobileChrome() {
   const nativeApp = isMounted && isNativeApp();
   const visible = !AUTH_PATHS.some((p) => pathname.includes(p));
   const tabMode = isTabRoute(pathname);
+  const immersiveDetail = isImmersiveDetail(pathname);
+  // Detail screens: hide tab bar so floating dock doesn't overlap
+  const hideTabBar = immersiveDetail || tabMinimized;
 
   const tabs = nativeApp
     ? [
@@ -70,7 +74,6 @@ export default function MobileChrome() {
         TABS[1],
         { id: "events", href: "/events", label: { en: "Events", mn: "Эвент" }, Icon: Ticket },
         TABS[2],
-        TABS[4],
       ]
     : TABS;
 
@@ -134,11 +137,25 @@ export default function MobileChrome() {
   useEffect(() => {
     const main = document.querySelector(".native-app-main");
     if (!main) return;
-    const onScroll = () => setScrolled(main.scrollTop > 40);
+    let lastY = main.scrollTop;
+    const onScroll = () => {
+      const y = main.scrollTop;
+      // Detail pages: wait until past hero before solid title bar (avoids double title)
+      setScrolled(y > (tabMode ? 40 : 120));
+      const delta = y - lastY;
+      if (y < 24) setTabMinimized(false);
+      else if (delta > 8 && y > 80) setTabMinimized(true);
+      else if (delta < -6) setTabMinimized(false);
+      lastY = y;
+    };
     onScroll();
     main.addEventListener("scroll", onScroll, { passive: true });
     return () => main.removeEventListener("scroll", onScroll);
-  }, [visible, pathname]);
+  }, [visible, pathname, tabMode]);
+
+  useEffect(() => {
+    setTabMinimized(false);
+  }, [pathname]);
 
   if (!isMounted || !visible) return null;
 
@@ -186,14 +203,12 @@ export default function MobileChrome() {
       />
 
       <nav
-        className={`ios-tabbar ios-tabbar--native lg:hidden ${tabs.length === 4 ? "cols-4" : "cols-5"}`}
+        className={`ios-tabbar ios-tabbar--native ios-tabbar--dc lg:hidden cols-4${hideTabBar ? " is-minimized" : ""}`}
         aria-label="Үндсэн цэс"
+        aria-hidden={hideTabBar}
       >
         {tabs.map(({ id, Icon, href, label }) => {
-          const active =
-            id === "profile"
-              ? pathname === "/profile" || pathname.startsWith("/profile/")
-              : pathname === href || (href !== "/" && pathname.startsWith(href));
+          const active = pathname === href || (href !== "/" && pathname.startsWith(href));
           const text = locale === "mn" ? label.mn : label.en;
           return (
             <Link
@@ -207,7 +222,7 @@ export default function MobileChrome() {
               className={`ios-tabbar__item ${active ? "on" : ""}`}
               aria-current={active ? "page" : undefined}
             >
-              <Icon size={24} strokeWidth={active ? 2.25 : 1.75} />
+              <Icon size={22} strokeWidth={active ? 2.3 : 1.75} />
               <span className="ios-tabbar__label">{text}</span>
             </Link>
           );

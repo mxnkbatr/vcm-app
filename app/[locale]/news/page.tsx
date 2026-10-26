@@ -34,7 +34,7 @@ export default function NewsPage() {
     <PremiumPageShell className="ios26-page">
       <div className="home-sections pt-1">
 
-        <PremiumSectionHeader title="Мэдээ" subtitle="volunteer.org.mn болон VCM-ийн шинэ мэдээ" />
+        <PremiumSectionHeader title="Мэдээ" subtitle="VCM-ийн шинэ мэдээ" />
 
         {loading ? (
           <div className="space-y-4">

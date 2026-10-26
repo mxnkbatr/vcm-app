@@ -28,7 +28,6 @@ const ProgramSchema = new mongoose.Schema(
     code: { type: String, required: true, unique: true, uppercase: true, trim: true },
     slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
     emoji: { type: String, default: "🌍" },
-    image: { type: String, default: "" },
     color: { type: String, default: "#0EA5E9" },
     gradFrom: { type: String, default: "#0ea5e9" },
     gradTo: { type: String, default: "#3b82f6" },

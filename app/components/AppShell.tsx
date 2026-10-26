@@ -1,15 +1,16 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import MobileChrome from "./MobileChrome";
+import LiquidBackground from "./LiquidBackground";
+import MotionProvider from "./MotionProvider";
 
-const MobileChrome = dynamic(() => import("./MobileChrome"), { ssr: false });
-const LiquidBackground = dynamic(() => import("./LiquidBackground"), { ssr: false });
 const Navbar = dynamic(() => import("./Navbar"), { ssr: false });
 const SmoothScroll = dynamic(() => import("./SmoothScroll"), { ssr: false });
-const MotionProvider = dynamic(() => import("./MotionProvider"));
 const Footer = dynamic(() => import("./Footer"));
 const NativeAppLifecycle = dynamic(() => import("./NativeAppLifecycle"), { ssr: false });
 const SwipeBackGesture = dynamic(() => import("./SwipeBackGesture"), { ssr: false });
+const ScrollMemory = dynamic(() => import("./ScrollMemory"), { ssr: false });
 const NativePullRefresh = dynamic(() => import("./NativePullRefresh"), { ssr: false });
 const NativePerfBoot = dynamic(() => import("./NativePerfBoot"), { ssr: false });
 const NativeStatusBar = dynamic(() => import("./NativeStatusBar"), { ssr: false });
@@ -27,6 +28,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <NativeStatusBar />
       <NativeHapticPress />
       <SwipeBackGesture />
+      <ScrollMemory />
       <NativePullRefresh />
       <LiquidBackground />
       <MotionProvider>

@@ -71,8 +71,8 @@ export default async function RootLayout({
             <link rel="dns-prefetch" href="https://res.cloudinary.com" />
 
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-            <meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)" />
-            <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+            <meta name="theme-color" content="#EEF1F4" />
+            <meta name="color-scheme" content="light" />
             <meta name="apple-mobile-web-app-title" content={BRAND.shortName} />
             <meta name="mobile-web-app-capable" content="yes" />
             <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -82,7 +82,7 @@ export default async function RootLayout({
             <link rel="apple-touch-icon" href={BRAND.appleTouchIcon} />
             <script
               dangerouslySetInnerHTML={{
-                __html: `(function(){try{var ua=navigator.userAgent||"";var C=window.Capacitor;var native=(C&&C.isNativePlatform&&C.isNativePlatform())||ua.indexOf("VCMNativeApp")!==-1;var mobile=window.innerWidth<=1023;var r=document.documentElement;if(native){r.classList.add("native-shell");document.cookie="vcm_native=1;path=/;max-age=31536000;SameSite=Lax";}if(native||mobile){r.classList.add("native-perf");}}catch(e){}})();`,
+                __html: `(function(){try{var ua=navigator.userAgent||"";var C=window.Capacitor;var native=(C&&C.isNativePlatform&&C.isNativePlatform())||ua.indexOf("VCMNativeApp")!==-1;var mobile=window.innerWidth<=1023;var r=document.documentElement;r.classList.remove("dark");r.style.colorScheme="light";try{localStorage.setItem("vcm-theme","light");}catch(_){}if(native){r.classList.add("native-shell");document.cookie="vcm_native=1;path=/;max-age=31536000;SameSite=Lax";}if(native||mobile){r.classList.add("native-perf");}}catch(e){}})();`,
               }}
             />
           </head>

@@ -41,9 +41,12 @@ function isPublicRoute(pathname: string): boolean {
         '/api/livekit',
         '/api/shopping',
         '/api/lessons',
+        '/api/lms',
         '/api/posts',
         '/api/banners',
         '/api/programs',
+        '/api/promo/validate',
+        '/api/purchases',
         '/api/qpay/webhook',
         '/api/cron/',
     ];

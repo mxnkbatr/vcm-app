@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion";
 import { Motion as motion } from "./MotionProxy";
-import { useTheme } from "next-themes";
 import { useTranslations, useLocale } from "next-intl";
 import { useIsMobile } from "./MotionProxy";
 import LanguageToggle from "./LanguageToggle";

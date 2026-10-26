@@ -97,7 +97,7 @@ export default function CartClient({ locale }: { locale: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           description: "VCM Shop Order",
-          promoCode: appliedPromo?.code,
+          ...(appliedPromo?.code ? { promoCode: appliedPromo.code } : {}),
           items: items.map((i) => ({
             itemId: i._id,
             quantity: i.quantity,
@@ -183,7 +183,10 @@ export default function CartClient({ locale }: { locale: string }) {
         <div className="liquid-card p-4 space-y-3">
           <div className="flex items-center gap-2">
             <Tag size={16} style={{ color: "var(--orange)" }} />
-            <span className="text-[14px] font-bold">Промо код</span>
+            <span className="text-[14px] font-bold">
+              Промо код{" "}
+              <span className="font-medium" style={{ color: "var(--label3)" }}>(заавал биш)</span>
+            </span>
           </div>
           {appliedPromo ? (
             <div className="flex items-center justify-between p-3 rounded-xl" style={{ background: "var(--emerald-dim)" }}>

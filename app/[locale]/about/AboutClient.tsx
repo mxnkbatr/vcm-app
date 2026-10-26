@@ -8,6 +8,7 @@ import { Heart, Globe, Users, Sparkles, Mail, Phone, MapPin, Star } from "lucide
 import { Link } from "@/navigation";
 import PremiumPageShell from "@/app/components/PremiumPageShell";
 import PremiumSectionHeader from "@/app/components/PremiumSectionHeader";
+import { BRAND } from "@/lib/branding";
 
 const STATS = [
   { value: "50+", label: { mn: "Үндэсний төсөл", en: "National projects" } },
@@ -224,9 +225,12 @@ export default function AboutClient() {
         </div>
 
         {/* Footer */}
-        <div className="text-center space-y-1 pt-4">
+        <div className="text-center space-y-1 pt-4 pb-2">
           <p className="text-[13px] font-bold" style={{ color: "var(--label)" }}>Volunteer Center Mongolia</p>
           <p className="text-[11px]" style={{ color: "var(--label4)" }}>© 2007–{new Date().getFullYear()} · VCM</p>
+          <p className="text-[10px] tracking-wide pt-1" style={{ color: "var(--label4)" }}>
+            Developed by {BRAND.developedBy}
+          </p>
         </div>
 
       </div>

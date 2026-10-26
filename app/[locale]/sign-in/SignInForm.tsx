@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Link, useRouter } from "@/navigation";
+import { useRouter } from "@/navigation";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import AuthScreen, { AuthError } from "@/app/components/auth/AuthScreen";
@@ -110,18 +110,9 @@ export default function SignInForm() {
   return (
     <>
       <AuthScreen
-        title="Тавтай морил"
-        subtitle="Имэйл болон нууц үгээрээ нэвтэрнэ үү"
-        footer={
-          <p className="text-[14px]" style={{ color: "var(--label2)" }}>
-            Бүртгэлгүй юу?{" "}
-            <Link href="/sign-up" className="font-bold press" style={{ color: "var(--blue)" }}>
-              Бүртгүүлэх
-            </Link>
-          </p>
-        }
-        stickyAction={
-          <button type="submit" form="sign-in-form" disabled={busy} className="btn btn-primary btn-full">
+        mode="sign-in"
+        action={
+          <button type="submit" form="sign-in-form" disabled={busy} className="btn btn-primary auth-cta">
             {busy ? (
               <span className="ios-spinner" style={{ width: 22, height: 22, borderWidth: 2 }} />
             ) : (
@@ -130,7 +121,7 @@ export default function SignInForm() {
           </button>
         }
       >
-        <form id="sign-in-form" onSubmit={handleSubmit} className="space-y-3">
+        <form id="sign-in-form" onSubmit={handleSubmit} className="auth-form">
           <FloatingField
             label="Имэйл"
             value={email}
@@ -139,6 +130,7 @@ export default function SignInForm() {
             inputMode="email"
             autoComplete="email"
             disabled={busy}
+            placeholder="name@email.com"
           />
           <FloatingField
             label="Нууц үг"
@@ -147,6 +139,7 @@ export default function SignInForm() {
             autoComplete="current-password"
             disabled={busy}
             passwordToggle
+            placeholder="Нууц үгээ оруулна уу"
           />
 
           <button
@@ -166,7 +159,7 @@ export default function SignInForm() {
       </AuthScreen>
 
       <IOSSheet open={forgotOpen} title="Нууц үг сэргээх" onClose={() => setForgotOpen(false)} detent="half">
-        <div className="space-y-3 pt-2">
+        <div className="auth-form pt-2">
           <p className="ios-subhead">Имэйл хаяг руу сэргээх холбоос илгээнэ.</p>
           <FloatingField
             label="Имэйл"
@@ -176,6 +169,7 @@ export default function SignInForm() {
             inputMode="email"
             autoComplete="email"
             disabled={forgotBusy}
+            placeholder="name@email.com"
           />
           {forgotMsg ? (
             <p
@@ -187,7 +181,7 @@ export default function SignInForm() {
           ) : null}
           <button
             type="button"
-            className="btn btn-primary btn-full"
+            className="btn btn-primary auth-cta"
             disabled={forgotBusy}
             onClick={() => void sendReset()}
           >

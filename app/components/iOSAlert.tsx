@@ -77,24 +77,37 @@ export const IOSSheet = ({
   children: React.ReactNode;
   title?: string;
 }) => {
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const root = document.documentElement;
+    root.classList.add("sheet-open");
+    const main = document.querySelector(".native-app-main") as HTMLElement | null;
+    const prev = main?.style.overflow ?? "";
+    if (main) main.style.overflow = "hidden";
+    return () => {
+      root.classList.remove("sheet-open");
+      if (main) main.style.overflow = prev;
+    };
+  }, [isOpen]);
+
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[90] flex items-end justify-center">
+        <div className="fixed inset-0 z-[220] flex items-end justify-center">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+            className="absolute inset-0 bg-black/45"
           />
           <motion.div
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300, mass: 0.8 }}
-            className="relative w-full max-w-[520px] bg-white rounded-t-[20px] shadow-2xl overflow-hidden flex flex-col max-h-[92dvh]"
-            style={{ background: 'var(--bg)' }}
+            className="relative w-full max-w-[520px] rounded-t-[20px] shadow-2xl overflow-hidden flex flex-col max-h-[92dvh]"
+            style={{ background: "#ffffff" }}
           >
             {/* Handle */}
             <div className="h-1.5 w-10 bg-slate-300 rounded-full mx-auto my-3" />

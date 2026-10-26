@@ -6,7 +6,7 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 const nextConfig: NextConfig = {
   /* config options here */
   // @ts-ignore
-  allowedDevOrigins: ['192.168.1.63', '192.168.1.152'],
+  allowedDevOrigins: ['192.168.1.63', '192.168.1.152', '192.168.0.138', '127.0.0.1', 'localhost'],
   reactStrictMode: true,
   compress: true,
   trailingSlash: false,
@@ -61,8 +61,8 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
-    // Smoother route morphing in supported browsers (Chrome 126+)
-    viewTransition: true,
+    // Off: View Transitions often flash white over custom glass/tab chrome
+    viewTransition: false,
     optimizePackageImports: [
       'framer-motion',
       'lucide-react',

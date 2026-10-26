@@ -13,11 +13,12 @@ import {
   ArrowLeft,
   Share2,
   CheckCircle2,
-  Loader2
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { useTranslations, useLocale } from "next-intl";
+import DetailDock from "@/app/components/DetailDock";
+import { nativeShare } from "@/lib/native-share";
 
 // --- TYPES ---
 interface Opportunity {
@@ -88,9 +89,19 @@ export default function OpportunityDetail() {
   }
 
   const Icon = opportunity.type === 'scholarship' ? GraduationCap : opportunity.type === 'internship' ? Briefcase : Heart;
+  const title = opportunity.title[locale] || opportunity.title.en;
+
+  const handleShare = async () => {
+    await nativeShare({
+      title,
+      text: locale === "mn" ? `${title} — VCM боломж` : `${title} — VCM opportunity`,
+      url: typeof window !== "undefined" ? window.location.href : undefined,
+      dialogTitle: locale === "mn" ? "Хуваалцах" : "Share",
+    });
+  };
 
   return (
-    <div className="page">
+    <div className="page page--dock">
       <div className="page-inner space-y-6">
         
         <Link href="/opportunities" className="inline-flex items-center gap-1.5 py-2 opacity-60 active:opacity-100 transition-opacity font-semibold text-[13px]" style={{ color: 'var(--blue)' }}>
@@ -110,14 +121,20 @@ export default function OpportunityDetail() {
                  {opportunity.type}
               </div>
               <div className="flex gap-2">
-                 <button className="icon-box-sm" style={{ background: 'var(--bg)' }}>
+                 <button
+                   type="button"
+                   onClick={() => void handleShare()}
+                   className="icon-box-sm press"
+                   style={{ background: 'var(--bg)' }}
+                   aria-label={locale === "mn" ? "Хуваалцах" : "Share"}
+                 >
                     <Share2 size={16} style={{ color: 'var(--label2)' }} />
                  </button>
               </div>
            </div>
 
            <h1 className="t-large-title !text-2xl">
-              {opportunity.title[locale] || opportunity.title.en}
+              {title}
            </h1>
 
            <div className="space-y-3">
@@ -182,7 +199,7 @@ export default function OpportunityDetail() {
              </motion.div>
            )}
 
-           {/* APPLY CARD */}
+           {/* APPLY CARD (info only — CTA in DetailDock) */}
            <motion.div 
              initial={{ opacity: 0, y: 12 }}
              animate={{ opacity: 1, y: 0 }}
@@ -194,16 +211,6 @@ export default function OpportunityDetail() {
               <p className="t-footnote" style={{ color: 'var(--label2)' }}>
                  {t("applyDesc", { deadline: opportunity.deadline })}
               </p>
-              
-              <a 
-                 href={opportunity.link} 
-                 target="_blank" 
-                 rel="noopener noreferrer"
-                 className="btn btn-primary btn-full"
-              >
-                 {t("applyNow")}
-                 <ExternalLink size={14} />
-              </a>
 
               <div className="pt-4 border-t border-dashed" style={{ borderColor: 'rgba(0,0,0,0.1)' }}>
                  <p className="t-caption2 uppercase tracking-widest opacity-40 mb-3">
@@ -221,6 +228,26 @@ export default function OpportunityDetail() {
         </div>
 
       </div>
+
+      <DetailDock>
+        <button
+          type="button"
+          onClick={() => void handleShare()}
+          className="detail-dock__btn detail-dock__btn--secondary press"
+        >
+          <Share2 size={17} strokeWidth={1.85} />
+          <span>{locale === "mn" ? "Хуваалцах" : "Share"}</span>
+        </button>
+        <a
+          href={opportunity.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="detail-dock__btn detail-dock__btn--primary press"
+        >
+          <span>{t("applyNow")}</span>
+          <ExternalLink size={16} strokeWidth={1.85} />
+        </a>
+      </DetailDock>
     </div>
   );
 }

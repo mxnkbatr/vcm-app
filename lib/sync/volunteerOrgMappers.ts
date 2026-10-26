@@ -228,12 +228,12 @@ export function mapVolunteerProgramDoc(item: z.infer<typeof volunteerItemSchema>
       location: org || "Монгол улс",
       slots: slots || 10,
       emoji: "🤝",
-      ...(image ? { image, color: "#0EA5E9" } : {}),
       tags: org ? [org] : [],
       source: SOURCE,
       externalId: id,
       externalUrl: `${BASE}/volunteer/${id}`,
       syncedAt: new Date(),
+      ...(image ? { color: "#0EA5E9" } : {}),
     },
     setOnInsert: {
       active: true,

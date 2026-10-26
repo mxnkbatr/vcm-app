@@ -15,6 +15,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "seed": "ts-node --compiler-options {\\\"module\\\":\\\"commonjs\\\"} lib/seed.ts",
+    "seed:demo": "ts-node --compiler-options {\\\"module\\\":\\\"commonjs\\\"} lib/seed-demo-catalog.ts",
     "ionic:build": "npm run build:ionic",
     "cap:copy": "cap copy",
     "cap:sync": "cap sync",
