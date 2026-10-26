@@ -46,18 +46,32 @@ export default function FloatingField({
           type={inputType}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          onFocus={() => setFocused(true)}
+          onFocus={(e) => {
+            setFocused(true);
+            // Keep field visible above the keyboard on iOS Safari/Chrome
+            window.setTimeout(() => {
+              try {
+                e.target.scrollIntoView({ block: "center", behavior: "smooth" });
+              } catch {
+                /* noop */
+              }
+            }, 80);
+          }}
           onBlur={() => setFocused(false)}
-          autoComplete={autoComplete}
+          autoComplete={autoComplete || (passwordToggle ? "current-password" : undefined)}
           inputMode={inputMode}
           disabled={disabled}
           placeholder={placeholder}
+          spellCheck={false}
+          autoCapitalize="off"
+          autoCorrect="off"
         />
         {passwordToggle && (
           <button
             type="button"
             className="auth-field-stack__eye press"
             aria-label={show ? "Нууц үг нуух" : "Нууц үг харуулах"}
+            onMouseDown={(ev) => ev.preventDefault()}
             onClick={() => setShow((v) => !v)}
             tabIndex={-1}
           >

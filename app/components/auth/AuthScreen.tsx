@@ -3,9 +3,7 @@
 import React from "react";
 import BrandLogo from "@/app/components/BrandLogo";
 import { Link } from "@/navigation";
-import { motion } from "framer-motion";
 import { ChevronLeft } from "lucide-react";
-import { springNative } from "@/lib/motion";
 
 type AuthMode = "sign-in" | "sign-up";
 
@@ -58,12 +56,8 @@ export default function AuthScreen({
       </div>
 
       <div className="auth-page__center">
-        <motion.div
-          className="auth-card app-detail__card"
-          initial={{ y: 12 }}
-          animate={{ y: 0 }}
-          transition={springNative}
-        >
+        {/* No framer transform here — iOS password focus + transform = white screen */}
+        <div className="auth-card app-detail__card">
           <p className="auth-card__eyebrow">{resolvedEyebrow}</p>
           <h1 className="auth-card__title">{resolvedTitle}</h1>
           <p className="auth-card__lead">{resolvedSub}</p>
@@ -108,7 +102,7 @@ export default function AuthScreen({
               </>
             )}
           </p>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

@@ -5950,13 +5950,14 @@ html.sheet-open body {
   z-index: 1;
   flex: 1;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   width: 100%;
   padding:
     calc(72px + env(safe-area-inset-top, 0px))
     20px
-    calc(28px + env(safe-area-inset-bottom, 0px));
+    /* Extra room so password field + keyboard don't scroll into a blank area */
+    calc(48px + env(safe-area-inset-bottom, 0px) + 40vh);
 }
 .auth-page__back,
 .auth-page__spacer {
@@ -5995,11 +5996,13 @@ html.sheet-open body {
   margin: 0 auto;
   padding: 22px 18px 20px;
   border-radius: var(--ios26-radius);
-  background: var(--ios26-card-bg);
-  border: 0.5px solid var(--liquid-border);
-  box-shadow: var(--liquid-shadow-float), inset 0 1px 0 var(--glass-highlight);
-  backdrop-filter: blur(32px) saturate(190%);
-  -webkit-backdrop-filter: blur(32px) saturate(190%);
+  /* Solid card — backdrop-filter + password keyboard = white screen on Safari/Chrome */
+  background: #ffffff !important;
+  border: 0.5px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transform: none !important;
 }
 .auth-card--success {
   text-align: center;
@@ -6116,19 +6119,15 @@ html.sheet-open body {
   min-height: 50px;
   padding: 0 14px;
   border-radius: 14px;
-  border: 0.5px solid var(--liquid-border);
-  background: color-mix(in srgb, var(--fill2) 65%, transparent);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+  border: 0.5px solid rgba(0, 0, 0, 0.08);
+  background: #f2f2f7;
+  box-shadow: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
-.dark .auth-field-stack__control {
-  background: rgba(120, 120, 128, 0.16);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-}
 .auth-field-stack.is-focus .auth-field-stack__control {
-  background: var(--ios26-card-bg);
+  background: #ffffff;
   border-color: color-mix(in srgb, var(--blue) 45%, var(--sep));
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 14%, transparent), inset 0 1px 0 var(--glass-highlight);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 14%, transparent);
 }
 .auth-field-stack.is-error .auth-field-stack__control {
   border-color: var(--red);
@@ -6139,12 +6138,24 @@ html.sheet-open body {
   border: none;
   outline: none;
   background: transparent;
-  font-size: 16px;
+  font-size: 16px; /* keep ≥16px — iOS won't zoom */
   letter-spacing: -0.2px;
   color: var(--label);
+  -webkit-text-fill-color: var(--label);
+  border-radius: 0;
 }
 .auth-field-stack__input::placeholder {
   color: var(--label4);
+  -webkit-text-fill-color: var(--label4);
+}
+/* Autofill paint can flash the whole card white on WebKit */
+.auth-field-stack__input:-webkit-autofill,
+.auth-field-stack__input:-webkit-autofill:hover,
+.auth-field-stack__input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--label) !important;
+  caret-color: var(--label);
+  transition: background-color 99999s ease-out 0s;
+  box-shadow: 0 0 0 1000px #fff inset !important;
 }
 .auth-field-stack__eye {
   flex-shrink: 0;

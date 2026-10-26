@@ -89,11 +89,21 @@ export default function PageTransition({ children }: { children: React.ReactNode
             background: "var(--bg)",
           }}
           onAnimationComplete={() => {
-            // Drop leftover will-change / transform hints after settle
+            // Clear settled transforms — leftover translate*(0) still breaks iOS password fields
             const layers = document.querySelectorAll<HTMLElement>(".native-page-layer");
             layers.forEach((el) => {
-              if (el.style.transform === "none" || el.style.transform === "translateX(0px)") {
+              const t = (el.style.transform || "").replace(/\s/g, "");
+              if (
+                !t ||
+                t === "none" ||
+                t === "translateX(0px)" ||
+                t === "translateY(0px)" ||
+                t === "translateX(0%)" ||
+                t === "translateY(0%)" ||
+                t === "matrix(1,0,0,1,0,0)"
+              ) {
                 el.style.transform = "";
+                el.style.willChange = "auto";
               }
             });
           }}

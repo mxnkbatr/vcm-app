@@ -36,11 +36,18 @@ export function isImmersiveDetail(pathname: string): boolean {
 const MODAL_ROUTES = new Set([
   "/cart",
   "/settings",
+  "/join",
+  "/complete-profile",
+]);
+
+/**
+ * Auth forms must NOT use transform-based page transitions.
+ * Safari/Chrome password focus + ancestor transform = blank white screen.
+ */
+const AUTH_ROUTES = new Set([
   "/sign-in",
   "/sign-up",
   "/register",
-  "/join",
-  "/complete-profile",
 ]);
 
 export function stripLocale(pathname: string): string {
@@ -66,12 +73,19 @@ function isModalRoute(path: string): boolean {
   return [...MODAL_ROUTES].some((r) => path.startsWith(`${r}/`));
 }
 
+function isAuthRoute(path: string): boolean {
+  if (AUTH_ROUTES.has(path)) return true;
+  return [...AUTH_ROUTES].some((r) => path.startsWith(`${r}/`));
+}
+
 export function getTransitionKind(from: string, to: string): TransitionKind {
   const fromPath = stripLocale(from);
   const toPath = stripLocale(to);
 
   if (fromPath === toPath) return "instant";
   if (isTabRoot(fromPath) && isTabRoot(toPath)) return "instant";
+  // Never leave translateY/X on auth pages (password keyboard white-screen bug)
+  if (isAuthRoute(toPath) || isAuthRoute(fromPath)) return "instant";
 
   if (isModalRoute(toPath) && !isModalRoute(fromPath)) return "modal";
   if (isModalRoute(fromPath) && !isModalRoute(toPath)) return "pop";
