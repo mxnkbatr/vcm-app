@@ -15,6 +15,7 @@ import {
 import { hapticNotification } from "@/lib/haptics";
 import { NotificationType } from "@capacitor/haptics";
 import PremiumPageShell from "@/app/components/PremiumPageShell";
+import PremiumSectionHeader from "@/app/components/PremiumSectionHeader";
 import IOSLargeTitle from "@/app/components/ui/IOSLargeTitle";
 import { IOSList, IOSListRow } from "@/app/components/ui/IOSList";
 import IOSSheet from "@/app/components/ui/IOSSheet";
@@ -143,7 +144,7 @@ export default function ProfilePage() {
         <VolunteerIdQr userId={String(userData._id)} name={userData.fullName} locale={locale} />
 
         <section>
-          <VcmSectionHead title="Мэдээлэл" />
+          <PremiumSectionHeader title="Мэдээлэл" />
           <IOSList>
             <IOSListRow icon={<Mail size={16} strokeWidth={1.75} />} title="Имэйл" subtitle={userData.email || "—"} />
             <IOSListRow icon={<Phone size={16} strokeWidth={1.75} />} title="Утас" subtitle={userData.phone || "Тохируулаагүй"} />
@@ -161,7 +162,7 @@ export default function ProfilePage() {
         </section>
 
         <section>
-          <VcmSectionHead title="Тохиргоо" />
+          <PremiumSectionHeader title="Тохиргоо" />
           <IOSList>
             <IOSListRow href="/settings" icon={<Settings size={16} strokeWidth={1.75} />} title="Тохиргоо" />
             <IOSListRow href="/about" icon={<Info size={16} strokeWidth={1.75} />} title="Тухай" />
@@ -169,7 +170,7 @@ export default function ProfilePage() {
         </section>
 
         <section>
-          <VcmSectionHead title="Миний түүх" />
+          <PremiumSectionHeader title="Миний түүх" />
           <ProfileActivityHistory
             applications={activity.applications}
             purchases={activity.purchases}
