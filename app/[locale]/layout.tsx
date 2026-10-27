@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 
 const inter = Inter({
@@ -42,6 +42,17 @@ export const metadata: Metadata = {
   },
 };
 
+// Exported (not a raw <meta>) so Next doesn't emit its own default viewport tag
+// without viewport-fit=cover, which makes iOS report a zero safe-area inset.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#EEF1F4",
+};
+
 const locales = ['en', 'mn', 'de'];
 
 export default async function RootLayout({
@@ -70,8 +81,6 @@ export default async function RootLayout({
             <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
             <link rel="dns-prefetch" href="https://res.cloudinary.com" />
 
-            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-            <meta name="theme-color" content="#EEF1F4" />
             <meta name="color-scheme" content="light" />
             <meta name="apple-mobile-web-app-title" content={BRAND.shortName} />
             <meta name="mobile-web-app-capable" content="yes" />

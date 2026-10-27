@@ -2151,11 +2151,7 @@ html.native-perf .home-brand-banner {
 }
 
 html.native-shell .native-chrome-top {
-  top: max(
-    env(safe-area-inset-top, 0px),
-    constant(safe-area-inset-top, 0px),
-    47px
-  );
+  top: var(--safe-top);
   padding-top: 0;
 }
 
@@ -2234,10 +2230,9 @@ html.native-shell .native-chrome-top {
 }
 
 html.native-shell {
-  --safe-top: max(
-    env(safe-area-inset-top, 0px),
-    constant(safe-area-inset-top, 0px)
-  );
+  /* No legacy constant(): WebKit rejects it inside max(), which zeroed every
+     var(--safe-top) user and pushed headers under the status bar. */
+  --safe-top: max(env(safe-area-inset-top, 0px), 20px);
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
   overscroll-behavior: none;
