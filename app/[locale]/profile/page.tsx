@@ -117,7 +117,7 @@ export default function ProfilePage() {
               initial={{ opacity: 0, y: -12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
-              className="fixed top-[calc(env(safe-area-inset-top,12px)+52px)] left-1/2 -translate-x-1/2 z-[200] px-5 py-3 rounded-[14px] text-sm font-semibold text-white"
+              className="fixed top-[calc(var(--safe-top)+52px)] left-1/2 -translate-x-1/2 z-[200] px-5 py-3 rounded-[14px] text-sm font-semibold text-white"
               style={{ background: toast.ok ? "var(--emerald)" : "var(--red)" }}
             >
               {toast.msg}

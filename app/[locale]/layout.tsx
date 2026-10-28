@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 
 const inter = Inter({
@@ -42,6 +42,17 @@ export const metadata: Metadata = {
   },
 };
 
+// Exported (not a raw <meta>) so Next doesn't emit its own default viewport tag
+// without viewport-fit=cover, which makes iOS report a zero safe-area inset.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#EEF1F4",
+};
+
 const locales = ['en', 'mn', 'de'];
 
 export default async function RootLayout({
@@ -70,8 +81,6 @@ export default async function RootLayout({
             <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
             <link rel="dns-prefetch" href="https://res.cloudinary.com" />
 
-            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-            <meta name="theme-color" content="#EEF1F4" />
             <meta name="color-scheme" content="light" />
             <meta name="apple-mobile-web-app-title" content={BRAND.shortName} />
             <meta name="mobile-web-app-capable" content="yes" />
@@ -82,7 +91,7 @@ export default async function RootLayout({
             <link rel="apple-touch-icon" href={BRAND.appleTouchIcon} />
             <script
               dangerouslySetInnerHTML={{
-                __html: `(function(){try{var ua=navigator.userAgent||"";var C=window.Capacitor;var native=(C&&C.isNativePlatform&&C.isNativePlatform())||ua.indexOf("VCMNativeApp")!==-1;var mobile=window.innerWidth<=1023;var r=document.documentElement;r.classList.remove("dark");r.style.colorScheme="light";try{localStorage.setItem("vcm-theme","light");}catch(_){}if(native){r.classList.add("native-shell");document.cookie="vcm_native=1;path=/;max-age=31536000;SameSite=Lax";}if(native||mobile){r.classList.add("native-perf");}}catch(e){}})();`,
+                __html: `(function(){try{var ua=navigator.userAgent||"";var C=window.Capacitor;var native=(C&&C.isNativePlatform&&C.isNativePlatform())||ua.indexOf("VCMNativeApp")!==-1;var mobile=window.innerWidth<=1023;var r=document.documentElement;r.classList.remove("dark");r.style.colorScheme="light";try{localStorage.setItem("vcm-theme","light");}catch(_){}if(native){r.classList.add("native-shell");var fixTop=function(){try{var pr=document.createElement("div");pr.style.cssText="position:fixed;top:0;height:env(safe-area-inset-top,0px);visibility:hidden;pointer-events:none";r.appendChild(pr);var st=pr.getBoundingClientRect().height;r.removeChild(pr);if(st>=1||!/iPhone|iPad|iPod/.test(ua)){r.style.removeProperty("--safe-top");}else{var sh=Math.max(screen.width,screen.height);r.style.setProperty("--safe-top",(sh>=852?59:sh>=812?47:20)+"px");}}catch(_){}};fixTop();document.addEventListener("DOMContentLoaded",fixTop);window.addEventListener("load",fixTop);document.cookie="vcm_native=1;path=/;max-age=31536000;SameSite=Lax";}if(native||mobile){r.classList.add("native-perf");}}catch(e){}})();`,
               }}
             />
           </head>

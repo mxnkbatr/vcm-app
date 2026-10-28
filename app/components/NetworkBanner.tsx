@@ -42,7 +42,7 @@ export default function NetworkBanner() {
   return (
     <div
       className="lg:hidden fixed left-0 right-0 z-[101] flex justify-center px-3"
-      style={{ top: "calc(64px + env(safe-area-inset-top))" }}
+      style={{ top: "calc(64px + var(--safe-top))" }}
     >
       <div
         className="frosted px-4 py-2 rounded-full text-[12px] font-bold"
