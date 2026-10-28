@@ -113,7 +113,7 @@ export default function NativePullRefresh() {
       className="native-ptr lg:hidden"
       style={{
         opacity: pull > 8 || refreshing ? 1 : 0,
-        transform: `translateY(calc(env(safe-area-inset-top, 0px) + ${Math.max(pull - 8, 0)}px))`,
+        transform: `translateY(calc(var(--safe-top) + ${Math.max(pull - 8, 0)}px))`,
       }}
       aria-hidden
     >

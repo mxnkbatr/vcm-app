@@ -1171,7 +1171,7 @@ html.native-perf .shop-detail__back {
 
 .native-back {
   position: absolute;
-  top: calc(env(safe-area-inset-top, 12px) + 72px);
+  top: calc(var(--safe-top) + 72px);
   left: 16px;
   z-index: 10;
   display: inline-flex;
@@ -1329,7 +1329,7 @@ html.native-perf .shop-detail__back {
     transform: translateX(-50%);
   }
   .page--immersive .native-back {
-    top: calc(env(safe-area-inset-top, 12px) + 16px);
+    top: calc(var(--safe-top) + 16px);
   }
 } 
  
@@ -1481,7 +1481,7 @@ a:active {
   align-items: center;
   justify-content: center;
   background: #F2F2F7;
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  padding: var(--safe-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   overflow: hidden;
 }
 
@@ -3658,7 +3658,7 @@ button.press {
   right: 0;
   z-index: 100;
   background: #F6F7F9;
-  padding-top: env(safe-area-inset-top, 0px);
+  padding-top: var(--safe-top);
   border-bottom: 1px solid transparent;
   transition: border-color 200ms ease;
 }
@@ -4081,7 +4081,7 @@ html.native-perf .vcm-tabbar {
 }
 .vcm-cover__nav {
   position: absolute;
-  top: calc(env(safe-area-inset-top, 0px) + 8px);
+  top: calc(var(--safe-top) + 8px);
   left: 12px;
   right: 12px;
   display: flex;
@@ -4272,7 +4272,7 @@ html.native-perf .vcm-tabbar {
   left: 0;
   right: 0;
   z-index: 100;
-  padding-top: env(safe-area-inset-top, 0px);
+  padding-top: var(--safe-top);
   pointer-events: none;
 }
 .ios-chrome-header__bar {
@@ -5408,7 +5408,7 @@ html.sheet-open body {
   left: 0;
   right: 0;
   z-index: 100;
-  padding-top: env(safe-area-inset-top, 0px);
+  padding-top: var(--safe-top);
   pointer-events: none;
 }
 .app-header__glass {
@@ -5710,7 +5710,7 @@ html.sheet-open body {
   flex-direction: column;
   box-sizing: border-box;
   padding:
-    calc(8px + env(safe-area-inset-top, 0px))
+    calc(8px + var(--safe-top))
     max(16px, env(safe-area-inset-right, 0px))
     calc(16px + env(safe-area-inset-bottom, 0px))
     max(16px, env(safe-area-inset-left, 0px));
@@ -5936,7 +5936,7 @@ html.sheet-open body {
   grid-template-columns: 44px 1fr 44px;
   align-items: center;
   padding:
-    calc(10px + env(safe-area-inset-top, 0px))
+    calc(10px + var(--safe-top))
     20px
     0;
 }
@@ -5949,7 +5949,7 @@ html.sheet-open body {
   justify-content: center;
   width: 100%;
   padding:
-    calc(72px + env(safe-area-inset-top, 0px))
+    calc(72px + var(--safe-top))
     20px
     /* Extra room so password field + keyboard don't scroll into a blank area */
     calc(48px + env(safe-area-inset-bottom, 0px) + 40vh);
@@ -6393,7 +6393,7 @@ html.sheet-open body {
   justify-content: space-between;
   gap: 10px;
   padding:
-    calc(10px + env(safe-area-inset-top, 0px))
+    calc(10px + var(--safe-top))
     16px
     12px;
 }
@@ -6429,7 +6429,7 @@ html.sheet-open body {
 }
 .app-detail__date-float {
   position: absolute;
-  top: calc(12px + env(safe-area-inset-top, 0px) + 52px);
+  top: calc(12px + var(--safe-top) + 52px);
   right: 16px;
   z-index: 3;
 }
@@ -6801,7 +6801,7 @@ html.native-perf .yt-player__badge {
 ------------------------------------------- */
 .in-app-banner {
   position: fixed;
-  top: calc(env(safe-area-inset-top, 0px) + 8px);
+  top: calc(var(--safe-top) + 8px);
   left: 12px;
   right: 12px;
   z-index: 200;
@@ -6977,7 +6977,7 @@ html.native-perf .yt-player__badge {
 .global-search__panel {
   height: 100%;
   background: var(--bg);
-  padding-top: env(safe-area-inset-top, 0px);
+  padding-top: var(--safe-top);
   display: flex;
   flex-direction: column;
 }

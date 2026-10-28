@@ -29,7 +29,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   return (
     <div
       className="min-h-dvh admin-shell"
-      style={{ background: "var(--bg)", paddingTop: "env(safe-area-inset-top, 0px)" }}
+      style={{ background: "var(--bg)", paddingTop: "var(--safe-top)" }}
     >
       {/* Mobile header */}
       <header className="admin-mobile-header lg:hidden sticky top-0 z-40">
