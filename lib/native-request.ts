@@ -8,9 +8,13 @@ export function isNativeRequest(req: NextRequest): boolean {
   return req.cookies.get(NATIVE_COOKIE)?.value === "1";
 }
 
-/** Paths that expose shop checkout or digital LMS on web — blocked on native. */
+/**
+ * Paths that expose checkout or digital LMS on web — blocked on native.
+ * `/shop` stays browsable (native tab); its item page shows an unavailable
+ * screen and the cart / payment APIs remain blocked.
+ */
 export function isNativeBlockedPath(pathWithoutLocale: string): boolean {
-  const blocked = ["/lessons", "/shop", "/cart", "/dashboard"];
+  const blocked = ["/lessons", "/cart", "/dashboard"];
   return blocked.some(
     (p) => pathWithoutLocale === p || pathWithoutLocale.startsWith(`${p}/`)
   );
