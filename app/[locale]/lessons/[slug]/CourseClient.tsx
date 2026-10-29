@@ -63,17 +63,13 @@ export default function CourseClient() {
   }, []);
 
   useEffect(() => {
-    if (nativeApp) {
-      setLoading(false);
-      return;
-    }
     setLoading(true);
     fetch(`/api/lms/courses/${slug}`)
       .then((r) => r.json())
       .then((d) => setData(d))
       .catch(() => setError("Failed to load course"))
       .finally(() => setLoading(false));
-  }, [slug, nativeApp]);
+  }, [slug]);
 
   const title = data?.course?.title ? ((data.course.title as any)[locale] || data.course.title.en) : "";
   const desc = data?.course?.description ? ((data.course.description as any)[locale] || data.course.description.en) : "";
@@ -113,18 +109,6 @@ export default function CourseClient() {
     const fresh = await fetch(`/api/lms/courses/${slug}`).then((r) => r.json());
     setData(fresh);
   };
-
-  if (nativeApp) {
-    return (
-      <NativeFeatureUnavailable
-        locale={locale}
-        titleMn="Сургалт апп дээр байхгүй"
-        titleEn="Courses are not available in the app"
-        subMn="Онлайн сургалт зөвхөн веб хувилбар дээр."
-        subEn="Online courses are only available on the website, not in this iOS app."
-      />
-    );
-  }
 
   if (loading) {
     return (
@@ -171,6 +155,19 @@ export default function CourseClient() {
           </div>
         </div>
       </div>
+    );
+  }
+
+  // Native shell: free courses only (App Store 3.1.1 — no paid digital content).
+  if (nativeApp && !isFree) {
+    return (
+      <NativeFeatureUnavailable
+        locale={locale}
+        titleMn="Сургалт апп дээр байхгүй"
+        titleEn="Course not available in the app"
+        subMn="Энэ сургалт одоогоор зөвхөн веб хувилбар дээр."
+        subEn="This course is only available on the website, not in this iOS app."
+      />
     );
   }
 
