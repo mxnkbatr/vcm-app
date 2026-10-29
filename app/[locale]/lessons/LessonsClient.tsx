@@ -6,7 +6,6 @@ import { BookOpen, Search, Star } from "lucide-react";
 import { useLocale } from "next-intl";
 import Skeleton from "@/app/components/Skeleton";
 import PremiumPageShell from "@/app/components/PremiumPageShell";
-import NativeFeatureUnavailable from "@/app/components/NativeFeatureUnavailable";
 import EmptyState from "@/app/components/ui/EmptyState";
 import SharedHero from "@/app/components/SharedHero";
 import { isNativeApp } from "@/lib/native-perf";
@@ -151,7 +150,7 @@ export default function LessonsClient({ initialCourses }: { initialCourses?: Cou
   const nativeApp = ready && isNativeApp();
 
   useEffect(() => {
-    if (!ready || nativeApp) return;
+    if (!ready) return;
     if (initialCourses?.length) {
       setLoading(false);
       return;
@@ -160,7 +159,8 @@ export default function LessonsClient({ initialCourses }: { initialCourses?: Cou
     fetch("/api/lms/courses")
       .then((r) => r.json())
       .then((d) => {
-        if (!cancelled && Array.isArray(d)) setCourses(d);
+        // Native shell: free courses only (App Store 3.1.1 — no paid digital content).
+        if (!cancelled && Array.isArray(d)) setCourses(nativeApp ? d.filter(isCourseFree) : d);
       })
       .catch(() => {})
       .finally(() => {
@@ -201,18 +201,6 @@ export default function LessonsClient({ initialCourses }: { initialCourses?: Cou
     );
   }
 
-  if (nativeApp) {
-    return (
-      <NativeFeatureUnavailable
-        locale={locale}
-        titleMn="Сургалт апп дээр байхгүй"
-        titleEn="Courses are not available in the app"
-        subMn="Онлайн сургалт зөвхөн веб хувилбар дээр."
-        subEn="Online courses are only available on the website, not in this iOS app."
-      />
-    );
-  }
-
   if (loading) {
     return (
       <PremiumPageShell className="dc-lms-page">
@@ -241,7 +229,7 @@ export default function LessonsClient({ initialCourses }: { initialCourses?: Cou
         </label>
 
         <div className="dc-lms__chips" role="tablist" aria-label={mn ? "Эрэмбэ" : "Sort"}>
-          {SORTS.map((f) => {
+          {SORTS.filter((f) => !nativeApp || !f.id.startsWith("price")).map((f) => {
             const on = sort === f.id;
             return (
               <button

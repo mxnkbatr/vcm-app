@@ -49,10 +49,6 @@ export default function LessonPlayerClient() {
   }, []);
 
   useEffect(() => {
-    if (nativeApp) {
-      setLoading(false);
-      return;
-    }
     setLoading(true);
     fetch(`/api/lms/courses/${slug}`)
       .then((r) => r.json())
@@ -64,9 +60,12 @@ export default function LessonPlayerClient() {
         setResumeAt(typeof watched === "number" ? watched : 0);
       })
       .finally(() => setLoading(false));
-  }, [slug, lessonId, nativeApp]);
+  }, [slug, lessonId]);
 
-  if (nativeApp) {
+  const courseIsFree = !!courseData?.course?.isFree || (courseData?.course?.price ?? 0) === 0;
+
+  // Native shell: free courses only (App Store 3.1.1 — no paid digital content).
+  if (nativeApp && !loading && courseData?.course && !courseIsFree) {
     return (
       <NativeFeatureUnavailable
         locale={locale}

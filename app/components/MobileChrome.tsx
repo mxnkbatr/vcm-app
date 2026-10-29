@@ -68,18 +68,14 @@ export default function MobileChrome() {
   // Detail screens: hide tab bar so floating dock doesn't overlap
   const hideTabBar = immersiveDetail || tabMinimized;
 
+  // Native keeps the web order and adds Events (lessons there list free courses only).
   const tabs = nativeApp
-    ? [
-        TABS[0],
-        TABS[1],
-        { id: "events", href: "/events", label: { en: "Events", mn: "Эвент" }, Icon: Ticket },
-        TABS[2],
-      ]
+    ? [...TABS, { id: "events", href: "/events", label: { en: "Events", mn: "Эвент" }, Icon: Ticket }]
     : TABS;
 
   useEffect(() => {
     const routes = nativeApp
-      ? ["/", "/programs", "/events", "/shop", "/profile", "/notifications", "/news"]
+      ? ["/", "/programs", "/shop", "/lessons", "/events", "/profile", "/notifications", "/news"]
       : ["/", "/programs", "/shop", "/events", "/lessons", "/profile", "/notifications", "/news"];
     const run = () => {
       routes.forEach((href) => {
@@ -203,7 +199,7 @@ export default function MobileChrome() {
       />
 
       <nav
-        className={`ios-tabbar ios-tabbar--native ios-tabbar--dc lg:hidden cols-4${hideTabBar ? " is-minimized" : ""}`}
+        className={`ios-tabbar ios-tabbar--native ios-tabbar--dc lg:hidden cols-${tabs.length}${hideTabBar ? " is-minimized" : ""}`}
         aria-label="Үндсэн цэс"
         aria-hidden={hideTabBar}
       >
